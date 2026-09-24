@@ -1,0 +1,64 @@
+Számlaazonosító;Könyvelési dátum;Könyvelési idő;Értéknap;Könyvelési nap;Összeg;Devizanem;T/J;Könyvelési szöveg;Közlemény;Partner;Partner számla
+ceges_bank;2024.08.03.;;2024.08.03.;2024.08.03.;-25345;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2024.08.06.;;2024.08.06.;2024.08.06.;-35312;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2024.08.07.;;2024.08.07.;2024.08.07.;45837;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.08.12.;;2024.08.12.;2024.08.12.;28966;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2024.08.12.;;2024.08.12.;2024.08.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2024.08.13.;;2024.08.13.;2024.08.13.;25440;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.08.14.;;2024.08.14.;2024.08.14.;29238;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.08.18.;;2024.08.18.;2024.08.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;
+ceges_bank;2024.08.22.;;2024.08.22.;2024.08.22.;38750;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.08.26.;;2024.08.26.;2024.08.26.;40542;HUF;J;Jóváírás;Projekt díj / számla;VRGO Web Projekt;
+ceges_bank;2024.09.03.;;2024.09.03.;2024.09.03.;-24492;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2024.09.06.;;2024.09.06.;2024.09.06.;-30921;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2024.09.09.;;2024.09.09.;2024.09.09.;42715;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.09.12.;;2024.09.12.;2024.09.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2024.09.14.;;2024.09.14.;2024.09.14.;34769;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.09.18.;;2024.09.18.;2024.09.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;
+ceges_bank;2024.09.19.;;2024.09.19.;2024.09.19.;18095;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.09.19.;;2024.09.19.;2024.09.19.;21647;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.09.21.;;2024.09.21.;2024.09.21.;152602;HUF;J;Jóváírás;Projekt díj / számla;vrgo.hu;
+ceges_bank;2024.10.03.;;2024.10.03.;2024.10.03.;-26688;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2024.10.05.;;2024.10.05.;2024.10.05.;30810;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.10.05.;;2024.10.05.;2024.10.05.;47308;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.10.06.;;2024.10.06.;2024.10.06.;-29819;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2024.10.12.;;2024.10.12.;2024.10.12.;46831;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2024.10.12.;;2024.10.12.;2024.10.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2024.10.16.;;2024.10.16.;2024.10.16.;21074;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.10.16.;;2024.10.16.;2024.10.16.;34877;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.10.18.;;2024.10.18.;2024.10.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;
+ceges_bank;2024.10.22.;;2024.10.22.;2024.10.22.;40265;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.10.24.;;2024.10.24.;2024.10.24.;52699;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.11.03.;;2024.11.03.;2024.11.03.;-18967;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2024.11.06.;;2024.11.06.;2024.11.06.;-34510;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2024.11.12.;;2024.11.12.;2024.11.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2024.11.14.;;2024.11.14.;2024.11.14.;18232;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.11.15.;;2024.11.15.;2024.11.15.;45428;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2024.11.15.;;2024.11.15.;2024.11.15.;28192;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.11.18.;;2024.11.18.;2024.11.18.;26933;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.11.18.;;2024.11.18.;2024.11.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;
+ceges_bank;2024.11.21.;;2024.11.21.;2024.11.21.;21234;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.11.23.;;2024.11.23.;2024.11.23.;23612;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.12.03.;;2024.12.03.;2024.12.03.;27252;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2024.12.03.;;2024.12.03.;2024.12.03.;-17725;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2024.12.06.;;2024.12.06.;2024.12.06.;-31078;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2024.12.10.;;2024.12.10.;2024.12.10.;31130;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu;
+ceges_bank;2024.12.12.;;2024.12.12.;2024.12.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2024.12.16.;;2024.12.16.;2024.12.16.;52033;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.12.17.;;2024.12.17.;2024.12.17.;43543;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.12.18.;;2024.12.18.;2024.12.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;
+ceges_bank;2024.12.21.;;2024.12.21.;2024.12.21.;70177;HUF;J;Jóváírás;Projekt díj / számla;VRGO Web Projekt;
+ceges_bank;2024.12.24.;;2024.12.24.;2024.12.24.;41255;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2024.12.25.;;2024.12.25.;2024.12.25.;585806;HUF;J;Jóváírás;Projekt díj / számla;VRGO — Fejlesztési díj;
+ceges_bank;2025.01.03.;;2025.01.03.;2025.01.03.;-22688;HUF;T;Kártya;Google Workspace / Hosting / SaaS;Szoftver előfizetés;
+ceges_bank;2025.01.06.;;2025.01.06.;2025.01.06.;29484;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2025.01.06.;;2025.01.06.;2025.01.06.;18481;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2025.01.06.;;2025.01.06.;2025.01.06.;22998;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2025.01.06.;;2025.01.06.;2025.01.06.;-29156;HUF;T;Átutalás;Könyvelői díj;Könyvelés;
+ceges_bank;2025.01.08.;;2025.01.08.;2025.01.08.;423416;HUF;J;Jóváírás;Projekt díj / számla;VRGO Web Projekt;
+ceges_bank;2025.01.12.;;2025.01.12.;2025.01.12.;-350000;HUF;T;Átutalás;Havi nettó kivét / Tulajdonosi kifizetés;Magán számla;magan_bank
+ceges_bank;2025.01.14.;;2025.01.14.;2025.01.14.;53448;HUF;J;Jóváírás;Projekt díj / számla;VRGO Web Projekt;
+ceges_bank;2025.01.15.;;2025.01.15.;2025.01.15.;27782;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;Projektor Lámpa csere — web;
+ceges_bank;2025.01.18.;;2025.01.18.;2025.01.18.;45059;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2025.01.18.;;2025.01.18.;2025.01.18.;48803;HUF;J;Jóváírás;Mikro megrendelés / szolgáltatás;projektorlampacsere.hu rendelés;
+ceges_bank;2025.01.18.;;2025.01.18.;2025.01.18.;-45000;HUF;T;Átutalás;Üzemanyag-hozzájárulás (havi);Üzemanyag-hozzájárulás;

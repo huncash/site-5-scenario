@@ -1,0 +1,17 @@
+# Szabályok: Mesh Data Manager fejlesztése
+
+## Kommunikációs stílus
+- Légy tömör és lényegretörő.
+- NE magyarázd el a kódot, kivéve, ha kifejezetten kérem.
+- Kerüld a körítést, csak a megoldásra koncentrálj.
+- Ha egy fájl módosítása szükséges, csak a módosított kódrészletet írd ki, ne a teljes fájlt (kivéve, ha kicsi).
+
+## Technikai korlátok
+- Offline-first prioritás: minden kódnak működnie kell hálózati kapcsolat nélkül.
+- Nincs felhőalapú függőség: tilos olyan könyvtárak használata, amik külső API-t (Firebase, Supabase, stb.) igényelnek.
+- Adatkezelés: Szigorúan az `src/lib/mesh/dataStore.ts` interfészt kell használni. Közvetlen `localStorage` vagy `db` hívás tilos az UI komponensekben.
+- Moduláris építés: Minden funkciót úgy kell megírni, hogy az egy P2P-node-on is megállja a helyét.
+
+## TanStack Start integráció
+- A TanStack Start-ot csak UI-ra és útvonalakra használjuk.
+- Tilos a 'server-functions' használata adatkezelésre. A `react-query` 'queryFn' mindig a `MeshRepository`-t hívja.

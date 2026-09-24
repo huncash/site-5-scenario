@@ -1,0 +1,528 @@
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { Link, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  CalendarClock,
+  Columns2,
+  Download,
+  GraduationCap,
+  Lock,
+  Maximize2,
+  Menu,
+  QrCode,
+  Search,
+  Settings,
+  Upload,
+  Users,
+  Wallet,
+} from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
+import { KnowledgeBaseModal } from "@/components/KnowledgeBaseModal";
+import { PdcaSemiRotaryKnob } from "@/components/PdcaSemiRotaryKnob";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { decryptJSON } from "@/lib/crypto";
+import { EMPTY_SETTINGS, type CustomSettings, type WorkspaceMeta } from "@/lib/finance";
+import { localdb } from "@/lib/localdb";
+import { getPdcaCycleSum } from "@/lib/pdcaCycle";
+import { useVault } from "@/lib/vault";
+import { toast } from "sonner";
+import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
+
+export function ProfileHeader({
+  profileId,
+  profileName,
+  profileHint,
+  visitorDemo,
+  onAddDevice,
+  showBack,
+  rightControls,
+  bottomRow,
+  situationLead,
+  viewMode,
+  onViewModeChange,
+  pdcaMode,
+  onPdcaModeChange,
+  onRotatePdca,
+}: {
+  profileId: string;
+  profileName: string;
+  profileHint?: string;
+  visitorDemo?: boolean;
+  onAddDevice?: () => void;
+  showBack?: boolean;
+  rightControls?: ReactNode;
+  bottomRow?: ReactNode;
+  situationLead?: string;
+  viewMode?: "split" | "full";
+  onViewModeChange?: (v: "split" | "full") => void;
+  pdcaMode?: "PD" | "DC" | "CA" | "AP";
+  onPdcaModeChange?: (v: "PD" | "DC" | "CA" | "AP") => void;
+  onRotatePdca?: () => void;
+}) {
+  const { lock, state } = useVault();
+  const router = useRouter();
+  const { openComingSoon } = useFeatureComingSoon();
+  const [kbOpen, setKbOpen] = useState(false);
+  const [omni, setOmni] = useState("");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const unlocked = state.status === "unlocked" ? state : null;
+  const vaultKey = unlocked?.key ?? null;
+  const visitorShell = Boolean(visitorDemo) || isDemoProfileName(unlocked?.profile.name);
+
+  const settingsQ = useQuery({
+    queryKey: ["settings"],
+    enabled: Boolean(vaultKey),
+    queryFn: async (): Promise<CustomSettings> => {
+      if (!vaultKey) return EMPTY_SETTINGS;
+      const row = await localdb.getSettings();
+      if (!row) return EMPTY_SETTINGS;
+      try {
+        const s = await decryptJSON<Partial<CustomSettings>>(vaultKey, row.data_enc);
+        return { ...EMPTY_SETTINGS, ...s, workspaces: s.workspaces ?? [] };
+      } catch {
+        return EMPTY_SETTINGS;
+      }
+    },
+  });
+
+  const workspaces = (settingsQ.data?.workspaces ?? []) as WorkspaceMeta[];
+  const pdcaSum = useMemo(() => getPdcaCycleSum(workspaces), [workspaces]);
+
+  const openOmniSearch = useCallback(() => {
+    const q = omni.trim();
+    openComingSoon({
+      title: q ? `Globális keresés: „${q}"` : "Globális kereső (omnibox)",
+      purpose:
+        "Egységes keresés tételekre, célokra, munkaterekre és törzsadatokra. Az indexelő és a találati lista modulja előkészítés alatt áll.",
+      featureId: "header.omnibox",
+    });
+  }, [omni, openComingSoon]);
+
+  function ymdDash(d = new Date()) {
+    const yyyy = String(d.getFullYear());
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function downloadText(filename: string, content: string) {
+    const blob = new Blob([content], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  const back = useCallback(() => {
+    void router.navigate({ to: "/" });
+  }, [router]);
+
+  const leaveVisitorCase = useCallback(async () => {
+    setProfileOpen(false);
+    if (visitorShell) writeScenarioDoorStep("hospitality");
+    await lock();
+    if (visitorShell) await router.navigate({ to: "/" });
+  }, [lock, router, visitorShell]);
+
+  return (
+    <header
+      className="sticky top-0 z-50 shrink-0 border-b border-slate-800/70 text-slate-100 backdrop-blur-md"
+      style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
+    >
+      <div className={`w-full px-2 sm:px-3 md:px-4 ${showBack ? "py-2" : "pt-1.5 pb-0.5"}`}>
+        <div className="grid w-full gap-2">
+          {/* TOP ROW: left brand/profile (fills) | right controls (pinned to right edge) */}
+          <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2 sm:gap-3">
+            <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-3 justify-self-start">
+              <div className="flex min-w-0 items-center gap-2">
+                {showBack ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 shrink-0 border-slate-700 bg-slate-900/40 text-slate-100 hover:bg-slate-800/40"
+                    onClick={back}
+                    title="Vissza a műszerfalra"
+                    aria-label="Vissza a műszerfalra"
+                  >
+                    <ArrowLeft className="mr-1.5 h-4 w-4" />
+                    Vissza
+                  </Button>
+                ) : (
+                <Link
+                  to="/"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-all duration-200 hover:bg-primary/25"
+                  aria-label="Főoldal"
+                  title="Főoldal"
+                >
+                  <Wallet className="h-5 w-5" />
+                </Link>
+                )}
+                <div className="min-w-0 leading-tight">
+                  <div className="truncate text-sm font-semibold tracking-tight text-slate-100">Szcenárió</div>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="truncate text-xs text-slate-300" title={profileHint ?? profileName}>
+                      {profileName}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: pinned controls (PDCA counter → view toggle → hamburger) */}
+            <div className="flex min-w-0 items-center justify-end gap-2 justify-self-end">
+              {rightControls}
+              {vaultKey ? (
+                <Popover
+                  open={profileOpen}
+                  onOpenChange={(o) => {
+                    setProfileOpen(o);
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700/70 bg-slate-900/40 px-2 text-[11px] font-mono tabular-nums text-slate-100 hover:bg-slate-900/60"
+                      onClick={() => {
+                        setProfileOpen((v) => !v);
+                      }}
+                      aria-label={`PDCA ciklusok — ${pdcaSum}`}
+                      title="Profil panel (PDCA számláló)"
+                    >
+                      <span className="text-slate-300 leading-none">PDCA</span>
+                      <span className="leading-none">#{pdcaSum}</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    className="w-72 border border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold">{profileName}</div>
+                          {visitorShell ? (
+                            <div className="mt-0.5 text-[11px] text-slate-300">Gazdasági eset — ingyenes demó</div>
+                          ) : (
+                            <div className="mt-0.5 text-[11px] text-slate-300">
+                              Profil ID: <span className="font-mono">{profileId}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0 rounded-md border border-slate-700/70 bg-slate-900/50 px-2 py-1 text-[10px] font-mono tabular-nums text-slate-100">
+                          PDCA #{pdcaSum}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="outline"
+                          className="h-8 border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                        >
+                          <Link to="/stats" search={{ profile: profileId }}>
+                            Aktivitás
+                          </Link>
+                        </Button>
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="outline"
+                          className="h-8 border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                        >
+                          <Link to="/settings" search={{ profile: profileId, tab: undefined }}>
+                            Beállítások
+                          </Link>
+                        </Button>
+                      </div>
+
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 w-full justify-center border border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                        onClick={() => {
+                          void leaveVisitorCase();
+                        }}
+                        title={visitorShell ? "Vissza a szcenáriókhoz" : "Trezor zárolása"}
+                      >
+                        <Lock className="mr-2 h-4 w-4" />
+                        {visitorShell ? "Másik eset" : "Zárolás / Kilépés"}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : null}
+
+              {showBack ? null : (
+              <div
+                className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900/40 px-2"
+                title="Váltás Osztott (2-oszlopos) és Teljes szélességű nézet között"
+              >
+                <Columns2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
+                <Switch
+                  checked={viewMode === "full"}
+                  onCheckedChange={(v) => {
+                    if (onViewModeChange) {
+                      onViewModeChange(v ? "full" : "split");
+                      return;
+                    }
+                    openComingSoon({
+                      title: "Nézet mód (split / full)",
+                      purpose:
+                        "Osztott és teljes oldalas PDCA elrendezés váltása. Ezen a felületen a nézetvezérlő nincs bekötve.",
+                      featureId: "header.view_mode",
+                    });
+                  }}
+                  aria-label={viewMode === "full" ? "Teljes oldalas nézet" : "Osztott nézet"}
+                />
+                <Maximize2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
+              </div>
+              )}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 hover:bg-slate-800/40"
+                    aria-label="Profil menü"
+                    title={`Profil menü — ${profileName}`}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="min-w-56 border border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md"
+                >
+                  {visitorShell ? null : (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/devices" search={{ profile: profileId }}>
+                          <Users className="mr-2 h-4 w-4" />
+                          Eszközeim
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/logs" search={{ profile: profileId }}>
+                          <CalendarClock className="mr-2 h-4 w-4" />
+                          Napló
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/stats" search={{ profile: profileId }}>
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      Aktivitás & Ciklusok
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setKbOpen(true);
+                    }}
+                  >
+                    <GraduationCap className="mr-2 h-4 w-4" />
+                    Tudásbázis / GYIK
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/references"
+                      search={{
+                        profile: profileId,
+                        workspace: "personal",
+                        tab: "partners",
+                        highlight: undefined,
+                        isSzumma: false,
+                      }}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Törzsadatok
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" search={{ profile: profileId, tab: undefined }}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Beállítások
+                    </Link>
+                  </DropdownMenuItem>
+                  {visitorShell ? null : (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          void (async () => {
+                            try {
+                              const wsId =
+                                typeof sessionStorage !== "undefined"
+                                  ? sessionStorage.getItem("ui:activeWorkspaceId") || "personal"
+                                  : "personal";
+                              const wsName =
+                                typeof sessionStorage !== "undefined"
+                                  ? sessionStorage.getItem("ui:activeWorkspaceName") || wsId
+                                  : wsId;
+                              const scope = wsId === "ALL" ? "ALL" : wsId;
+                              const txt = await localdb.exportEncryptedData({ scope });
+                              const fn =
+                                scope === "ALL"
+                                  ? `mesh_backup_full_${ymdDash()}.json`
+                                  : `mesh_backup_${String(wsName).replaceAll(" ", "_")}_${ymdDash()}.json`;
+                              downloadText(fn, txt);
+                              toast.success("Gyors mentés letöltve.");
+                            } catch (e: any) {
+                              toast.error(e?.message || "Gyors mentés sikertelen.");
+                            }
+                          })();
+                        }}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Gyors mentés (.json)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          void router.navigate({
+                            to: "/settings",
+                            search: { profile: profileId, tab: undefined },
+                            hash: "backup-restore" as any,
+                          });
+                        }}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Mentés betöltése…
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          if (onAddDevice) {
+                            onAddDevice();
+                            return;
+                          }
+                          void router.navigate({ to: "/connect" });
+                        }}
+                      >
+                        <QrCode className="mr-2 h-4 w-4" />
+                        Eszköz hozzáadása QR-rel
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      void leaveVisitorCase();
+                    }}
+                  >
+                    <Lock className="mr-2 h-4 w-4" />
+                    {visitorShell ? "Másik eset" : "Kijelentkezés"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {/*
+            RULE: the PDCA dial pivot (SVG centerline) sits on the viewport
+            horizontal midpoint in every view. Equal 1fr | auto | 1fr on a
+            full-width row; do not shift the middle column.
+            Subpages (showBack) drop this case chrome — no dial, search, or CT.
+          */}
+          {showBack ? null : (
+          <div
+            data-pdca-dial-viewport-center
+            className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
+          >
+            {situationLead ? (
+              <div className="min-w-0 w-full rounded-xl border border-border/50 bg-card/30 px-2.5 py-1.5">
+                <p className="text-xs leading-snug text-slate-300">
+                  <span className="font-semibold uppercase tracking-wider text-slate-200">
+                    A helyzet:{" "}
+                  </span>
+                  {situationLead}
+                </p>
+              </div>
+            ) : (
+              <div className="min-w-0" />
+            )}
+
+            <div className="pointer-events-none select-none bg-transparent">
+              <PdcaSemiRotaryKnob mode={pdcaMode ?? "PD"} onModeChange={() => {}} />
+            </div>
+
+            <div className="flex min-w-0 w-full flex-col items-stretch justify-end gap-1">
+              <button
+                type="button"
+                className="inline-flex h-8 w-auto max-w-full shrink-0 self-start items-center justify-center whitespace-nowrap rounded-md border border-slate-700 bg-slate-900/40 px-2 text-xs text-slate-100 transition-colors hover:bg-slate-800/40 sm:px-3"
+                onClick={() => {
+                  if (onRotatePdca) {
+                    onRotatePdca();
+                    return;
+                  }
+                  openComingSoon({
+                    title: "PDCA váltótárcsa forgatás",
+                    purpose:
+                      "Negyedfordulatos PDCA módváltás a tárcsával. Ezen az oldalon a tárcsa vezérlő nincs bekötve — nyisd meg a fő PDCA nézetet.",
+                    featureId: "header.pdca_rotate",
+                  });
+                }}
+                aria-label="Forgasd el a váltótárcsát"
+                title="Forgasd el a váltótárcsát"
+              >
+                <span className="truncate">👈 Forgasd el a váltótárcsát</span>
+              </button>
+              <div className="flex h-9 min-w-0 w-full items-center overflow-hidden rounded-lg border border-slate-700 bg-slate-900/40 px-3 focus-within:border-slate-500">
+                <Input
+                  value={omni}
+                  onChange={(e) => setOmni(e.currentTarget.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      openOmniSearch();
+                    }
+                  }}
+                  placeholder="Globális keresés — funkciók, tételek, célok…"
+                  className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-slate-100 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                <button
+                  type="button"
+                  className="cursor-pointer border-none bg-transparent p-1 text-slate-300 transition-colors hover:text-slate-100"
+                  title="Keresés"
+                  aria-label="Keresés"
+                  onClick={openOmniSearch}
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+          )}
+        </div>
+
+        {bottomRow ? (
+          <div
+            className="mt-1 -mx-2 px-2 pt-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4"
+            style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
+          >
+            {bottomRow}
+          </div>
+        ) : null}
+
+        <KnowledgeBaseModal open={kbOpen} onOpenChange={setKbOpen} />
+      </div>
+    </header>
+  );
+}

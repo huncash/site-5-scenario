@@ -1,0 +1,3 @@
+C:\Users\patri\Desktop\B\ME360\dev\mesh-data-manager
+
+Ezt az útvonalat NE módosítsd; az eredeti repo érintetlen marad.

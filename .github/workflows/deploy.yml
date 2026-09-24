@@ -1,0 +1,83 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Node target, port 4100)
+        env:
+          NODE_ENV: production
+        run: npm run build:node
+
+      - name: Package release
+        run: |
+          mkdir -p release
+          cp -r .output release/
+          cp package.json package-lock.json ecosystem.config.cjs release/
+          tar -czf release.tar.gz -C release .
+
+      - name: Validate VPS SSH key secret
+        run: |
+          test -n "${{ secrets.VPS_SSH_KEY }}" || (echo "Missing VPS_SSH_KEY secret" && exit 1)
+
+      - name: Upload release to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 195.228.152.141
+          username: deploy
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "release.tar.gz"
+          target: "/var/www/szcenario/incoming/"
+
+      - name: Activate release
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 195.228.152.141
+          username: deploy
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            set -euo pipefail
+            SITE_SLUG="szcenario"
+            APP_DIR=/var/www/$SITE_SLUG
+            SHA=${{ github.sha }}
+            RELEASE_DIR="$APP_DIR/releases/$SHA"
+            mkdir -p "$RELEASE_DIR"
+            tar -xzf "$APP_DIR/incoming/release.tar.gz" -C "$RELEASE_DIR"
+            rm -f "$APP_DIR/incoming/release.tar.gz"
+            ln -sfn "$APP_DIR/shared/.env.production" "$RELEASE_DIR/.env"
+            ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
+            pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
+            pm2 start "$RELEASE_DIR/.output/server/index.mjs" \
+              --name "$SITE_SLUG" \
+              --cwd "$RELEASE_DIR" \
+              --node-args="--env-file=$APP_DIR/shared/.env.production" \
+              --time \
+              --output "/var/log/$SITE_SLUG/out.log" \
+              --error "/var/log/$SITE_SLUG/err.log"
+            pm2 save
+            cd "$APP_DIR/releases"
+            ls -1t | tail -n +6 | xargs -r rm -rf
+            echo "Deployed $SHA → $SITE_SLUG (port 4100)"

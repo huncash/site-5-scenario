@@ -1,0 +1,484 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+html {
+  color-scheme: dark;
+  /* ~110% density at browser 100% zoom so the mosaic does not open a third sliver. */
+  font-size: clamp(13.2px, 0.5vw + 11px, 15px);
+  /* App shell uses h-screen; avoid double document scroll + gutter shift */
+  overflow: hidden;
+  height: 100%;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #1f293d #0b0f19;
+}
+
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html,
+body,
+#root {
+  background-color: #0b0f19;
+}
+
+.workspace-canvas {
+  min-height: 100%;
+  background: var(--ws-canvas-bg, #0b0f19);
+}
+
+/* ── Viewport-first density system ───────────────────────────────────────── */
+.app-shell-main {
+  flex: 1 1 0%;
+  min-height: 0;
+  background: var(--ws-canvas-bg, #0b0f19);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.pdca-col {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0.4rem;
+  max-height: none;
+  overflow: visible;
+}
+.pdca-col > .grid {
+  align-content: start;
+  align-items: start;
+  flex: 0 1 auto;
+}
+
+/* Mosaic: several columns AND rows inside PLAN/DO/CHECK/ACT — not one fat stack.
+   Container-queried so split columns on a 4K display still pack tiles. */
+.pdca-frame {
+  container-type: inline-size;
+  container-name: pdca;
+  font-size: 12px;
+}
+
+/* Always 2 columns in a PLAN/DO pane — never a third sliver for data tables. */
+.pdca-tile-grid,
+.pdca-module-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  min-width: 0;
+  align-items: start;
+  justify-items: stretch;
+}
+.pdca-tile--wide {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* Horizontal rule between stacked reports in a pane */
+.viz-split {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(148 163 184 / 0.45);
+}
+.pdca-tile-grid > .card-table,
+.pdca-module-stack > .card-table {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+@container pdca (max-width: 40rem) {
+  .pdca-tile-grid,
+  .pdca-module-stack {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pdca-tile--wide {
+    grid-column: auto;
+  }
+}
+
+.pdca-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.3rem;
+  min-width: 0;
+}
+.pdca-frame :is(h1, h2, h3) {
+  font-size: 12px;
+  line-height: 1.2;
+}
+.pdca-frame .text-base {
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+}
+.pdca-frame .text-sm {
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+}
+.pdca-frame .text-xs,
+.pdca-frame .text-\[11px\] {
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+.pdca-frame .text-lg {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+.pdca-frame .kpi-value {
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+}
+.pdca-frame .kpi-label {
+  font-size: 9px !important;
+  letter-spacing: 0.03em;
+}
+.pdca-frame :is(.p-3\.5, .p-3, .p-4, .p-2\.5) {
+  padding: 0.4rem 0.5rem;
+}
+.pdca-frame :is(.pt-0) {
+  padding-top: 0;
+}
+.pdca-frame :is(.pb-2, .pb-3, .pb-1\.5) {
+  padding-bottom: 0.28rem;
+}
+.pdca-frame :is(.pl-12, .pl-14) {
+  padding-left: 1.7rem !important;
+}
+.pdca-frame .rounded-xl,
+.pdca-frame .rounded-lg {
+  min-width: 0;
+  overflow: hidden;
+}
+.pdca-frame .card-kpi,
+.pdca-frame .min-w-\[130px\] {
+  min-width: 6.1rem !important;
+  flex: 1 1 6.1rem;
+  padding: 0.3rem 0.4rem !important;
+}
+.pdca-frame .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.45rem;
+}
+.pdca-frame .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.35rem;
+}
+.pdca-frame .gap-4 {
+  gap: 0.4rem;
+}
+.pdca-frame .gap-3 {
+  gap: 0.32rem;
+}
+.pdca-frame .gap-2 {
+  gap: 0.28rem;
+}
+.pdca-frame [data-help-icon] {
+  cursor: help;
+}
+
+[data-view-mode="full"] .pdca-col {
+  max-height: none;
+}
+
+@media (max-width: 767px) {
+  .pdca-col {
+    max-height: none;
+  }
+}
+
+/* Card density presets — lifted surface, not black-on-blue */
+.card-kpi {
+  overflow: hidden;
+  background: oklch(0.28 0.028 264) !important;
+  border-color: oklch(1 0 0 / 14%) !important;
+}
+.card-module {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: oklch(0.22 0.03 264) !important;
+}
+.card-module > [data-slot="card-content"],
+.card-module .card-scroll-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+.card-table {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: oklch(0.22 0.03 264) !important;
+}
+.card-table .card-scroll-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Internal app: wrap instead of ellipsis so labels stay readable */
+.app-shell-main .kpi-value,
+.app-shell-main .kpi-label,
+.app-shell-main .card-kpi > :first-child,
+.app-shell-main .card-kpi > :nth-child(2) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.app-shell-main h1,
+.app-shell-main h2,
+.app-shell-main h3 {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  overflow-wrap: break-word;
+}
+.app-shell-main .recharts-legend-item-text {
+  color: #e8eef8 !important;
+}
+.app-shell-main .recharts-default-legend {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+}
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 7.5rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid oklch(1 0 0 / 12%);
+  background: oklch(0.3 0.03 264);
+}
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  color: #e8eef8;
+  white-space: nowrap;
+}
+.chart-legend li.is-active {
+  font-weight: 700;
+  color: #fff;
+}
+.chart-legend .swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+.tile-lift {
+  border: 1px solid oklch(1 0 0 / 12%);
+  background: oklch(0.3 0.03 264);
+}
+
+/* STRICT SINGLE SCROLLBAR RULE (app content only):
+   - Keep only the main app-shell scrollbar.
+   - Neutralize inner overflow utility classes inside the app shell.
+   - Dialogs/portals are typically outside .app-shell-main and can keep their own scrolling. */
+.app-shell-main .overflow-y-auto {
+  overflow-y: visible !important;
+}
+.app-shell-main .overflow-x-auto {
+  overflow-x: visible !important;
+}
+.app-shell-main .overflow-auto {
+  overflow: visible !important;
+}
+
+
+/* Custom dark scrollbar (webkit) — matches app background */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.875rem;
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.82 0.035 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+
+.dark {}
+
+/* Wide dialogs often need clean internal scrolling. */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--border) 80%, transparent) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--border) 85%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--border) 100%, transparent);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .print-hidden {
+    display: none !important;
+  }
+  .print-container {
+    max-width: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .print-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ddd !important;
+  }
+}
