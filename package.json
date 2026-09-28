@@ -5,19 +5,20 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 4000",
-    "build": "vite build",
+    "dev": "next dev --port 4100",
+    "build": "next build",
     "build:dev": "vite build --mode development",
     "build:node": "vite build --config vite.config.node.ts",
-    "start": "node .output/server/index.mjs",
+    "start": "next start --port 4100",
     "preview": "vite preview",
     "signaling": "node signaling-server.js",
     "generate:testdata": "tsx simulations/generateTestBankData.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "deploy": "git add . && git commit -m \"Auto deploy\" && git push origin main && ssh vmvrgohu@195.228.152.141 \"cd /var/www/site-5 && git remote set-url origin https://github.com/huncash/site-5_newdev.git && git fetch origin && git reset --hard origin/main && npm install && rm -rf .next && npm run build && pm2 delete site-5 || true && pm2 start npm --name site-5 -- start && pm2 save\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
