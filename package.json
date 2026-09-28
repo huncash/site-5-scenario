@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest",
     "test:run": "vitest run",
-    "deploy": "git add . && git commit -m \"Auto deploy\" && git push origin main && ssh vmvrgohu@195.228.152.141 \"cd /var/www/site-5 && git remote set-url origin https://github.com/huncash/site-5_newdev.git && git fetch origin && git reset --hard origin/main && npm install && rm -rf .next && npm run build && pm2 delete site-5 || true && pm2 start npm --name site-5 -- start && pm2 save\""
+    "deploy": "git add . && git commit -m \"Auto deploy\" && git push origin main && ssh vmvrgohu@195.228.152.141 \"cd /var/www/site-5 && git remote set-url origin https://github.com/huncash/site-5-scenario.git && git fetch origin && git reset --hard origin/main && npm install && rm -rf .next && npm run build && pm2 delete site-5 || true && pm2 start npm --name site-5 -- start && pm2 save\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
