@@ -2,6 +2,6 @@ services:
   signaling:
     build: .
     ports:
-      - "4001:4001"
+      - "4100:4100"
     environment:
-      - PORT=4001
+      - PORT=4100

@@ -230,10 +230,10 @@ function LoginPage() {
 
           <div className="text-center space-y-1.5">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Belépés
+              Profil megnyitása
             </h1>
             <p className="text-sm text-muted-foreground">
-              Add meg a mesterjelszót a titkosított adatok feloldásához.
+              Add meg a mesterjelszót a helyi profil megnyitásához (az eseteid ezen az eszközön vannak).
             </p>
           </div>
 
@@ -244,7 +244,7 @@ function LoginPage() {
                 <p className="font-semibold text-emerald-400">
                   Aktív belépés: {state.profile.name}
                 </p>
-                <p className="text-muted-foreground">A széf jelenleg fel van oldva.</p>
+                <p className="text-muted-foreground">A profil jelenleg meg van nyitva.</p>
               </div>
               <div className="flex gap-1.5">
                 <Button size="sm" className="h-7 text-xs gap-1" onClick={() => void navigate({ to: "/" })}>
@@ -327,12 +327,12 @@ function LoginPage() {
               {busy ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin" />
-                  Feloldás...
+                  Megnyitás...
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Bejelentkezés
+                  Megnyitás
                 </>
               )}
             </Button>
@@ -371,16 +371,14 @@ function LoginPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold tracking-wide text-foreground">
-                      Hátsó ajtó — 7 gazdasági eset
+                      Demó indító — 7 gazdasági eset
                     </p>
                     <p className="text-[11px] text-muted-foreground">
                       1 kattintás: létrehoz / felold + feltölt 3 év “Vállalkozás1” adatot + “Projekt1” modellt. Jelszó:{" "}
                       <span className="font-mono">{DEMO_PASSWORD}</span>
                     </p>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">
-                    Poka-yoke
-                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">Demó</Badge>
                 </div>
 
                 <div className="mt-3 grid grid-cols-1 gap-2">

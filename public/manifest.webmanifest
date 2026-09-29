@@ -1,7 +1,7 @@
 {
-  "name": "Mesh Data Manager",
-  "short_name": "Mesh",
-  "description": "Offline-first, végponttól végpontig titkosított mesh adatkezelő és szinkron.",
+  "name": "Szcenárió",
+  "short_name": "Szcenárió",
+  "description": "Szcenárió — helyzetek és „mi lenne, ha” forgatókönyvek a saját eszközödön. Nincs regisztráció; az adataid nálad maradnak.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

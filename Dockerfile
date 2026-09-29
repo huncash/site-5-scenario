@@ -8,10 +8,10 @@ RUN npm install --omit=dev
 
 COPY signaling-server.js ./
 
-EXPOSE 4001
+EXPOSE 4100
 
 ENV NODE_ENV=production
-ENV PORT=4001
+ENV PORT=4100
 
 CMD ["node", "signaling-server.js"]
 

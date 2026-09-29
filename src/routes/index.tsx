@@ -1050,7 +1050,8 @@ function FinanceDashboard({
   // DEMO: seed a couple of mesh devices + logs so "Eszközök" / "Napló" screens are not empty.
   const demoSegmentId = useMemo(() => {
     const v = (settings as any)?.__demo?.segmentId;
-    if (typeof v === "string" && v.trim() && isDemoSegmentId(v.trim())) return v.trim();
+    const trimmed = typeof v === "string" ? v.trim() : "";
+    if (trimmed && isDemoSegmentId(trimmed)) return trimmed;
     return segmentIdFromDemoName(profileName);
   }, [profileName, settings]);
   const isVisitorDemo = Boolean(demoSegmentId) || isDemoProfileName(profileName);
@@ -15224,10 +15225,10 @@ function HomeLoginScreen({
   return (
     <VaultShell>
       <div className="text-center">
-        <h2 className="text-lg font-semibold tracking-tight">Belépés</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Profil megnyitása</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {hasProfiles
-            ? "Add meg a mesterjelszót az eszközön tárolt titkosított adatok feloldásához."
+            ? "Add meg a mesterjelszót a helyi profil megnyitásához (az eseteid ezen az eszközön vannak)."
             : "Még nincs profil ezen az eszközön. Hozz létre egyet a folytatáshoz."}
         </p>
       </div>
@@ -15272,7 +15273,7 @@ function HomeLoginScreen({
           </div>
 
           <Button className="w-full" onClick={submit} disabled={busy || !pw}>
-            {busy ? "Belépés…" : "Belépés"}
+            {busy ? "Megnyitás…" : "Megnyitás"}
           </Button>
 
           {profiles.length === 1 && selectedProfile && (

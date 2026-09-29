@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, PlayCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/demoSession";
 import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
 import { useVault } from "@/lib/vault";
+import { localdb } from "@/lib/localdb";
 
 const SCENARIO_TYPES: Array<{
   id: string;
@@ -49,7 +50,7 @@ const SCENARIO_TYPES: Array<{
     id: "crisis",
     title: "Válságkezelési szcenárió",
     blurb:
-      "Belső válság — például adatlopás — hogyan hatna az ügyfelekre és a működésre.",
+      "Belső válság — például kereslet-visszaesés — hogyan hatna az ügyfelekre és a működésre.",
   },
 ];
 
@@ -253,7 +254,7 @@ export function ScenarioDoor() {
                   disabled={busyId !== null}
                   onClick={() => void openCase(s.id)}
                 >
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span className="min-w-0">
                     <span className="block text-sm font-medium">{s.title}</span>
                     <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
@@ -284,9 +285,11 @@ export function ScenarioDoor() {
               void (async () => {
                 try {
                   await enterRememberedOrFirstDemo({ unlockById, createProfile });
+                  const profileId = localdb.getActiveProfile();
+                  if (!profileId) throw new Error("Nincs aktív profil.");
                   await navigate({
                     to: "/settings",
-                    search: { tab: "danger", focus: SETTINGS_FOCUS_DEMO_RESET },
+                    search: { profile: profileId, tab: "danger", focus: SETTINGS_FOCUS_DEMO_RESET },
                   });
                 } catch (err: unknown) {
                   setError(err instanceof Error ? err.message : "Nem sikerült megnyitni a beállításokat.");

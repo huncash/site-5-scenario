@@ -144,7 +144,8 @@ function ReferencesPage() {
   const settings = settingsQ.data ?? EMPTY_SETTINGS;
   const visitorSegmentId = useMemo(() => {
     const raw = (settings as any)?.__demo?.segmentId;
-    if (typeof raw === "string" && isDemoSegmentId(raw.trim())) return raw.trim();
+    const trimmed = typeof raw === "string" ? raw.trim() : "";
+    if (trimmed && isDemoSegmentId(trimmed)) return trimmed;
     return segmentIdFromDemoName(profileName);
   }, [profileName, settings]);
   const visitorWorkspaces = useMemo(() => {
@@ -197,7 +198,7 @@ function ReferencesPage() {
     async (workspaceId: string, patch: Partial<WorkspaceMeta>, label: string) => {
       if (denyShowcaseWrite(Boolean(visitorSegmentId) || isDemoProfileName(profileName))) return;
       if (!vaultKey) {
-        toast.error("A trezor zárva van.");
+        toast.error("A profil zárva van.");
         return;
       }
       setBusy(true);

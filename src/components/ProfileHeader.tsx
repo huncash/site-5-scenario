@@ -246,7 +246,7 @@ export function ProfileHeader({
                           variant="outline"
                           className="h-8 border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
                         >
-                          <Link to="/settings" search={{ profile: profileId, tab: undefined }}>
+                          <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
                             Beállítások
                           </Link>
                         </Button>
@@ -260,7 +260,7 @@ export function ProfileHeader({
                         onClick={() => {
                           void leaveVisitorCase();
                         }}
-                        title={visitorShell ? "Vissza a szcenáriókhoz" : "Trezor zárolása"}
+                        title={visitorShell ? "Vissza a szcenáriókhoz" : "Profil zárolása"}
                       >
                         <Lock className="mr-2 h-4 w-4" />
                         {visitorShell ? "Másik eset" : "Zárolás / Kilépés"}
@@ -357,7 +357,7 @@ export function ProfileHeader({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/settings" search={{ profile: profileId, tab: undefined }}>
+                    <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
                       <Settings className="mr-2 h-4 w-4" />
                       Beállítások
                     </Link>
@@ -398,7 +398,7 @@ export function ProfileHeader({
                         onSelect={() => {
                           void router.navigate({
                             to: "/settings",
-                            search: { profile: profileId, tab: undefined },
+                            search: { profile: profileId, tab: undefined, focus: undefined },
                             hash: "backup-restore" as any,
                           });
                         }}
