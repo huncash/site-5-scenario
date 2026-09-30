@@ -29,6 +29,7 @@ import {
   GripVertical,
   KeyRound,
   Lock,
+  Minus,
   PiggyBank,
   Plus,
   QrCode,
@@ -641,6 +642,7 @@ function FinanceDashboard({
   const [auditDayIso, setAuditDayIso] = useState<string | null>(null);
   type LedgerFilter = "all" | "income" | "expense" | "saving_transfer" | "liability_planned";
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
+  const [ledgerCollapsed, setLedgerCollapsed] = useState(false);
   type CashflowChannelFilter = "all" | "card" | "transfer" | "bank" | "other";
   const [cashflowChannelFilter, setCashflowChannelFilter] = useState<CashflowChannelFilter>("all");
   const [cashflowQuickPage, setCashflowQuickPage] = useState(1);
@@ -6652,6 +6654,29 @@ function FinanceDashboard({
   const lockedDoLedger = (
     <div className="pdca-module-stack w-full min-w-0">
       <Card className="pdca-tile--wide relative w-full overflow-hidden">
+        <button
+          type="button"
+          className={cn(
+            "absolute right-0 top-0 z-20 h-8 w-8 text-slate-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70",
+            ledgerCollapsed ? "text-amber-200" : "",
+          )}
+          style={{ clipPath: "polygon(100% 0%, 0% 0%, 100% 100%)" }}
+          onClick={() => setLedgerCollapsed((v) => !v)}
+          aria-label={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
+          title={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
+        >
+          <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <polygon points="100,0 0,0 100,100" fill="rgba(15,23,42,0.78)" />
+            <polyline points="0,0 100,100" stroke="rgba(148,163,184,0.55)" strokeWidth="4" fill="none" />
+          </svg>
+          <span className="relative z-10 block">
+            {ledgerCollapsed ? (
+              <Plus className="absolute right-1 top-1 h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Minus className="absolute right-1 top-1 h-3.5 w-3.5" aria-hidden="true" />
+            )}
+          </span>
+        </button>
         <CardHeader className="pb-1.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <CardTitle
@@ -6760,7 +6785,7 @@ function FinanceDashboard({
           ) : null}
           {bankImportStatus ? <div className="mt-1 text-[11px] text-slate-300">{bankImportStatus}</div> : null}
         </CardHeader>
-        <CardContent className="pt-0">
+        {ledgerCollapsed ? null : <CardContent className="pt-0">
           <div className="flex w-full flex-wrap items-stretch gap-3">
             <div className="card-kpi min-w-[130px] flex-1 rounded-md border border-sky-500/25 bg-sky-950/20 p-2.5">
               <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Tételek</div>
@@ -6821,10 +6846,10 @@ function FinanceDashboard({
               </div>
             </div>
           </div>
-        </CardContent>
+        </CardContent>}
       </Card>
 
-      <Card className="card-table w-full">
+      {ledgerCollapsed ? null : <Card className="card-table w-full">
         <CardContent className="pt-3">
           <div className="mb-2 flex flex-row flex-wrap items-center gap-2">
             <Button type="button" size="sm" variant={ledgerFilter === "all" ? "secondary" : "outline"} className="h-8" onClick={() => setLedgerFilter("all")}>
@@ -6884,7 +6909,7 @@ function FinanceDashboard({
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card>}
 
       <div className="w-full">
         {(() => {

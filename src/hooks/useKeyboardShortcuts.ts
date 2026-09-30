@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function useKeyboardShortcuts({
   enabled = true,
@@ -19,6 +19,29 @@ export function useKeyboardShortcuts({
   onToggleSzumma?: () => void;
   onRotatePdca?: () => void;
 }) {
+  const handlersRef = useRef({
+    onPrevBottomTab,
+    onNextBottomTab,
+    onPrevTopTab,
+    onNextTopTab,
+    onSave,
+    onToggleSzumma,
+    onRotatePdca,
+  });
+
+  // Keep latest callbacks without re-binding the event listener.
+  useEffect(() => {
+    handlersRef.current = {
+      onPrevBottomTab,
+      onNextBottomTab,
+      onPrevTopTab,
+      onNextTopTab,
+      onSave,
+      onToggleSzumma,
+      onRotatePdca,
+    };
+  }, [onNextBottomTab, onNextTopTab, onPrevBottomTab, onPrevTopTab, onRotatePdca, onSave, onToggleSzumma]);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -27,11 +50,11 @@ export function useKeyboardShortcuts({
         ["INPUT", "TEXTAREA", "SELECT"].includes((document.activeElement?.tagName || "").toUpperCase()) ||
         Boolean((document.activeElement as HTMLElement | null)?.isContentEditable);
 
-      // Save: Ctrl+S (always allowed) + prevent browser save dialog
-      if (e.ctrlKey && !e.altKey && !e.shiftKey && (e.key === "s" || e.key === "S")) {
+      // Save: Ctrl/Cmd+S (always allowed) + prevent browser save dialog
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === "s" || e.key === "S")) {
         e.preventDefault();
         if (e.repeat) return;
-        onSave?.();
+        handlersRef.current.onSave?.();
         return;
       }
 
@@ -42,7 +65,7 @@ export function useKeyboardShortcuts({
       if (!e.ctrlKey && e.altKey && e.shiftKey && (e.key === "End" || e.code === "End")) {
         e.preventDefault();
         if (e.repeat) return;
-        onToggleSzumma?.();
+        handlersRef.current.onToggleSzumma?.();
         return;
       }
 
@@ -50,28 +73,42 @@ export function useKeyboardShortcuts({
       if (!e.ctrlKey && e.altKey && e.shiftKey && e.key === "ArrowLeft") {
         e.preventDefault();
         if (e.repeat) return;
-        onPrevBottomTab?.();
+        handlersRef.current.onPrevBottomTab?.();
         return;
       }
 
       if (!e.ctrlKey && e.altKey && e.shiftKey && e.key === "ArrowRight") {
         e.preventDefault();
         if (e.repeat) return;
-        onNextBottomTab?.();
+        handlersRef.current.onNextBottomTab?.();
         return;
       }
 
-      // Top workspace tabs: Alt+Shift+PageUp/PageDown
+      // Top workspace tabs: PageUp/PageDown (legacy, no modifiers)
+      if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && e.key === "PageUp") {
+        e.preventDefault();
+        if (e.repeat) return;
+        handlersRef.current.onPrevTopTab?.();
+        return;
+      }
+      if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && e.key === "PageDown") {
+        e.preventDefault();
+        if (e.repeat) return;
+        handlersRef.current.onNextTopTab?.();
+        return;
+      }
+
+      // Top workspace tabs: Alt+Shift+PageUp/PageDown (fallback)
       if (!e.ctrlKey && e.altKey && e.shiftKey && e.key === "PageUp") {
         e.preventDefault();
         if (e.repeat) return;
-        onPrevTopTab?.();
+        handlersRef.current.onPrevTopTab?.();
         return;
       }
       if (!e.ctrlKey && e.altKey && e.shiftKey && e.key === "PageDown") {
         e.preventDefault();
         if (e.repeat) return;
-        onNextTopTab?.();
+        handlersRef.current.onNextTopTab?.();
         return;
       }
 
@@ -79,27 +116,36 @@ export function useKeyboardShortcuts({
       if (e.ctrlKey && e.altKey && !e.shiftKey && e.key === "ArrowLeft") {
         e.preventDefault();
         if (e.repeat) return;
-        onPrevTopTab?.();
+        handlersRef.current.onPrevTopTab?.();
         return;
       }
       if (e.ctrlKey && e.altKey && !e.shiftKey && e.key === "ArrowRight") {
         e.preventDefault();
         if (e.repeat) return;
-        onNextTopTab?.();
+        handlersRef.current.onNextTopTab?.();
         return;
       }
 
-      // Alt+Shift+ArrowDown: PDCA quarter rotate
+      // PDCA quarter rotate: ArrowDown (legacy, no modifiers)
+      if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && e.key === "ArrowDown") {
+        e.preventDefault();
+        if (e.repeat) return;
+        handlersRef.current.onRotatePdca?.();
+        return;
+      }
+
+      // PDCA quarter rotate: Alt+Shift+ArrowDown (fallback)
       if (!e.ctrlKey && e.altKey && e.shiftKey && e.key === "ArrowDown") {
         e.preventDefault();
         if (e.repeat) return;
-        onRotatePdca?.();
+        handlersRef.current.onRotatePdca?.();
         return;
       }
     };
 
-    window.addEventListener("keydown", onKeyDown, { passive: false });
-    return () => window.removeEventListener("keydown", onKeyDown as any);
-  }, [enabled, onNextBottomTab, onNextTopTab, onPrevBottomTab, onPrevTopTab, onRotatePdca, onSave, onToggleSzumma]);
+    const opts: AddEventListenerOptions = { passive: false };
+    window.addEventListener("keydown", onKeyDown, opts);
+    return () => window.removeEventListener("keydown", onKeyDown, opts);
+  }, [enabled]);
 }
 

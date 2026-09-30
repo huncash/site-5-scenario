@@ -307,7 +307,7 @@ export function WaterfallChart({
           const y = hangsBelow ? Math.max(y0bar, zeroY + 2) : y0bar;
           const h = hangsBelow ? Math.max(3, barBot - y) : h0;
           const fill = r.shown >= 0 ? UP : DOWN;
-          const dim = hover && hover !== r.key;
+          const isHover = hover === r.key;
           const axisTick = r.role === "start" || r.role === "total";
           const label = compactHuf(r.shown);
           const spaceAbove = y - padT;
@@ -347,10 +347,18 @@ export function WaterfallChart({
                 height={h}
                 rx={3}
                 fill={fill}
-                opacity={dim ? 0.35 : 1}
                 clipPath={`url(#${clipId})`}
+                stroke={isHover ? "rgba(248,250,252,0.9)" : "transparent"}
+                strokeWidth={isHover ? 1 : 0}
               />
-              <text x={labelX} y={labelY} textAnchor="middle" fill="#f8fafc" fontSize={8}>
+              <text
+                x={labelX}
+                y={labelY}
+                textAnchor="middle"
+                fill={isHover ? "rgba(250,204,21,0.98)" : "#f8fafc"}
+                fontSize={isHover ? 9 : 8}
+                fontWeight={isHover ? 700 : 400}
+              >
                 {label}
               </text>
               {axisTick ? (
@@ -358,8 +366,9 @@ export function WaterfallChart({
                   x={x + barW / 2}
                   y={padT + plotH + 13}
                   textAnchor="middle"
-                  fill={INK}
+                  fill={isHover ? "rgba(250,204,21,0.98)" : INK}
                   fontSize={8}
+                  fontWeight={isHover ? 700 : 400}
                 >
                   {r.label}
                 </text>
