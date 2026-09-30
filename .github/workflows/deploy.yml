@@ -40,12 +40,28 @@ jobs:
         run: |
           test -n "${{ secrets.VPS_SSH_KEY }}" || (echo "Missing VPS_SSH_KEY secret" && exit 1)
 
+      - name: Prepare SSH key (normalize + validate)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          # Normalize CRLF (common when key was copied from Windows) and write key to disk.
+          printf '%s' "${{ secrets.VPS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/vps_deploy_key
+          chmod 600 ~/.ssh/vps_deploy_key
+          # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
+          if ! ssh-keygen -y -f ~/.ssh/vps_deploy_key >/dev/null 2>&1; then
+            echo "VPS_SSH_KEY is not a usable *unencrypted private key* (or has wrong format/passphrase)."
+            echo "Fix: paste the full private key including BEGIN/END lines into the repo secret VPS_SSH_KEY."
+            echo "If the key is passphrase-protected, add a VPS_SSH_PASSPHRASE secret and wire it to the action."
+            exit 1
+          fi
+
       - name: Upload release to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 195.228.152.141
           username: deploy
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key_path: /home/runner/.ssh/vps_deploy_key
           port: 22
           source: "release.tar.gz"
           target: "/var/www/szcenario/incoming/"
@@ -55,7 +71,7 @@ jobs:
         with:
           host: 195.228.152.141
           username: deploy
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key_path: /home/runner/.ssh/vps_deploy_key
           port: 22
           script_stop: true
           script: |
