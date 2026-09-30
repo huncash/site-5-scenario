@@ -55,7 +55,15 @@ import os
 k = os.environ.get("VPS_SSH_KEY", "")
 # Normalize CRLF + decode literal backslash-n newlines if present.
 k = k.replace("\r", "").replace("\\n", "\n")
-print(k, end="")
+# Strip trailing spaces/tabs per line (common when key was copied through Notepad and got padded).
+lines = k.split("\n")
+lines = [ln.rstrip(" \t") for ln in lines]
+# Trim empty lines at start/end
+while lines and lines[0] == "":
+    lines.pop(0)
+while lines and lines[-1] == "":
+    lines.pop()
+print("\n".join(lines) + "\n", end="")
 PY
           chmod 600 ~/.ssh/vps_deploy_key
           # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
