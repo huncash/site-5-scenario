@@ -42,16 +42,27 @@ jobs:
 
       - name: Prepare SSH key (normalize + validate)
         shell: bash
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          # Normalize CRLF (common when key was copied from Windows) and write key to disk.
-          printf '%s' "${{ secrets.VPS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/vps_deploy_key
+          # Write key to disk, handling common formats:
+          # - real multiline private key pasted into GitHub Secrets
+          # - single-line value with literal "\n" sequences (copy/paste through JSON/env)
+          python3 - <<'PY' > ~/.ssh/vps_deploy_key
+import os
+k = os.environ.get("VPS_SSH_KEY", "")
+# Normalize CRLF + decode literal backslash-n newlines if present.
+k = k.replace("\r", "").replace("\\n", "\n")
+print(k, end="")
+PY
           chmod 600 ~/.ssh/vps_deploy_key
           # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
           if ! ssh-keygen -y -f ~/.ssh/vps_deploy_key >/dev/null 2>&1; then
             echo "VPS_SSH_KEY is not a usable *unencrypted private key* (or has wrong format/passphrase)."
             echo "Fix: paste the full private key including BEGIN/END lines into the repo secret VPS_SSH_KEY."
+            echo "Expected header like: -----BEGIN OPENSSH PRIVATE KEY----- (or RSA/EC/ED25519)."
             echo "If the key is passphrase-protected, add a VPS_SSH_PASSPHRASE secret and wire it to the action."
             exit 1
           fi
