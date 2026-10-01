@@ -10,6 +10,7 @@ import {
   Lock,
   Maximize2,
   Menu,
+  Sparkles,
   QrCode,
   Search,
   Settings,
@@ -40,6 +41,7 @@ import { getPdcaCycleSum } from "@/lib/pdcaCycle";
 import { useVault } from "@/lib/vault";
 import { toast } from "sonner";
 import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
+import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 
 export function ProfileHeader({
   profileId,
@@ -75,6 +77,7 @@ export function ProfileHeader({
   const { lock, state } = useVault();
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
+  const { openTour } = useOnboardingTour();
   const [kbOpen, setKbOpen] = useState(false);
   const [omni, setOmni] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
@@ -340,6 +343,14 @@ export function ProfileHeader({
                   >
                     <GraduationCap className="mr-2 h-4 w-4" />
                     Tudásbázis / GYIK
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      openTour();
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Kezdő lépések / Interaktív bemutató
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link

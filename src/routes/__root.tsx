@@ -15,6 +15,7 @@ import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
+import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
 
 function NotFoundComponent() {
   return (
@@ -182,10 +183,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <VaultProvider>
         <FeatureComingSoonProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <HoverCoachTooltip />
-          <Toaster richColors closeButton position="top-center" />
+          <OnboardingTourProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <HoverCoachTooltip />
+            <Toaster richColors closeButton position="top-center" />
+          </OnboardingTourProvider>
         </FeatureComingSoonProvider>
       </VaultProvider>
     </QueryClientProvider>
