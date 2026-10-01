@@ -211,8 +211,22 @@ function Page() {
   return <VaultGate />;
 }
 
+const HOME_MODE_KEY = "szcenario_home_mode";
+type HomeMode = "door" | "dashboard";
+
 function VaultGate() {
   const { state } = useVault();
+  const [homeMode, setHomeMode] = useState<HomeMode>("door");
+
+  useEffect(() => {
+    try {
+      const v = typeof window !== "undefined" ? window.localStorage.getItem(HOME_MODE_KEY) : null;
+      setHomeMode(v === "dashboard" ? "dashboard" : "door");
+    } catch {
+      setHomeMode("door");
+    }
+  }, []);
+
   if (state.status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
@@ -220,6 +234,8 @@ function VaultGate() {
       </div>
     );
   }
+  // Marketing/door is the default home, even when a demo profile auto-unlocks.
+  if (homeMode !== "dashboard") return <ScenarioDoor />;
   if (state.status !== "unlocked") return <ScenarioDoor />;
   return (
     <FinanceDashboard

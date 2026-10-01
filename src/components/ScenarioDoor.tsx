@@ -94,6 +94,15 @@ export function ScenarioDoor() {
   const inFlight = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
+  const preferDashboardHome = () => {
+    try {
+      if (typeof window === "undefined") return;
+      window.localStorage.setItem("szcenario_home_mode", "dashboard");
+    } catch {
+      // ignore
+    }
+  };
+
   const branches = useMemo(
     () => [
       {
@@ -140,6 +149,7 @@ export function ScenarioDoor() {
     setError(null);
     try {
       await enterDemoSegment(segmentId, { unlockById, createProfile });
+      preferDashboardHome();
       await navigate({ to: "/" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Nem sikerült megnyitni az esetet.");
@@ -156,6 +166,7 @@ export function ScenarioDoor() {
     setError(null);
     try {
       await enterDemoSegment("demo7_personal_pocket_seasonal_pilot", { unlockById, createProfile });
+      preferDashboardHome();
       await navigate({ to: "/" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Nem sikerült elindítani az ingyenes kipróbálást.");
