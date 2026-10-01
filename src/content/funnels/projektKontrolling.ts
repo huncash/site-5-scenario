@@ -1,4 +1,4 @@
-import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
 
 const packages = {
   starter: {
@@ -24,6 +24,8 @@ const packages = {
       "Teljes projekt cash‑flow fókusz (terv → tény → eltérés)",
       "Banki kivonat parser (import‑first) + gyors áttekintés",
       "Valóság‑sokk elemzés (marketing copy)",
+      PRO_MULTIUSER_BULLET,
+      PRO_P2P_SYNC_BULLET,
     ],
     limits: ["Slotok száma: rugalmas (nem korlátlan)"],
   },

@@ -1,4 +1,4 @@
-import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
 
 const packages = {
   starter: {
@@ -24,6 +24,8 @@ const packages = {
       "MUDA mikro‑szivárgás hőtérkép",
       "Excel import",
       "Fedezeti pont kalkulátor",
+      PRO_MULTIUSER_BULLET,
+      PRO_P2P_SYNC_BULLET,
     ],
     limits: [
       "Forgatókönyv-slotok: rugalmas (nem korlátlan)",

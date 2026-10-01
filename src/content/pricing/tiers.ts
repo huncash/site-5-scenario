@@ -18,6 +18,13 @@ export type TierCopy = {
 
 export type TierOffer = TierCore & TierCopy;
 
+// Shared marketing bullets that should stay consistent across funnels.
+// (Marketing-only; not enforced in the application engine.)
+export const PRO_MULTIUSER_BULLET =
+  "Több felhasználó / több eszköz (egy cég több alkalmazottja saját eszközön, egymástól függetlenül)";
+export const PRO_P2P_SYNC_BULLET =
+  "Opcionális közeli eszköz↔eszköz szinkron (QR párosítással, P2P; export/import helyett)";
+
 /**
  * NOTE: These tiers are marketing-only in this build.
  * They are NOT enforced in the application engine (zero feature expansion).

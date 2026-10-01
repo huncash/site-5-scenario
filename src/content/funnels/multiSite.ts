@@ -1,4 +1,4 @@
-import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
 
 const packages = {
   starter: {
@@ -23,7 +23,8 @@ const packages = {
       "Vállalkozási cash‑flow + import‑first workflow",
       "Lean / MUDA elemzések (vizuális jelzések és fókuszok)",
       "Multi‑site fa‑struktúra (több egység és projekt kezelés a napi munkában)",
-      "Több eszközös használat és P2P szinkron (csapatmunka export/import helyett)",
+      PRO_MULTIUSER_BULLET,
+      PRO_P2P_SYNC_BULLET,
     ],
     limits: ["Slotok száma: rugalmas (nem korlátlan)"],
   },

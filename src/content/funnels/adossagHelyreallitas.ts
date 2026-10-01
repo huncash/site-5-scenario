@@ -1,4 +1,4 @@
-import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
 
 const packages = {
   starter: {
@@ -23,6 +23,8 @@ const packages = {
       "Tartozások / kötelezettségek panel (demóban előre betöltve)",
       "Runway és közeljövő teher fókusz",
       "Lean/MUDA jelzések a pazarlásra (marketing copy)",
+      PRO_MULTIUSER_BULLET,
+      PRO_P2P_SYNC_BULLET,
     ],
     limits: ["Slotok száma: rugalmas (nem korlátlan)"],
   },

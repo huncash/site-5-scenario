@@ -13,7 +13,9 @@ export function FunnelShell(props: {
 }) {
   const { title, subtitle, eyebrow, rightSlot, children } = props;
   return (
-    <div className="min-h-screen bg-background">
+    // NOTE: the app shell disables document scroll (html/body/#root overflow hidden),
+    // so funnel pages must provide their own scroll container.
+    <div className="h-dvh overflow-x-hidden overflow-y-auto bg-background">
       <header className="sticky top-0 z-30 border-b border-border/50 bg-slate-950/60 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
