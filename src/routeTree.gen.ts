@@ -18,6 +18,10 @@ import { Route as ReferencesRouteImport } from './routes/references'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as FMinosegKoltsegIndexRouteImport } from './routes/f/minoseg-koltseg/index'
+import { Route as FMinosegKoltsegCheckoutRouteImport } from './routes/f/minoseg-koltseg/checkout'
+import { Route as FMinosegKoltsegDemoRouteImport } from './routes/f/minoseg-koltseg/demo'
+import { Route as FMinosegKoltsegPricingRouteImport } from './routes/f/minoseg-koltseg/pricing'
 import { Route as FMultiSiteIndexRouteImport } from './routes/f/multi-site/index'
 import { Route as FMultiSiteCheckoutRouteImport } from './routes/f/multi-site/checkout'
 import { Route as FMultiSiteDemoRouteImport } from './routes/f/multi-site/demo'
@@ -68,6 +72,26 @@ const StatsRoute = StatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FMinosegKoltsegIndexRoute = FMinosegKoltsegIndexRouteImport.update({
+  id: '/f/minoseg-koltseg/',
+  path: '/f/minoseg-koltseg/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMinosegKoltsegCheckoutRoute = FMinosegKoltsegCheckoutRouteImport.update({
+  id: '/f/minoseg-koltseg/checkout',
+  path: '/f/minoseg-koltseg/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMinosegKoltsegDemoRoute = FMinosegKoltsegDemoRouteImport.update({
+  id: '/f/minoseg-koltseg/demo',
+  path: '/f/minoseg-koltseg/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMinosegKoltsegPricingRoute = FMinosegKoltsegPricingRouteImport.update({
+  id: '/f/minoseg-koltseg/pricing',
+  path: '/f/minoseg-koltseg/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FMultiSiteIndexRoute = FMultiSiteIndexRouteImport.update({
   id: '/f/multi-site/',
   path: '/f/multi-site/',
@@ -99,9 +123,13 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
+  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
+  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site/': typeof FMultiSiteIndexRoute
 }
 export interface FileRoutesByTo {
@@ -114,9 +142,13 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
+  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
+  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/minoseg-koltseg': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site': typeof FMultiSiteIndexRoute
 }
 export interface FileRoutesById {
@@ -130,9 +162,13 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
+  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
+  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site/': typeof FMultiSiteIndexRoute
 }
 export interface FileRouteTypes {
@@ -147,9 +183,13 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/minoseg-koltseg/checkout'
+    | '/f/minoseg-koltseg/demo'
+    | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/minoseg-koltseg/'
     | '/f/multi-site/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,9 +202,13 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/minoseg-koltseg/checkout'
+    | '/f/minoseg-koltseg/demo'
+    | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/minoseg-koltseg'
     | '/f/multi-site'
   id:
     | '__root__'
@@ -177,9 +221,13 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/minoseg-koltseg/checkout'
+    | '/f/minoseg-koltseg/demo'
+    | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/minoseg-koltseg/'
     | '/f/multi-site/'
   fileRoutesById: FileRoutesById
 }
@@ -193,9 +241,13 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
+  FMinosegKoltsegCheckoutRoute: typeof FMinosegKoltsegCheckoutRoute
+  FMinosegKoltsegDemoRoute: typeof FMinosegKoltsegDemoRoute
+  FMinosegKoltsegPricingRoute: typeof FMinosegKoltsegPricingRoute
   FMultiSiteCheckoutRoute: typeof FMultiSiteCheckoutRoute
   FMultiSiteDemoRoute: typeof FMultiSiteDemoRoute
   FMultiSitePricingRoute: typeof FMultiSitePricingRoute
+  FMinosegKoltsegIndexRoute: typeof FMinosegKoltsegIndexRoute
   FMultiSiteIndexRoute: typeof FMultiSiteIndexRoute
 }
 
@@ -264,6 +316,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/f/minoseg-koltseg/': {
+      id: '/f/minoseg-koltseg/'
+      path: '/f/minoseg-koltseg'
+      fullPath: '/f/minoseg-koltseg/'
+      preLoaderRoute: typeof FMinosegKoltsegIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/minoseg-koltseg/checkout': {
+      id: '/f/minoseg-koltseg/checkout'
+      path: '/f/minoseg-koltseg/checkout'
+      fullPath: '/f/minoseg-koltseg/checkout'
+      preLoaderRoute: typeof FMinosegKoltsegCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/minoseg-koltseg/demo': {
+      id: '/f/minoseg-koltseg/demo'
+      path: '/f/minoseg-koltseg/demo'
+      fullPath: '/f/minoseg-koltseg/demo'
+      preLoaderRoute: typeof FMinosegKoltsegDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/minoseg-koltseg/pricing': {
+      id: '/f/minoseg-koltseg/pricing'
+      path: '/f/minoseg-koltseg/pricing'
+      fullPath: '/f/minoseg-koltseg/pricing'
+      preLoaderRoute: typeof FMinosegKoltsegPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/f/multi-site/': {
       id: '/f/multi-site/'
       path: '/f/multi-site'
@@ -305,9 +385,13 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
+  FMinosegKoltsegCheckoutRoute: FMinosegKoltsegCheckoutRoute,
+  FMinosegKoltsegDemoRoute: FMinosegKoltsegDemoRoute,
+  FMinosegKoltsegPricingRoute: FMinosegKoltsegPricingRoute,
   FMultiSiteCheckoutRoute: FMultiSiteCheckoutRoute,
   FMultiSiteDemoRoute: FMultiSiteDemoRoute,
   FMultiSitePricingRoute: FMultiSitePricingRoute,
+  FMinosegKoltsegIndexRoute: FMinosegKoltsegIndexRoute,
   FMultiSiteIndexRoute: FMultiSiteIndexRoute,
 }
 export const routeTree = rootRouteImport

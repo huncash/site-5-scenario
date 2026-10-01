@@ -1,5 +1,3 @@
-import { Link } from "@tanstack/react-router";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +21,10 @@ export function DemoSlotTeaser(props: { title: string; body: string; cta: string
         <p className="text-[12px] text-slate-300">{body}</p>
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild>
-            <Link to={to}>{cta}</Link>
+            <a href={to}>{cta}</a>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/f/multi-site/pricing">Csomagok</Link>
+            <a href="/f/multi-site/pricing">Csomagok</a>
           </Button>
         </div>
       </CardContent>

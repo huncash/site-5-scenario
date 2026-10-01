@@ -1,12 +1,10 @@
-import { Link } from "@tanstack/react-router";
-
-import { TIERS, type TierDefinition, type TierId } from "@/content/pricing/tiers";
+import type { TierId, TierOffer } from "@/content/pricing/tiers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-function TierBadge({ tier }: { tier: TierDefinition }) {
+function TierBadge({ tier }: { tier: Pick<TierOffer, "badge"> }) {
   if (!tier.badge) return null;
   const variant = tier.badge === "Ajánlott" ? "default" : "secondary";
   return (
@@ -17,17 +15,19 @@ function TierBadge({ tier }: { tier: TierDefinition }) {
 }
 
 export function TierCards(props: {
-  funnelId?: string;
+  offers: TierOffer[];
   selected?: TierId | null;
   ctaLabel?: string;
-  ctaTo?: "/f/multi-site/checkout";
+  /** Base href for checkout, tier will be appended as ?tier=... */
+  checkoutHref: string;
 }) {
-  const { selected, ctaLabel = "Kiválasztom", ctaTo = "/f/multi-site/checkout" } = props;
+  const { offers, selected, ctaLabel = "Kiválasztom", checkoutHref } = props;
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      {TIERS.map((t) => {
+      {offers.map((t) => {
         const isSelected = selected === t.id;
         const isRecommended = t.badge === "Ajánlott";
+        const href = `${checkoutHref}?tier=${encodeURIComponent(t.id)}`;
         return (
           <Card
             key={t.id}
@@ -67,9 +67,7 @@ export function TierCards(props: {
 
               <div className="pt-1">
                 <Button asChild className="w-full" variant={isRecommended ? "default" : "secondary"}>
-                  <Link to={ctaTo} search={{ tier: t.id }}>
-                    {ctaLabel}
-                  </Link>
+                  <a href={href}>{ctaLabel}</a>
                 </Button>
               </div>
             </CardContent>

@@ -1,4 +1,45 @@
-import type { TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/tiers";
+
+const packages = {
+  starter: {
+    tagline: "Belépő csomag: azonnali rend a kasszában.",
+    description:
+      "Ha most akarsz tiszta képet és egy működő rutint: cash‑flow, kategóriák, tervezés — mindezt a saját eszközödön.",
+    includes: [
+      "1× Magán + 1× Vállalkozás + 1× Projekt alap nézet (PLAN/DO értelmesen működjön)",
+      "Banki kivonat import (alap hatékonyság)",
+      "Lokális mentés / export (titkosítva)",
+    ],
+    limits: [
+      "Új munkaterület hozzáadása: nincs (csak az alap 1‑1‑1)",
+      "Használat: 1 eszköz (multi‑device / csapat nélkül)",
+    ],
+  },
+  pro: {
+    tagline: "Működés- és döntéstámogatás üzemi szinten.",
+    description:
+      "Ha már nem csak követni akarod a költést, hanem rendszert építesz: import‑first, Lean/MUDA jelzések, több munkaterület.",
+    includes: [
+      "Vállalkozási cash‑flow + import‑first workflow",
+      "Lean / MUDA elemzések (vizuális jelzések és fókuszok)",
+      "Multi‑site fa‑struktúra (több egység és projekt kezelés a napi munkában)",
+      "Több eszközös használat és P2P szinkron (csapatmunka export/import helyett)",
+    ],
+    limits: ["Slotok száma: rugalmas (nem korlátlan)"],
+  },
+  expert: {
+    tagline: "Konszolidáció több egységre, gyors beavatkozásokkal.",
+    description:
+      "Hálózati üzemeltetőknek: több telephely, több kassza, központi kontroll. A cél: gyorsan látni a driftet és lépni ACT-ben.",
+    includes: [
+      "Korlátlan slotok (egységek, projektek, nézetek)",
+      "Többegységes konszolidáció és összevetés",
+      "Fejlett ACT beavatkozási modulok (operátori döntés támogatás)",
+      "Prioritásos módszertani sablonok (multi‑site rutinok)",
+    ],
+    limits: ["Korlátok: a módszertan és a valós működés szab határt, nem a csomag."],
+  },
+} satisfies Record<TierId, TierCopy>;
 
 export const MULTISITE_FUNNEL = {
   hero: {
@@ -25,6 +66,8 @@ export const MULTISITE_FUNNEL = {
     note:
       "A csomagok ebben a verzióban tájékoztató jellegűek (marketing). A termék core motorját nem bővítjük: a funnel csak wrapper.",
   },
+  packages,
+  tierOffers: buildTierOffers(packages),
   faq: [
     {
       q: "Hol tárolódnak az adatok? Van szerver oldali adatbázis?",
