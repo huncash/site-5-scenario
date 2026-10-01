@@ -2,8 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export function DemoSlotTeaser(props: { title: string; body: string; cta: string; to?: string }) {
-  const { title, body, cta, to = "/f/multi-site/demo" } = props;
+export function DemoSlotTeaser(props: { title: string; body: string; cta: string; to: string; pricingHref: string }) {
+  const { title, body, cta, to, pricingHref } = props;
   return (
     <Card className="relative overflow-hidden border-slate-700/60 bg-slate-950/30">
       <CardHeader className="pb-2">
@@ -24,7 +24,7 @@ export function DemoSlotTeaser(props: { title: string; body: string; cta: string
             <a href={to}>{cta}</a>
           </Button>
           <Button asChild variant="outline">
-            <a href="/f/multi-site/pricing">Csomagok</a>
+            <a href={pricingHref}>Csomagok</a>
           </Button>
         </div>
       </CardContent>

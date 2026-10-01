@@ -18,6 +18,10 @@ import { Route as ReferencesRouteImport } from './routes/references'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as FAdossagHelyreallitasIndexRouteImport } from './routes/f/adossag-helyreallitas/index'
+import { Route as FAdossagHelyreallitasCheckoutRouteImport } from './routes/f/adossag-helyreallitas/checkout'
+import { Route as FAdossagHelyreallitasDemoRouteImport } from './routes/f/adossag-helyreallitas/demo'
+import { Route as FAdossagHelyreallitasPricingRouteImport } from './routes/f/adossag-helyreallitas/pricing'
 import { Route as FMinosegKoltsegIndexRouteImport } from './routes/f/minoseg-koltseg/index'
 import { Route as FMinosegKoltsegCheckoutRouteImport } from './routes/f/minoseg-koltseg/checkout'
 import { Route as FMinosegKoltsegDemoRouteImport } from './routes/f/minoseg-koltseg/demo'
@@ -26,6 +30,10 @@ import { Route as FMultiSiteIndexRouteImport } from './routes/f/multi-site/index
 import { Route as FMultiSiteCheckoutRouteImport } from './routes/f/multi-site/checkout'
 import { Route as FMultiSiteDemoRouteImport } from './routes/f/multi-site/demo'
 import { Route as FMultiSitePricingRouteImport } from './routes/f/multi-site/pricing'
+import { Route as FProjektKontrollingIndexRouteImport } from './routes/f/projekt-kontrolling/index'
+import { Route as FProjektKontrollingCheckoutRouteImport } from './routes/f/projekt-kontrolling/checkout'
+import { Route as FProjektKontrollingDemoRouteImport } from './routes/f/projekt-kontrolling/demo'
+import { Route as FProjektKontrollingPricingRouteImport } from './routes/f/projekt-kontrolling/pricing'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -72,6 +80,30 @@ const StatsRoute = StatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FAdossagHelyreallitasIndexRoute =
+  FAdossagHelyreallitasIndexRouteImport.update({
+    id: '/f/adossag-helyreallitas/',
+    path: '/f/adossag-helyreallitas/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FAdossagHelyreallitasCheckoutRoute =
+  FAdossagHelyreallitasCheckoutRouteImport.update({
+    id: '/f/adossag-helyreallitas/checkout',
+    path: '/f/adossag-helyreallitas/checkout',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FAdossagHelyreallitasDemoRoute =
+  FAdossagHelyreallitasDemoRouteImport.update({
+    id: '/f/adossag-helyreallitas/demo',
+    path: '/f/adossag-helyreallitas/demo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FAdossagHelyreallitasPricingRoute =
+  FAdossagHelyreallitasPricingRouteImport.update({
+    id: '/f/adossag-helyreallitas/pricing',
+    path: '/f/adossag-helyreallitas/pricing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const FMinosegKoltsegIndexRoute = FMinosegKoltsegIndexRouteImport.update({
   id: '/f/minoseg-koltseg/',
   path: '/f/minoseg-koltseg/',
@@ -112,6 +144,29 @@ const FMultiSitePricingRoute = FMultiSitePricingRouteImport.update({
   path: '/f/multi-site/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FProjektKontrollingIndexRoute =
+  FProjektKontrollingIndexRouteImport.update({
+    id: '/f/projekt-kontrolling/',
+    path: '/f/projekt-kontrolling/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FProjektKontrollingCheckoutRoute =
+  FProjektKontrollingCheckoutRouteImport.update({
+    id: '/f/projekt-kontrolling/checkout',
+    path: '/f/projekt-kontrolling/checkout',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FProjektKontrollingDemoRoute = FProjektKontrollingDemoRouteImport.update({
+  id: '/f/projekt-kontrolling/demo',
+  path: '/f/projekt-kontrolling/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FProjektKontrollingPricingRoute =
+  FProjektKontrollingPricingRouteImport.update({
+    id: '/f/projekt-kontrolling/pricing',
+    path: '/f/projekt-kontrolling/pricing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,14 +178,22 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
+  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
+  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
   '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
   '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
   '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
+  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
+  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
+  '/f/adossag-helyreallitas/': typeof FAdossagHelyreallitasIndexRoute
   '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site/': typeof FMultiSiteIndexRoute
+  '/f/projekt-kontrolling/': typeof FProjektKontrollingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,14 +205,22 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
+  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
+  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
   '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
   '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
   '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
+  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
+  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
+  '/f/adossag-helyreallitas': typeof FAdossagHelyreallitasIndexRoute
   '/f/minoseg-koltseg': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site': typeof FMultiSiteIndexRoute
+  '/f/projekt-kontrolling': typeof FProjektKontrollingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,14 +233,22 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
+  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
+  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
   '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
   '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
   '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
   '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
   '/f/multi-site/demo': typeof FMultiSiteDemoRoute
   '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
+  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
+  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
+  '/f/adossag-helyreallitas/': typeof FAdossagHelyreallitasIndexRoute
   '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
   '/f/multi-site/': typeof FMultiSiteIndexRoute
+  '/f/projekt-kontrolling/': typeof FProjektKontrollingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -183,14 +262,22 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/adossag-helyreallitas/checkout'
+    | '/f/adossag-helyreallitas/demo'
+    | '/f/adossag-helyreallitas/pricing'
     | '/f/minoseg-koltseg/checkout'
     | '/f/minoseg-koltseg/demo'
     | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/projekt-kontrolling/checkout'
+    | '/f/projekt-kontrolling/demo'
+    | '/f/projekt-kontrolling/pricing'
+    | '/f/adossag-helyreallitas/'
     | '/f/minoseg-koltseg/'
     | '/f/multi-site/'
+    | '/f/projekt-kontrolling/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,14 +289,22 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/adossag-helyreallitas/checkout'
+    | '/f/adossag-helyreallitas/demo'
+    | '/f/adossag-helyreallitas/pricing'
     | '/f/minoseg-koltseg/checkout'
     | '/f/minoseg-koltseg/demo'
     | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/projekt-kontrolling/checkout'
+    | '/f/projekt-kontrolling/demo'
+    | '/f/projekt-kontrolling/pricing'
+    | '/f/adossag-helyreallitas'
     | '/f/minoseg-koltseg'
     | '/f/multi-site'
+    | '/f/projekt-kontrolling'
   id:
     | '__root__'
     | '/'
@@ -221,14 +316,22 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/adossag-helyreallitas/checkout'
+    | '/f/adossag-helyreallitas/demo'
+    | '/f/adossag-helyreallitas/pricing'
     | '/f/minoseg-koltseg/checkout'
     | '/f/minoseg-koltseg/demo'
     | '/f/minoseg-koltseg/pricing'
     | '/f/multi-site/checkout'
     | '/f/multi-site/demo'
     | '/f/multi-site/pricing'
+    | '/f/projekt-kontrolling/checkout'
+    | '/f/projekt-kontrolling/demo'
+    | '/f/projekt-kontrolling/pricing'
+    | '/f/adossag-helyreallitas/'
     | '/f/minoseg-koltseg/'
     | '/f/multi-site/'
+    | '/f/projekt-kontrolling/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -241,14 +344,22 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
+  FAdossagHelyreallitasCheckoutRoute: typeof FAdossagHelyreallitasCheckoutRoute
+  FAdossagHelyreallitasDemoRoute: typeof FAdossagHelyreallitasDemoRoute
+  FAdossagHelyreallitasPricingRoute: typeof FAdossagHelyreallitasPricingRoute
   FMinosegKoltsegCheckoutRoute: typeof FMinosegKoltsegCheckoutRoute
   FMinosegKoltsegDemoRoute: typeof FMinosegKoltsegDemoRoute
   FMinosegKoltsegPricingRoute: typeof FMinosegKoltsegPricingRoute
   FMultiSiteCheckoutRoute: typeof FMultiSiteCheckoutRoute
   FMultiSiteDemoRoute: typeof FMultiSiteDemoRoute
   FMultiSitePricingRoute: typeof FMultiSitePricingRoute
+  FProjektKontrollingCheckoutRoute: typeof FProjektKontrollingCheckoutRoute
+  FProjektKontrollingDemoRoute: typeof FProjektKontrollingDemoRoute
+  FProjektKontrollingPricingRoute: typeof FProjektKontrollingPricingRoute
+  FAdossagHelyreallitasIndexRoute: typeof FAdossagHelyreallitasIndexRoute
   FMinosegKoltsegIndexRoute: typeof FMinosegKoltsegIndexRoute
   FMultiSiteIndexRoute: typeof FMultiSiteIndexRoute
+  FProjektKontrollingIndexRoute: typeof FProjektKontrollingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -316,6 +427,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/f/adossag-helyreallitas/': {
+      id: '/f/adossag-helyreallitas/'
+      path: '/f/adossag-helyreallitas'
+      fullPath: '/f/adossag-helyreallitas/'
+      preLoaderRoute: typeof FAdossagHelyreallitasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/adossag-helyreallitas/checkout': {
+      id: '/f/adossag-helyreallitas/checkout'
+      path: '/f/adossag-helyreallitas/checkout'
+      fullPath: '/f/adossag-helyreallitas/checkout'
+      preLoaderRoute: typeof FAdossagHelyreallitasCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/adossag-helyreallitas/demo': {
+      id: '/f/adossag-helyreallitas/demo'
+      path: '/f/adossag-helyreallitas/demo'
+      fullPath: '/f/adossag-helyreallitas/demo'
+      preLoaderRoute: typeof FAdossagHelyreallitasDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/adossag-helyreallitas/pricing': {
+      id: '/f/adossag-helyreallitas/pricing'
+      path: '/f/adossag-helyreallitas/pricing'
+      fullPath: '/f/adossag-helyreallitas/pricing'
+      preLoaderRoute: typeof FAdossagHelyreallitasPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/f/minoseg-koltseg/': {
       id: '/f/minoseg-koltseg/'
       path: '/f/minoseg-koltseg'
@@ -372,6 +511,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FMultiSitePricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/f/projekt-kontrolling/': {
+      id: '/f/projekt-kontrolling/'
+      path: '/f/projekt-kontrolling'
+      fullPath: '/f/projekt-kontrolling/'
+      preLoaderRoute: typeof FProjektKontrollingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/projekt-kontrolling/checkout': {
+      id: '/f/projekt-kontrolling/checkout'
+      path: '/f/projekt-kontrolling/checkout'
+      fullPath: '/f/projekt-kontrolling/checkout'
+      preLoaderRoute: typeof FProjektKontrollingCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/projekt-kontrolling/demo': {
+      id: '/f/projekt-kontrolling/demo'
+      path: '/f/projekt-kontrolling/demo'
+      fullPath: '/f/projekt-kontrolling/demo'
+      preLoaderRoute: typeof FProjektKontrollingDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/projekt-kontrolling/pricing': {
+      id: '/f/projekt-kontrolling/pricing'
+      path: '/f/projekt-kontrolling/pricing'
+      fullPath: '/f/projekt-kontrolling/pricing'
+      preLoaderRoute: typeof FProjektKontrollingPricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -385,14 +552,22 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
+  FAdossagHelyreallitasCheckoutRoute: FAdossagHelyreallitasCheckoutRoute,
+  FAdossagHelyreallitasDemoRoute: FAdossagHelyreallitasDemoRoute,
+  FAdossagHelyreallitasPricingRoute: FAdossagHelyreallitasPricingRoute,
   FMinosegKoltsegCheckoutRoute: FMinosegKoltsegCheckoutRoute,
   FMinosegKoltsegDemoRoute: FMinosegKoltsegDemoRoute,
   FMinosegKoltsegPricingRoute: FMinosegKoltsegPricingRoute,
   FMultiSiteCheckoutRoute: FMultiSiteCheckoutRoute,
   FMultiSiteDemoRoute: FMultiSiteDemoRoute,
   FMultiSitePricingRoute: FMultiSitePricingRoute,
+  FProjektKontrollingCheckoutRoute: FProjektKontrollingCheckoutRoute,
+  FProjektKontrollingDemoRoute: FProjektKontrollingDemoRoute,
+  FProjektKontrollingPricingRoute: FProjektKontrollingPricingRoute,
+  FAdossagHelyreallitasIndexRoute: FAdossagHelyreallitasIndexRoute,
   FMinosegKoltsegIndexRoute: FMinosegKoltsegIndexRoute,
   FMultiSiteIndexRoute: FMultiSiteIndexRoute,
+  FProjektKontrollingIndexRoute: FProjektKontrollingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

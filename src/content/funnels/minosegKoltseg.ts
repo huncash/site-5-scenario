@@ -91,3 +91,65 @@ export const MINOSEG_KOLTSEG_FUNNEL = {
   ],
 } as const;
 
+export type MinosegKoltsegVariantId = "a" | "b" | "c";
+
+export const MINOSEG_KOLTSEG_VARIANTS: Record<
+  MinosegKoltsegVariantId,
+  {
+    heroTitle: string;
+    heroSubtitle: string;
+    primaryCta: string;
+    secondaryCta: string;
+    proofBullets: string[];
+    demoTeaserBody: string;
+  }
+> = {
+  a: {
+    heroTitle: "Minőség vs. Költség. Találd meg, hol csúszik el a fedezet a folyamataidban.",
+    heroSubtitle:
+      "Fedezeti pont, sávok, veszteséghőtérkép — helyi számítással, gyors visszacsatolással. Nincs szerver‑oldali adattárolás.",
+    primaryCta: "Segédeszköz ingyenes kipróbálása",
+    secondaryCta: "Csomagok megtekintése",
+    proofBullets: [
+      "Üzemvezetői nézet: hol csúszik el a fedezet (nem csak az, hogy mennyit költöttél)",
+      "Gyors lokális számítás: azonnali visszajelzés a sávokon és a hőtérképen",
+      "Local‑first: nincs regisztráció, nincs telemetria, nincs szerver‑oldali adatbázis",
+    ],
+    demoTeaserBody:
+      "A demóban előre betöltött minőség‑költség helyzetet kapsz: fedezeti pont, sávok és veszteséghőtérkép — hogy lásd, mit jelent a Lean a napi döntésekben.",
+  },
+  b: {
+    heroTitle: "Hol folyik el a fedezet? Nézd meg 60 másodperc alatt.",
+    heroSubtitle:
+      "Veszteséghőtérkép + fedezeti pont: pontosan látod, mely sávok húzzák el a profitot — internet nélkül is.",
+    primaryCta: "Ingyenes kipróbálás (1 kattintás)",
+    secondaryCta: "Mutasd a hőtérképet",
+    proofBullets: [
+      "Nem “riport”: operatív döntés — hőtérképen látszik a drift",
+      "Lokális számítás → gyors, nem vár a hálózatra",
+      "Adatszuverenitás: a működés a te eszközödön marad",
+    ],
+    demoTeaserBody:
+      "Kattints, és kapsz egy előre betöltött üzemhelyzetet: sávok, fedezeti pont és hőtérkép. Nem kell beállítanod semmit, csak nézed a jeleket.",
+  },
+  c: {
+    heroTitle: "Minőség‑költség döntések: láss rá a driftre műszakonként.",
+    heroSubtitle:
+      "Sávok és veszteséghőtérkép — hogy a minőség javítása ne “vak költség” legyen, hanem kontrollált beavatkozás.",
+    primaryCta: "Kipróbálom a szimulációt",
+    secondaryCta: "Csomagok",
+    proofBullets: [
+      "Fedezeti pont: mikor borul a működés veszteségbe",
+      "Hőtérkép: hol vannak a mikro‑szivárgások (MUDA jelzések)",
+      "Local‑first: nincs központi adatbázis, nincs telemetria",
+    ],
+    demoTeaserBody:
+      "A demóban a “minőség vs. költség” kompromisszumot látod: a sávok és a hőtérkép megmutatja, hol kell ACT-ben beavatkozni.",
+  },
+};
+
+export function pickMinosegKoltsegVariant(v: string | null | undefined) {
+  if (v === "b" || v === "c") return v;
+  return "a";
+}
+
