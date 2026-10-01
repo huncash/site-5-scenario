@@ -18,6 +18,10 @@ import { Route as ReferencesRouteImport } from './routes/references'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as FMultiSiteIndexRouteImport } from './routes/f/multi-site/index'
+import { Route as FMultiSiteCheckoutRouteImport } from './routes/f/multi-site/checkout'
+import { Route as FMultiSiteDemoRouteImport } from './routes/f/multi-site/demo'
+import { Route as FMultiSitePricingRouteImport } from './routes/f/multi-site/pricing'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +68,26 @@ const StatsRoute = StatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FMultiSiteIndexRoute = FMultiSiteIndexRouteImport.update({
+  id: '/f/multi-site/',
+  path: '/f/multi-site/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMultiSiteCheckoutRoute = FMultiSiteCheckoutRouteImport.update({
+  id: '/f/multi-site/checkout',
+  path: '/f/multi-site/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMultiSiteDemoRoute = FMultiSiteDemoRouteImport.update({
+  id: '/f/multi-site/demo',
+  path: '/f/multi-site/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FMultiSitePricingRoute = FMultiSitePricingRouteImport.update({
+  id: '/f/multi-site/pricing',
+  path: '/f/multi-site/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +99,10 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
+  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
+  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/multi-site/': typeof FMultiSiteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +114,10 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
+  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
+  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/multi-site': typeof FMultiSiteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +130,10 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
+  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
+  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
+  '/f/multi-site/': typeof FMultiSiteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +147,10 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/multi-site/checkout'
+    | '/f/multi-site/demo'
+    | '/f/multi-site/pricing'
+    | '/f/multi-site/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +162,10 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/multi-site/checkout'
+    | '/f/multi-site/demo'
+    | '/f/multi-site/pricing'
+    | '/f/multi-site'
   id:
     | '__root__'
     | '/'
@@ -133,6 +177,10 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/f/multi-site/checkout'
+    | '/f/multi-site/demo'
+    | '/f/multi-site/pricing'
+    | '/f/multi-site/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +193,10 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
+  FMultiSiteCheckoutRoute: typeof FMultiSiteCheckoutRoute
+  FMultiSiteDemoRoute: typeof FMultiSiteDemoRoute
+  FMultiSitePricingRoute: typeof FMultiSitePricingRoute
+  FMultiSiteIndexRoute: typeof FMultiSiteIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +264,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/f/multi-site/': {
+      id: '/f/multi-site/'
+      path: '/f/multi-site'
+      fullPath: '/f/multi-site/'
+      preLoaderRoute: typeof FMultiSiteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/multi-site/checkout': {
+      id: '/f/multi-site/checkout'
+      path: '/f/multi-site/checkout'
+      fullPath: '/f/multi-site/checkout'
+      preLoaderRoute: typeof FMultiSiteCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/multi-site/demo': {
+      id: '/f/multi-site/demo'
+      path: '/f/multi-site/demo'
+      fullPath: '/f/multi-site/demo'
+      preLoaderRoute: typeof FMultiSiteDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/multi-site/pricing': {
+      id: '/f/multi-site/pricing'
+      path: '/f/multi-site/pricing'
+      fullPath: '/f/multi-site/pricing'
+      preLoaderRoute: typeof FMultiSitePricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +305,10 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
+  FMultiSiteCheckoutRoute: FMultiSiteCheckoutRoute,
+  FMultiSiteDemoRoute: FMultiSiteDemoRoute,
+  FMultiSitePricingRoute: FMultiSitePricingRoute,
+  FMultiSiteIndexRoute: FMultiSiteIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
