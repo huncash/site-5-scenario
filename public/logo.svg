@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Egységes sötét háttér -->
+  <rect width="512" height="512" rx="112" fill="#0b132b" />
+
+  <!-- Pajzs piktogram (egységes neon színnel) -->
+  <path
+    d="M256 96C320 96 376 112 416 128V240C416 336 348 416 256 448C164 416 96 336 96 240V128C136 112 192 96 256 96Z"
+    fill="none"
+    stroke="#00f0ff"
+    stroke-width="26"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Dollár jel (pontosan ugyanolyan neon színnel) -->
+  <path
+    d="M256 150V362M296 188H222C200.903 188 183.75 205.153 183.75 226.25C183.75 247.347 200.903 264.5 222 264.5H290C311.097 264.5 328.25 281.653 328.25 302.75C328.25 323.847 311.097 341 290 341H216"
+    fill="none"
+    stroke="#00f0ff"
+    stroke-width="24"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
+
