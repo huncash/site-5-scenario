@@ -69,7 +69,8 @@ jobs:
               lines.pop()
           print("\n".join(lines) + "\n", end="")
           PY
-          chmod 600 "$KEY_HOME/.ssh/vps_deploy_key"
+          # Docker actions may run as a different UID than the runner user; make the key readable in-container.
+          chmod 644 "$KEY_HOME/.ssh/vps_deploy_key"
           # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
           if ! ssh-keygen -y -f "$KEY_HOME/.ssh/vps_deploy_key" >/dev/null 2>&1; then
             echo "VPS_SSH_KEY is not a usable *unencrypted private key* (or has wrong format/passphrase)."
