@@ -80,7 +80,8 @@ jobs:
         with:
           host: 195.228.152.141
           username: deploy
-          key_path: /home/runner/.ssh/vps_deploy_key
+          # NOTE: appleboy/scp-action runs in a Docker container; runner $HOME is mounted at /github/home.
+          key_path: /github/home/.ssh/vps_deploy_key
           port: 22
           source: "release.tar.gz"
           target: "/var/www/szcenario/incoming/"
@@ -90,7 +91,8 @@ jobs:
         with:
           host: 195.228.152.141
           username: deploy
-          key_path: /home/runner/.ssh/vps_deploy_key
+          # NOTE: appleboy/ssh-action runs in a Docker container; runner $HOME is mounted at /github/home.
+          key_path: /github/home/.ssh/vps_deploy_key
           port: 22
           script_stop: true
           script: |
