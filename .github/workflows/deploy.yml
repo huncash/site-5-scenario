@@ -46,13 +46,15 @@ jobs:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           set -euo pipefail
-          # IMPORTANT: appleboy/* actions run in Docker and only mount $GITHUB_HOME to /github/home.
-          # Therefore the key MUST be written under $GITHUB_HOME so key_path can reference it.
-          mkdir -p "$GITHUB_HOME/.ssh"
+          # IMPORTANT: appleboy/* actions run in Docker and mount the runner temp "github home"
+          # directory at /github/home. On Ubuntu runners this is typically: $RUNNER_TEMP/_github_home
+          # (e.g. /home/runner/work/_temp/_github_home).
+          KEY_HOME="${RUNNER_TEMP:?}/_github_home"
+          mkdir -p "$KEY_HOME/.ssh"
           # Write key to disk, handling common formats:
           # - real multiline private key pasted into GitHub Secrets
           # - single-line value with literal "\n" sequences (copy/paste through JSON/env)
-          python3 - <<'PY' > "$GITHUB_HOME/.ssh/vps_deploy_key"
+          python3 - <<'PY' > "$KEY_HOME/.ssh/vps_deploy_key"
           import os
           k = os.environ.get("VPS_SSH_KEY", "")
           # Normalize CRLF + decode literal backslash-n newlines if present.
@@ -67,9 +69,9 @@ jobs:
               lines.pop()
           print("\n".join(lines) + "\n", end="")
           PY
-          chmod 600 "$GITHUB_HOME/.ssh/vps_deploy_key"
+          chmod 600 "$KEY_HOME/.ssh/vps_deploy_key"
           # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
-          if ! ssh-keygen -y -f "$GITHUB_HOME/.ssh/vps_deploy_key" >/dev/null 2>&1; then
+          if ! ssh-keygen -y -f "$KEY_HOME/.ssh/vps_deploy_key" >/dev/null 2>&1; then
             echo "VPS_SSH_KEY is not a usable *unencrypted private key* (or has wrong format/passphrase)."
             echo "Fix: paste the full private key including BEGIN/END lines into the repo secret VPS_SSH_KEY."
             echo "Expected header like: -----BEGIN OPENSSH PRIVATE KEY----- (or RSA/EC/ED25519)."
