@@ -40,53 +40,12 @@ jobs:
         run: |
           test -n "${{ secrets.VPS_SSH_KEY }}" || (echo "Missing VPS_SSH_KEY secret" && exit 1)
 
-      - name: Prepare SSH key (normalize + validate)
-        shell: bash
-        env:
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-        run: |
-          set -euo pipefail
-          # IMPORTANT: appleboy/* actions run in Docker and mount the runner temp "github home"
-          # directory at /github/home. On Ubuntu runners this is typically: $RUNNER_TEMP/_github_home
-          # (e.g. /home/runner/work/_temp/_github_home).
-          KEY_HOME="${RUNNER_TEMP:?}/_github_home"
-          mkdir -p "$KEY_HOME/.ssh"
-          # Write key to disk, handling common formats:
-          # - real multiline private key pasted into GitHub Secrets
-          # - single-line value with literal "\n" sequences (copy/paste through JSON/env)
-          python3 - <<'PY' > "$KEY_HOME/.ssh/vps_deploy_key"
-          import os
-          k = os.environ.get("VPS_SSH_KEY", "")
-          # Normalize CRLF + decode literal backslash-n newlines if present.
-          k = k.replace("\r", "").replace("\\n", "\n")
-          # Strip trailing spaces/tabs per line (common when key was copied through Notepad and got padded).
-          lines = k.split("\n")
-          lines = [ln.rstrip(" \t") for ln in lines]
-          # Trim empty lines at start/end
-          while lines and lines[0] == "":
-              lines.pop(0)
-          while lines and lines[-1] == "":
-              lines.pop()
-          print("\n".join(lines) + "\n", end="")
-          PY
-          # Docker actions may run as a different UID than the runner user; make the key readable in-container.
-          chmod 600 "$KEY_HOME/.ssh/vps_deploy_key"
-          # Validate key is parseable (fails clearly if it's a public key / corrupted / passphrase-protected).
-          if ! ssh-keygen -y -f "$KEY_HOME/.ssh/vps_deploy_key" >/dev/null 2>&1; then
-            echo "VPS_SSH_KEY is not a usable *unencrypted private key* (or has wrong format/passphrase)."
-            echo "Fix: paste the full private key including BEGIN/END lines into the repo secret VPS_SSH_KEY."
-            echo "Expected header like: -----BEGIN OPENSSH PRIVATE KEY----- (or RSA/EC/ED25519)."
-            echo "If the key is passphrase-protected, add a VPS_SSH_PASSPHRASE secret and wire it to the action."
-            exit 1
-          fi
-
       - name: Upload release to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 195.228.152.141
           username: deploy
-          # NOTE: appleboy/scp-action runs in a Docker container; runner $HOME is mounted at /github/home.
-          key_path: /github/home/.ssh/vps_deploy_key
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           source: "release.tar.gz"
           target: "/var/www/szcenario/incoming/"
@@ -96,8 +55,7 @@ jobs:
         with:
           host: 195.228.152.141
           username: deploy
-          # NOTE: appleboy/ssh-action runs in a Docker container; runner $HOME is mounted at /github/home.
-          key_path: /github/home/.ssh/vps_deploy_key
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script_stop: true
           script: |
@@ -120,6 +78,4 @@ jobs:
               --output "/var/log/$SITE_SLUG/out.log" \
               --error "/var/log/$SITE_SLUG/err.log"
             pm2 save
-            cd "$APP_DIR/releases"
-            ls -1t | tail -n +6 | xargs -r rm -rf
-            echo "Deployed $SHA → $SITE_SLUG (port 4100)"
+            cd "$APP_DIR/releases" && ls -t | tail -n +6 | xargs -r rm -rf
