@@ -20,14 +20,14 @@ function ProjektKontrollingLandingPage() {
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="border-border/60 bg-background/30">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold text-slate-100">Kontrolling ütem</CardTitle>
+            <CardTitle className="text-base font-semibold text-slate-100">Interim kontrolling workflow</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-[11px]">terv→tény</Badge>
-              <Badge variant="secondary" className="text-[11px]">eltérés</Badge>
+              <Badge variant="secondary" className="text-[11px]">ügyféladat helyben</Badge>
+              <Badge variant="secondary" className="text-[11px]">offline</Badge>
               <Badge variant="secondary" className="text-[11px]">import‑first</Badge>
-              <Badge variant="secondary" className="text-[11px]">local‑first</Badge>
+              <Badge variant="secondary" className="text-[11px]">Avalanche/Snowball</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {c.proofBullets.map((x) => (
@@ -52,7 +52,12 @@ function ProjektKontrollingLandingPage() {
         <div className="rounded-xl border border-border/60 bg-background/30 p-4">
           <div className="text-sm font-semibold text-slate-100">Csomagok (áttekintés)</div>
           <div className="mt-3">
-            <TierCards offers={c.tierOffers} selected={c.tiers.defaultSelected} checkoutHref="/f/projekt-kontrolling/checkout" ctaLabel="Ingyenes kipróbálás" />
+            <TierCards
+              offers={c.tierOffers}
+              selected={c.tiers.defaultSelected}
+              checkoutHref="/f/projekt-kontrolling/checkout"
+              ctaLabel="Segédeszköz ingyenes kipróbálása"
+            />
           </div>
           <div className="mt-2 text-[11px] text-slate-400">{c.tiers.note}</div>
         </div>

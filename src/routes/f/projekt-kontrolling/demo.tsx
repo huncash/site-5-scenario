@@ -24,7 +24,7 @@ function ProjektKontrollingDemoLoaderPage() {
     setError(null);
     void (async () => {
       try {
-        await enterDemoSegment("demo1_multisite_operator", { unlockById, createProfile });
+        await enterDemoSegment("demo7_personal_pocket_seasonal_pilot", { unlockById, createProfile });
         await navigate({ to: "/" });
       } catch (e: unknown) {
         inFlight.current = false;
@@ -34,7 +34,11 @@ function ProjektKontrollingDemoLoaderPage() {
   }, [createProfile, navigate, state.status, unlockById]);
 
   return (
-    <FunnelShell eyebrow="Projekt‑kontrolling" title="Projekt demó betöltése…" subtitle="Wrapper-only: preloadolt demó aktiválása, majd redirect a dashboardra.">
+    <FunnelShell
+      eyebrow="Projektalapú & interim kontrolling"
+      title="Interim demó betöltése…"
+      subtitle="Wrapper-only: preloadolt (projekt + helyreállítás) demó aktiválása, majd redirect a dashboardra."
+    >
       <Card className="border-border/60 bg-background/30">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold text-slate-100">Állapot</CardTitle>
