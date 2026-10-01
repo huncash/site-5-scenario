@@ -2,62 +2,64 @@ import { buildTierOffers, type TierCopy, type TierId } from "@/content/pricing/t
 
 const packages = {
   starter: {
-    tagline: "Átlátható költség és terv, 1 projektre.",
+    tagline: "Alap terv + gyors helyzetkép, ügyféladat-kímélően.",
     description:
-      "Ha most szeretnél projekt‑szintű rálátást: terv → tény → eltérés, gyorsan és helyben.",
+      "Ha gyorsan akarsz rálátást adni egy projekt vagy magán‑keret helyzetére: helyi számítás, offline működés, és a tartozás‑fókusz (Avalanche/Snowball) alap egységei.",
     includes: [
-      "1 projekt alap nézet (PLAN/DO)",
+      "Alap pénzügyi tervezés (PLAN/DO szemlélet)",
+      "Avalanche/Snowball fókusz (tartozás‑prioritás javaslat)",
       "Banki/Excel import (hatékonyság)",
-      "Lokális mentés / export (titkosítva)",
+      "Local‑first mentés / export (titkosítva)",
     ],
     limits: [
-      "Új projektek: korlátozott (marketing copy)",
-      "Csapat / több eszköz: korlátozott (marketing copy)",
+      "Slotok és haladó beavatkozási ágak: korlátozott (marketing copy)",
+      "Több eszköz / konzultációs keret: korlátozott (marketing copy)",
     ],
   },
   pro: {
-    tagline: "Kontrolling ritmus: eltérés, fókusz, döntés.",
+    tagline: "Projekt‑cash‑flow + valóság‑sokk: gyors döntési fókusz.",
     description:
-      "Ha a projekt nem csak ‘költség’, hanem ütemezett döntések sora: követhető eltérés és fókusz a következő lépéshez.",
+      "Interim ritmusra: projekt cash‑flow, import‑first banki kivonat feldolgozás, és „valóság‑sokk” jelzések — hogy az eltérés ne Excel‑vadászat legyen, hanem döntés‑jel.",
     includes: [
-      "Projekt‑szintű cash‑flow fókusz",
-      "Excel import + gyors áttekintés",
-      "Lean/MUDA jelzések a pazarlásra (marketing copy)",
+      "Teljes projekt cash‑flow fókusz (terv → tény → eltérés)",
+      "Banki kivonat parser (import‑first) + gyors áttekintés",
+      "Valóság‑sokk elemzés (marketing copy)",
     ],
     limits: ["Slotok száma: rugalmas (nem korlátlan)"],
   },
   expert: {
-    tagline: "Több projekt, több forgatókönyv, ACT ágak.",
+    tagline: "Korlátlan projekt‑slot + teljes ACT döntési mátrix.",
     description:
-      "Komplexebb portfólióra: több projekt párhuzamosan, több forgatókönyv-slot és módszertani sablonok.",
+      "Tanácsadói / interim portfólióra: több ügyfél‑helyzet, több projekt és több beavatkozási ág — egységes keretben, helyi futással.",
     includes: [
-      "Korlátlan forgatókönyv-slotok (marketing copy)",
-      "Fejlett ACT beavatkozási ágak (marketing copy)",
+      "Korlátlan projekt‑slotok (marketing copy)",
+      "Többfelhasználós konzultációs keretrendszer (marketing copy)",
+      "Teljes ACT döntési mátrix (marketing copy)",
       "Prioritásos módszertani sablonok",
     ],
-    limits: ["Korlátok: a valós folyamatok és a módszertan szab határt."],
+    limits: ["Korlátok: a valós működés és a módszertan szab határt (nem a funnel)."],
   },
 } satisfies Record<TierId, TierCopy>;
 
 export const PROJEKT_KONTROLLING_FUNNEL = {
   hero: {
-    eyebrow: "Projekt‑kontrolling",
-    title: "Terv → Tény → Eltérés. Projekt-kontrolling helyben, gyorsan.",
+    eyebrow: "Projektalapú & interim kontrolling",
+    title: "Zseb-kontrolling és Cash-flow szimuláció interim szakértőknek és projektekhez",
     subtitle:
-      "Lásd, hol csúszik el a projekt költsége és üteme — import‑first, lokális számítás, adatszuverenitás.",
+      "Ügyfél‑biztos működés: local‑first számítás, offline használat, nincs szerver‑oldali adattárolás. A demó preloadolt helyzetből indul, majd a meglévő app‑nézetbe visz.",
     primaryCta: "Segédeszköz ingyenes kipróbálása",
     secondaryCta: "Csomagok megtekintése",
   },
   proofBullets: [
-    "Projekt fókusz: eltérés nem Excel‑vadászat, hanem döntés‑jel",
-    "Import‑first: banki/Excel alap, nem kézi táblázat",
-    "Local‑first: nincs telemetria, nincs szerver‑oldali adatbázis",
+    "Ügyféladat‑titoktartás: nincs szerver‑oldali adatbázis, nincs telemetria",
+    "Offline‑first: terepen / ügyfélnél is fut, hálózat nélkül",
+    "Valóság‑sokk + tartozás‑fókusz: döntési jelzések (nem csak összeglista)",
   ],
   demoTeaser: {
-    title: "Interaktív előnézet: Projekt1 (demó)",
+    title: "Interaktív előnézet: projekt + helyreállítás (demó)",
     body:
-      "Preloadolt projekt helyzet: cél, idővonal és döntési fókusz — hogy lásd, mire jó a kontrolling ritmus.",
-    cta: "Megnyitom a projekt demót",
+      "Preloadolt helyzetből indulsz: cash‑flow fókusz + tartozások, és Avalanche/Snowball javaslatok a priorizáláshoz — hogy 60 mp alatt lásd a „reality‑shock” pontokat.",
+    cta: "Megnyitom az interim demót",
   },
   tiers: {
     defaultSelected: "pro" as TierId,
@@ -67,16 +69,20 @@ export const PROJEKT_KONTROLLING_FUNNEL = {
   tierOffers: buildTierOffers(packages),
   faq: [
     {
-      q: "Kontrolling = új funkció? Kényszerít a funnel valamire?",
-      a: "Nem. A funnel csak wrapper oldal. A demó a meglévő állapotot nyitja meg, a core motor változatlan.",
+      q: "Ügyféladat hova kerül? Van szerver‑oldali adattárolás?",
+      a: "Nincs szerver‑oldali adattárolás. Local‑first: a működés a te eszközödön történik; nincs telemetria sem.",
     },
     {
-      q: "Milyen gyors a betöltés és számítás?",
-      a: "A cél a gyors lokális visszajelzés. Import után a nézetek helyben számolódnak, nem a hálózatra várnak.",
+      q: "Használható offline (ügyfélnél / helyszínen)?",
+      a: "Igen. A cél az offline‑first működés: a számítás és a nézetek helyben futnak, nem a hálózatra támaszkodnak.",
     },
     {
-      q: "Hol maradnak az adataim?",
-      a: "Local‑first: a működés a te eszközödön történik, nincs szerver‑oldali adattárolás.",
+      q: "Mit csinál pontosan a demó indítása?",
+      a: "Wrapper-only: preloadolt demó‑állapotot aktivál, majd a meglévő app‑nézetbe irányít. A core motorhoz nem nyúl.",
+    },
+    {
+      q: "Mi a „valóság‑sokk” ebben a kontextusban?",
+      a: "Olyan jelzések összessége, ami kiemeli: hol borul a runway/teher, hol csúszik el a projekt‑fedezet, és hol kell ACT-ben beavatkozni (helyi számítással).",
     },
   ],
 } as const;
