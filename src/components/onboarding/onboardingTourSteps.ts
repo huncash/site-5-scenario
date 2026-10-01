@@ -11,7 +11,7 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
   {
     id: "welcome-shortcuts",
     title: "Üdvözlés & Gyorsbillentyűk",
-    body: "A Szcenárió desktopon gyors: billentyűzettel pár másodperc alatt tudsz váltani, menteni és forgatni a PDCA fókuszt.",
+    body: "A Szcenárió desktopon gyors: billentyűzettel pár másodperc alatt tudsz váltani, menteni és forgatni a PDCA fókuszt. A gyorsbillentyűk listáját a felső sávban, a hamburger mellett találod (⌨).",
     bullets: [
       "Mentés: Ctrl/Cmd + S",
       "Alsó fülek váltása: Alt + Shift + ← / →",
@@ -55,9 +55,14 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
   },
   {
     id: "security-close",
-    title: "100% adatbiztonság & zárás",
-    body: "Az adataid a te eszközödön maradnak: nincs regisztráció, nincs telemetria, nincs szerver‑oldali adatbázis. Készen állsz?",
-    bullets: ["Local‑first · offline‑first", "Nincs szerver‑oldali adattárolás", "Bármikor újraindítható a bemutató a menüből"],
+    title: "Adatkezelés & következő 2 perc",
+    body: "Zárásként két praktikus dolog: hogyan ments, és hol tudsz visszajönni ide segítségért. Nem ígéret — konkrét műveletek.",
+    bullets: [
+      "Mentés: Hamburger → Gyors mentés (.json) vagy Beállítások → Mentés betöltése…",
+      "Eszköz hozzáadása: Hamburger → Eszköz hozzáadása QR-rel (ha több eszközön dolgozol)",
+      "Segítség: Hamburger → Tudásbázis / GYIK",
+      "Demó váltás: Hamburger → Másik eset",
+    ],
   },
 ];
 

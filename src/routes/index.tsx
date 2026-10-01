@@ -214,17 +214,29 @@ function Page() {
 const HOME_MODE_KEY = "szcenario_home_mode";
 type HomeMode = "door" | "dashboard";
 
+function readHomeMode(): HomeMode {
+  try {
+    const v = typeof window !== "undefined" ? window.localStorage.getItem(HOME_MODE_KEY) : null;
+    return v === "dashboard" ? "dashboard" : "door";
+  } catch {
+    return "door";
+  }
+}
+
 function VaultGate() {
   const { state } = useVault();
   const [homeMode, setHomeMode] = useState<HomeMode>("door");
 
   useEffect(() => {
-    try {
-      const v = typeof window !== "undefined" ? window.localStorage.getItem(HOME_MODE_KEY) : null;
-      setHomeMode(v === "dashboard" ? "dashboard" : "door");
-    } catch {
-      setHomeMode("door");
-    }
+    setHomeMode(readHomeMode());
+
+    const onPing = () => setHomeMode(readHomeMode());
+    window.addEventListener("storage", onPing);
+    window.addEventListener("szcenario:home_mode", onPing as any);
+    return () => {
+      window.removeEventListener("storage", onPing);
+      window.removeEventListener("szcenario:home_mode", onPing as any);
+    };
   }, []);
 
   if (state.status === "loading") {

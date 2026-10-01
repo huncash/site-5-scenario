@@ -6,10 +6,14 @@ import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { ONBOARDING_TOUR_STEPS } from "@/components/onboarding/onboardingTourSteps";
 
 const STORAGE_KEY = "szcenario_onboarding_seen";
+const PENDING_KEY = "szcenario_onboarding_pending";
+const HOME_MODE_KEY = "szcenario_home_mode";
 
 type OnboardingTourApi = {
   openTour: () => void;
   closeTour: () => void;
+  isOpen: boolean;
+  stepIndex: number;
 };
 
 const Ctx = createContext<OnboardingTourApi | null>(null);
@@ -28,6 +32,26 @@ function safeSetSeen(): void {
     localStorage.setItem(STORAGE_KEY, "1");
   } catch {
     // ignore (private mode / blocked storage)
+  }
+}
+
+function safeConsumePending(): boolean {
+  try {
+    if (typeof localStorage === "undefined") return false;
+    const v = localStorage.getItem(PENDING_KEY) === "1";
+    if (v) localStorage.removeItem(PENDING_KEY);
+    return v;
+  } catch {
+    return false;
+  }
+}
+
+function safeReadHomeMode(): "door" | "dashboard" {
+  try {
+    if (typeof localStorage === "undefined") return "door";
+    return localStorage.getItem(HOME_MODE_KEY) === "dashboard" ? "dashboard" : "door";
+  } catch {
+    return "door";
   }
 }
 
@@ -62,19 +86,24 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
     setStepIndex((i) => Math.max(i - 1, 0));
   }, []);
 
-  // Auto-trigger on first visit (only on dashboard, not on funnels/login).
+  // Auto-trigger only after "kipróbálás" starts a demo (pending flag), not on the landing/door.
   useEffect(() => {
     if (safeGetSeen()) return;
     try {
       const p = window.location.pathname || "/";
       if (p !== "/") return;
+      if (safeReadHomeMode() !== "dashboard") return;
+      if (!safeConsumePending()) return;
       openTour();
     } catch {
       // ignore
     }
   }, [openTour]);
 
-  const api = useMemo<OnboardingTourApi>(() => ({ openTour, closeTour }), [openTour, closeTour]);
+  const api = useMemo<OnboardingTourApi>(
+    () => ({ openTour, closeTour, isOpen: open, stepIndex }),
+    [openTour, closeTour, open, stepIndex],
+  );
 
   return (
     <Ctx.Provider value={api}>

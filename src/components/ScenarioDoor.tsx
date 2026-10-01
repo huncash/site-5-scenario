@@ -98,6 +98,8 @@ export function ScenarioDoor() {
     try {
       if (typeof window === "undefined") return;
       window.localStorage.setItem("szcenario_home_mode", "dashboard");
+      window.localStorage.setItem("szcenario_onboarding_pending", "1");
+      window.dispatchEvent(new Event("szcenario:home_mode"));
     } catch {
       // ignore
     }

@@ -17,6 +17,7 @@ import {
   Upload,
   Users,
   Wallet,
+  Keyboard,
 } from "lucide-react";
 
 import {
@@ -42,6 +43,8 @@ import { useVault } from "@/lib/vault";
 import { toast } from "sonner";
 import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export function ProfileHeader({
   profileId,
@@ -77,13 +80,15 @@ export function ProfileHeader({
   const { lock, state } = useVault();
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
-  const { openTour } = useOnboardingTour();
+  const { openTour, isOpen: tourOpen, stepIndex: tourStep } = useOnboardingTour();
   const [kbOpen, setKbOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [omni, setOmni] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
   const unlocked = state.status === "unlocked" ? state : null;
   const vaultKey = unlocked?.key ?? null;
   const visitorShell = Boolean(visitorDemo) || isDemoProfileName(unlocked?.profile.name);
+  const highlightShortcuts = tourOpen && tourStep === 0;
 
   const settingsQ = useQuery({
     queryKey: ["settings"],
@@ -298,6 +303,23 @@ export function ProfileHeader({
                 <Maximize2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
               </div>
               )}
+
+              {/* Keyboard shortcuts quick access (left of hamburger) */}
+              <button
+                type="button"
+                className={cn(
+                  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 text-slate-100 hover:bg-slate-800/40",
+                  highlightShortcuts
+                    ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
+                    : "",
+                )}
+                aria-label="Gyorsbillentyűk"
+                title="Gyorsbillentyűk"
+                data-tour-anchor="shortcuts"
+                onClick={() => setShortcutsOpen(true)}
+              >
+                <Keyboard className="h-4 w-4" />
+              </button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -533,6 +555,44 @@ export function ProfileHeader({
         ) : null}
 
         <KnowledgeBaseModal open={kbOpen} onOpenChange={setKbOpen} />
+
+        <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+          <DialogContent className="max-w-xl border-slate-700 bg-slate-950/95 text-slate-100 shadow-2xl backdrop-blur">
+            <div className="space-y-3">
+              <div className="pr-8">
+                <DialogTitle className="text-lg font-semibold text-slate-100">Gyorsbillentyűk</DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-slate-300">
+                  Navigáció és fókuszváltás desktopon. Ha épp beviteli mezőben gépelsz, a navigációs gyorsbillentyűk nem futnak.
+                </DialogDescription>
+              </div>
+
+              <div className="grid gap-2 text-[13px] text-slate-200 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mentés</div>
+                  <div className="mt-1 font-mono">Ctrl/Cmd + S</div>
+                </div>
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Szumma</div>
+                  <div className="mt-1 font-mono">Alt + Shift + End</div>
+                </div>
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Alsó fülek</div>
+                  <div className="mt-1 font-mono">Alt + Shift + ← / →</div>
+                </div>
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Munkaterek</div>
+                  <div className="mt-1 font-mono">PageUp / PageDown</div>
+                  <div className="mt-1 text-[11px] text-slate-400">Fallback: Alt+Shift+PageUp/PageDown, Ctrl+Alt+←/→</div>
+                </div>
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3 sm:col-span-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">PDCA negyed forgatás</div>
+                  <div className="mt-1 font-mono">↓</div>
+                  <div className="mt-1 text-[11px] text-slate-400">Fallback: Alt + Shift + ↓</div>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </header>
   );
