@@ -73,7 +73,7 @@ export function HelpIcon({
         className="w-64 max-w-[min(16rem,calc(100vw-2rem))] border border-slate-500/45 bg-slate-950 p-2.5 text-[12px] leading-snug text-slate-50 shadow-xl"
         align="start"
         side="bottom"
-        sideOffset={6}
+        sideOffset={14}
         collisionPadding={12}
         data-exact-ignore
         onClick={(e) => e.stopPropagation()}
