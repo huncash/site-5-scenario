@@ -2,6 +2,7 @@
 
 export type TourAnchorId =
   | "header"
+  | "situation"
   | "pdca-dial"
   | "view-toggle"
   | "shortcuts"
@@ -11,7 +12,7 @@ export type TourAnchorId =
   | "bottom-tabs";
 
 export type TourVisual = {
-  icon: "layout" | "panels" | "tabs" | "dial" | "split" | "keys" | "menu" | "workspace";
+  icon?: "layout" | "panels" | "tabs" | "dial" | "split" | "keys" | "menu" | "workspace";
   caption: string;
 };
 
@@ -33,6 +34,12 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
       { icon: "panels", caption: "A számok a böngészőben készülnek." },
       { icon: "menu", caption: "Kilépés: Főmenü → Másik eset." },
     ],
+    anchors: ["situation", "work-panels", "app-menu"],
+    anchorLabels: {
+      situation: "Helyzet",
+      "work-panels": "Számok",
+      "app-menu": "Menü",
+    },
   },
   {
     id: "anatomy",
@@ -43,9 +50,10 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
       { icon: "workspace", caption: "A fülek a munkateret cserélik." },
       { icon: "tabs", caption: "Lent: Cashflow, Tételek, Üzletek, Leltár." },
     ],
-    anchors: ["header", "workspaces", "bottom-tabs"],
+    anchors: ["situation", "pdca-dial", "workspaces", "bottom-tabs"],
     anchorLabels: {
-      header: "Fent",
+      situation: "Fent",
+      "pdca-dial": "Tárcsa",
       workspaces: "Terek",
       "bottom-tabs": "Modulok",
     },
@@ -67,24 +75,37 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
   {
     id: "welcome-shortcuts",
     title: "Gyorsbillentyűk",
-    body: "A billentyűzet-ikon a lista. Mentés: Ctrl/Cmd+S.",
-    visuals: [{ icon: "keys", caption: "Alsó fülek: Alt+Shift+←/→ · munkaterek: PageUp/PageDown." }],
+    body: "",
+    visuals: [
+      { caption: "Mentés: Ctrl/Cmd+S" },
+      { caption: "Lean kereső: Ctrl/Cmd+K" },
+      { caption: "Szumma: Alt+Shift+End" },
+      { caption: "Alsó fülek: Alt+Shift+←/→" },
+      { caption: "Munkaterek: PageUp/PageDown" },
+      { caption: "PDCA forgatás: ↓" },
+    ],
     anchors: ["shortcuts"],
   },
   {
     id: "workspaces",
     title: "Munkaterek",
-    body: "Magán, vállalkozás és projekt külön könyvelési tér. A felső fülek ezeket cserélik.",
-    visuals: [{ icon: "workspace", caption: "A középső panelt a kiválasztott tér tölti." }],
+    body: "Fent a fülek: Magán, vállalkozás, projekt. Ami ki van választva, arra számol a középső rész.",
+    visuals: [
+      { caption: "Magán — saját kassza, nem a cégé." },
+      { caption: "Vállalkozás / projekt — a helyzet üzleti számai." },
+      { caption: "A + új teret nyit, a számokat nem keveri." },
+    ],
     anchors: ["workspaces"],
-    anchorLabels: { workspaces: "Terek" },
+    anchorLabels: { workspaces: "Fülek" },
   },
   {
     id: "security-close",
-    title: "Főmenü",
-    body: "A három vonal a főmenü. Mentés, GYIK és kilépés itt van.",
+    title: "Menü",
+    body: "Jobb fent. Innen mentesz, segítséget kérsz, vagy kilépsz a helyzetből.",
     visuals: [
-      { icon: "menu", caption: "Gyors mentés (.json) · GYIK · Másik eset." },
+      { caption: "Gyors mentés — a fájl a gépeden marad." },
+      { caption: "Tudásbázis / GYIK — ha elakadtál." },
+      { caption: "Másik eset — vissza a kapuhoz, ez bezárul." },
     ],
     anchors: ["app-menu"],
     anchorLabels: { "app-menu": "Menü" },

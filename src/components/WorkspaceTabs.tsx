@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import type { WorkspaceMeta } from "@/lib/finance";
 import { formatMoney } from "@/lib/finance";
 import { computeWorkspaceTint, type WorkspaceTint } from "@/lib/workspaceTint";
+import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 
 export type PdcaMode = "PD" | "DC" | "CA" | "AP";
 export type PdcaNewBucket = "DO" | "PLAN";
@@ -39,6 +40,8 @@ export function WorkspaceTabs({
   onOpenCreate?: () => void;
   className?: string;
 }) {
+  const { isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
+  const highlightPanels = tourOpen && (tourStepId === "demo" || tourStepId === "anatomy");
   const selectWs = (wsId: string) => {
     if (wsId === "__all") return setActiveWs("szumma");
     if (wsId === "personal") return setActiveWs("magan");
@@ -224,6 +227,8 @@ export function WorkspacePanels({
 }) {
   const [notesDraft, setNotesDraft] = useState(checkNotes ?? "");
   useEffect(() => setNotesDraft(checkNotes ?? ""), [checkNotes, activeWorkspaceId, pdcaMode]);
+  const { isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
+  const highlightPanels = tourOpen && (tourStepId === "demo" || tourStepId === "anatomy");
 
   const phaseLabel = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
     if (p === "PLAN") return "PLAN — TERVEZÉS & CÉLKITŰZÉSEK";
@@ -260,7 +265,9 @@ export function WorkspacePanels({
       <div
         data-tour-anchor="work-panels"
         data-view-mode={viewMode ?? "split"}
-        className={`w-full px-2 pt-1 sm:px-3 md:px-4 ${isFull ? "max-w-none" : "mx-auto max-w-[98%]"}`}
+        className={`w-full px-2 pt-1 sm:px-3 md:px-4 ${isFull ? "max-w-none" : "mx-auto max-w-[98%]"} ${
+          highlightPanels ? "rounded-xl ring-2 ring-cyan-300/70 shadow-[0_0_0_4px_rgba(34,211,238,0.16)]" : ""
+        }`}
       >
         <div
           className={`relative grid w-full grid-cols-1 items-start gap-2 md:gap-2.5 ${
@@ -300,7 +307,9 @@ export function WorkspacePanels({
   return (
     <div
       data-tour-anchor="work-panels"
-      className={`mx-auto w-full px-2 pt-4 sm:px-4 ${viewMode === "full" ? "max-w-none" : "max-w-[98%]"}`}
+      className={`mx-auto w-full px-2 pt-4 sm:px-4 ${viewMode === "full" ? "max-w-none" : "max-w-[98%]"} ${
+        highlightPanels ? "rounded-xl ring-2 ring-cyan-300/70 shadow-[0_0_0_4px_rgba(34,211,238,0.16)]" : ""
+      }`}
     >
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6">
         <div className="text-xs font-semibold uppercase tracking-wider">

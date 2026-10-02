@@ -18,6 +18,8 @@ import { VaultProvider } from "@/lib/vault";
 import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
 import { SupportEmbedProvider } from "@/components/support/SupportEmbedProvider";
 import { LeanCommandPalette } from "@/components/LeanCommandPalette";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -161,8 +163,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="hu" className="dark">
+    <html lang="hu" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -196,19 +199,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <VaultProvider>
-        <FeatureComingSoonProvider>
-          <SupportEmbedProvider>
-            <OnboardingTourProvider>
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-              <LeanCommandPalette />
-              <HoverCoachTooltip />
-              <Toaster richColors closeButton position="top-center" />
-            </OnboardingTourProvider>
-          </SupportEmbedProvider>
-        </FeatureComingSoonProvider>
-      </VaultProvider>
+      <ThemeProvider>
+        <VaultProvider>
+          <FeatureComingSoonProvider>
+            <SupportEmbedProvider>
+              <OnboardingTourProvider>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+                <LeanCommandPalette />
+                <HoverCoachTooltip />
+                <Toaster richColors closeButton position="top-center" />
+              </OnboardingTourProvider>
+            </SupportEmbedProvider>
+          </FeatureComingSoonProvider>
+        </VaultProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

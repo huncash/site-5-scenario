@@ -90,7 +90,7 @@ export function ProfileHeader({
   const visitorShell = Boolean(visitorDemo) || isDemoProfileName(unlocked?.profile.name);
   const highlightShortcuts = tourOpen && tourStepId === "welcome-shortcuts";
   const highlightViewToggle = tourOpen && tourStepId === "pdca";
-  const highlightMenu = tourOpen && tourStepId === "security-close";
+  const highlightMenu = tourOpen && (tourStepId === "security-close" || tourStepId === "demo");
 
   const settingsQ = useQuery({
     queryKey: ["settings"],
@@ -495,7 +495,15 @@ export function ProfileHeader({
             className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
           >
             {situationLead ? (
-              <div className="min-w-0 w-full rounded-xl border border-border/50 bg-card/30 px-2.5 py-1.5">
+              <div
+                data-tour-anchor="situation"
+                className={cn(
+                  "min-w-0 w-full rounded-xl border border-border/50 bg-card/30 px-2.5 py-1.5",
+                  tourOpen && (tourStepId === "demo" || tourStepId === "anatomy")
+                    ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60"
+                    : "",
+                )}
+              >
                 <p className="text-xs leading-snug text-slate-300">
                   <span className="font-semibold uppercase tracking-wider text-slate-200">
                     A helyzet:{" "}

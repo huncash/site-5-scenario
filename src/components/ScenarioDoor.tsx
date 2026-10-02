@@ -3,6 +3,8 @@ import { useNavigate, Link } from "@tanstack/react-router";
 import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { PaletteToggle } from "@/components/PaletteToggle";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
 import {
   enterDemoSegment,
@@ -112,25 +114,25 @@ export function ScenarioDoor() {
     () => [
       {
         title: "Projektalapú & interim kontrolling",
-        body: "Terv → tény → eltérés. Gyors zseb‑kontrolling és valóság‑sokk jelzés projektekhez.",
+        body: "Terv → Tény → Eltérés. Gyors zseb-kontrolling és korai figyelmeztetés projektekhez.",
         segmentId: "demo7_personal_pocket_seasonal_pilot" as const,
         infoHref: "/f/projekt-kontrolling/",
       },
       {
-        title: "Adósság‑helyreállítás",
-        body: "Runway + teher. Avalanche/Snowball fókusz és a következő 30–60 nap tisztázása.",
+        title: "Adósság-helyreállítás",
+        body: "Runway és likviditási teher. Avalanche / Snowball fókusz a következő 30–60 nap pénzügyi tisztázására.",
         segmentId: "demo7_personal_pocket_seasonal_pilot" as const,
         infoHref: "/f/adossag-helyreallitas/",
       },
       {
         title: "Lean Minőség & Költség",
-        body: "Fedezeti pont, sávok, veszteség-hőtérkép. Mikro‑szivárgások gyors jelzése üzemvezetőknek.",
+        body: "Fedezeti pont, költségsávok és veszteség-hőtérkép. Mikro-szivárgások azonnali szűrése.",
         segmentId: "demo4_fine_dining_bistro" as const,
         infoHref: "/f/minoseg-koltseg/",
       },
       {
-        title: "Multi‑Site / Hálózati vállalkozások",
-        body: "Egységek konszolidációja és drift jelzés. Lean/MUDA fókusz több telephelyen.",
+        title: "Multi-Site / Hálózati vállalkozások",
+        body: "Telephelyek konszolidációja, drift jelzés és egységes Lean/MUDA fókusz több egységre.",
         segmentId: "demo1_multisite_operator" as const,
         infoHref: "/f/multi-site/",
       },
@@ -181,15 +183,22 @@ export function ScenarioDoor() {
       data-exact-ignore
       className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background outline-none"
     >
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950">
+      <header className="sticky top-0 z-30 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-foreground">Szcenárió</div>
             <div className="text-[11px] text-muted-foreground">Local‑first · offline‑first</div>
           </div>
-          <Button asChild variant="outline" className="h-8 border-white/35 bg-transparent text-foreground">
-            <Link to="/login">Belépés</Link>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <PaletteToggle />
+            <ThemeToggle />
+            <Button
+              asChild
+              className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
+            >
+              <Link to="/login">Belépés</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -198,14 +207,16 @@ export function ScenarioDoor() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             szcenario.hu
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Szcenárió</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            Hibamegelőző vezetés- és döntéstámogatás kompromisszumok nélkül.
+          </h1>
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            A program egy helyzetet a te eszközödön számol: terv, tény, eltérés. Nincs regisztráció, nincs szerver-oldali adattárolás. Válaszd a saját fókuszodat: a Demó indítása a mintahelyzetet nyitja, a Több infó a csomagokat és a GYIK-et.
+            Teljes adatkontroll a saját gépeden: lokális számítás, nulla telemetria. Nézd meg a működés közben a mintaprojekteket, vagy válaszd ki a számodra releváns modult.
           </p>
           <div className="mx-auto flex max-w-2xl items-start justify-center gap-2 text-left text-[12px] text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
             <span>
-              Az adat a böngészőben marad. Mentés: export/import vagy közeli eszköz↔eszköz (QR). Nincs telemetria.
+              <span className="font-semibold text-foreground">100% Local-First biztonság:</span> Adataid a böngészőben maradnak. Biztonságos mentés fájl-exporttal vagy közvetlen eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla felhős kockázat.
             </span>
           </div>
         </div>
@@ -214,9 +225,11 @@ export function ScenarioDoor() {
           <div className="space-y-12">
             <section className="space-y-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Válassz ágazatot
+                Válassz döntési fókuszt
               </div>
-              <p className="max-w-3xl text-[12px] leading-relaxed text-muted-foreground">{DEMO_STARTER_BLURB}</p>
+              <p className="max-w-3xl text-[12px] leading-relaxed text-muted-foreground">
+                Interaktív előnézet előre betöltött, valós helyzeteken keresztül. Kattints a demóra a motor teszteléséhez, vagy nyisd meg a részleteket a csomagokért és a tudnivalókért.
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {branches.map((b) => (
                   <div key={b.infoHref} className="rounded-2xl border border-white/12 bg-card p-4">
@@ -232,7 +245,7 @@ export function ScenarioDoor() {
                         Demó indítása
                       </Button>
                       <Button asChild variant="outline" className="h-9 border-white/35 bg-transparent px-3 text-foreground">
-                        <a href={b.infoHref}>Több infó</a>
+                        <a href={b.infoHref}>Részletek & árak</a>
                       </Button>
                     </div>
                   </div>

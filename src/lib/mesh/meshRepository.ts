@@ -333,7 +333,7 @@ function defaultStore(): DataStore<MeshSchema> {
   return new LocalStorageDataStore<MeshSchema>({ namespace: "mesh-repo" });
 }
 
-function getRepository(): MeshRepository<MeshSchema> {
+export function getMeshRepository(): MeshRepository<MeshSchema> {
   if (_repo) return _repo;
   _repo = createMeshRepository(defaultStore());
   
@@ -347,7 +347,7 @@ function getRepository(): MeshRepository<MeshSchema> {
 }
 
 export function useMeshRepository(): MeshRepository<MeshSchema> {
-  return useMemo(() => getRepository(), []);
+  return useMemo(() => getMeshRepository(), []);
 }
 
 export function getMeshActiveProfileId(): string | null {

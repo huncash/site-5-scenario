@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { PaletteToggle } from "@/components/PaletteToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +18,7 @@ export function FunnelShell(props: {
     // NOTE: the app shell disables document scroll (html/body/#root overflow hidden),
     // so funnel pages must provide their own scroll container.
     <div className="door-page h-dvh overflow-x-hidden overflow-y-auto bg-background">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950">
+      <header className="sticky top-0 z-30 border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <Link to="/" className="block min-w-0 truncate text-sm font-semibold text-foreground">
@@ -26,7 +28,13 @@ export function FunnelShell(props: {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {rightSlot}
-            <Button asChild size="sm" variant="outline" className="h-8 border-white/35 bg-transparent text-foreground">
+            <PaletteToggle />
+            <ThemeToggle />
+            <Button
+              asChild
+              size="sm"
+              className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
+            >
               <Link to="/login">Belépés</Link>
             </Button>
           </div>
@@ -45,7 +53,7 @@ export function FunnelShell(props: {
         {children}
       </main>
 
-      <footer className="border-t border-white/10 bg-slate-950">
+      <footer className="border-t border-border bg-background">
         <div className="mx-auto w-full max-w-7xl px-4 py-6 text-xs text-muted-foreground">
           Nincs regisztráció, nincs telemetria — a működés a te eszközödön fut.
         </div>

@@ -19,7 +19,7 @@ import type { OnboardingStep, TourAnchorId, TourVisual } from "@/components/onbo
 import { useSupportEmbedOptional } from "@/components/support/SupportEmbedProvider";
 import { ONBOARDING_EMBED_SLUG } from "@/lib/support";
 
-const ICON: Record<TourVisual["icon"], typeof Menu> = {
+const ICON: Record<NonNullable<TourVisual["icon"]>, typeof Menu> = {
   layout: LayoutDashboard,
   panels: PanelsTopLeft,
   tabs: Rows3,
@@ -31,14 +31,19 @@ const ICON: Record<TourVisual["icon"], typeof Menu> = {
 };
 
 function measureAnchors(ids: TourAnchorId[]) {
+  const maxW = window.innerWidth * 0.94;
+  const maxH = window.innerHeight * 0.36;
   return ids
     .map((id) => {
       const el = document.querySelector(`[data-tour-anchor="${id}"]`);
       if (!el) return null;
-      const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) return null;
-      // Skip viewport-filling boxes — they hide the layout instead of pointing to it.
-      if (r.width > window.innerWidth * 0.92 || r.height > window.innerHeight * 0.45) return null;
+      const raw = el.getBoundingClientRect();
+      if (raw.width < 2 || raw.height < 2) return null;
+      const width = Math.min(raw.width, maxW);
+      const height = Math.min(raw.height, maxH);
+      const left = raw.left + Math.max(0, (raw.width - width) / 2);
+      const top = raw.top;
+      const r = new DOMRect(left, top, width, height);
       return { id, r };
     })
     .filter((x): x is { id: TourAnchorId; r: DOMRect } => Boolean(x));
@@ -80,7 +85,14 @@ export function OnboardingTour(props: {
 
   const cardAtTop = useMemo(() => {
     const ids = step?.anchors ?? [];
-    return ids.includes("bottom-tabs") && !ids.includes("header");
+    const highlightsTop =
+      ids.includes("header") ||
+      ids.includes("situation") ||
+      ids.includes("pdca-dial") ||
+      ids.includes("app-menu") ||
+      ids.includes("shortcuts") ||
+      ids.includes("view-toggle");
+    return ids.includes("bottom-tabs") && !highlightsTop;
   }, [step?.anchors]);
 
   useEffect(() => {
@@ -114,10 +126,6 @@ export function OnboardingTour(props: {
                 {label}
               </div>
             ) : null}
-            <div
-              className="absolute -right-1 top-1/2 h-0 w-0 -translate-y-1/2 border-y-[6px] border-l-[8px] border-y-transparent border-l-cyan-300/90"
-              aria-hidden="true"
-            />
           </div>
         );
       })}
@@ -147,16 +155,16 @@ export function OnboardingTour(props: {
           </button>
         </div>
 
-        <p className="mt-1 text-[13px] leading-snug text-slate-300">{step?.body ?? ""}</p>
+        {step?.body ? <p className="mt-1 text-[13px] leading-snug text-slate-300">{step.body}</p> : null}
 
         {step?.visuals?.length ? (
           <div className="mt-2 grid gap-1.5">
             {step.visuals.map((v) => {
-              const Ico = ICON[v.icon];
+              const Ico = v.icon ? ICON[v.icon] : null;
               return (
                 <div key={v.caption} className="flex items-start gap-2 text-[12px] text-slate-200">
-                  <Ico className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" />
-                  <span>{v.caption}</span>
+                  {Ico ? <Ico className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" /> : null}
+                  <span className={Ico ? undefined : "font-mono text-[11px] leading-snug"}>{v.caption}</span>
                 </div>
               );
             })}
