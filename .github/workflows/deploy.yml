@@ -45,7 +45,7 @@ jobs:
           test -f .output/public/_shell.html
           test -f scripts/static-origin.mjs
           echo "Built SHA ${{ github.sha }}"
-          find .output -maxdepth 3 -type f | head -n 40
+          find .output/public -maxdepth 2 -type f | sort
 
       - name: Package release
         run: |
