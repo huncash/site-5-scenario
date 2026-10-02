@@ -39,6 +39,14 @@ export const TIER_CORE: TierCore[] = [
 export const PRICING_HERO =
   "Válassza ki a vállalkozása méretéhez és céljaihoz illeszkedő konstrukciót. Minden csomag tiszta, lokális alapon működik, rejtett költségek és bonyolult szerverfüggőség nélkül.";
 
+export const PRICING_NET_NOTE =
+  "Áraink nettóban értendőek, és a megrendelő országa szerinti áfával együtt kerülnek kiállításra.";
+
+export const PRICING_VAT_FAQ = {
+  q: "Nettó vagy bruttó árak szerepelnek a csomagoknál?",
+  a: "Az árak nettó összegűek. A számlázás a megrendelő országának megfelelő áfával történik.",
+} as const;
+
 export const DEMO_STARTER_BLURB =
   "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheti a cash-flow fókuszokat és a likviditási mutatókat.";
 

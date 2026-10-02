@@ -10,5 +10,5 @@
     "types": ["node", "vite/client"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["./**/*.ts", "./**/*.tsx"]
+  "include": ["./**/*.ts", "./**/*.tsx", "../src/content/pricing/vat.ts"]
 }

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import QRCode from "qrcode";
 
@@ -6,8 +6,11 @@ import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { CountryVatPicker } from "@/components/home/CountryVatPicker";
+import { PriceBreakdown } from "@/components/home/PriceBreakdown";
 import type { TierCopy, TierCore, TierId } from "@/content/pricing/tiers";
-import { formatHuf, TIER_MONTHLY_HUF, YEARLY_DISCOUNT_PCT, yearlyPriceHuf } from "@/content/pricing/tiers";
+import { formatHuf, TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
+import { countryFromTaxId, resolveVat, SELLER_COUNTRY, splitVat } from "@/content/pricing/vat";
 import {
   chargeHuf,
   newToken,
@@ -26,6 +29,7 @@ export function FunnelCheckout(props: {
   const { eyebrow, funnelName, tier, copy } = props;
   const navigate = useNavigate();
   const [interval, setInterval] = useState<BillingInterval>("yearly");
+  const [country, setCountry] = useState(SELLER_COUNTRY);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -35,10 +39,17 @@ export function FunnelCheckout(props: {
   const [error, setError] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ url: string; email: string; qr: string; token: string } | null>(null);
 
+  useEffect(() => {
+    const raw = taxId.replace(/[\s./-]/g, "").toUpperCase();
+    if (!/^[A-Z]{2}/.test(raw)) return;
+    const inferred = countryFromTaxId(taxId);
+    if (inferred) setCountry(inferred);
+  }, [taxId]);
+
   const monthly = tier ? TIER_MONTHLY_HUF[tier.id] : 0;
-  const yearly = yearlyPriceHuf(monthly);
-  const due = tier ? chargeHuf(tier.id, interval) : 0;
-  const monthlyYearTotal = monthly * 12;
+  const vat = resolveVat({ country, taxId });
+  const dueNet = tier ? chargeHuf(tier.id, interval) : 0;
+  const due = splitVat(dueNet, vat.rate).gross;
 
   const goBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
@@ -145,6 +156,9 @@ export function FunnelCheckout(props: {
         <form className="grid gap-4" onSubmit={submit}>
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
             <legend className="px-1 text-sm font-semibold text-slate-100">Fizetési gyakoriság</legend>
+            <div className="mt-2">
+              <CountryVatPicker country={country} onChange={setCountry} />
+            </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <button
                 type="button"
@@ -155,8 +169,9 @@ export function FunnelCheckout(props: {
                 onClick={() => setInterval("yearly")}
               >
                 <div className="text-sm font-semibold text-slate-100">Évente (alapértelmezett)</div>
-                <div className="mt-1 text-[13px] text-slate-200">{formatHuf(yearly)} / év</div>
-                <div className="mt-0.5 text-[11px] text-cyan-200">−{YEARLY_DISCOUNT_PCT}% a havihoz képest ({formatHuf(monthlyYearTotal)})</div>
+                <div className="mt-2">
+                  <PriceBreakdown netMonthly={monthly} interval="yearly" vat={vat} compact />
+                </div>
               </button>
               <button
                 type="button"
@@ -167,12 +182,15 @@ export function FunnelCheckout(props: {
                 onClick={() => setInterval("monthly")}
               >
                 <div className="text-sm font-semibold text-slate-100">Havonta</div>
-                <div className="mt-1 text-[13px] text-slate-200">{formatHuf(monthly)} / hó</div>
-                <div className="mt-0.5 text-[11px] text-slate-400">12 hónap: {formatHuf(monthlyYearTotal)}</div>
+                <div className="mt-2">
+                  <PriceBreakdown netMonthly={monthly} interval="monthly" vat={vat} compact />
+                </div>
               </button>
             </div>
             <div className="mt-3 text-sm text-slate-200">
-              Fizetendő most: <span className="font-semibold text-slate-50">{formatHuf(due)}</span>
+              Fizetendő most: <span className="font-semibold text-slate-50">{formatHuf(due)} bruttó</span>
+              {" · "}
+              {formatHuf(dueNet)} nettó + {vat.labelHu}
               {interval === "yearly" ? " (egy év)" : " (első hónap)"}
             </div>
           </fieldset>

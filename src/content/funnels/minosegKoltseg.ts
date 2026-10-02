@@ -1,4 +1,4 @@
-import { buildTierOffers, DEMO_STARTER_BLURB, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -44,6 +44,7 @@ export const MINOSEG_KOLTSEG_FUNNEL = {
       q: "Hogyan tudom megosztani a képet a csapattal?",
       a: "Lokális mentés/export működik. Több eszközös használat esetén a titkosított mentés eszközök között vihető át.",
     },
+    PRICING_VAT_FAQ,
   ],
 } as const;
 

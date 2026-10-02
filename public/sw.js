@@ -39,7 +39,11 @@ function isBypass(url) {
   return (
     url.pathname === "/build-id.txt" ||
     url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/_serverFn")
+    url.pathname.startsWith("/_serverFn") ||
+    url.pathname.startsWith("/src/") ||
+    url.pathname.startsWith("/@") ||
+    url.pathname.startsWith("/node_modules/") ||
+    url.searchParams.has("tsr-split")
   );
 }
 

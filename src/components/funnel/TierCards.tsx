@@ -1,5 +1,5 @@
 import type { TierId, TierOffer } from "@/content/pricing/tiers";
-import { formatHuf, TIER_COMPARE_ROWS, TIER_MONTHLY_HUF, YEARLY_DISCOUNT_PCT, yearlyPriceHuf } from "@/content/pricing/tiers";
+import { formatHuf, PRICING_NET_NOTE, TIER_COMPARE_ROWS, TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { billCheckoutUrl } from "@/lib/billing";
@@ -14,6 +14,8 @@ export function TierCards(props: {
   const { offers, selected, ctaLabel = "Kiválasztom" } = props;
 
   return (
+    <div className="space-y-3">
+      <p className="text-[13px] italic leading-relaxed text-slate-300">„{PRICING_NET_NOTE}”</p>
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
@@ -43,11 +45,8 @@ export function TierCards(props: {
                     ) : null}
                   </div>
                   <div className="mt-1 text-[11px] font-normal leading-snug text-slate-300">{t.tagline}</div>
-                  <div className="mt-2 text-[13px] font-semibold text-slate-100">
+                  <div className="mt-2 text-[15px] font-semibold text-slate-100">
                     {formatHuf(yearlyPriceHuf(TIER_MONTHLY_HUF[t.id]))} / év
-                  </div>
-                  <div className="text-[11px] font-normal text-cyan-300">
-                    −{YEARLY_DISCOUNT_PCT}% · {formatHuf(TIER_MONTHLY_HUF[t.id])} / hó
                   </div>
                   <Button
                     asChild
@@ -102,6 +101,7 @@ export function TierCards(props: {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

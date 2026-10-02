@@ -6,10 +6,13 @@ import { fileURLToPath } from "node:url";
 import { createServer as createViteServer, type ViteDevServer } from "vite";
 
 import { barionConfigured, createBarionPayment } from "./barion.ts";
-import { chargeHuf, isBillInterval, isBillTier, tierLabel } from "./catalog.ts";
+import { isBillInterval, isBillTier, tierLabel, type BillInterval, type BillTier } from "./catalog.ts";
 import { billEnv } from "./env.ts";
+import { quotePackage } from "./quote.ts";
 import { createStripeCheckout, stripeConfigured } from "./stripe.ts";
-import { createOrder, getOrder, getOrderByLicenseToken, newTransferCode, updateOrder, type Buyer, type PayMethod } from "./store.ts";
+import { createOrder, getOrder, getOrderByLicenseToken, newTransferCode, updateOrder, type Buyer, type InvoiceLine, type Order, type PayMethod } from "./store.ts";
+import { grossFromLines, issueSzamlazzProforma } from "./szamlazz.ts";
+import { countryFromTaxId, SELLER_COUNTRY } from "./vat.ts";
 import { lookupCompany } from "./vies.ts";
 import { handleBillingWebhook } from "./webhooks.ts";
 
@@ -37,14 +40,112 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
   }
 }
 
+function inferTier(name: string): BillTier {
+  const n = name.toLowerCase();
+  if (n.includes("campus") || n.includes("hallgató")) return "campus";
+  if (n.includes("enterprise") || n.includes("nagyvállalat") || n.includes("nagyvallalat")) return "expert";
+  if (n.includes("alap")) return "starter";
+  return "pro";
+}
+
+function inferInterval(name: string): BillInterval {
+  return /hó|havi|month/i.test(name) ? "monthly" : "yearly";
+}
+
+function vatHint(order: Order): string {
+  if (order.vatTreatment === "reverse_charge") return "0% ÁFA · fordított adózás";
+  if (order.vatTreatment === "export") return "0% ÁFA · export";
+  if (order.vatRate != null) return `${order.vatRate}% ÁFA`;
+  if (order.vatCode) return `${order.vatCode} ÁFA`;
+  return "ÁFA";
+}
+
+function transferPayload(order: Order) {
+  return {
+    amountHuf: order.amountHuf,
+    netHuf: order.netHuf,
+    vatRate: order.vatRate,
+    vatCode: order.vatCode,
+    vatTreatment: order.vatTreatment,
+    vatLabel: vatHint(order),
+    buyerCountry: order.buyerCountry,
+    iban: billEnv.transferIban,
+    name: billEnv.transferName,
+    bank: billEnv.transferBank,
+    code: order.transferCode,
+    label: tierLabel(order.tier),
+    proformaNumber: order.proformaNumber,
+  };
+}
+
+function parseVatField(raw: unknown, fallback: number): number | string | { error: string } {
+  if (raw == null || raw === "") return fallback;
+  if (typeof raw === "string" && /[A-Za-z.]/.test(raw)) return raw.trim();
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return { error: "A tétel áfája hibás." };
+  return n;
+}
+
+async function attachProforma(order: Order): Promise<Order> {
+  if (order.proformaNumber) return order;
+  const issued = await issueSzamlazzProforma(order);
+  if (!issued.number) {
+    console.warn("[bill] dijbekero skip/fail", order.id, issued.error);
+    return order;
+  }
+  return (await updateOrder(order.id, { proformaNumber: issued.number })) ?? order;
+}
+
+function invoiceLinesFrom(raw: unknown): InvoiceLine[] | string {
+  if (!Array.isArray(raw) || raw.length === 0) return "Legalább egy tétel kell.";
+  const lines: InvoiceLine[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== "object") return "Hibás tétel.";
+    const item = row as Record<string, unknown>;
+    const name = String(item.name ?? "").trim();
+    const quantity = Number(item.quantity);
+    const netUnitPrice = Number(item.netUnitPrice);
+    const vat = parseVatField(item.vat, billEnv.szamlazzVat);
+    if (!name) return "A tétel megnevezése hiányzik.";
+    if (!Number.isFinite(quantity) || quantity <= 0) return "A tétel mennyisége hibás.";
+    if (!Number.isFinite(netUnitPrice) || netUnitPrice < 0) return "A tétel nettó ára hibás.";
+    if (typeof vat === "object") return vat.error;
+    lines.push({
+      name,
+      quantity,
+      unit: String(item.unit ?? "db").trim() || "db",
+      netUnitPrice,
+      vat,
+    });
+  }
+  return lines;
+}
+
+function buyerFromStructured(raw: unknown): Buyer | string {
+  if (!raw || typeof raw !== "object") return "A vevő adatai hiányoznak.";
+  const b = raw as Record<string, unknown>;
+  const name = String(b.name ?? "").trim();
+  const zip = String(b.zip ?? "").trim();
+  const city = String(b.city ?? "").trim();
+  const street = String(b.address ?? "").trim();
+  const email = String(b.email ?? "").trim();
+  const taxId = String(b.taxNumber ?? b.taxId ?? "").trim();
+  const country = String(b.country ?? "").trim() || countryFromTaxId(taxId) || undefined;
+  const address = [zip, city, street].filter(Boolean).join(" ") || street;
+  if (!name || !address || !email) return "Név, cím és e-mail kell.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Az e-mail formája hibás.";
+  return { name, address, zip, city, country, taxId, email };
+}
+
 function buyerFrom(body: Record<string, unknown>): Buyer | string {
   const name = String(body.name ?? "").trim();
   const address = String(body.address ?? "").trim();
   const email = String(body.email ?? "").trim();
   const taxId = String(body.taxId ?? "").trim();
+  const country = String(body.country ?? "").trim() || countryFromTaxId(taxId) || undefined;
   if (!name || !address || !email) return "Név, cím és e-mail kell.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Az e-mail formája hibás.";
-  return { name, address, email, taxId };
+  return { name, address, email, taxId, country };
 }
 
 async function handleApi(req: Request): Promise<Response> {
@@ -68,12 +169,76 @@ async function handleApi(req: Request): Promise<Response> {
         id: order.id,
         status: order.status,
         amountHuf: order.amountHuf,
+        netHuf: order.netHuf,
+        vatRate: order.vatRate,
+        vatCode: order.vatCode,
+        vatTreatment: order.vatTreatment,
+        buyerCountry: order.buyerCountry,
         tier: order.tier,
         interval: order.interval,
         payMethod: order.payMethod,
         transferCode: order.transferCode,
         invoiceNumber: order.invoiceNumber,
+        proformaNumber: order.proformaNumber,
       },
+    });
+  }
+
+  if (req.method === "POST" && p === "/api/billing/dijbekero") {
+    const body = await readJson(req);
+    const buyer = buyerFromStructured(body.buyer);
+    if (typeof buyer === "string") return Response.json({ ok: false, error: buyer }, { status: 400 });
+    const lines = invoiceLinesFrom(body.items);
+    if (typeof lines === "string") return Response.json({ ok: false, error: lines }, { status: 400 });
+    const amountHuf = grossFromLines(lines);
+    if (amountHuf <= 0) return Response.json({ ok: false, error: "A tételösszeg nulla." }, { status: 400 });
+
+    const requestedId = String(body.orderId ?? "").trim();
+    let order = requestedId ? await getOrder(requestedId) : null;
+    if (order) {
+      if (order.status === "paid" || order.status === "invoiced") {
+        return Response.json({
+          ok: true,
+          orderId: order.id,
+          proformaNumber: order.proformaNumber,
+          invoiceNumber: order.invoiceNumber,
+          status: order.status,
+          transfer: transferPayload(order),
+        });
+      }
+      if (!order.proformaNumber) {
+        order =
+          (await updateOrder(order.id, { buyer, lines, amountHuf, payMethod: "hu_transfer" })) ?? order;
+      }
+    } else {
+      const firstName = lines[0]?.name ?? "";
+      try {
+        order = await createOrder({
+          id: requestedId || undefined,
+          status: "awaiting_transfer",
+          tier: inferTier(firstName),
+          interval: inferInterval(firstName),
+          amountHuf,
+          payMethod: "hu_transfer",
+          transferCode: requestedId && requestedId.startsWith("SZC-") ? requestedId : newTransferCode(),
+          buyer,
+          lines,
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "A rendelést nem sikerült rögzíteni.";
+        return Response.json({ ok: false, error: msg }, { status: 409 });
+      }
+    }
+
+    const before = order.proformaNumber;
+    order = await attachProforma(order);
+    return Response.json({
+      ok: true,
+      orderId: order.id,
+      proformaNumber: order.proformaNumber,
+      issued: Boolean(order.proformaNumber && order.proformaNumber !== before),
+      transfer: transferPayload(order),
+      warning: order.proformaNumber ? undefined : "A díjbekérő Agent-hívás nem sikerült; a rendelés megvan, az átutalás ettől függetlenül elindítható.",
     });
   }
 
@@ -91,32 +256,45 @@ async function handleApi(req: Request): Promise<Response> {
     const buyer = buyerFrom(body);
     if (typeof buyer === "string") return Response.json({ ok: false, error: buyer }, { status: 400 });
 
-    const amountHuf = chargeHuf(tier, interval);
+    const quote = quotePackage(tier, interval, { country: buyer.country, taxId: buyer.taxId });
+    buyer.country = quote.vat.country;
+    const amountHuf = quote.due.gross;
+    const intervalLabel = interval === "yearly" ? "1 év" : "1 hó";
+    const lines: InvoiceLine[] = [
+      {
+        name: `Szcenárió — ${tierLabel(tier)} (${intervalLabel})`,
+        quantity: 1,
+        unit: "db",
+        netUnitPrice: quote.dueNet,
+        vat: quote.vat.vatCode,
+      },
+    ];
     const payMethod = pay as PayMethod;
-    const order = await createOrder({
+    let order = await createOrder({
       status: payMethod === "hu_transfer" ? "awaiting_transfer" : "pending",
       tier,
       interval,
       ref: typeof body.ref === "string" ? body.ref : undefined,
       amountHuf,
+      netHuf: quote.dueNet,
+      vatRate: quote.vat.rate,
+      vatCode: quote.vat.vatCode,
+      vatTreatment: quote.vat.treatment,
+      buyerCountry: quote.vat.country,
       payMethod,
       transferCode: payMethod === "hu_transfer" ? newTransferCode() : undefined,
       buyer,
+      lines,
     });
 
     if (payMethod === "hu_transfer") {
+      order = await attachProforma(order);
       return Response.json({
         ok: true,
         orderId: order.id,
         method: "hu_transfer",
-        transfer: {
-          amountHuf: order.amountHuf,
-          iban: billEnv.transferIban,
-          name: billEnv.transferName,
-          bank: billEnv.transferBank,
-          code: order.transferCode,
-          label: tierLabel(tier),
-        },
+        proformaNumber: order.proformaNumber,
+        transfer: transferPayload(order),
       });
     }
 
@@ -150,6 +328,31 @@ async function handleApi(req: Request): Promise<Response> {
       tier: order.tier,
       interval: order.interval,
       status: order.status,
+    });
+  }
+
+  if (req.method === "GET" && p === "/api/billing/quote") {
+    const tier = url.searchParams.get("tier");
+    const interval = url.searchParams.get("interval") === "monthly" ? "monthly" : "yearly";
+    const country = url.searchParams.get("country") || SELLER_COUNTRY;
+    const taxId = url.searchParams.get("taxId") ?? "";
+    if (!isBillTier(tier)) return Response.json({ ok: false, error: "Ismeretlen csomag." }, { status: 400 });
+    const q = quotePackage(tier, interval, { country, taxId });
+    return Response.json({
+      ok: true,
+      country: q.vat.country,
+      rate: q.vat.rate,
+      vatCode: q.vat.vatCode,
+      treatment: q.vat.treatment,
+      labelHu: q.vat.labelHu,
+      labelEn: q.vat.labelEn,
+      net: q.due.net,
+      vat: q.due.vat,
+      gross: q.due.gross,
+      yearly: q.yearly,
+      monthly: q.monthly,
+      monthly12: q.monthly12,
+      saveNet: q.saveNet,
     });
   }
 

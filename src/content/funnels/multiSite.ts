@@ -1,4 +1,4 @@
-import { buildTierOffers, DEMO_STARTER_BLURB, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -48,6 +48,7 @@ export const MULTISITE_FUNNEL = {
       q: "Csapatban több eszközön is használható?",
       a: "Igen: több eszköz összeköthető, így a titkosított mentés eszközök között vihető át.",
     },
+    PRICING_VAT_FAQ,
   ],
 } as const;
 

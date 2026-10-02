@@ -72,6 +72,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.reload();
+                return;
+              }
               router.invalidate();
               reset();
             }}
@@ -81,6 +85,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <a
             href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (typeof window !== "undefined") window.location.assign("/");
+            }}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home

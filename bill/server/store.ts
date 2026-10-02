@@ -10,8 +10,19 @@ export type OrderStatus = "pending" | "awaiting_transfer" | "paid" | "invoiced" 
 export type Buyer = {
   name: string;
   address: string;
+  zip?: string;
+  city?: string;
+  country?: string;
   taxId: string;
   email: string;
+};
+
+export type InvoiceLine = {
+  name: string;
+  quantity: number;
+  unit: string;
+  netUnitPrice: number;
+  vat: number | string;
 };
 
 export type Order = {
@@ -22,11 +33,18 @@ export type Order = {
   interval: BillInterval;
   ref?: string;
   amountHuf: number;
+  netHuf?: number;
+  vatRate?: number;
+  vatCode?: string;
+  vatTreatment?: string;
+  buyerCountry?: string;
   payMethod: PayMethod;
   transferCode?: string;
   buyer: Buyer;
   providerRef?: string;
   invoiceNumber?: string;
+  proformaNumber?: string;
+  lines?: InvoiceLine[];
 };
 
 const dir = fileURLToPath(new URL("../data", import.meta.url));
@@ -51,11 +69,15 @@ async function save(orders: Order[]): Promise<void> {
   await writeFile(file, JSON.stringify(orders, null, 2), "utf8");
 }
 
-export async function createOrder(input: Omit<Order, "id" | "createdAt">): Promise<Order> {
+export async function createOrder(input: Omit<Order, "id" | "createdAt"> & { id?: string }): Promise<Order> {
   const orders = await load();
+  const id = input.id?.trim() || crypto.randomUUID();
+  if (orders.some((o) => o.id === id)) {
+    throw new Error(`Már létező rendelés: ${id}`);
+  }
   const order: Order = {
     ...input,
-    id: crypto.randomUUID(),
+    id,
     createdAt: new Date().toISOString(),
   };
   orders.push(order);
