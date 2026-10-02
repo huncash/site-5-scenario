@@ -1,15 +1,18 @@
 import { useState } from "react";
 
 import { PricingCompareTable } from "@/components/home/PricingCompareTable";
+import { PRICING_ALIGN_GRID } from "@/components/home/pricingLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 import {
   formatHuf,
+  PRICING_CUMULATIVE_NOTE,
   PRICING_HERO,
   PRICING_NET_NOTE,
   PRICING_VAT_FAQ,
   TIER_AUDIENCE,
+  TIER_CARD_HIGHLIGHTS,
   TIER_CORE,
   TIER_MONTHLY_HUF,
   TIER_SLOGAN,
@@ -67,7 +70,8 @@ export function HomePricing(props: { campus?: boolean }) {
 
       {campus ? <CampusStrip interval={interval} /> : null}
 
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className={PRICING_ALIGN_GRID}>
+        <div className="hidden lg:block" aria-hidden />
         {TIER_CORE.map((p) => {
           const href = billCheckoutUrl({ tier: p.id, interval });
           const recommended = p.badge === "Ajánlott";
@@ -75,7 +79,7 @@ export function HomePricing(props: { campus?: boolean }) {
             <article
               key={p.id}
               className={cn(
-                "flex flex-col rounded-2xl border p-4",
+                "flex h-full min-w-0 flex-col rounded-2xl border p-4",
                 recommended ? "border-amber-300/50 bg-card" : "border-white/12 bg-card",
               )}
             >
@@ -85,12 +89,23 @@ export function HomePricing(props: { campus?: boolean }) {
               </div>
               <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{TIER_SLOGAN[p.id]}</p>
               <p className="mt-2 text-[12px] leading-snug text-muted-foreground">{TIER_AUDIENCE[p.id]}</p>
-              <div className="mt-3 text-lg font-semibold text-foreground">
+              <ul className="mt-3 space-y-1.5 text-[12px] leading-snug text-foreground">
+                {TIER_CARD_HIGHLIGHTS[p.id].map((line) => (
+                  <li key={line} className="flex gap-2">
+                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-foreground/70" aria-hidden />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto pt-4 text-lg font-semibold text-foreground">
                 {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval))} {per}
               </div>
               <Button
                 asChild
-                className={cn("mt-4 h-9", recommended ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400" : "border-white/35 bg-transparent text-foreground")}
+                className={cn(
+                  "mt-3 h-9",
+                  recommended ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400" : "border-white/35 bg-transparent text-foreground",
+                )}
                 variant={recommended ? "default" : "outline"}
               >
                 <a href={href}>Megrendelem</a>
@@ -99,6 +114,8 @@ export function HomePricing(props: { campus?: boolean }) {
           );
         })}
       </div>
+
+      <p className="text-[12px] leading-relaxed text-muted-foreground">{PRICING_CUMULATIVE_NOTE}</p>
 
       <PricingCompareTable />
 

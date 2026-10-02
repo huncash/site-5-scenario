@@ -62,6 +62,34 @@ export const TIER_AUDIENCE: Record<TierId, string> = {
   expert: "Több telephelyes, hálózati struktúrájú cégeknek vagy interim szakértőknek, akik komplex portfóliót kezelnek.",
 };
 
+/** Kártyán a funkció-bemutatás; a magasabb csomag első sora a kumulatív öröklés. */
+export const TIER_CARD_HIGHLIGHTS: Record<TierId, string[]> = {
+  starter: [
+    "Alapvető cash-flow áttekintés",
+    "Bank- és Excel-import",
+    "Titkosított lokális mentés",
+    "Alap tartozásnyilvántartás",
+    "1 felhasználó",
+  ],
+  pro: [
+    "Minden az Alapcsomagból",
+    "Részletes havi/éves cash-flow",
+    "Runway és likviditási kalkulátor",
+    "Lean / MUDA jelzések",
+    "1 felhasználó, több eszközön",
+  ],
+  expert: [
+    "Minden a Pro-ból",
+    "Korlátlan multi-forgatókönyv",
+    "Avalanche / Snowball stratégia",
+    "Folyamat-optimalizálási audit",
+    "Többfelhasználós jogosultságok",
+  ],
+};
+
+export const PRICING_CUMULATIVE_NOTE =
+  "A magasabb csomag tartalmazza az összes alsóbb csomag funkcióját. A táblázatban a bővített korlát vagy az extra modul szerepel; a pipa az öröklött funkciót jelöli.";
+
 export const TIER_COMPARE_ROWS: Array<{
   feature: string;
   starter: string;
@@ -69,34 +97,40 @@ export const TIER_COMPARE_ROWS: Array<{
   expert: string;
 }> = [
   {
+    feature: "Alsóbb csomagok funkciói",
+    starter: "–",
+    pro: "✓ Alapcsomag",
+    expert: "✓ Alapcsomag + Pro",
+  },
+  {
     feature: "Átfogó cash-flow modul",
     starter: "Alapvető áttekintés",
-    pro: "Részletes havi/éves cash-flow",
+    pro: "Részletes havi/éves",
     expert: "Korlátlan multi-forgatókönyv",
   },
   {
     feature: "Adatimport (Bank & Excel)",
     starter: "✓",
-    pro: "Gyors tömeges import",
-    expert: "Prioritásos, automatizált import",
+    pro: "✓ Tömeges import",
+    expert: "✓ Prioritásos, automatizált",
   },
   {
     feature: "Adatszuverenitás & Biztonság",
     starter: "Titkosított lokális mentés",
-    pro: "Titkosított lokális mentés",
-    expert: "Titkosított lokális mentés + felhős szinkron",
+    pro: "✓",
+    expert: "✓ + felhős szinkron",
   },
   {
     feature: "Kötelezettség- és tartozáskezelés",
     starter: "Alap nyilvántartás",
     pro: "Előre betöltött modulok & ütemezés",
-    expert: "Fejlett Avalanche / Snowball stratégia",
+    expert: "Fejlett Avalanche / Snowball",
   },
   {
     feature: "Runway és likviditási horizont",
     starter: "–",
     pro: "Közeljövő teher fókusz & kalkulátor",
-    expert: "Teljes körű stresszteszt & runway predikció",
+    expert: "Teljes körű stresszteszt & predikció",
   },
   {
     feature: "Lean / MUDA pazarlásszűrés",
@@ -107,10 +141,14 @@ export const TIER_COMPARE_ROWS: Array<{
   {
     feature: "Felhasználói hozzáférések",
     starter: "1 felhasználó",
-    pro: "1 felhasználó (több eszközön)",
+    pro: "1 felhasználó, több eszközön",
     expert: "Többfelhasználós, csoportos jogosultságok",
   },
 ];
+
+export function isCompareAbsent(value: string): boolean {
+  return value === "–" || value === "-" || value === "—" || value === "";
+}
 
 /** Placeholder listaárak (Ft / hó). A fizetési szolgáltató nincs bekötve. */
 export const TIER_MONTHLY_HUF: Record<TierId, number> = {
