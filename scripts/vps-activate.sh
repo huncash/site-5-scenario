@@ -12,6 +12,8 @@ fi
 RELEASE_DIR="$APP_DIR/releases/$SHA"
 ENVF="$APP_DIR/shared/.env.production"
 LOG_DIR="/var/log/$SITE_SLUG"
+PORT_N=4100
+ME="$(id -u)"
 
 need() {
   if [ ! -e "$1" ]; then
@@ -22,9 +24,17 @@ need() {
   echo "ok $1"
 }
 
+ss_4100() {
+  ss -tlnH 2>/dev/null | awk '{print $4}' | grep -E ":${PORT_N}$" || true
+}
+
 dump_logs() {
   echo "==== listen ===="
-  sudo ss -tulpn 2>/dev/null | grep 4100 || ss -tulpn 2>/dev/null | grep 4100 || true
+  ss -tulpn 2>/dev/null | grep -E ":${PORT_N}([^0-9]|$)" || true
+  echo "==== fuser ===="
+  fuser -v "${PORT_N}/tcp" 2>&1 || true
+  echo "==== curl :${PORT_N} ===="
+  curl -sS -D- --max-time 2 "http://127.0.0.1:${PORT_N}/" | head -n 20 || true
   echo "==== pm2 list ===="
   pm2 list || true
   echo "==== $SITE_SLUG logs ===="
@@ -33,12 +43,22 @@ dump_logs() {
     "$LOG_DIR/out.log" "$LOG_DIR/out-0.log" 2>/dev/null || true
 }
 
-port_holders() {
-  ss -tlnp 2>/dev/null | grep -E ":${PORT}([^0-9]|$)" || true
-}
-
-port_free() {
-  ! ss -tlnH 2>/dev/null | awk '{print $4}' | grep -Eq ":${PORT}$"
+kill_own_4100() {
+  fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
+  fi
+  local pid cmdline cwd
+  for pid in $(pgrep -u "$ME" -x node || true); do
+    cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+    cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
+    case "$cmdline $cwd" in
+      *static-origin.mjs*|*"/var/www/szcenario"*)
+        echo ">> kill node $pid"
+        kill -9 "$pid" >/dev/null 2>&1 || true
+        ;;
+    esac
+  done
 }
 
 echo ">> activate $SHA"
@@ -51,29 +71,29 @@ grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
-echo ">> pm2 delete + free 4100"
+echo ">> pm2 delete + free $PORT_N"
 pm2 delete site-5 >/dev/null 2>&1 || true
 pm2 delete szcenario >/dev/null 2>&1 || true
-sudo fuser -k 4100/tcp || sudo lsof -t -i:4100 | xargs -r sudo kill -9 || true
+kill_own_4100
 sleep 2
-ss4100="$(sudo ss -tulpn | grep 4100 || true)"
-if [ -n "$ss4100" ]; then
-  echo "port 4100 still busy after fuser"
-  echo "$ss4100"
+kill_own_4100
+sleep 1
+busy="$(ss_4100)"
+if [ -n "$busy" ]; then
+  echo "port $PORT_N still busy (deploy user, no sudo)"
+  echo "$busy"
+  echo "ha mas uid tartja: rooton  fuser -kv ${PORT_N}/tcp"
   dump_logs
   exit 1
 fi
-echo ">> port 4100 free"
+echo ">> port $PORT_N free"
 
 echo ">> ensure $ENVF"
-sudo mkdir -p "$APP_DIR/shared" "$LOG_DIR" || mkdir -p "$APP_DIR/shared" "$LOG_DIR"
-sudo chown deploy:deploy "$APP_DIR/shared" "$LOG_DIR" 2>/dev/null || true
+mkdir -p "$APP_DIR/shared" "$LOG_DIR"
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
-  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' | sudo tee "$ENVF" >/dev/null \
-    || printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
-  sudo chmod 600 "$ENVF" || chmod 600 "$ENVF" || true
-  sudo chown deploy:deploy "$ENVF" || true
+  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
+  chmod 600 "$ENVF" || true
 fi
 echo ">> ls shared"
 ls -la "$APP_DIR/shared/"
