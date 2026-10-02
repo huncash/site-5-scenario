@@ -86,8 +86,18 @@ function safeJoin(urlPath) {
   const decoded = decodeURIComponent(urlPath.split("?")[0]);
   const rel = decoded.replace(/^\/+/, "");
   const abs = path.resolve(ROOT, rel);
-  if (!abs.startsWith(ROOT)) return null;
+  const relToRoot = path.relative(ROOT, abs);
+  if (relToRoot.startsWith("..") || path.isAbsolute(relToRoot)) return null;
   return abs;
+}
+
+async function readBuildId() {
+  const direct = path.join(ROOT, "build-id.txt");
+  if (existsSync(direct)) return readFile(direct);
+  if (process.env.BUILD_SHA) return Buffer.from(`${process.env.BUILD_SHA}\n`);
+  const shaFile = path.join(RELEASE_ROOT, "BUILD_SHA");
+  if (existsSync(shaFile)) return readFile(shaFile);
+  return null;
 }
 
 async function fileIfExists(filePath) {
@@ -128,6 +138,29 @@ async function shellFile() {
 const server = createServer(async (req, res) => {
   try {
     const urlPath = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`).pathname;
+    if (urlPath === "/healthz") {
+      res.writeHead(200, {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+      });
+      res.end(`ok ${HOST}:${PORT} ${ROOT}\n`);
+      return;
+    }
+    if (urlPath === "/build-id.txt") {
+      const body = await readBuildId();
+      if (!body) {
+        console.error("[static-origin] 404 /build-id.txt", { root: ROOT, cwd: process.cwd() });
+        res.writeHead(404, { "cache-control": "no-store" });
+        res.end("Not found");
+        return;
+      }
+      res.writeHead(200, {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+      });
+      res.end(body);
+      return;
+    }
     let file = await resolveFile(urlPath);
     let status = 200;
     if (!file) {
@@ -136,6 +169,7 @@ const server = createServer(async (req, res) => {
         file = await shellFile();
       }
       if (!file) {
+        console.error("[static-origin] 404", urlPath, ROOT);
         res.writeHead(404, { "cache-control": "no-store" });
         res.end("Not found");
         return;
@@ -169,4 +203,5 @@ server.on("error", (error) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[static-origin] ${HOST}:${PORT} → ${ROOT}`);
+  console.log(`[static-origin] build-id.txt=${existsSync(path.join(ROOT, "build-id.txt"))}`);
 });

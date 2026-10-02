@@ -11,6 +11,7 @@ fi
 
 RELEASE_DIR="$APP_DIR/releases/$SHA"
 ENVF="$APP_DIR/shared/.env.production"
+LOG_DIR="/var/log/$SITE_SLUG"
 
 need() {
   if [ ! -e "$1" ]; then
@@ -19,6 +20,25 @@ need() {
     exit 1
   fi
   echo "ok $1"
+}
+
+dump_logs() {
+  echo "==== listen ===="
+  ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+  echo "==== pm2 list ===="
+  pm2 list || true
+  echo "==== $SITE_SLUG logs ===="
+  tail -n 80 \
+    "$LOG_DIR/err.log" "$LOG_DIR/err-0.log" \
+    "$LOG_DIR/out.log" "$LOG_DIR/out-0.log" 2>/dev/null || true
+}
+
+port_holders() {
+  ss -tlnp 2>/dev/null | grep -E ":${PORT}([^0-9]|$)" || true
+}
+
+port_free() {
+  ! ss -tlnH 2>/dev/null | awk '{print $4}' | grep -Eq ":${PORT}$"
 }
 
 echo ">> activate $SHA"
@@ -31,7 +51,7 @@ grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
-mkdir -p "$APP_DIR/shared" /var/log/"$SITE_SLUG"
+mkdir -p "$APP_DIR/shared" "$LOG_DIR"
 
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
@@ -40,19 +60,6 @@ if [ ! -f "$ENVF" ]; then
 fi
 need "$ENVF"
 
-ln -sfn "$ENVF" "$RELEASE_DIR/.env"
-ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
-echo "current=$(readlink -f "$APP_DIR/current")"
-
-echo ">> pm2 delete"
-pm2 delete site-5 >/dev/null 2>&1 || true
-pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-sleep 1
-if command -v fuser >/dev/null 2>&1; then
-  fuser -k 4100/tcp >/dev/null 2>&1 || true
-fi
-
-echo ">> source env"
 set -a
 # shellcheck disable=SC1091
 . "$ENVF"
@@ -61,34 +68,110 @@ export NODE_ENV="${NODE_ENV:-production}"
 export HOST="${HOST:-127.0.0.1}"
 export PORT="${PORT:-4100}"
 export STATIC_ROOT="$RELEASE_DIR/.output/public"
+export BUILD_SHA="$SHA"
 export RELEASE_DIR
 export SITE_SLUG
+
+ln -sfn "$ENVF" "$RELEASE_DIR/.env"
+ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
+echo "current=$(readlink -f "$APP_DIR/current")"
+
+echo ">> pm2 delete"
+pm2 delete site-5 >/dev/null 2>&1 || true
+pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
+for _ in 1 2 3 4 5 6 7 8; do
+  if ! pm2 describe "$SITE_SLUG" >/dev/null 2>&1; then
+    break
+  fi
+  pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
+  sleep 1
+done
+
+kill_matching() {
+  local pat="$1"
+  local pid
+  for pid in $(pgrep -f "$pat" || true); do
+    if [ "$pid" = "$$" ] || [ "$pid" = "$PPID" ]; then
+      continue
+    fi
+    kill -9 "$pid" >/dev/null 2>&1 || true
+  done
+}
+
+echo ">> free port $PORT"
+kill_matching "scripts/static-origin.mjs"
+kill_matching ".output/server/index.mjs"
+if command -v fuser >/dev/null 2>&1; then
+  fuser -k "$PORT/tcp" >/dev/null 2>&1 || true
+fi
+if command -v lsof >/dev/null 2>&1; then
+  lsof -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
+fi
+
+busy=1
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if port_free; then
+    echo ">> port $PORT free"
+    busy=0
+    break
+  fi
+  echo ">> port $PORT busy ($i)"
+  port_holders
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -k "$PORT/tcp" >/dev/null 2>&1 || true
+  fi
+  sleep 1
+done
+if [ "$busy" -ne 0 ]; then
+  echo "port $PORT not free"
+  dump_logs
+  exit 1
+fi
 
 echo ">> pm2 start PORT=$PORT HOST=$HOST STATIC_ROOT=$STATIC_ROOT"
 pm2 start "$RELEASE_DIR/ecosystem.config.cjs" --update-env
 pm2 save
-sleep 3
+
+echo ">> wait health"
+health_ok=0
+for i in $(seq 1 20); do
+  if curl -fsS --max-time 2 "http://127.0.0.1:${PORT}/healthz" | tee /tmp/healthz.txt; then
+    health_ok=1
+    break
+  fi
+  echo "healthz try $i"
+  sleep 1
+done
+if [ "$health_ok" -ne 1 ]; then
+  echo "healthz failed"
+  dump_logs
+  exit 1
+fi
 
 echo ">> pm2 describe"
 pm2 describe "$SITE_SLUG" | tee /tmp/pm2-szcenario.txt
 if ! grep -q "online" /tmp/pm2-szcenario.txt; then
-  echo "==== $SITE_SLUG err.log ===="
-  tail -n 80 "/var/log/$SITE_SLUG/err.log" || true
-  echo "==== $SITE_SLUG out.log ===="
-  tail -n 80 "/var/log/$SITE_SLUG/out.log" || true
+  dump_logs
   exit 1
 fi
 pm2 describe "$SITE_SLUG" | grep -E "exec cwd|script path" | tee /tmp/pm2-cwd.txt
 if ! grep -qE "$RELEASE_DIR|$APP_DIR/current" /tmp/pm2-cwd.txt; then
   echo "pm2 cwd mismatch"
   cat /tmp/pm2-cwd.txt
+  dump_logs
   exit 1
 fi
 
 echo ">> curl health"
-curl -fsS --max-time 8 "http://127.0.0.1:4100/build-id.txt" | tee /tmp/build-id.txt
+if ! curl -fsS --max-time 8 "http://127.0.0.1:${PORT}/build-id.txt" | tee /tmp/build-id.txt; then
+  dump_logs
+  exit 1
+fi
 grep -qx "$SHA" /tmp/build-id.txt
-curl -fsS --max-time 8 "http://127.0.0.1:4100/version.json" | tee /tmp/version.json
+if ! curl -fsS --max-time 8 "http://127.0.0.1:${PORT}/version.json" | tee /tmp/version.json; then
+  dump_logs
+  exit 1
+fi
 grep -q "$SHA" /tmp/version.json
 
 echo ">> prune old releases"
