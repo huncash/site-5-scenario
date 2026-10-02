@@ -24,7 +24,7 @@ need() {
 
 dump_logs() {
   echo "==== listen ===="
-  ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+  sudo ss -tulpn 2>/dev/null | grep 4100 || ss -tulpn 2>/dev/null | grep 4100 || true
   echo "==== pm2 list ===="
   pm2 list || true
   echo "==== $SITE_SLUG logs ===="
@@ -51,13 +51,32 @@ grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
-mkdir -p "$APP_DIR/shared" "$LOG_DIR"
+echo ">> pm2 delete + free 4100"
+pm2 delete site-5 >/dev/null 2>&1 || true
+pm2 delete szcenario >/dev/null 2>&1 || true
+sudo fuser -k 4100/tcp || sudo lsof -t -i:4100 | xargs -r sudo kill -9 || true
+sleep 2
+ss4100="$(sudo ss -tulpn | grep 4100 || true)"
+if [ -n "$ss4100" ]; then
+  echo "port 4100 still busy after fuser"
+  echo "$ss4100"
+  dump_logs
+  exit 1
+fi
+echo ">> port 4100 free"
 
+echo ">> ensure $ENVF"
+sudo mkdir -p "$APP_DIR/shared" "$LOG_DIR" || mkdir -p "$APP_DIR/shared" "$LOG_DIR"
+sudo chown deploy:deploy "$APP_DIR/shared" "$LOG_DIR" 2>/dev/null || true
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
-  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
-  chmod 600 "$ENVF" || true
+  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' | sudo tee "$ENVF" >/dev/null \
+    || printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
+  sudo chmod 600 "$ENVF" || chmod 600 "$ENVF" || true
+  sudo chown deploy:deploy "$ENVF" || true
 fi
+echo ">> ls shared"
+ls -la "$APP_DIR/shared/"
 need "$ENVF"
 
 set -a
@@ -75,19 +94,6 @@ export SITE_SLUG
 ln -sfn "$ENVF" "$RELEASE_DIR/.env"
 ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
 echo "current=$(readlink -f "$APP_DIR/current")"
-
-echo ">> pm2 delete + free 4100"
-pm2 delete site-5 >/dev/null 2>&1 || true
-pm2 delete szcenario >/dev/null 2>&1 || true
-fuser -k 4100/tcp >/dev/null 2>&1 || true
-sleep 2
-if ! port_free; then
-  echo "port $PORT still busy after fuser"
-  port_holders
-  dump_logs
-  exit 1
-fi
-echo ">> port $PORT free"
 
 echo ">> pm2 start PORT=$PORT HOST=$HOST STATIC_ROOT=$STATIC_ROOT"
 pm2 start "$RELEASE_DIR/ecosystem.config.cjs" --update-env
