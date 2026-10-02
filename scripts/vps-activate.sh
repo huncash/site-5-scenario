@@ -89,26 +89,28 @@ delete_pm2_5100() {
 
 point_nginx_5100() {
   echo ">> nginx proxy_pass 4100 → 5100"
-  if ! sudo -n true >/dev/null 2>&1; then
-    echo "sudo nincs — a publikus nginx marad 4100-on, szcenario.hu a regi origint mutatja"
-    return 1
-  fi
   local f patched=0
-  while IFS= read -r f; do
-    [ -n "$f" ] || continue
-    echo ">> patch $f"
-    sudo sed -i 's/127\.0\.0\.1:4100/127.0.0.1:5100/g' "$f"
-    patched=1
-  done < <(sudo grep -rl '127.0.0.1:4100' /etc/nginx 2>/dev/null || true)
-  if [ "$patched" -eq 0 ]; then
-    echo ">> nginx: nincs 4100 proxy_pass"
-    sudo grep -n 'proxy_pass' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* 2>/dev/null || true
+  if sudo -n grep -rl '127.0.0.1:4100' /etc/nginx >/tmp/nginx-4100.txt 2>/dev/null; then
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      echo ">> patch $f"
+      sudo -n sed -i 's/127\.0\.0\.1:4100/127.0.0.1:5100/g' "$f"
+      patched=1
+    done < /tmp/nginx-4100.txt
+  fi
+  if [ "$patched" -eq 1 ]; then
+    sudo -n nginx -t
+    sudo -n systemctl reload nginx
+    echo ">> nginx reloaded"
+    sudo -n grep -n 'proxy_pass' /etc/nginx/sites-enabled/* 2>/dev/null || true
     return 0
   fi
-  sudo nginx -t
-  sudo systemctl reload nginx
-  echo ">> nginx reloaded"
-  sudo grep -n 'proxy_pass' /etc/nginx/sites-enabled/* 2>/dev/null || true
+  echo ">> nginx: a deploy user nem irhatja /etc/nginx-et"
+  echo "ROOT, EGYSZER:"
+  echo "  sudo sed -i 's/127\\.0\\.0\\.1:4100/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
+  echo "  sudo nginx -t && sudo systemctl reload nginx"
+  echo "  curl -sS https://szcenario.hu/build-id.txt"
+  return 0
 }
 
 echo ">> activate $SHA"
