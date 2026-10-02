@@ -27,6 +27,8 @@ jobs:
       - name: Build (Node target, port 5100)
         env:
           NODE_ENV: production
+          PORT: 5100
+          NITRO_PORT: 5100
         run: npm run build:node
 
       - name: Verify CI production output
