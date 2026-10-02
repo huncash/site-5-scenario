@@ -3,6 +3,7 @@ const SLUG = process.env.SITE_SLUG || "szcenario";
 const APP_DIR = `/var/www/${SLUG}`;
 const CWD = process.env.RELEASE_DIR || `${APP_DIR}/current`;
 
+// Egy processz: static-origin a 4100-on. Nitro SSR (.output/server/index.mjs) nem indul.
 module.exports = {
   apps: [
     {
