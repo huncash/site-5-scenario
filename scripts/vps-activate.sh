@@ -13,6 +13,7 @@ RELEASE_DIR="$APP_DIR/releases/$SHA"
 ENVF="$APP_DIR/shared/.env.production"
 LOG_DIR="/var/log/$SITE_SLUG"
 PORT_N=4100
+CURRENT_USER="$(whoami)"
 
 need() {
   if [ ! -e "$1" ]; then
@@ -27,26 +28,11 @@ ss_4100() {
   ss -tlnH 2>/dev/null | awk '{print $4}' | grep -E ":${PORT_N}$" || true
 }
 
-first_pid_4100() {
-  sudo fuser "${PORT_N}/tcp" 2>/dev/null | tr -s '[:space:]' '\n' | grep -E '^[0-9]+$' | head -n1 || true
-}
-
-dump_holder() {
-  local pid="$1"
-  [ -n "$pid" ] || return 0
-  echo "==== holder pid=$pid ===="
-  ps -o user,ppid,pid,cmd -p "$pid" 2>/dev/null || true
-  echo "cmdline=$(sudo tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
-  echo "cwd=$(sudo readlink "/proc/$pid/cwd" 2>/dev/null || true)"
-  echo "cgroup=$(sudo tr '\n' ' ' < "/proc/$pid/cgroup" 2>/dev/null || true)"
-}
-
 dump_logs() {
   echo "==== listen ===="
   ss -tulpn 2>/dev/null | grep -E ":${PORT_N}([^0-9]|$)" || true
   echo "==== fuser ===="
-  sudo fuser -v "${PORT_N}/tcp" 2>&1 || true
-  dump_holder "$(first_pid_4100)"
+  fuser -v "${PORT_N}/tcp" 2>&1 || true
   echo "==== curl :${PORT_N} ===="
   curl -sS -D- --max-time 2 "http://127.0.0.1:${PORT_N}/" | head -n 20 || true
   echo "==== pm2 list ===="
@@ -57,85 +43,52 @@ dump_logs() {
     "$LOG_DIR/out.log" "$LOG_DIR/out-0.log" 2>/dev/null || true
 }
 
-run_as() {
-  local user="$1"
-  local cmd="$2"
-  sudo -u "$user" bash -lc "$cmd"
+kill_pids() {
+  local pid
+  for pid in "$@"; do
+    [ -n "$pid" ] || continue
+    echo ">> kill -9 $pid"
+    kill -9 "$pid" >/dev/null 2>&1 || true
+  done
 }
 
-stop_owner_pm2() {
-  local owner="$1"
-  local name
-  echo ">> $owner pm2 list"
-  run_as "$owner" "pm2 list" || true
-  run_as "$owner" "pm2 delete $SITE_SLUG" || true
-  run_as "$owner" "pm2 delete site-5" || true
-  run_as "$owner" "pm2 jlist" > /tmp/pm2-owner.json 2>/dev/null || true
-  if [ -s /tmp/pm2-owner.json ]; then
-    node -e '
-      let apps = [];
-      try { apps = JSON.parse(require("fs").readFileSync("/tmp/pm2-owner.json", "utf8")); } catch (e) { process.exit(0); }
-      for (const a of apps) {
-        const env = a.pm2_env || {};
-        const port = String(env.PORT || (env.env && env.env.PORT) || "");
-        const script = String(env.pm_exec_path || "");
-        const cwd = String(env.pm_cwd || "");
-        if (port === "4100" || /szcenario|static-origin|\.output\/server/.test(script + " " + cwd)) {
-          console.log(a.name);
-        }
-      }
-    ' | while read -r name; do
-      [ -n "$name" ] || continue
-      echo ">> $owner pm2 delete $name"
-      run_as "$owner" "pm2 delete $name" || true
-    done
-    run_as "$owner" "pm2 save" || true
-  fi
-}
-
-stop_cgroup_unit() {
-  local pid="$1"
-  local unit
-  unit="$(sudo tr '\n' '/' < "/proc/$pid/cgroup" 2>/dev/null | grep -oE '[^/]+\.service' | grep -vE '^user@[0-9]+\.service$' | grep -v '^init.scope$' | tail -n1 || true)"
-  if [ -n "$unit" ]; then
-    echo ">> systemctl stop $unit"
-    sudo systemctl stop "$unit" || true
-  fi
-}
-
-free_4100() {
-  local pid owner uid
-  pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-  pm2 delete site-5 >/dev/null 2>&1 || true
-
-  pid="$(first_pid_4100)"
-  if [ -z "$pid" ] && [ -z "$(ss_4100)" ]; then
-    echo ">> port $PORT_N already free"
-    return 0
-  fi
-  dump_holder "$pid"
-
-  owner="$(ps -o user= -p "$pid" 2>/dev/null | awk '{print $1}')"
-  echo ">> 4100 owner=${owner:-unknown} pid=$pid"
-  if [ -n "$owner" ] && [ "$owner" != "deploy" ] && [ "$owner" != "$(id -un)" ]; then
-    stop_owner_pm2 "$owner"
-    uid="$(id -u "$owner" 2>/dev/null || true)"
-    if [ -n "$uid" ] && [ -d "/run/user/$uid" ]; then
-      sudo -u "$owner" env XDG_RUNTIME_DIR="/run/user/$uid" \
-        HOME="$(getent passwd "$owner" | cut -d: -f6)" \
-        systemctl --user stop "$SITE_SLUG" >/dev/null 2>&1 || true
+kill_own_4100() {
+  local pids pid cmdline cwd attempt=1
+  while [ $attempt -le 5 ]; do
+    pids="$(fuser "${PORT_N}/tcp" 2>/dev/null || true)"
+    if [ -z "$pids" ] && [ -z "$(ss_4100)" ]; then
+      break
     fi
-  fi
-  stop_cgroup_unit "$pid"
-
-  sleep 1
-  pid="$(first_pid_4100)"
-  if [ -n "$pid" ]; then
-    echo ">> leftover kill $pid"
-    sudo kill -9 "$pid" >/dev/null 2>&1 || true
-    sudo fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
+    echo ">> cleanup attempt $attempt: fuser ${PORT_N}: ${pids:-none}"
+    
+    # 1. fuser alapú kill (sudo nélkül, saját userre)
+    fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
+    
+    # 2. lsof alapú kill
+    if command -v lsof >/dev/null 2>&1; then
+      lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
+    fi
+    
+    # 3. Node folyamatok átvizsgálása és lelövése cgroup/cwd alapján
+    for pid in $(pgrep -u "$CURRENT_USER" -x node || true); do
+      cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+      cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
+      case "$cmdline $cwd" in
+        *static-origin.mjs*|*"/.output/server/index.mjs"*|*signaling-server.js*|*"/var/www/$SITE_SLUG"*)
+          echo ">> force kill node $pid"
+          kill -9 "$pid" >/dev/null 2>&1 || true
+          ;;
+      esac
+    done
+    
     sleep 1
-  fi
+    attempt=$((attempt + 1))
+  done
+}
+
+delete_pm2_4100() {
+  # PM2 démon tiszta leállítása, hogy ne élessze újra a beragadt appot
+  pm2 kill >/dev/null 2>&1 || true
 }
 
 echo ">> activate $SHA"
@@ -148,11 +101,12 @@ grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
-echo ">> free $PORT_N (stop supervisor, not just pid)"
-free_4100
+echo ">> pm2 kill + free $PORT_N"
+delete_pm2_4100
+kill_own_4100
 busy="$(ss_4100)"
 if [ -n "$busy" ]; then
-  echo "port $PORT_N still busy"
+  echo "port $PORT_N still busy after cleanup"
   echo "$busy"
   dump_logs
   exit 1
