@@ -3,8 +3,8 @@ function read(name: string, fallback = ""): string {
 }
 
 export const billEnv = {
-  port: Number(read("BILL_PORT", "4110")) || 4110,
-  publicUrl: read("BILL_PUBLIC_URL", "http://localhost:4110").replace(/\/$/, ""),
+  port: Number(read("BILL_PORT", "5110")) || 5110,
+  publicUrl: read("BILL_PUBLIC_URL", "http://localhost:5110").replace(/\/$/, ""),
   stripeSecret: read("STRIPE_SECRET_KEY"),
   stripeWebhookSecret: read("STRIPE_WEBHOOK_SECRET"),
   barionPosKey: read("BARION_POSKEY"),

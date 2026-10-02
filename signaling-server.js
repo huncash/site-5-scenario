@@ -1,7 +1,7 @@
 import http from "node:http";
 import { WebSocketServer } from "ws";
 
-const PORT = Number(process.env.PORT ?? 4100);
+const PORT = Number(process.env.SIGNALING_PORT ?? 5130);
 
 const server = http.createServer((req, res) => {
   if (req.url === "/healthz") {

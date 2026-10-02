@@ -14,7 +14,7 @@ A Pro / Enterprise csomag helyi motorja: ugyanaz a statikus frontend, IndexedDB 
 npm run desktop:dev
 ```
 
-A webview a `http://localhost:4100` /app munkaterületet tölti (vite). Éles csomag a `.output/public` statikus kimenetet csomagolja.
+A webview a `http://localhost:5100` /app munkaterületet tölti (vite). Éles csomag a `.output/public` statikus kimenetet csomagolja.
 
 ## Éles build
 

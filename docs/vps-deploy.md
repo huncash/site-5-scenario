@@ -1,7 +1,8 @@
-# VPS deploy — site-5 (szcenario.hu, port 4100)
+# VPS deploy — site-5 (szcenario.hu, port 5100)
 
 **Forrásmappa:** `C:\Users\patri\DEVELOPMENT\dev\fuszer-platform\vendor\mesh-data-manager-fuszer`  
-GitHub repo: `site-5-scenario`. VPS: `/var/www/szcenario`, PM2 `szcenario`, port **4100**.
+GitHub repo: `site-5-scenario`. VPS: `/var/www/szcenario`, PM2 `szcenario`, port **5100**.  
+Bill: **5110**, support: **5120**, signaling: **5130**.
 
 A site-1–4 menete: DNS → GitHub repo + `VPS_SSH_KEY` → `main` push → Actions (nginx/PM2).  
 A jegyzettömbös kulcs a **GitHub secret**, nem Windows `ssh -i`. A Cursor terminaljába semmit se másolj.
@@ -34,7 +35,7 @@ Ha a promptod már `...\vendor\mesh-data-manager-fuszer>`, ide. A `CSERÉLD_A_US
 git init
 git branch -M main
 git add .
-git commit -m "site-5-scenario: VPS nginx + PM2 4100 + GitHub deploy"
+git commit -m "site-5-scenario: VPS nginx + PM2 5100 + GitHub deploy"
 git remote add origin https://github.com/CSERÉLD_A_USERED/site-5-scenario.git
 git push -u origin main
 ```
@@ -53,7 +54,7 @@ Nyisd **ugyanazt**, amivel a többi site első nginxét csináltad (atlasz Shell
 mkdir -p /var/www/szcenario/{releases,shared,incoming}
 mkdir -p /var/log/szcenario /var/www/letsencrypt
 chown -R deploy:deploy /var/www/szcenario /var/log/szcenario
-printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > /var/www/szcenario/shared/.env.production
+printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' > /var/www/szcenario/shared/.env.production
 chmod 600 /var/www/szcenario/shared/.env.production
 chown deploy:deploy /var/www/szcenario/shared/.env.production
 ```

@@ -21,7 +21,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RELEASE_ROOT = path.resolve(HERE, "..");
 
 function resolvePort() {
-  const raw = process.env.PORT || process.env.NITRO_PORT || "4100";
+  const raw = process.env.PORT || process.env.NITRO_PORT || "5100";
   const port = Number(raw);
   if (!Number.isFinite(port) || port <= 0 || port > 65535) {
     console.error("[static-origin] érvénytelen PORT", { raw, cwd: process.cwd() });

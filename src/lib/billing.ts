@@ -4,7 +4,7 @@ export const BILL_CHECKOUT_ORIGIN = "https://bill.szcenario.hu";
 
 export function billPublicOrigin(): string {
   if (typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
-    return "http://localhost:4110";
+    return "http://localhost:5110";
   }
   return BILL_CHECKOUT_ORIGIN;
 }

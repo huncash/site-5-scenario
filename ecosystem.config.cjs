@@ -3,7 +3,7 @@ const SLUG = process.env.SITE_SLUG || "szcenario";
 const APP_DIR = `/var/www/${SLUG}`;
 const CWD = process.env.RELEASE_DIR || `${APP_DIR}/current`;
 
-// Egy processz: static-origin a 4100-on. Nitro SSR (.output/server/index.mjs) nem indul.
+// Egy processz: static-origin a 5100-on. Nitro SSR (.output/server/index.mjs) nem indul.
 module.exports = {
   apps: [
     {
@@ -21,7 +21,7 @@ module.exports = {
       env: {
         NODE_ENV: process.env.NODE_ENV || "production",
         HOST: process.env.HOST || "127.0.0.1",
-        PORT: process.env.PORT || process.env.NITRO_PORT || "4100",
+        PORT: process.env.PORT || process.env.NITRO_PORT || "5100",
         STATIC_ROOT: process.env.STATIC_ROOT || pathJoin(CWD, ".output/public"),
         BUILD_SHA: process.env.BUILD_SHA || "",
       },

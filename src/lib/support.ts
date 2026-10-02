@@ -7,7 +7,7 @@ export type SupportLayer = "tippek" | "gyik" | "ticket";
 
 export function supportPublicOrigin(): string {
   if (typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
-    return "http://localhost:4111";
+    return "http://localhost:5120";
   }
   return SUPPORT_ORIGIN_PROD;
 }

@@ -12,7 +12,7 @@ fi
 RELEASE_DIR="$APP_DIR/releases/$SHA"
 ENVF="$APP_DIR/shared/.env.production"
 LOG_DIR="/var/log/$SITE_SLUG"
-PORT_N=4100
+PORT_N=5100
 
 need() {
   if [ ! -e "$1" ]; then
@@ -23,11 +23,11 @@ need() {
   echo "ok $1"
 }
 
-ss_4100() {
+ss_5100() {
   ss -tlnH 2>/dev/null | awk '{print $4}' | grep -E ":${PORT_N}$" || true
 }
 
-first_pid_4100() {
+first_pid_5100() {
   sudo fuser "${PORT_N}/tcp" 2>/dev/null | tr -s '[:space:]' '\n' | grep -E '^[0-9]+$' | head -n1 || true
 }
 
@@ -46,7 +46,7 @@ dump_logs() {
   ss -tulpn 2>/dev/null | grep -E ":${PORT_N}([^0-9]|$)" || true
   echo "==== fuser ===="
   sudo fuser -v "${PORT_N}/tcp" 2>&1 || true
-  dump_holder "$(first_pid_4100)"
+  dump_holder "$(first_pid_5100)"
   echo "==== curl :${PORT_N} ===="
   curl -sS -D- --max-time 2 "http://127.0.0.1:${PORT_N}/" | head -n 20 || true
   echo "==== pm2 list ===="
@@ -80,7 +80,7 @@ stop_owner_pm2() {
         const port = String(env.PORT || (env.env && env.env.PORT) || "");
         const script = String(env.pm_exec_path || "");
         const cwd = String(env.pm_cwd || "");
-        if (port === "4100" || /szcenario|static-origin|\.output\/server/.test(script + " " + cwd)) {
+        if (port === "5100" || /szcenario|static-origin|\.output\/server/.test(script + " " + cwd)) {
           console.log(a.name);
         }
       }
@@ -103,20 +103,20 @@ stop_cgroup_unit() {
   fi
 }
 
-free_4100() {
+free_5100() {
   local pid owner uid
   pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
   pm2 delete site-5 >/dev/null 2>&1 || true
 
-  pid="$(first_pid_4100)"
-  if [ -z "$pid" ] && [ -z "$(ss_4100)" ]; then
+  pid="$(first_pid_5100)"
+  if [ -z "$pid" ] && [ -z "$(ss_5100)" ]; then
     echo ">> port $PORT_N already free"
     return 0
   fi
   dump_holder "$pid"
 
   owner="$(ps -o user= -p "$pid" 2>/dev/null | awk '{print $1}')"
-  echo ">> 4100 owner=${owner:-unknown} pid=$pid"
+  echo ">> 5100 owner=${owner:-unknown} pid=$pid"
   if [ -n "$owner" ] && [ "$owner" != "deploy" ] && [ "$owner" != "$(id -un)" ]; then
     stop_owner_pm2 "$owner"
     uid="$(id -u "$owner" 2>/dev/null || true)"
@@ -129,7 +129,7 @@ free_4100() {
   stop_cgroup_unit "$pid"
 
   sleep 1
-  pid="$(first_pid_4100)"
+  pid="$(first_pid_5100)"
   if [ -n "$pid" ]; then
     echo ">> leftover kill $pid"
     sudo kill -9 "$pid" >/dev/null 2>&1 || true
@@ -149,8 +149,8 @@ need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
 echo ">> free $PORT_N (stop supervisor, not just pid)"
-free_4100
-busy="$(ss_4100)"
+free_5100
+busy="$(ss_5100)"
 if [ -n "$busy" ]; then
   echo "port $PORT_N still busy"
   echo "$busy"
@@ -163,12 +163,17 @@ echo ">> ensure $ENVF"
 mkdir -p "$APP_DIR/shared" "$LOG_DIR"
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
-  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
+  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' > "$ENVF"
   chmod 600 "$ENVF" || true
 fi
 echo ">> ls shared"
 ls -la "$APP_DIR/shared/"
 need "$ENVF"
+if grep -q '^PORT=' "$ENVF"; then
+  sed -i 's/^PORT=.*/PORT=5100/' "$ENVF"
+else
+  printf '\nPORT=5100\n' >> "$ENVF"
+fi
 
 set -a
 # shellcheck disable=SC1091
@@ -176,7 +181,7 @@ set -a
 set +a
 export NODE_ENV="${NODE_ENV:-production}"
 export HOST="${HOST:-127.0.0.1}"
-export PORT="${PORT:-4100}"
+export PORT=5100
 export STATIC_ROOT="$RELEASE_DIR/.output/public"
 export BUILD_SHA="$SHA"
 export RELEASE_DIR
