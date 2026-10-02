@@ -409,6 +409,9 @@ body,
 
   --accent-color: var(--accent-emerald);
   --accent: var(--accent-color);
+  --pro-pess: #ff5c5c;
+  --pro-real: #38bdf8;
+  --pro-opt: #facc15;
   --bg-primary: var(--app-bg);
   --bg-card: var(--card-bg);
   --btn-text: #ffffff;
@@ -602,6 +605,9 @@ html[data-accessibility="active"] {
   --a11y-bg-dots: radial-gradient(circle at 50% 50%, #ffd100 1.4px, #000000 1.55px);
   --a11y-bg-h-stripe: repeating-linear-gradient(0deg, #000000 0 4px, #ffd100 4px 7px);
   --a11y-bg-v-stripe: repeating-linear-gradient(90deg, #000000 0 4px, #ffd100 4px 7px);
+  --pro-pess: #ff5c5c !important;
+  --pro-real: #ffffff !important;
+  --pro-opt: #ffd100 !important;
   --app-bg: #000000 !important;
   --card-bg: #000000 !important;
   --card-border: #ffd100 !important;
@@ -677,6 +683,9 @@ html.light.palette-bronze.a11y-vision {
   --a11y-bg-dots: radial-gradient(circle at 50% 50%, #000000 1.4px, #ffd100 1.55px);
   --a11y-bg-h-stripe: repeating-linear-gradient(0deg, #ffd100 0 4px, #000000 4px 7px);
   --a11y-bg-v-stripe: repeating-linear-gradient(90deg, #ffd100 0 4px, #000000 4px 7px);
+  --pro-pess: #9b0000 !important;
+  --pro-real: #000000 !important;
+  --pro-opt: #000000 !important;
   --app-bg: #ffd100 !important;
   --card-bg: #ffffff !important;
   --card-border: #000000 !important;
@@ -841,6 +850,57 @@ html.a11y-vision [stroke="#10B981"],
 html.a11y-vision [stroke="#0891B2"] {
   fill: var(--text-main);
   stroke: var(--card-border);
+}
+
+/* PRO-görbék: szín + a11y szaggatás (pesszimista / realista / optimista). */
+.pro-line-pess,
+.pro-line-real,
+.pro-line-opt {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-accessibility="active"] .pro-line-pess,
+html.a11y-vision .pro-line-pess {
+  stroke: var(--pro-pess) !important;
+  stroke-dasharray: 8 5 !important;
+}
+html[data-accessibility="active"] .pro-line-real,
+html.a11y-vision .pro-line-real {
+  stroke: var(--pro-real) !important;
+  stroke-dasharray: 0 !important;
+}
+html[data-accessibility="active"] .pro-line-opt,
+html.a11y-vision .pro-line-opt {
+  stroke: var(--pro-opt) !important;
+  stroke-dasharray: 2.4 3.6 !important;
+}
+
+.pro-swatch-pess,
+.pro-swatch-real,
+.pro-swatch-opt {
+  display: inline-block;
+  height: 3px;
+  width: 1.15rem;
+  border-radius: 1px;
+}
+.pro-swatch-pess { background: var(--pro-pess); }
+.pro-swatch-real { background: var(--pro-real); }
+.pro-swatch-opt { background: var(--pro-opt); }
+html[data-accessibility="active"] .pro-swatch-pess,
+html.a11y-vision .pro-swatch-pess {
+  background-image: repeating-linear-gradient(90deg, var(--pro-pess) 0 6px, transparent 6px 10px);
+  background-color: transparent;
+}
+html[data-accessibility="active"] .pro-swatch-real,
+html.a11y-vision .pro-swatch-real {
+  background-image: none;
+  background-color: var(--pro-real);
+}
+html[data-accessibility="active"] .pro-swatch-opt,
+html.a11y-vision .pro-swatch-opt {
+  background-image: repeating-linear-gradient(90deg, var(--pro-opt) 0 2px, transparent 2px 5px);
+  background-color: transparent;
 }
 
 /* Sárga kitöltésű gomb / badge / CTA: mindig fekete, vastag felirat (hover/fókusz is). */

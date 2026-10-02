@@ -161,6 +161,7 @@ import {
   type VizSpan,
 } from "@/components/lean-viz/LeanCharts";
 import { groupExpenseWaterfall, type HeatCell, type SankeyLink } from "@/lib/leanViz";
+import { PRO_LINE_CLASS, PRO_OPT, PRO_PESS, PRO_REAL } from "@/lib/proChart";
 import { RawTransactionAuditTable } from "@/components/RawTransactionAuditTable";
 import { computeKaizenAudit } from "@/lib/kaizenEngine";
 import {
@@ -5748,9 +5749,9 @@ export function FinanceDashboard({
             windowLabel={`${whatIf.chart[0]?.month ?? ""} – ${whatIf.chart[whatIf.chart.length - 1]?.month ?? ""}`}
             legend={
               <>
-                <ChartLegendSwatch color="#34d399" label="Optimista" line />
-                <ChartLegendSwatch color="var(--accent-color)" label="Reális" line />
-                <ChartLegendSwatch color="#fb7185" label="Pesszimista" line />
+                <ChartLegendSwatch tone="opt" label="Optimista" line />
+                <ChartLegendSwatch tone="real" label="Reális" line />
+                <ChartLegendSwatch tone="pess" label="Pesszimista" line />
               </>
             }
           >
@@ -10085,33 +10086,48 @@ export function FinanceDashboard({
                               formatter={(v: number) => formatMoney(Math.round(v), CURRENCY)}
                               labelFormatter={(lab) => `Hónap: ${lab}`}
                             />
-                            <Legend wrapperStyle={{ fontSize: 12 }} />
+                            <Legend
+                              wrapperStyle={{ fontSize: 12 }}
+                              content={() => (
+                                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-1">
+                                  <ChartLegendSwatch tone="opt" label="Optimista" line />
+                                  <ChartLegendSwatch tone="real" label="Reális" line />
+                                  <ChartLegendSwatch tone="pess" label="Pesszimista" line />
+                                </div>
+                              )}
+                            />
                             <Line
                               type="monotone"
                               dataKey="optimistic"
                               name="Optimista"
-                              stroke="var(--color-chart-1)"
-                              strokeWidth={whatIfScenario === "optimistic" ? 3 : 2}
-                              dot={false}
-                              opacity={whatIfScenario === "optimistic" ? 1 : 0.55}
+                              className={PRO_LINE_CLASS.opt}
+                              stroke={PRO_OPT}
+                              strokeWidth={whatIfScenario === "optimistic" ? 3 : 2.2}
+                              dot={{ r: 3, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              activeDot={{ r: 4.5, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              opacity={whatIfScenario === "optimistic" ? 1 : 0.72}
                             />
                             <Line
                               type="monotone"
                               dataKey="realistic"
                               name="Reális"
-                              stroke="var(--color-chart-2)"
-                              strokeWidth={whatIfScenario === "realistic" ? 3 : 2}
-                              dot={false}
-                              opacity={whatIfScenario === "realistic" ? 1 : 0.55}
+                              className={PRO_LINE_CLASS.real}
+                              stroke={PRO_REAL}
+                              strokeWidth={whatIfScenario === "realistic" ? 3 : 2.2}
+                              dot={{ r: 3, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              activeDot={{ r: 4.5, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              opacity={whatIfScenario === "realistic" ? 1 : 0.72}
                             />
                             <Line
                               type="monotone"
                               dataKey="pessimistic"
                               name="Pesszimista"
-                              stroke="var(--color-chart-7)"
-                              strokeWidth={whatIfScenario === "pessimistic" ? 3 : 2}
-                              dot={false}
-                              opacity={whatIfScenario === "pessimistic" ? 1 : 0.55}
+                              className={PRO_LINE_CLASS.pess}
+                              stroke={PRO_PESS}
+                              strokeWidth={whatIfScenario === "pessimistic" ? 3 : 2.2}
+                              dot={{ r: 3, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              activeDot={{ r: 4.5, strokeWidth: 1.5, fill: "var(--card-bg)" }}
+                              opacity={whatIfScenario === "pessimistic" ? 1 : 0.72}
                             />
                           </LineChart>
                         </ResponsiveContainer>

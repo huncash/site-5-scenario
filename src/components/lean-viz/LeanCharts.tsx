@@ -11,6 +11,15 @@ import {
   type WaterfallStep,
 } from "@/lib/leanViz";
 import { a11yPatternClassForColor } from "@/lib/a11yChartPatterns";
+import {
+  PRO_PESS,
+  PRO_REAL,
+  PRO_OPT,
+  PRO_LINE_CLASS,
+  PRO_SWATCH_CLASS,
+  proToneFromSeriesId,
+  type ProTone,
+} from "@/lib/proChart";
 import { cn } from "@/lib/utils";
 
 const CURRENCY = "HUF";
@@ -37,9 +46,11 @@ function niceTicks(min: number, max: number, count = 5): number[] {
 }
 
 function seriesStroke(id: string, active?: boolean): string {
-  if (id === "opt" || id === "inc") return UP;
-  if (id === "pess" || id === "exp") return DOWN;
-  if (id === "real" || id === "sav") return FOCUS;
+  if (id === "opt") return PRO_OPT;
+  if (id === "pess") return PRO_PESS;
+  if (id === "inc") return UP;
+  if (id === "exp") return DOWN;
+  if (id === "real" || id === "sav") return id === "real" ? PRO_REAL : FOCUS;
   return active ? FOCUS : INK;
 }
 
@@ -95,19 +106,26 @@ export function ChartLegendSwatch({
   color,
   label,
   line,
+  tone,
 }: {
-  color: string;
+  color?: string;
   label: string;
   line?: boolean;
+  tone?: ProTone;
 }) {
+  const fill = color ?? (tone === "pess" ? PRO_PESS : tone === "opt" ? PRO_OPT : tone === "real" ? PRO_REAL : FOCUS);
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] leading-snug text-slate-300">
+    <span className="inline-flex items-center gap-1.5 text-[10px] leading-snug text-slate-300">
       <span
         className={cn(
-          line ? "inline-block h-px w-3" : "inline-block h-2.5 w-3.5 rounded-sm border border-transparent",
-          !line && a11yPatternClassForColor(color),
+          line && tone
+            ? PRO_SWATCH_CLASS[tone]
+            : line
+              ? "inline-block h-[3px] w-5 rounded-sm"
+              : "inline-block h-2.5 w-3.5 rounded-sm border border-transparent",
+          !line && fill ? a11yPatternClassForColor(fill) : null,
         )}
-        style={line ? { background: color } : { background: color }}
+        style={tone && line ? undefined : { background: fill }}
         aria-hidden
       />
       {label}
@@ -602,15 +620,33 @@ export function SmallMultiples({
           const d = s.points
             .map((p, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(p.y).toFixed(1)}`)
             .join(" ");
+          const tone = proToneFromSeriesId(s.id);
+          const stroke = seriesStroke(s.id, s.active);
+          const markEvery = Math.max(1, Math.floor((s.points.length - 1) / 4));
           return (
-            <path
-              key={s.id}
-              d={d}
-              fill="none"
-              stroke={seriesStroke(s.id, s.active)}
-              strokeWidth={s.active ? 1.8 : 1.2}
-              opacity={s.active ? 1 : 0.75}
-            />
+            <g key={s.id}>
+              <path
+                d={d}
+                fill="none"
+                className={tone ? PRO_LINE_CLASS[tone] : undefined}
+                stroke={stroke}
+                strokeWidth={s.active ? 2.2 : 1.6}
+                opacity={s.active ? 1 : 0.82}
+              />
+              {s.points.map((p, i) =>
+                i === 0 || i === s.points.length - 1 || i % markEvery === 0 ? (
+                  <circle
+                    key={i}
+                    cx={toX(i)}
+                    cy={toY(p.y)}
+                    r={s.active ? 3 : 2.2}
+                    fill="var(--card-bg)"
+                    stroke={stroke}
+                    strokeWidth={1.5}
+                  />
+                ) : null,
+              )}
+            </g>
           );
         })}
         {xi != null ? (
