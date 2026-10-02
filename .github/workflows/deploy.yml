@@ -50,14 +50,18 @@ jobs:
       - name: Package release
         run: |
           set -euo pipefail
+          test -f ecosystem.config.cjs
+          test -f scripts/static-origin.mjs
+          test -f package.json
+          test -f BUILD_SHA
           rm -rf release release.tar.gz
-          mkdir -p release
-          cp -a .output release/.output
-          cp package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
           mkdir -p release/scripts
-          cp scripts/static-origin.mjs release/scripts/
+          cp -a .output release/.output
+          cp -a package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
+          cp -a scripts/static-origin.mjs release/scripts/
           tar -czf release.tar.gz -C release .
-          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt'
+          tar -tzf release.tar.gz | grep -E '^\./ecosystem\.config\.cjs$|^ecosystem\.config\.cjs$'
+          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs'
           ls -lh release.tar.gz
 
       - name: Validate VPS SSH key secret
@@ -100,6 +104,7 @@ jobs:
             tar -xzf "$TAR" -C "$RELEASE_DIR"
             rm -f "$TAR"
 
+            test -f "$RELEASE_DIR/ecosystem.config.cjs" || { echo "missing ecosystem.config.cjs"; ls -la "$RELEASE_DIR"; exit 1; }
             test -f "$RELEASE_DIR/.output/server/index.mjs"
             test -f "$RELEASE_DIR/BUILD_SHA"
             grep -qx "$SHA" "$RELEASE_DIR/BUILD_SHA"
