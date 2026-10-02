@@ -18,7 +18,11 @@ import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExpla
 import {
   DAILY_OPS_BODY,
   DAILY_OPS_TITLE,
+  HERO_DEMO_PREVIEW_BODY,
+  HERO_DEMO_PREVIEW_TITLE,
   HERO_HEADLINE,
+  HERO_LOCAL_FIRST_BODY,
+  HERO_LOCAL_FIRST_LABEL,
   HERO_SUBHEADLINE,
   WHY_BODY,
   WHY_LEAD,
@@ -213,32 +217,33 @@ export function ScenarioDoor() {
       </header>
 
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4 py-8 pb-16">
-        <div className="space-y-3 text-center">
+        <div className="space-y-5 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             szcenario.hu
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          <h1 className="mx-auto max-w-3xl text-balance text-[1.7rem] font-semibold leading-[1.18] tracking-tight text-foreground sm:text-3xl md:text-4xl">
             {HERO_HEADLINE}
           </h1>
-          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-pretty text-[15px] leading-relaxed text-muted-foreground sm:text-base">
             {HERO_SUBHEADLINE}
           </p>
-          <div className="mx-auto flex max-w-2xl items-start justify-center gap-2 text-left text-[12px] text-muted-foreground">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
-            <span>
-              <span className="font-semibold text-foreground">100% Local-First biztonság:</span> Az adataid a böngésződben maradnak. Biztonságos mentés fájl-exporttal vagy közvetlen eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla felhős kockázat.
-            </span>
+          <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-left text-[13px] leading-relaxed text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-emerald)]" />
+            <p>
+              <span className="font-semibold text-foreground">{HERO_LOCAL_FIRST_LABEL}</span>{" "}
+              {HERO_LOCAL_FIRST_BODY}
+            </p>
           </div>
         </div>
 
         {step === "type" ? (
           <div className="space-y-12">
             <section className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Válassz döntési fókuszt
-              </div>
-              <p className="max-w-3xl text-[12px] leading-relaxed text-muted-foreground">
-                Interaktív előnézet előre betöltött, valós helyzeteken keresztül. Kattints a demóra a motor teszteléséhez, vagy nyisd meg a részleteket a csomagokért és a tudnivalókért.
+              <h2 className="text-sm font-semibold tracking-tight text-foreground">
+                {HERO_DEMO_PREVIEW_TITLE}
+              </h2>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">
+                {HERO_DEMO_PREVIEW_BODY}
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {branches.map((b) => (
@@ -540,14 +545,14 @@ function PdcaShot() {
             <ShotLabel>1,2 M</ShotLabel>
             <ShotLabel>0,8 M</ShotLabel>
           </div>
-          <div className="flex items-end gap-1">
-            <div className="h-12 w-5 rounded-sm bg-emerald-400/70" />
-            <div className="h-8 w-5 rounded-sm bg-sky-400/60" />
+            <div className="flex items-end gap-1">
+            <div className="h-12 w-5 rounded-sm bg-emerald-400/70 a11y-pat-diagonal" />
+            <div className="h-8 w-5 rounded-sm bg-sky-400/60 a11y-pat-dots" />
           </div>
         </div>
         <div className="mt-auto space-y-1.5 pt-3">
           <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
-            <div className="h-full w-2/3 bg-amber-300/80" />
+            <div className="h-full w-2/3 bg-amber-300/80 a11y-pat-h-stripe" />
           </div>
           <div className="grid grid-cols-3 gap-1">
             <div className="h-8 rounded bg-slate-900/70" />
@@ -591,7 +596,7 @@ function CashflowShot() {
                 <span className="absolute inset-x-0 -top-5 flex justify-center">
                   <ShotLabel>{h}%</ShotLabel>
                 </span>
-                <div className="h-full w-full rounded-sm bg-cyan-400/70" />
+                <div className={`h-full w-full rounded-sm bg-cyan-400/70 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots", "a11y-pat-h-stripe", "a11y-pat-v-stripe", "a11y-pat-diagonal"][i]}`} />
               </div>
             </div>
           ))}
@@ -636,11 +641,14 @@ function ItemsShot() {
   ];
   return (
     <div className="flex h-full flex-col gap-2 rounded-lg bg-[var(--app-bg)] p-2">
-      {rows.map((r) => (
+      {rows.map((r, i) => (
         <div key={r.n} className="flex items-center gap-2">
           <div className="w-16 shrink-0 text-[10px] text-slate-400">{r.n}</div>
           <div className="relative h-5 flex-1 rounded-sm bg-slate-800">
-            <div className="h-full rounded-sm bg-emerald-400/55" style={{ width: r.w }} />
+            <div
+              className={`h-full rounded-sm bg-emerald-400/55 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots"][i]}`}
+              style={{ width: r.w }}
+            />
           </div>
           <ShotLabel>{r.v}</ShotLabel>
         </div>

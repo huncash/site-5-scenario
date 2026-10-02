@@ -5324,7 +5324,7 @@ export function FinanceDashboard({
               {selectedBucketStats.hasTarget ? (
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
                   <div
-                    className="h-full rounded-full bg-sky-500"
+                    className="h-full rounded-full bg-sky-500 a11y-pat-dots"
                     style={{ width: `${selectedBucketStats.progressPct ?? 0}%` }}
                   />
                 </div>
@@ -7271,15 +7271,15 @@ export function FinanceDashboard({
           <div className="mt-2">
             <div className="flex h-2 w-full overflow-hidden rounded-full bg-slate-900/60">
               <div
-                className="h-full bg-emerald-400/80"
+                className="h-full bg-emerald-400/80 a11y-pat-diagonal"
                 style={{ width: `${Math.max(0, Math.min(100, mirrorSummary.needsPct))}%` }}
               />
               <div
-                className="h-full bg-amber-400/80"
+                className="h-full bg-amber-400/80 a11y-pat-checker"
                 style={{ width: `${Math.max(0, Math.min(100, mirrorSummary.wantsPct))}%` }}
               />
               <div
-                className="h-full bg-sky-400/80"
+                className="h-full bg-sky-400/80 a11y-pat-dots"
                 style={{ width: `${Math.max(0, Math.min(100, mirrorSummary.investPct))}%` }}
               />
             </div>

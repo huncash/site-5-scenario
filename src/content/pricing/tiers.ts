@@ -48,7 +48,7 @@ export const PRICING_VAT_FAQ = {
 } as const;
 
 export const DEMO_STARTER_BLURB =
-  "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheted a működést!";
+  "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheti a cash-flow fókuszokat és a likviditási mutatókat.";
 
 export const TIER_SLOGAN: Record<TierId, string> = {
   starter: "Gyors átlátás, alapvető cash-flow és biztonságos lokális adatszuverenitás.",

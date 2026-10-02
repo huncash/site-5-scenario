@@ -1,8 +1,16 @@
 /** Nyilvános márka- és PRO-grafikon szövegek. SEO/ajtó: nincs következő lépés, nincs kopogtató. */
 
-export const HERO_HEADLINE = "Stratégiai szcenáriótervezés és döntéstámogatás vállalkozásoknak";
+export const HERO_HEADLINE = "Hibamegelőző vezetés- és döntéstámogatás kompromisszumok nélkül.";
 export const HERO_SUBHEADLINE =
-  "A múlt adataira épülő, valósághű szcenárió-szimuláció vállalkozásoknak.";
+  "Teljes adatkontroll a saját gépeden: lokális számítás, nulla telemetria. Nézd meg a működés közben a mintaprojekteket, vagy válaszd ki a számodra releváns modult.";
+export const HERO_LOCAL_FIRST_LABEL = "100% Local-First biztonság:";
+export const HERO_LOCAL_FIRST_BODY =
+  "Adataid a böngészőben maradnak. Biztonságos mentés fájl-exporttal vagy közvetlen eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla felhős kockázat.";
+export const HERO_DEMO_PREVIEW_TITLE = "További demó helyzetek";
+export const HERO_DEMO_PREVIEW_BODY =
+  "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheti a cash-flow fókuszokat és a likviditási mutatókat.";
+export const ABOUT_TAGLINE = "Stratégiai szcenáriótervezés és döntéstámogatás vállalkozásoknak";
+export const ABOUT_LEAD = "A múlt adataira épülő, valósághű szcenárió-szimuláció vállalkozásoknak.";
 
 export const WHY_TITLE = "Miért „Szcenárió” – és miért megy ez túl a hagyományos tervezésen?";
 export const WHY_LEAD =

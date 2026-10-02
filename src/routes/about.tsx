@@ -3,10 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
 import {
+  ABOUT_LEAD,
+  ABOUT_TAGLINE,
   DAILY_OPS_BODY,
   DAILY_OPS_TITLE,
-  HERO_HEADLINE,
-  HERO_SUBHEADLINE,
   PRO_ARTICLE_BODY,
   PRO_ARTICLE_TITLE,
   WHY_BODY,
@@ -20,9 +20,9 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   return (
-    <FunnelShell eyebrow="Rólunk" title={WHY_TITLE} subtitle={HERO_HEADLINE}>
+    <FunnelShell eyebrow="Rólunk" title={WHY_TITLE} subtitle={ABOUT_TAGLINE}>
       <div className="mx-auto max-w-3xl space-y-8 text-[14px] leading-relaxed text-muted-foreground">
-        <p className="text-foreground">{HERO_SUBHEADLINE}</p>
+        <p className="text-foreground">{ABOUT_LEAD}</p>
         <p>{WHY_LEAD}</p>
         <p>{WHY_BODY}</p>
 

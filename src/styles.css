@@ -595,6 +595,13 @@ html[data-accessibility="active"] {
   --a11y-white: #ffffff;
   --a11y-focus: #ffd100;
   --a11y-focus-gap: #000000;
+  --a11y-pattern-base: #000000;
+  --a11y-pattern-mark: #ffd100;
+  --a11y-bg-diagonal: repeating-linear-gradient(45deg, #000000 0 3px, #ffd100 3px 6px);
+  --a11y-bg-checker: repeating-conic-gradient(#000000 0% 25%, #ffd100 0% 50%);
+  --a11y-bg-dots: radial-gradient(circle at 50% 50%, #ffd100 1.4px, #000000 1.55px);
+  --a11y-bg-h-stripe: repeating-linear-gradient(0deg, #000000 0 4px, #ffd100 4px 7px);
+  --a11y-bg-v-stripe: repeating-linear-gradient(90deg, #000000 0 4px, #ffd100 4px 7px);
   --app-bg: #000000 !important;
   --card-bg: #000000 !important;
   --card-border: #ffd100 !important;
@@ -663,6 +670,13 @@ html.light.palette-slate.a11y-vision,
 html.light.palette-bronze.a11y-vision {
   --a11y-focus: #000000;
   --a11y-focus-gap: #ffd100;
+  --a11y-pattern-base: #ffd100;
+  --a11y-pattern-mark: #000000;
+  --a11y-bg-diagonal: repeating-linear-gradient(45deg, #ffd100 0 3px, #000000 3px 6px);
+  --a11y-bg-checker: repeating-conic-gradient(#ffd100 0% 25%, #000000 0% 50%);
+  --a11y-bg-dots: radial-gradient(circle at 50% 50%, #000000 1.4px, #ffd100 1.55px);
+  --a11y-bg-h-stripe: repeating-linear-gradient(0deg, #ffd100 0 4px, #000000 4px 7px);
+  --a11y-bg-v-stripe: repeating-linear-gradient(90deg, #ffd100 0 4px, #000000 4px 7px);
   --app-bg: #ffd100 !important;
   --card-bg: #ffffff !important;
   --card-border: #000000 !important;
@@ -773,7 +787,7 @@ html.a11y-vision [class*="text-orange-"],
 html.a11y-vision [class*="text-violet-"],
 html.a11y-vision [class*="text-fuchsia-"],
 html.a11y-vision [class*="text-indigo-"],
-html.a11y-vision [class*="text-slate-"],
+html.a11y-vision [class*="text-slate-"]:not(.bg-cyan-500):not(.btn-demo):not([class*="bg-[var(--accent"]):not(.bg-primary),
 html.a11y-vision [class*="text-zinc-"],
 html.a11y-vision [class*="text-muted"] {
   color: var(--text-main) !important;
@@ -827,6 +841,145 @@ html.a11y-vision [stroke="#10B981"],
 html.a11y-vision [stroke="#0891B2"] {
   fill: var(--text-main);
   stroke: var(--card-border);
+}
+
+/* Sárga kitöltésű gomb / badge / CTA: mindig fekete, vastag felirat (hover/fókusz is). */
+html.a11y-vision:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item,
+  [class*="bg-cyan-5"],
+  [class*="bg-cyan-4"],
+  [class*="bg-[var(--accent"],
+  [class*="text-primary-foreground"]
+):not([class*="bg-primary/"]):not([class*="bg-cyan-500/"]):not([class*="bg-cyan-400/"]),
+html.accessibility-mode:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item,
+  [class*="bg-cyan-5"],
+  [class*="bg-cyan-4"],
+  [class*="bg-[var(--accent"],
+  [class*="text-primary-foreground"]
+):not([class*="bg-primary/"]):not([class*="bg-cyan-500/"]):not([class*="bg-cyan-400/"]),
+html[data-accessibility="active"]:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item,
+  [class*="bg-cyan-5"],
+  [class*="bg-cyan-4"],
+  [class*="bg-[var(--accent"],
+  [class*="text-primary-foreground"]
+):not([class*="bg-primary/"]):not([class*="bg-cyan-500/"]):not([class*="bg-cyan-400/"]) {
+  color: #000000 !important;
+  font-weight: 700;
+}
+
+html.a11y-vision:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item,
+  [class*="bg-cyan-5"],
+  [class*="bg-cyan-4"],
+  [class*="bg-[var(--accent"]
+):is(:hover, :focus, :focus-visible, :active),
+html.a11y-vision:not(.light):not(.light-mode) :is(
+  .hover\:bg-\[var\(--accent-color\)\]:hover,
+  .hover\:bg-\[var\(--accent\)\]:hover,
+  .hover\:bg-cyan-400:hover,
+  .hover\:bg-primary:hover,
+  .hover\:bg-primary\/90:hover
+),
+html.accessibility-mode:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item
+):is(:hover, :focus, :focus-visible, :active),
+html[data-accessibility="active"]:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item
+):is(:hover, :focus, :focus-visible, :active) {
+  color: #000000 !important;
+  font-weight: 700;
+}
+
+html.a11y-vision:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-\[var\(--accent\)\],
+  .bg-\[var\(--accent-color\)\],
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item,
+  [class*="bg-cyan-5"],
+  [class*="bg-[var(--accent"]
+) :is(span, svg, a),
+html.accessibility-mode:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item
+) :is(span, svg, a),
+html[data-accessibility="active"]:not(.light):not(.light-mode) :is(
+  .bg-primary,
+  .bg-cyan-500,
+  .btn-demo,
+  .btn-new-item
+) :is(span, svg, a) {
+  color: #000000 !important;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+html.light.a11y-vision .bg-\[var\(--bg-primary\)\],
+html.light-mode.a11y-vision .bg-\[var\(--bg-primary\)\],
+html.light.accessibility-mode .bg-\[var\(--bg-primary\)\],
+html.light-mode.accessibility-mode .bg-\[var\(--bg-primary\)\] {
+  color: #000000 !important;
+  font-weight: 700;
+}
+
+.bg-yellow-300,
+.bg-yellow-400,
+.bg-yellow-500,
+.bg-amber-300,
+.bg-amber-400,
+[class*="bg-yellow-3"]:not([class*="/"]),
+[class*="bg-yellow-4"]:not([class*="/"]),
+[class*="bg-yellow-5"]:not([class*="/"]) {
+  color: #000000 !important;
+  font-weight: 700;
+}
+
+.bg-yellow-300:hover,
+.bg-yellow-400:hover,
+.bg-yellow-500:hover,
+.bg-amber-300:hover,
+.bg-amber-400:hover,
+.bg-yellow-300:focus-visible,
+.bg-yellow-400:focus-visible,
+.bg-yellow-500:focus-visible,
+.bg-amber-300:focus-visible,
+.bg-amber-400:focus-visible {
+  color: #000000 !important;
 }
 
 /* Wide dialogs often need clean internal scrolling. */
@@ -890,14 +1043,22 @@ html[data-accessibility="active"] body {
   color: var(--foreground);
 }
 
-.door-page .bg-cyan-500 {
+.door-page .bg-cyan-500,
+.door-page .bg-cyan-500.text-slate-950,
+.door-page .btn-demo {
   background-color: var(--brand);
-  color: var(--brand-foreground);
+  color: var(--brand-foreground) !important;
+  font-weight: 700;
 }
 
-.door-page .hover\:bg-cyan-400:hover {
+.door-page .hover\:bg-cyan-400:hover,
+.door-page .bg-cyan-500:hover,
+.door-page .bg-cyan-500:focus-visible,
+.door-page .btn-demo:hover,
+.door-page .btn-demo:focus-visible {
   background-color: var(--brand-hover);
-  color: var(--brand-foreground);
+  color: var(--brand-foreground) !important;
+  font-weight: 700;
 }
 
 .door-page .text-cyan-200,
@@ -1281,15 +1442,18 @@ html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
   background-color: var(--accent-color, var(--accent, #10b981));
   color: var(--btn-text, #ffffff);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.btn-new-item:hover {
+.btn-new-item:hover,
+.btn-new-item:focus-visible,
+.btn-new-item:active {
   background-color: var(--accent-hover, #059669);
+  color: var(--btn-text, #ffffff);
 }
 
 @media (max-width: 640px) {

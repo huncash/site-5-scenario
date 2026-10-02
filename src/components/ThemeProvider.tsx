@@ -25,6 +25,7 @@ import {
   saveUiPalette,
   saveUiTheme,
 } from "@/lib/theme";
+import { A11yChartPatterns } from "@/components/A11yChartPatterns";
 import type { UiPalette, UiTheme } from "@/lib/mesh/schema";
 
 type ThemeContextValue = {
@@ -121,7 +122,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [theme, palette, a11y, setTheme, setPalette, setA11y, toggleTheme, toggleA11y, cyclePalette],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      <A11yChartPatterns />
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 const idleTheme: ThemeContextValue = {

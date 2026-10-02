@@ -187,13 +187,13 @@ export function MudaHeatmap({
 
       <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-slate-300">
         <div className="flex items-center gap-1" data-exact="A cella zöldje a napi összes kiadás nagysága a hónap maximumához képest.">
-          <span className="inline-block h-2 w-2 rounded-sm bg-emerald-400/40" /> költési intenzitás
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-emerald-400/40 a11y-pat-dots" /> költési intenzitás
         </div>
         <div className="flex items-center gap-1" data-exact="vágy — nem kötelező kiadás ezen a napon.">
-          <span className="inline-block h-2 w-2 rounded-full bg-pink-400/70" /> WANT nap
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-pink-400/70 a11y-pat-h-stripe" /> WANT nap
         </div>
         <div className="flex items-center gap-1" data-exact="veszteség — pazarlás, impulzus vagy felesleges tétel ezen a napon.">
-          <span className="inline-block h-2 w-2 rounded-full bg-rose-400/90" /> MUDA nap
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-rose-400/90 a11y-pat-checker" /> MUDA nap
         </div>
       </div>
 
@@ -227,6 +227,17 @@ export function MudaHeatmap({
               `Veszteség: ${formatMoney(Math.round(c.mudaExpense))}`,
             ].join("\n");
 
+            const heatPat =
+              c.mudaExpense > 0
+                ? "a11y-pat-checker"
+                : c.wantsExpense > 0
+                  ? "a11y-pat-h-stripe"
+                  : intensity > 0.66
+                    ? "a11y-pat-diagonal"
+                    : intensity > 0.33
+                      ? "a11y-pat-v-stripe"
+                      : "a11y-pat-dots";
+
             return (
               <button
                 key={c.dateIso}
@@ -237,6 +248,7 @@ export function MudaHeatmap({
                   hasLeak ? cn(wantStrength, leakStrength) : "",
                   isSelected ? "ring-2 ring-cyan-400/70" : "",
                   c.inMonth ? "cursor-pointer hover:border-slate-600/80" : "cursor-default opacity-60",
+                  heatPat,
                 )}
                 style={{
                   backgroundColor: `rgba(16, 185, 129, ${alpha})`,

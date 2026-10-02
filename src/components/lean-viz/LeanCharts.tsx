@@ -10,6 +10,7 @@ import {
   type SparkSeries,
   type WaterfallStep,
 } from "@/lib/leanViz";
+import { a11yPatternClassForColor } from "@/lib/a11yChartPatterns";
 import { cn } from "@/lib/utils";
 
 const CURRENCY = "HUF";
@@ -102,8 +103,11 @@ export function ChartLegendSwatch({
   return (
     <span className="inline-flex items-center gap-1 text-[10px] leading-snug text-slate-300">
       <span
-        className={line ? "inline-block h-px w-3" : "inline-block h-2 w-2 rounded-sm"}
-        style={{ background: color }}
+        className={cn(
+          line ? "inline-block h-px w-3" : "inline-block h-2.5 w-3.5 rounded-sm border border-transparent",
+          !line && a11yPatternClassForColor(color),
+        )}
+        style={line ? { background: color } : { background: color }}
         aria-hidden
       />
       {label}
@@ -347,6 +351,7 @@ export function WaterfallChart({
                 height={h}
                 rx={3}
                 fill={fill}
+                className={r.shown >= 0 ? "a11y-pat-diagonal" : "a11y-pat-checker"}
                 clipPath={`url(#${clipId})`}
                 stroke={isHover ? "rgba(248,250,252,0.9)" : "transparent"}
                 strokeWidth={isHover ? 1 : 0}
@@ -411,7 +416,7 @@ export function BulletGraph({ item }: { item: BulletDatum }) {
         <div className="absolute inset-y-0 left-0 bg-[color-mix(in_srgb,var(--card-border)_55%,var(--card-bg))]" style={{ width: "85%" }} />
         <div className="absolute inset-y-0 left-0 bg-[color-mix(in_srgb,var(--card-border)_35%,var(--card-bg))]" style={{ width: "100%" }} />
         <div
-          className="absolute inset-y-[3px] left-0 rounded-sm bg-[var(--accent-color)]"
+          className="absolute inset-y-[3px] left-0 rounded-sm bg-[var(--accent-color)] a11y-pat-diagonal"
           style={{ width: `${actualPct}%` }}
         />
         <div
@@ -495,7 +500,15 @@ export function ExceptionHeatmap({
                   <td key={c}>
                     <button
                       type="button"
-                      className={cn("h-6 w-full rounded-sm", dim && "opacity-25")}
+                      className={cn(
+                        "h-6 w-full rounded-sm",
+                        dim && "opacity-25",
+                        Math.abs(v) < max * 0.08
+                          ? "a11y-pat-h-stripe"
+                          : v < 0
+                            ? "a11y-pat-checker"
+                            : "a11y-pat-diagonal",
+                      )}
                       style={{ background: color(v) }}
                       title={`${r} · ${c}: ${formatMoney(Math.round(v), CURRENCY)}`}
                       onMouseEnter={() => setFocus({ row: r, col: c })}
@@ -724,6 +737,7 @@ export function FlowSankey({
               height={src.heights[i] ?? row}
               rx={2}
               fill={FOCUS}
+              className="a11y-pat-dots"
             />
           </g>
         ))}
@@ -739,6 +753,7 @@ export function FlowSankey({
                 height={snk.heights[i] ?? row}
                 rx={2}
                 fill={MUTED}
+                className="a11y-pat-h-stripe"
               />
               <text x={nameX} y={cy} fill={INK} fontSize={8}>
                 {clipLabel(s, nameChars)}
