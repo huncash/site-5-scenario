@@ -88,6 +88,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script_stop: true
+          command_timeout: 10m
           script: |
             set -euo pipefail
             SITE_SLUG="szcenario"
@@ -97,14 +98,22 @@ jobs:
             mkdir -p "$APP_DIR/incoming" "$APP_DIR/releases" "$APP_DIR/shared"
 
             TAR="$(find "$APP_DIR/incoming" -name 'release.tar.gz' -type f | sort | tail -n 1)"
-            test -n "${TAR:-}" || (echo "release.tar.gz not found under $APP_DIR/incoming" && find "$APP_DIR/incoming" -maxdepth 3 -ls && exit 1)
+            if [ -z "${TAR:-}" ]; then
+              echo "release.tar.gz not found under $APP_DIR/incoming"
+              find "$APP_DIR/incoming" -maxdepth 3 -ls
+              exit 1
+            fi
 
             rm -rf "$RELEASE_DIR"
             mkdir -p "$RELEASE_DIR"
             tar -xzf "$TAR" -C "$RELEASE_DIR"
             rm -f "$TAR"
 
-            test -f "$RELEASE_DIR/ecosystem.config.cjs" || { echo "missing ecosystem.config.cjs"; ls -la "$RELEASE_DIR"; exit 1; }
+            if [ ! -f "$RELEASE_DIR/ecosystem.config.cjs" ]; then
+              echo "missing ecosystem.config.cjs"
+              ls -la "$RELEASE_DIR"
+              exit 1
+            fi
             test -f "$RELEASE_DIR/.output/server/index.mjs"
             test -f "$RELEASE_DIR/BUILD_SHA"
             grep -qx "$SHA" "$RELEASE_DIR/BUILD_SHA"
