@@ -1,5 +1,5 @@
 /* Szcenárió PWA — statikus asset cache + offline fallback. Nincs szerver-adat. */
-const CACHE_NAME = "szcenario-static-v2";
+const CACHE_NAME = "szcenario-static-v3";
 const PRECACHE = [
   "/offline.html",
   "/manifest.webmanifest",
@@ -38,6 +38,7 @@ function isHashedAsset(url) {
 function isBypass(url) {
   return (
     url.pathname === "/build-id.txt" ||
+    url.pathname === "/version.json" ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/_serverFn") ||
     url.pathname.startsWith("/src/") ||

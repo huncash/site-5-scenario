@@ -87,6 +87,30 @@ delete_pm2_5100() {
   pm2 kill >/dev/null 2>&1 || true
 }
 
+point_nginx_5100() {
+  echo ">> nginx proxy_pass 4100 → 5100"
+  if ! sudo -n true >/dev/null 2>&1; then
+    echo "sudo nincs — a publikus nginx marad 4100-on, szcenario.hu a regi origint mutatja"
+    return 1
+  fi
+  local f patched=0
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    echo ">> patch $f"
+    sudo sed -i 's/127\.0\.0\.1:4100/127.0.0.1:5100/g' "$f"
+    patched=1
+  done < <(sudo grep -rl '127.0.0.1:4100' /etc/nginx 2>/dev/null || true)
+  if [ "$patched" -eq 0 ]; then
+    echo ">> nginx: nincs 4100 proxy_pass"
+    sudo grep -n 'proxy_pass' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* 2>/dev/null || true
+    return 0
+  fi
+  sudo nginx -t
+  sudo systemctl reload nginx
+  echo ">> nginx reloaded"
+  sudo grep -n 'proxy_pass' /etc/nginx/sites-enabled/* 2>/dev/null || true
+}
+
 echo ">> activate $SHA"
 need "$RELEASE_DIR/ecosystem.config.cjs"
 need "$RELEASE_DIR/.output/server/index.mjs"
@@ -186,6 +210,9 @@ if ! curl -fsS --max-time 8 "http://127.0.0.1:${PORT}/version.json" | tee /tmp/v
   exit 1
 fi
 grep -q "$SHA" /tmp/version.json
+
+echo ">> nginx → 5100"
+point_nginx_5100
 
 echo ">> prune old releases"
 cd "$APP_DIR/releases"
