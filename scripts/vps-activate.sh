@@ -32,7 +32,7 @@ dump_logs() {
   echo "==== listen ===="
   ss -tulpn 2>/dev/null | grep -E ":${PORT_N}([^0-9]|$)" || true
   echo "==== fuser ===="
-  fuser -v "${PORT_N}/tcp" 2>&1 || true
+  sudo fuser -v "${PORT_N}/tcp" 2>&1 || true
   echo "==== curl :${PORT_N} ===="
   curl -sS -D- --max-time 2 "http://127.0.0.1:${PORT_N}/" | head -n 20 || true
   echo "==== pm2 list ===="
@@ -47,21 +47,21 @@ kill_pids() {
   local pid
   for pid in "$@"; do
     [ -n "$pid" ] || continue
-    echo ">> kill -9 $pid"
-    kill -9 "$pid" >/dev/null 2>&1 || true
+    echo ">> sudo kill -9 $pid"
+    sudo kill -9 "$pid" >/dev/null 2>&1 || true
   done
 }
 
 kill_own_4100() {
   local pids pid cmdline cwd
-  pids="$(fuser "${PORT_N}/tcp" 2>/dev/null || true)"
+  pids="$(sudo fuser "${PORT_N}/tcp" 2>/dev/null || true)"
   echo ">> fuser ${PORT_N}: ${pids:-none}"
   # szándékos word-split: fuser PID listát ad
   # shellcheck disable=SC2086
   kill_pids $pids
-  fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
+  sudo fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
   if command -v lsof >/dev/null 2>&1; then
-    lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
+    sudo lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r sudo kill -9 >/dev/null 2>&1 || true
   fi
   for pid in $(pgrep -u "$ME" -x node || true); do
     cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
@@ -69,7 +69,7 @@ kill_own_4100() {
     case "$cmdline $cwd" in
       *static-origin.mjs*|*"/.output/server/index.mjs"*|*signaling-server.js*|*"/var/www/szcenario"*)
         echo ">> kill node $pid"
-        kill -9 "$pid" >/dev/null 2>&1 || true
+        sudo kill -9 "$pid" >/dev/null 2>&1 || true
         ;;
     esac
   done
@@ -117,9 +117,8 @@ kill_own_4100
 sleep 1
 busy="$(ss_4100)"
 if [ -n "$busy" ]; then
-  echo "port $PORT_N still busy (deploy user, no sudo)"
+  echo "port $PORT_N still busy even with sudo cleanup"
   echo "$busy"
-  echo "ha mas uid tartja: rooton  fuser -kv ${PORT_N}/tcp"
   dump_logs
   exit 1
 fi
