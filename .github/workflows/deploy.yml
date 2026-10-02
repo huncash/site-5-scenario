@@ -52,15 +52,17 @@ jobs:
           set -euo pipefail
           test -f ecosystem.config.cjs
           test -f scripts/static-origin.mjs
+          test -f scripts/vps-activate.sh
           test -f package.json
           test -f BUILD_SHA
           rm -rf release release.tar.gz
           mkdir -p release/scripts
           cp -a .output release/.output
           cp -a package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
-          cp -a scripts/static-origin.mjs release/scripts/
+          cp -a scripts/static-origin.mjs scripts/vps-activate.sh release/scripts/
           tar -czf release.tar.gz -C release .
           tar -tzf release.tar.gz | grep -E '^\./ecosystem\.config\.cjs$|^ecosystem\.config\.cjs$'
+          tar -tzf release.tar.gz | grep -E 'scripts/vps-activate\.sh'
           tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs'
           ls -lh release.tar.gz
 
@@ -87,110 +89,22 @@ jobs:
           username: deploy
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script_stop: true
+          script_stop: false
           command_timeout: 10m
           script: |
             set -euo pipefail
-            SITE_SLUG="szcenario"
-            APP_DIR=/var/www/$SITE_SLUG
+            SITE_SLUG=szcenario
+            APP_DIR=/var/www/szcenario
             SHA=${{ github.sha }}
             RELEASE_DIR="$APP_DIR/releases/$SHA"
             mkdir -p "$APP_DIR/incoming" "$APP_DIR/releases" "$APP_DIR/shared"
-
             TAR="$(find "$APP_DIR/incoming" -name 'release.tar.gz' -type f | sort | tail -n 1)"
-            if [ -z "${TAR:-}" ]; then
-              echo "release.tar.gz not found under $APP_DIR/incoming"
-              find "$APP_DIR/incoming" -maxdepth 3 -ls
-              exit 1
-            fi
-
+            test -n "$TAR"
+            echo "tar=$TAR"
             rm -rf "$RELEASE_DIR"
             mkdir -p "$RELEASE_DIR"
             tar -xzf "$TAR" -C "$RELEASE_DIR"
             rm -f "$TAR"
-
-            if [ ! -f "$RELEASE_DIR/ecosystem.config.cjs" ]; then
-              echo "missing ecosystem.config.cjs"
-              ls -la "$RELEASE_DIR"
-              exit 1
-            fi
-            test -f "$RELEASE_DIR/.output/server/index.mjs"
-            test -f "$RELEASE_DIR/BUILD_SHA"
-            grep -qx "$SHA" "$RELEASE_DIR/BUILD_SHA"
-            test -f "$RELEASE_DIR/.output/public/build-id.txt"
-            grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
-
-            ln -sfn "$APP_DIR/shared/.env.production" "$RELEASE_DIR/.env"
-            ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
-            echo "current=$(readlink -f "$APP_DIR/current")"
-            echo "release_ls=$(ls -la "$RELEASE_DIR" | tr '\n' ' ')"
-
-            echo ">> pm2 delete"
-            pm2 delete site-5 >/dev/null 2>&1 || true
-            pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-            sleep 1
-            if command -v fuser >/dev/null 2>&1; then
-              fuser -k 4100/tcp >/dev/null 2>&1 || true
-            fi
-
-            ENVF="$APP_DIR/shared/.env.production"
-            if [ ! -f "$ENVF" ]; then
-              echo ">> creating $ENVF"
-              printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
-              chmod 600 "$ENVF" || true
-            fi
-            echo ">> checks"
-            for p in \
-              "$ENVF" \
-              "$RELEASE_DIR/scripts/static-origin.mjs" \
-              "$RELEASE_DIR/.output/public" \
-              "$RELEASE_DIR/ecosystem.config.cjs"
-            do
-              if [ ! -e "$p" ]; then
-                echo "missing $p"
-                ls -la "$(dirname "$p")" || true
-                exit 1
-              fi
-              echo "ok $p"
-            done
-
-            echo ">> source env"
-            set -a
-            # shellcheck disable=SC1091
-            . "$ENVF"
-            set +a
-            export NODE_ENV="${NODE_ENV:-production}"
-            export HOST="${HOST:-127.0.0.1}"
-            export PORT="${PORT:-4100}"
-            export STATIC_ROOT="$RELEASE_DIR/.output/public"
-            export RELEASE_DIR
-            export SITE_SLUG
-            echo ">> pm2 start PORT=$PORT HOST=$HOST STATIC_ROOT=$STATIC_ROOT"
-            pm2 start "$RELEASE_DIR/ecosystem.config.cjs" --update-env
-            pm2 save
-            sleep 3
-            echo ">> pm2 describe"
-            pm2 describe "$SITE_SLUG" | tee /tmp/pm2-szcenario.txt
-            if ! grep -q "online" /tmp/pm2-szcenario.txt; then
-              echo "==== $SITE_SLUG err.log ===="
-              tail -n 80 "/var/log/$SITE_SLUG/err.log" || true
-              echo "==== $SITE_SLUG out.log ===="
-              tail -n 80 "/var/log/$SITE_SLUG/out.log" || true
-              exit 1
-            fi
-            pm2 describe "$SITE_SLUG" | grep -E "exec cwd|script path" | tee /tmp/pm2-cwd.txt
-            if ! grep -qE "$RELEASE_DIR|$APP_DIR/current" /tmp/pm2-cwd.txt; then
-              echo "pm2 cwd mismatch"
-              cat /tmp/pm2-cwd.txt
-              exit 1
-            fi
-
-            echo ">> curl health"
-            curl -fsS --max-time 8 "http://127.0.0.1:4100/build-id.txt" | tee /tmp/build-id.txt
-            grep -qx "$SHA" /tmp/build-id.txt
-            curl -fsS --max-time 8 "http://127.0.0.1:4100/version.json" | tee /tmp/version.json
-            grep -q "$SHA" /tmp/version.json
-
-            echo ">> prune old releases"
-            cd "$APP_DIR/releases" && ls -t | tail -n +6 | xargs -r rm -rf
-            echo ">> deploy ok $SHA"
+            test -f "$RELEASE_DIR/scripts/vps-activate.sh"
+            chmod +x "$RELEASE_DIR/scripts/vps-activate.sh"
+            SITE_SLUG="$SITE_SLUG" APP_DIR="$APP_DIR" bash "$RELEASE_DIR/scripts/vps-activate.sh" "$SHA"
