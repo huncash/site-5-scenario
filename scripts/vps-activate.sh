@@ -76,57 +76,18 @@ ln -sfn "$ENVF" "$RELEASE_DIR/.env"
 ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
 echo "current=$(readlink -f "$APP_DIR/current")"
 
-echo ">> pm2 delete"
+echo ">> pm2 delete + free 4100"
 pm2 delete site-5 >/dev/null 2>&1 || true
-pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-for _ in 1 2 3 4 5 6 7 8; do
-  if ! pm2 describe "$SITE_SLUG" >/dev/null 2>&1; then
-    break
-  fi
-  pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-  sleep 1
-done
-
-kill_matching() {
-  local pat="$1"
-  local pid
-  for pid in $(pgrep -f "$pat" || true); do
-    if [ "$pid" = "$$" ] || [ "$pid" = "$PPID" ]; then
-      continue
-    fi
-    kill -9 "$pid" >/dev/null 2>&1 || true
-  done
-}
-
-echo ">> free port $PORT"
-kill_matching "scripts/static-origin.mjs"
-kill_matching ".output/server/index.mjs"
-if command -v fuser >/dev/null 2>&1; then
-  fuser -k "$PORT/tcp" >/dev/null 2>&1 || true
-fi
-if command -v lsof >/dev/null 2>&1; then
-  lsof -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
-fi
-
-busy=1
-for i in 1 2 3 4 5 6 7 8 9 10; do
-  if port_free; then
-    echo ">> port $PORT free"
-    busy=0
-    break
-  fi
-  echo ">> port $PORT busy ($i)"
+pm2 delete szcenario >/dev/null 2>&1 || true
+fuser -k 4100/tcp >/dev/null 2>&1 || true
+sleep 2
+if ! port_free; then
+  echo "port $PORT still busy after fuser"
   port_holders
-  if command -v fuser >/dev/null 2>&1; then
-    fuser -k "$PORT/tcp" >/dev/null 2>&1 || true
-  fi
-  sleep 1
-done
-if [ "$busy" -ne 0 ]; then
-  echo "port $PORT not free"
   dump_logs
   exit 1
 fi
+echo ">> port $PORT free"
 
 echo ">> pm2 start PORT=$PORT HOST=$HOST STATIC_ROOT=$STATIC_ROOT"
 pm2 start "$RELEASE_DIR/ecosystem.config.cjs" --update-env
