@@ -1,6 +1,7 @@
 // Local-only encrypted store on IndexedDB. Multi-profile: each profile owns
 // its own salt/verifier and its own encrypted rows. The active profile is
 // set by the vault after unlock; all row methods scope to it implicitly.
+// Nincs szerveroldali DB: számítás, szcenárió és tárolás a böngészőben marad.
 
 import type { DataStore, StoreDefinition } from "@/storage/DataStore";
 import { IndexedDbDataStore } from "@/storage/indexeddb/IndexedDbDataStore";

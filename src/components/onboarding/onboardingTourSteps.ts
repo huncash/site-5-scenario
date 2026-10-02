@@ -1,68 +1,92 @@
 "use client";
 
+export type TourAnchorId =
+  | "header"
+  | "pdca-dial"
+  | "view-toggle"
+  | "shortcuts"
+  | "app-menu"
+  | "workspaces"
+  | "work-panels"
+  | "bottom-tabs";
+
+export type TourVisual = {
+  icon: "layout" | "panels" | "tabs" | "dial" | "split" | "keys" | "menu" | "workspace";
+  caption: string;
+};
+
 export type OnboardingStep = {
   id: string;
   title: string;
   body: string;
-  bullets?: string[];
+  visuals?: TourVisual[];
+  anchors?: TourAnchorId[];
+  anchorLabels?: Partial<Record<TourAnchorId, string>>;
 };
 
 export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
   {
-    id: "welcome-shortcuts",
-    title: "Üdvözlés & Gyorsbillentyűk",
-    body: "A Szcenárió desktopon gyors: billentyűzettel pár másodperc alatt tudsz váltani, menteni és forgatni a PDCA fókuszt. A gyorsbillentyűk listáját a felső sávban, a hamburger mellett találod (⌨).",
-    bullets: [
-      "Mentés: Ctrl/Cmd + S",
-      "Alsó fülek váltása: Alt + Shift + ← / →",
-      "Felső munkaterek váltása: PageUp / PageDown (vagy Alt+Shift+PageUp/PageDown; Ctrl+Alt+←/→ fallback)",
-      "Szumma toggle: Alt + Shift + End",
-      "PDCA negyed forgatás: ↓ (vagy Alt + Shift + ↓ fallback)",
+    id: "demo",
+    title: "Mintahelyzet",
+    body: "Előre betöltött példa. Nem banki kivonat, nem élő ügyféladat.",
+    visuals: [
+      { icon: "panels", caption: "A számok a böngészőben készülnek." },
+      { icon: "menu", caption: "Kilépés: Főmenü → Másik eset." },
     ],
   },
   {
     id: "anatomy",
-    title: "A felület anatómiája",
-    body: "A felső sávban van a profil és a gyorsmenü (hamburger). A középen lévő PDCA tárcsa a fókuszváltás (PLAN→DO→CHECK→ACT) vizuális „iránytűje”.",
-    bullets: [
-      "Globális kereső: a felső sáv keresőmezője (tételek / célok / törzsadatok)",
-      "Hamburger menü: extra funkciók, eszközök, beállítások és ez a bemutató",
-      "Nézet: split / full elrendezés (ha elérhető a nézetvezérlő)",
+    title: "Három sáv",
+    body: "Felső vezérlés, középen a munka, alul a modulok.",
+    visuals: [
+      { icon: "layout", caption: "Fent: helyzet és PDCA-tárcsa." },
+      { icon: "workspace", caption: "A fülek a munkateret cserélik." },
+      { icon: "tabs", caption: "Lent: Cashflow, Tételek, Üzletek, Leltár." },
     ],
+    anchors: ["header", "workspaces", "bottom-tabs"],
+    anchorLabels: {
+      header: "Fent",
+      workspaces: "Terek",
+      "bottom-tabs": "Modulok",
+    },
   },
   {
     id: "pdca",
-    title: "A PDCA ciklus lényege",
-    body: "A szimuláció lényege, hogy ne csak rögzíts, hanem döntést hozz: PLAN (terv) → DO (működés) → CHECK (eltérés) → ACT (beavatkozás).",
-    bullets: [
-      "PLAN: terv és célok — mit szeretnél elérni",
-      "DO: a napi működés tételei — mi történik valójában",
-      "CHECK: eltérés és mintázatok — hol csúszik el",
-      "ACT: beavatkozás — mit változtatsz, hogy a következő kör jobb legyen",
+    title: "PDCA",
+    body: "PLAN → DO → CHECK → ACT. Egyszerre legfeljebb két fázis látszik.",
+    visuals: [
+      { icon: "dial", caption: "A tárcsa a következő fázispárra fordít." },
+      { icon: "split", caption: "Osztott / teljes nézet a fejléc kapcsolóján." },
     ],
+    anchors: ["pdca-dial", "view-toggle"],
+    anchorLabels: {
+      "pdca-dial": "Tárcsa",
+      "view-toggle": "Nézet",
+    },
   },
   {
-    id: "demo",
-    title: "A demó adatok felfedezése",
-    body: "Most egy előre betöltött, biztonságos demó állapotot látsz. Nem kell banki import ahhoz, hogy értelmet kapjon a felület — a lényeg azonnal látható.",
-    bullets: ["Minden helyben fut (local‑first)", "A demó csak minta — nem „éles” adat", "Bármikor válthatsz másik esetre/profilra"],
+    id: "welcome-shortcuts",
+    title: "Gyorsbillentyűk",
+    body: "A billentyűzet-ikon a lista. Mentés: Ctrl/Cmd+S.",
+    visuals: [{ icon: "keys", caption: "Alsó fülek: Alt+Shift+←/→ · munkaterek: PageUp/PageDown." }],
+    anchors: ["shortcuts"],
   },
   {
-    id: "what-if",
-    title: "Interaktív módosítások (What‑if)",
-    body: "Állíts értékeket, próbálj ki alternatívákat és nézd meg azonnal a hatást. A cél: gyors „mi lenne, ha” döntési visszajelzés a böngészőben.",
-    bullets: ["Csúszkák / mezők: finomhangolás", "Grafikonok: azonnali visszacsatolás", "Fókusz: PDCA‑ban lépj tovább, ne ragadj a listákban"],
+    id: "workspaces",
+    title: "Munkaterek",
+    body: "Magán, vállalkozás és projekt külön könyvelési tér. A felső fülek ezeket cserélik.",
+    visuals: [{ icon: "workspace", caption: "A középső panelt a kiválasztott tér tölti." }],
+    anchors: ["workspaces"],
+    anchorLabels: { workspaces: "Terek" },
   },
   {
     id: "security-close",
-    title: "Adatkezelés & következő 2 perc",
-    body: "Zárásként két praktikus dolog: hogyan ments, és hol tudsz visszajönni ide segítségért. Nem ígéret — konkrét műveletek.",
-    bullets: [
-      "Mentés: Hamburger → Gyors mentés (.json) vagy Beállítások → Mentés betöltése…",
-      "Eszköz hozzáadása: Hamburger → Eszköz hozzáadása QR-rel (ha több eszközön dolgozol)",
-      "Segítség: Hamburger → Tudásbázis / GYIK",
-      "Demó váltás: Hamburger → Másik eset",
+    title: "Főmenü",
+    body: "A három vonal a főmenü. Mentés, GYIK és kilépés itt van.",
+    visuals: [
+      { icon: "menu", caption: "Gyors mentés (.json) · GYIK · Másik eset." },
     ],
+    anchors: ["app-menu"],
+    anchorLabels: { "app-menu": "Menü" },
   },
 ];
-

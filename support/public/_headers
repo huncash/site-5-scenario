@@ -1,0 +1,6 @@
+/*
+  Content-Security-Policy: frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://szcenario.hu https://*.szcenario.hu
+  X-Content-Type-Options: nosniff
+
+/embed/*
+  Cache-Control: public, max-age=300, stale-while-revalidate=86400

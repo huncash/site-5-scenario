@@ -1,29 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export function DemoSlotTeaser(props: { title: string; body: string; cta: string; to: string; pricingHref: string }) {
   const { title, body, cta, to, pricingHref } = props;
   return (
-    <Card className="relative overflow-hidden border-slate-700/60 bg-slate-950/30">
+    <Card className="relative overflow-hidden border-white/12 bg-card">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-base font-semibold text-slate-100">
+        <CardTitle className="flex items-center text-base font-semibold text-foreground">
           {title}
-          <Badge variant="secondary" className="ml-2 text-[10px]">
-            preload
-          </Badge>
         </CardTitle>
-        <div className="mt-0.5 text-[11px] text-slate-300">
-          A demó a meglévő rendszerállapotot tölti be — nincs új feature, csak wrapper.
-        </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-[12px] text-slate-300">{body}</p>
+        <p className="text-[12px] text-muted-foreground">{body}</p>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild>
+          <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">
             <a href={to}>{cta}</a>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="border-white/35 bg-transparent text-foreground">
             <a href={pricingHref}>Csomagok</a>
           </Button>
         </div>

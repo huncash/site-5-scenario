@@ -16,6 +16,8 @@ import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
 import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
+import { SupportEmbedProvider } from "@/components/support/SupportEmbedProvider";
+import { LeanCommandPalette } from "@/components/LeanCommandPalette";
 
 function NotFoundComponent() {
   return (
@@ -130,12 +132,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "mask-icon", href: "/logo.svg", color: "#00f0ff" },
       { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
     ],
 
   }),
 
   shellComponent: RootShell,
+  pendingComponent: function ShellPending() {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground">
+        <span className="text-sm tracking-wide">Szcenárió</span>
+      </div>
+    );
+  },
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
@@ -159,36 +169,36 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    // In dev, make sure no previously-registered SW/caches keep stale assets.
-    if (!import.meta.env.DEV) return;
-    try {
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .getRegistrations()
-          .then((regs) => Promise.all(regs.map((r) => r.unregister())))
-          .catch(() => {});
-      }
+    if (!("serviceWorker" in navigator)) return;
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+        .catch(() => {});
       if ("caches" in window) {
         caches
           .keys()
-          .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+          .then((keys) => Promise.all(keys.filter((k) => k.startsWith("szcenario-")).map((k) => caches.delete(k))))
           .catch(() => {});
       }
-    } catch {
-      // ignore
+      return;
     }
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <VaultProvider>
         <FeatureComingSoonProvider>
-          <OnboardingTourProvider>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-            <HoverCoachTooltip />
-            <Toaster richColors closeButton position="top-center" />
-          </OnboardingTourProvider>
+          <SupportEmbedProvider>
+            <OnboardingTourProvider>
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+              <LeanCommandPalette />
+              <HoverCoachTooltip />
+              <Toaster richColors closeButton position="top-center" />
+            </OnboardingTourProvider>
+          </SupportEmbedProvider>
         </FeatureComingSoonProvider>
       </VaultProvider>
     </QueryClientProvider>

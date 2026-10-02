@@ -1,45 +1,6 @@
-import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, DEMO_STARTER_BLURB, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
 
-const packages = {
-  starter: {
-    tagline: "Átlátható cash‑flow és alap puffer.",
-    description:
-      "Ha első körben azt akarod látni, mennyi a teher és mennyi a szabad: gyors rálátás és lokális mentés.",
-    includes: [
-      "Alap cash‑flow áttekintés",
-      "Banki/Excel import (hatékonyság)",
-      "Lokális mentés / export (titkosítva)",
-    ],
-    limits: [
-      "Adósság‑rutinok: alap szint (marketing copy)",
-      "Forgatókönyvek: korlátozott",
-    ],
-  },
-  pro: {
-    tagline: "Runway + tartozás‑teher: operatív döntési ritmus.",
-    description:
-      "Ha ütemezni akarod a helyreállítást: teher, puffer és következő lépés fókusz, gyorsan és helyben.",
-    includes: [
-      "Tartozások / kötelezettségek panel (demóban előre betöltve)",
-      "Runway és közeljövő teher fókusz",
-      "Lean/MUDA jelzések a pazarlásra (marketing copy)",
-      PRO_MULTIUSER_BULLET,
-      PRO_P2P_SYNC_BULLET,
-    ],
-    limits: ["Slotok száma: rugalmas (nem korlátlan)"],
-  },
-  expert: {
-    tagline: "Komplex helyreállítás: több ág, több forgatókönyv.",
-    description:
-      "Ha több tartozás, több ütemezés és több döntési ág van: fejlett ACT beavatkozások és korlátlan forgatókönyvek.",
-    includes: [
-      "Korlátlan forgatókönyv-slotok (marketing copy)",
-      "Fejlett ACT beavatkozási ágak (marketing copy)",
-      "Prioritásos módszertani sablonok (helyreállítási rutinok)",
-    ],
-    limits: ["Korlátok: a valós működés szab határt, nem a csomag."],
-  },
-} satisfies Record<TierId, TierCopy>;
+const packages = STANDARD_TIER_COPY;
 
 export const ADOSSAG_HELYREALLITAS_FUNNEL = {
   hero: {
@@ -57,13 +18,12 @@ export const ADOSSAG_HELYREALLITAS_FUNNEL = {
   ],
   demoTeaser: {
     title: "Interaktív előnézet: tartozás + törlesztés (demó)",
-    body:
-      "Preloadolt tartozás és törlesztés helyzet — hogy azonnal lásd a terhet és a fókuszt a következő 30 napra.",
+    body: DEMO_STARTER_BLURB,
     cta: "Megnyitom a helyreállítás demót",
   },
   tiers: {
     defaultSelected: "pro" as TierId,
-    note: "Tájékoztató jellegű csomagok (marketing). A funnel nem bővíti a core motort.",
+    note: "Minden csomag tiszta, lokális alapon működik, rejtett költségek nélkül.",
   },
   packages,
   tierOffers: buildTierOffers(packages),

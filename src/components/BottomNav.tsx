@@ -34,6 +34,7 @@ export function BottomNav({
 
   return (
     <div
+      data-tour-anchor="bottom-tabs"
       className="fixed bottom-0 left-0 right-0 z-50 flex h-8 w-full items-center justify-between gap-2 border-t border-slate-800/70 px-2 py-0.5 backdrop-blur-md sm:px-3"
       style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
     >

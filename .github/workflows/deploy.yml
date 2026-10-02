@@ -29,12 +29,36 @@ jobs:
           NODE_ENV: production
         run: npm run build:node
 
+      - name: Verify CI production output
+        run: |
+          set -euo pipefail
+          test -f .output/server/index.mjs
+          test -d .output/public
+          mkdir -p .output/public
+          echo "${{ github.sha }}" > .output/public/build-id.txt
+          echo "${{ github.sha }}" > BUILD_SHA
+          printf '{"sha":"%s","builtAt":"%s"}\n' "${{ github.sha }}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .output/public/version.json
+          test -f .output/public/sw.js
+          test -f .output/public/manifest.webmanifest
+          test -f .output/public/manifest.json
+          test -f .output/public/index.html
+          test -f .output/public/_shell.html
+          test -f scripts/static-origin.mjs
+          echo "Built SHA ${{ github.sha }}"
+          find .output -maxdepth 3 -type f | head -n 40
+
       - name: Package release
         run: |
+          set -euo pipefail
+          rm -rf release release.tar.gz
           mkdir -p release
-          cp -r .output release/
-          cp package.json package-lock.json ecosystem.config.cjs release/
+          cp -a .output release/.output
+          cp package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
+          mkdir -p release/scripts
+          cp scripts/static-origin.mjs release/scripts/
           tar -czf release.tar.gz -C release .
+          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt'
+          ls -lh release.tar.gz
 
       - name: Validate VPS SSH key secret
         run: |
@@ -49,6 +73,8 @@ jobs:
           port: 22
           source: "release.tar.gz"
           target: "/var/www/szcenario/incoming/"
+          overwrite: true
+          timeout: 120s
 
       - name: Activate release
         uses: appleboy/ssh-action@v1.2.0
@@ -64,18 +90,48 @@ jobs:
             APP_DIR=/var/www/$SITE_SLUG
             SHA=${{ github.sha }}
             RELEASE_DIR="$APP_DIR/releases/$SHA"
+            mkdir -p "$APP_DIR/incoming" "$APP_DIR/releases" "$APP_DIR/shared"
+
+            TAR="$(find "$APP_DIR/incoming" -name 'release.tar.gz' -type f | sort | tail -n 1)"
+            test -n "${TAR:-}" || (echo "release.tar.gz not found under $APP_DIR/incoming" && find "$APP_DIR/incoming" -maxdepth 3 -ls && exit 1)
+
+            rm -rf "$RELEASE_DIR"
             mkdir -p "$RELEASE_DIR"
-            tar -xzf "$APP_DIR/incoming/release.tar.gz" -C "$RELEASE_DIR"
-            rm -f "$APP_DIR/incoming/release.tar.gz"
+            tar -xzf "$TAR" -C "$RELEASE_DIR"
+            rm -f "$TAR"
+
+            test -f "$RELEASE_DIR/.output/server/index.mjs"
+            test -f "$RELEASE_DIR/BUILD_SHA"
+            grep -qx "$SHA" "$RELEASE_DIR/BUILD_SHA"
+            test -f "$RELEASE_DIR/.output/public/build-id.txt"
+            grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
+
             ln -sfn "$APP_DIR/shared/.env.production" "$RELEASE_DIR/.env"
             ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"
+            readlink -f "$APP_DIR/current"
+
+            # Old manual deploy used PM2 name site-5 under /var/www/site-5 — that must not keep port 4100.
+            pm2 delete site-5 >/dev/null 2>&1 || true
             pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
-            pm2 start "$RELEASE_DIR/.output/server/index.mjs" \
+            test -f "$RELEASE_DIR/scripts/static-origin.mjs"
+            pm2 start "$RELEASE_DIR/scripts/static-origin.mjs" \
               --name "$SITE_SLUG" \
               --cwd "$RELEASE_DIR" \
+              --interpreter node \
               --node-args="--env-file=$APP_DIR/shared/.env.production" \
               --time \
               --output "/var/log/$SITE_SLUG/out.log" \
               --error "/var/log/$SITE_SLUG/err.log"
             pm2 save
+            sleep 3
+            pm2 describe "$SITE_SLUG" | tee /tmp/pm2-szcenario.txt
+            grep -q "online" /tmp/pm2-szcenario.txt
+            pm2 describe "$SITE_SLUG" | grep -E "exec cwd|script path" | tee /tmp/pm2-cwd.txt
+            grep -q "$RELEASE_DIR" /tmp/pm2-cwd.txt
+
+            curl -fsS --max-time 8 "http://127.0.0.1:4100/build-id.txt" | tee /tmp/build-id.txt
+            grep -qx "$SHA" /tmp/build-id.txt
+            curl -fsS --max-time 8 "http://127.0.0.1:4100/version.json" | tee /tmp/version.json
+            grep -q "$SHA" /tmp/version.json
+
             cd "$APP_DIR/releases" && ls -t | tail -n +6 | xargs -r rm -rf

@@ -8,6 +8,7 @@ import { FaqSection } from "@/components/funnel/FaqSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PRICING_HERO } from "@/content/pricing/tiers";
 
 export const Route = createFileRoute("/f/adossag-helyreallitas/")({
   component: AdossagLandingPage,
@@ -48,11 +49,12 @@ function AdossagLandingPage() {
         <DemoSlotTeaser title={c.demoTeaser.title} body={c.demoTeaser.body} cta={c.demoTeaser.cta} to="/f/adossag-helyreallitas/demo" pricingHref="/f/adossag-helyreallitas/pricing" />
       </div>
 
-      <div className="mt-6 grid gap-4">
-        <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-          <div className="text-sm font-semibold text-slate-100">Csomagok (áttekintés)</div>
+      <div className="mt-6 space-y-6">
+        <div>
+          <div className="text-sm font-semibold text-slate-100">Csomagok</div>
+          <p className="mt-1 max-w-3xl text-[13px] text-slate-300">{PRICING_HERO}</p>
           <div className="mt-3">
-            <TierCards offers={c.tierOffers} selected={c.tiers.defaultSelected} checkoutHref="/f/adossag-helyreallitas/checkout" ctaLabel="Ingyenes kipróbálás" />
+            <TierCards offers={c.tierOffers} selected={c.tiers.defaultSelected} checkoutHref="/f/adossag-helyreallitas/checkout" ctaLabel="Kiválasztom" />
           </div>
           <div className="mt-2 text-[11px] text-slate-400">{c.tiers.note}</div>
         </div>

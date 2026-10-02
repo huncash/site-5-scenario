@@ -258,6 +258,7 @@ export function WorkspacePanels({
     const isFull = viewMode === "full";
     return (
       <div
+        data-tour-anchor="work-panels"
         data-view-mode={viewMode ?? "split"}
         className={`w-full px-2 pt-1 sm:px-3 md:px-4 ${isFull ? "max-w-none" : "mx-auto max-w-[98%]"}`}
       >
@@ -297,7 +298,10 @@ export function WorkspacePanels({
   }
 
   return (
-    <div className={`mx-auto w-full px-2 pt-4 sm:px-4 ${viewMode === "full" ? "max-w-none" : "max-w-[98%]"}`}>
+    <div
+      data-tour-anchor="work-panels"
+      className={`mx-auto w-full px-2 pt-4 sm:px-4 ${viewMode === "full" ? "max-w-none" : "max-w-[98%]"}`}
+    >
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6">
         <div className="text-xs font-semibold uppercase tracking-wider">
           <span className={headerLeftCls}>{headerLeft}</span>

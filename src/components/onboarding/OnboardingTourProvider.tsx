@@ -14,6 +14,7 @@ type OnboardingTourApi = {
   closeTour: () => void;
   isOpen: boolean;
   stepIndex: number;
+  stepId: string | null;
 };
 
 const Ctx = createContext<OnboardingTourApi | null>(null);
@@ -101,7 +102,13 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
   }, [openTour]);
 
   const api = useMemo<OnboardingTourApi>(
-    () => ({ openTour, closeTour, isOpen: open, stepIndex }),
+    () => ({
+      openTour,
+      closeTour,
+      isOpen: open,
+      stepIndex,
+      stepId: ONBOARDING_TOUR_STEPS[stepIndex]?.id ?? null,
+    }),
     [openTour, closeTour, open, stepIndex],
   );
 

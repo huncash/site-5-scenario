@@ -328,6 +328,7 @@ export function createMeshRepository<TSchema extends DataStoreSchema>(
 let _repo: MeshRepository<MeshSchema> | null = null;
 
 function defaultStore(): DataStore<MeshSchema> {
+  // Szerveren soha nincs perzisztencia — a mesh adat a kliens gépén marad.
   if (typeof window === "undefined") return new InMemoryDataStore<MeshSchema>();
   return new LocalStorageDataStore<MeshSchema>({ namespace: "mesh-repo" });
 }

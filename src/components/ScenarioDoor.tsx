@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, PlayCircle, ShieldCheck, Sparkles, Workflow } from "lucide-react";
+import { useNavigate, Link } from "@tanstack/react-router";
+import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
@@ -12,6 +12,8 @@ import {
   type ScenarioDoorStep,
 } from "@/lib/demoSession";
 import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
+import { HomePricing } from "@/components/home/HomePricing";
+import { DEMO_STARTER_BLURB } from "@/content/pricing/tiers";
 import { useVault } from "@/lib/vault";
 import { localdb } from "@/lib/localdb";
 
@@ -91,6 +93,7 @@ export function ScenarioDoor() {
   const [busyId, setBusyId] = useState<DemoSegmentId | null>(null);
   const [resetBusy, setResetBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [campus, setCampus] = useState(false);
   const inFlight = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -109,30 +112,40 @@ export function ScenarioDoor() {
     () => [
       {
         title: "Projektalapú & interim kontrolling",
-        body: "Zseb‑kontrolling + valóság‑sokk: terv → tény → eltérés, döntési fókusz.",
-        href: "/f/projekt-kontrolling/",
+        body: "Terv → tény → eltérés. Gyors zseb‑kontrolling és valóság‑sokk jelzés projektekhez.",
+        segmentId: "demo7_personal_pocket_seasonal_pilot" as const,
+        infoHref: "/f/projekt-kontrolling/",
       },
       {
         title: "Adósság‑helyreállítás",
-        body: "Runway + teher: Avalanche/Snowball fókusz és következő 30–60 nap tisztázása.",
-        href: "/f/adossag-helyreallitas/",
+        body: "Runway + teher. Avalanche/Snowball fókusz és a következő 30–60 nap tisztázása.",
+        segmentId: "demo7_personal_pocket_seasonal_pilot" as const,
+        infoHref: "/f/adossag-helyreallitas/",
       },
       {
         title: "Lean Minőség & Költség",
-        body: "Fedezeti pont, sávok, veszteséghőtérkép — mikro‑szivárgások gyors jelzése.",
-        href: "/f/minoseg-koltseg/",
+        body: "Fedezeti pont, sávok, veszteség-hőtérkép. Mikro‑szivárgások gyors jelzése üzemvezetőknek.",
+        segmentId: "demo4_fine_dining_bistro" as const,
+        infoHref: "/f/minoseg-koltseg/",
       },
       {
         title: "Multi‑Site / Hálózati vállalkozások",
-        body: "Egységek konszolidációja, drift jelzés, Lean/MUDA fókusz — egy kézben.",
-        href: "/f/multi-site/",
+        body: "Egységek konszolidációja és drift jelzés. Lean/MUDA fókusz több telephelyen.",
+        segmentId: "demo1_multisite_operator" as const,
+        infoHref: "/f/multi-site/",
       },
     ],
     [],
   );
 
   useEffect(() => {
-    setStep(readScenarioDoorStep());
+    const stored = readScenarioDoorStep();
+    setStep(stored === "hospitality" || stored === "industry" ? stored : "type");
+    try {
+      setCampus(new URLSearchParams(window.location.search).get("ref") === "campus");
+    } catch {
+      setCampus(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -161,162 +174,135 @@ export function ScenarioDoor() {
     }
   };
 
-  const quickTry = async () => {
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setBusyId("demo7_personal_pocket_seasonal_pilot");
-    setError(null);
-    try {
-      await enterDemoSegment("demo7_personal_pocket_seasonal_pilot", { unlockById, createProfile });
-      preferDashboardHome();
-      await navigate({ to: "/" });
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Nem sikerült elindítani az ingyenes kipróbálást.");
-    } finally {
-      setBusyId(null);
-      inFlight.current = false;
-    }
-  };
-
   return (
     <div
       ref={scrollerRef}
       tabIndex={-1}
       data-exact-ignore
-      className="h-full min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain bg-background outline-none"
+      className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background outline-none"
     >
-      <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">Szcenárió</div>
+            <div className="text-[11px] text-muted-foreground">Local‑first · offline‑first</div>
+          </div>
+          <Button asChild variant="outline" className="h-8 border-white/35 bg-transparent text-foreground">
+            <Link to="/login">Belépés</Link>
+          </Button>
+        </div>
+      </header>
+
+      <div className="mx-auto w-full max-w-5xl space-y-10 px-4 py-8 pb-16">
         <div className="space-y-3 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             szcenario.hu
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">Szcenárió</h1>
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Zseb‑kontrolling és valóság‑sokk: veszteségjelzések, döntési fókusz és “mi lenne, ha” tesztek — helyben futva.
+            A program egy helyzetet a te eszközödön számol: terv, tény, eltérés. Nincs regisztráció, nincs szerver-oldali adattárolás. Válaszd a saját fókuszodat: a Demó indítása a mintahelyzetet nyitja, a Több infó a csomagokat és a GYIK-et.
           </p>
-          {/* Above-the-fold CTA (no scroll): primary action always visible */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <Button
-              type="button"
-              className="h-10 bg-cyan-500/90 px-4 text-slate-950 hover:bg-cyan-400"
-              disabled={busyId !== null || resetBusy}
-              onClick={() => void quickTry()}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Segédeszköz ingyenes kipróbálása
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 border-border/60 bg-card/30 px-4"
-              disabled={busyId !== null || resetBusy}
-              onClick={() => go("hospitality")}
-            >
-              <PlayCircle className="mr-2 h-4 w-4" />
-              További demó helyzetek
-            </Button>
+          <div className="mx-auto flex max-w-2xl items-start justify-center gap-2 text-left text-[12px] text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
+            <span>
+              Az adat a böngészőben marad. Mentés: export/import vagy közeli eszköz↔eszköz (QR). Nincs telemetria.
+            </span>
           </div>
         </div>
 
         {step === "type" ? (
-          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-            {/* Summary card (single, concrete) */}
-            <div className="rounded-2xl border border-border/70 bg-card/40 p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">Lényeg</div>
-                  <div className="mt-1 text-lg font-semibold text-foreground">
-                    Zseb‑kontrolling: döntési jelzés, nem riport.
-                  </div>
-                </div>
-                <div className="shrink-0 rounded-xl border border-border/60 bg-card/30 px-3 py-2 text-[11px] text-muted-foreground">
-                  Lean + poka‑yoke
-                </div>
+          <div className="space-y-12">
+            <section className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Válassz ágazatot
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                A cél: gyorsan lásd a <span className="text-foreground/90">valóság‑sokk</span> pontokat (drift, teher, fedezet‑csúszás),
-                és azonnal kipróbáld a beavatkozást “mi lenne, ha” módban — <span className="text-foreground/90">hálózat nélkül is</span>.
-              </p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <div className="rounded-xl border border-border/60 bg-card/30 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Valóság‑sokk</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">Runway / teher / eltérés</div>
-                </div>
-                <div className="rounded-xl border border-border/60 bg-card/30 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Poka‑yoke</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">hibabiztos adatútvonal</div>
-                </div>
-              </div>
-              <div className="mt-3 text-[11px] text-muted-foreground">
-                Kattintáskor preloadolt, biztonságos demó állapot indul. Nem kér banki importot.
-              </div>
-            </div>
-
-            {/* Data security / transparency (visible immediately) */}
-            <div className="rounded-2xl border border-border/70 bg-card/40 p-5">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-cyan-300" />
-                <div className="text-sm font-semibold text-foreground">Adatbiztonság & transzparencia</div>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Poka‑yoke elv: legyen egyértelmű, mi történik az adataiddal — és mi nem.
-              </p>
-              <ul className="mt-3 space-y-1.5 text-[13px] text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/70" />
-                  <span>
-                    <span className="text-foreground/90 font-medium">Nincs szerver‑oldali adatbázis</span> (a működés helyben fut).
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/70" />
-                  <span>
-                    <span className="text-foreground/90 font-medium">Nincs regisztráció, nincs telemetria</span>.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300/70" />
-                  <span>
-                    Mentés / átvitel: <span className="text-foreground/90 font-medium">export/import</span> vagy közeli eszköz↔eszköz (QR/P2P), ahol elérhető.
-                  </span>
-                </li>
-              </ul>
-              <div className="mt-4 rounded-xl border border-border/60 bg-card/30 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Workflow className="h-4 w-4 text-slate-300" />
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Transzparens lépések
-                  </div>
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  1) demó indul → 2) dashboardra visz → 3) módosítasz → 4) azonnali grafikon visszajelzés.
-                </div>
-              </div>
-            </div>
-
-            {/* Branches (immediate choices) */}
-            <div className="lg:col-span-2">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Elágazás — válassz célpontot
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <p className="max-w-3xl text-[12px] leading-relaxed text-muted-foreground">{DEMO_STARTER_BLURB}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
                 {branches.map((b) => (
-                  <Button
-                    key={b.href}
-                    asChild
-                    variant="secondary"
-                    className="h-auto justify-start whitespace-normal rounded-2xl border border-border/60 bg-card/40 px-4 py-3 text-left hover:bg-card/60"
-                  >
-                    <a href={b.href}>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-foreground">{b.title}</div>
-                        <div className="mt-0.5 text-[11px] font-normal text-muted-foreground">{b.body}</div>
-                      </div>
-                    </a>
-                  </Button>
+                  <div key={b.infoHref} className="rounded-2xl border border-white/12 bg-card p-4">
+                    <div className="text-sm font-semibold text-foreground">{b.title}</div>
+                    <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{b.body}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        className="h-9 bg-cyan-500 px-3 text-slate-950 hover:bg-cyan-400"
+                        disabled={busyId !== null || resetBusy}
+                        onClick={() => void openCase(b.segmentId)}
+                      >
+                        Demó indítása
+                      </Button>
+                      <Button asChild variant="outline" className="h-9 border-white/35 bg-transparent px-3 text-foreground">
+                        <a href={b.infoHref}>Több infó</a>
+                      </Button>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  disabled={busyId !== null || resetBusy}
+                  onClick={() => go("hospitality")}
+                >
+                  További vendéglátós mintahelyzetek
+                </button>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Szcenárió fajták
+                </div>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Most a gazdasági ág nyitott. A többi ugyanerre a módszerre jön később — más kérdés, ugyanaz a helyi számítás.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SCENARIO_TYPES.map((t) =>
+                  t.open ? (
+                    <div key={t.id} className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4">
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
+                      <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                    </div>
+                  ) : (
+                    <div
+                      key={t.id}
+                      className="rounded-2xl border border-dashed border-white/15 bg-card p-4"
+                    >
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Később
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
+                      <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                    </div>
+                  ),
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Hogyan működik
+              </div>
+              <dl className="grid gap-3 sm:grid-cols-2">
+                <DoorFact term="Helyben számol">
+                  Terv, tény, eltérés a böngészőben készül. Nincs felhő‑adatbázis, nincs telemetria.
+                </DoorFact>
+                <DoorFact term="Egy ágazat, több fókusz">
+                  Vendéglátás és gazdasági helyzetek: projekt, adósság, lean, több telephely. A többi ágazat később.
+                </DoorFact>
+                <DoorFact term="Demó = minta, nem ügyfél">{DEMO_STARTER_BLURB}</DoorFact>
+                <DoorFact term="Mentés nálad">
+                  Export/import, vagy közeli eszköz↔eszköz QR‑rel. A belépés mesterjelszóval az eszközön történik.
+                </DoorFact>
+              </dl>
+            </section>
+
+            <HomeProductShots />
+            <HomePricing campus={campus} />
           </div>
         ) : null}
 
@@ -344,10 +330,10 @@ export function ScenarioDoor() {
                     <p className="mt-2 text-sm text-muted-foreground">{ind.blurb}</p>
                   </button>
                 ) : (
-                  <div
-                    key={ind.id}
-                    className="rounded-2xl border border-dashed border-border/50 bg-muted/10 p-5 text-left opacity-70"
-                  >
+                    <div
+                      key={ind.id}
+                      className="rounded-2xl border border-dashed border-white/15 bg-card p-5 text-left"
+                    >
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Később
                     </div>
@@ -363,6 +349,7 @@ export function ScenarioDoor() {
         {step === "hospitality" ? (
           <div className="space-y-4">
             <DoorBack onClick={() => go("type")} label="Vissza" aside="További demó helyzetek" />
+            <p className="text-[12px] leading-relaxed text-muted-foreground">{DEMO_STARTER_BLURB}</p>
             <div className="grid gap-2">
               {DEMO_SEGMENTS.map((s) => (
                 <Button
@@ -394,7 +381,7 @@ export function ScenarioDoor() {
         <div className="border-t border-border/40 pt-6 text-center">
           <button
             type="button"
-            className="text-[11px] text-muted-foreground/80 underline-offset-4 hover:text-muted-foreground hover:underline"
+            className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             disabled={busyId !== null || resetBusy}
             onClick={() => {
               if (inFlight.current) return;
@@ -427,9 +414,188 @@ export function ScenarioDoor() {
   );
 }
 
+function HomeProductShots() {
+  return (
+    <section className="space-y-4">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">A program</div>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          PDCA‑mosaik: fent a helyzet, középen a munka, alul a modulok. A számok a saját eszközödön készülnek.
+        </p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-5">
+        <ProductFrame className="lg:col-span-3" caption="PLAN + DO — terv és élő működés egymás mellett">
+          <PdcaShot />
+        </ProductFrame>
+        <ProductFrame className="lg:col-span-2" caption="Cashflow és eltérés, nem Excel‑vadászat">
+          <CashflowShot />
+        </ProductFrame>
+        <ProductFrame className="lg:col-span-2" caption="Magán, vállalkozás, projekt — külön terek">
+          <WorkspaceShot />
+        </ProductFrame>
+        <ProductFrame className="lg:col-span-3" caption="Tételek és sávok: a szám olvasható a oszlopon kívül">
+          <ItemsShot />
+        </ProductFrame>
+      </div>
+    </section>
+  );
+}
+
+function ProductFrame({
+  caption,
+  className,
+  children,
+}: {
+  caption: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <figure className={`overflow-hidden rounded-2xl border border-border/60 bg-slate-950/80 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.7)] ${className ?? ""}`}>
+      <div className="flex items-center gap-1.5 border-b border-white/5 px-3 py-2">
+        <span className="h-2 w-2 rounded-full bg-white/20" />
+        <span className="h-2 w-2 rounded-full bg-white/12" />
+        <span className="h-2 w-2 rounded-full bg-white/12" />
+        <span className="ml-2 truncate text-[10px] text-muted-foreground">szcenario.hu</span>
+      </div>
+      <div className="aspect-[16/10] p-3" aria-hidden>
+        {children}
+      </div>
+      <figcaption className="border-t border-white/10 px-3 py-2 text-[12px] text-muted-foreground">{caption}</figcaption>
+    </figure>
+  );
+}
+
+function ShotLabel({ children }: { children: ReactNode }) {
+  return (
+    <span className="rounded-md bg-slate-950/90 px-1.5 py-0.5 text-[9px] font-medium text-slate-200 shadow-sm">
+      {children}
+    </span>
+  );
+}
+
+function PdcaShot() {
+  return (
+    <div className="grid h-full grid-cols-2 gap-2 rounded-lg bg-[#0b0f19] p-2">
+      <div className="flex flex-col rounded-md border border-amber-300/30 bg-amber-500/[0.06] p-2">
+        <div className="text-[9px] font-semibold uppercase tracking-wider text-amber-200/80">PLAN</div>
+        <div className="mt-2 flex items-end justify-between gap-3">
+          <div className="space-y-1">
+            <ShotLabel>1,2 M</ShotLabel>
+            <ShotLabel>0,8 M</ShotLabel>
+          </div>
+          <div className="flex items-end gap-1">
+            <div className="h-12 w-5 rounded-sm bg-emerald-400/70" />
+            <div className="h-8 w-5 rounded-sm bg-sky-400/60" />
+          </div>
+        </div>
+        <div className="mt-auto space-y-1.5 pt-3">
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
+            <div className="h-full w-2/3 bg-amber-300/80" />
+          </div>
+          <div className="grid grid-cols-3 gap-1">
+            <div className="h-8 rounded bg-slate-900/70" />
+            <div className="h-8 rounded bg-slate-900/50" />
+            <div className="h-8 rounded bg-slate-900/70" />
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col rounded-md border border-cyan-300/30 bg-cyan-500/[0.06] p-2">
+        <div className="text-[9px] font-semibold uppercase tracking-wider text-cyan-200/80">DO</div>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-400">Cash nettő</span>
+            <ShotLabel>−120 e</ShotLabel>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-400">Tartozás</span>
+            <ShotLabel>2,4 M</ShotLabel>
+          </div>
+        </div>
+        <div className="mt-auto grid grid-cols-2 gap-1 pt-3">
+          <div className="h-10 rounded border border-white/5 bg-slate-900/70" />
+          <div className="h-10 rounded border border-white/5 bg-slate-900/50" />
+          <div className="col-span-2 h-8 rounded border border-white/5 bg-slate-900/40" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CashflowShot() {
+  const bars = [28, 46, 38, 62, 54, 71];
+  return (
+    <div className="flex h-full flex-col rounded-lg bg-[#0b0f19] p-2">
+      <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">Halmozott eredmény</div>
+      <div className="relative mt-2 min-h-0 flex-1">
+        <div className="absolute inset-0 flex items-end gap-1.5">
+          {bars.map((h, i) => (
+            <div key={i} className="flex h-full min-w-0 flex-1 flex-col justify-end">
+              <div className="relative w-full" style={{ height: `${h}%` }}>
+                <span className="absolute inset-x-0 -top-5 flex justify-center">
+                  <ShotLabel>{h}%</ShotLabel>
+                </span>
+                <div className="h-full w-full rounded-sm bg-cyan-400/70" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WorkspaceShot() {
+  return (
+    <div className="flex h-full flex-col rounded-lg bg-[#0b0f19] p-2">
+      <div className="flex gap-1">
+        {["Magán", "Vállalkozás", "Projekt"].map((x, i) => (
+          <div
+            key={x}
+            className={`rounded-md px-2 py-1 text-[10px] ${i === 1 ? "bg-white/10 text-slate-100" : "text-slate-500"}`}
+          >
+            {x}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 grid flex-1 grid-cols-2 gap-2">
+        <div className="rounded-md border border-white/5 bg-slate-900/60" />
+        <div className="rounded-md border border-white/5 bg-slate-900/40" />
+      </div>
+      <div className="mt-2 flex justify-around rounded-md border border-white/5 bg-slate-900/50 py-1 text-[9px] text-slate-400">
+        <span>Cashflow</span>
+        <span className="text-cyan-200">Tételek</span>
+        <span>Üzletek</span>
+        <span>Leltár</span>
+      </div>
+    </div>
+  );
+}
+
+function ItemsShot() {
+  const rows = [
+    { n: "Alapanyag", v: "420 e", w: "70%" },
+    { n: "Bér", v: "310 e", w: "52%" },
+    { n: "Rezsi", v: "180 e", w: "34%" },
+  ];
+  return (
+    <div className="flex h-full flex-col gap-2 rounded-lg bg-[#0b0f19] p-2">
+      {rows.map((r) => (
+        <div key={r.n} className="flex items-center gap-2">
+          <div className="w-16 shrink-0 text-[10px] text-slate-400">{r.n}</div>
+          <div className="relative h-5 flex-1 rounded-sm bg-slate-800">
+            <div className="h-full rounded-sm bg-emerald-400/55" style={{ width: r.w }} />
+          </div>
+          <ShotLabel>{r.v}</ShotLabel>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DoorFact({ term, children }: { term: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-card/40 px-4 py-3">
+    <div className="rounded-xl border border-white/12 bg-card px-4 py-3">
       <dt className="text-xs font-semibold uppercase tracking-wider text-foreground">{term}</dt>
       <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">{children}</dd>
     </div>

@@ -6,7 +6,7 @@ module.exports = {
   apps: [
     {
       name: SLUG,
-      script: ".output/server/index.mjs",
+      script: "scripts/static-origin.mjs",
       cwd: `${APP_DIR}/current`,
       instances: 1,
       exec_mode: "fork",

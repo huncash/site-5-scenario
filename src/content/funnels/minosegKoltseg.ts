@@ -1,50 +1,6 @@
-import { buildTierOffers, PRO_MULTIUSER_BULLET, PRO_P2P_SYNC_BULLET, type TierCopy, type TierId } from "@/content/pricing/tiers";
+import { buildTierOffers, DEMO_STARTER_BLURB, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
 
-const packages = {
-  starter: {
-    tagline: "Sablonok és gyors rendrakás.",
-    description:
-      "Alap költségvetés és magánéleti büdzsé sablonok — hogy gyorsan lásd, hová folyik el a pénz, és legyen mire építeni a módszertant.",
-    includes: [
-      "Alap költségvetés és magánbüdzsé sablonok",
-      "Gyors import és kategória-rutin",
-      "Lokális mentés / export (titkosítva)",
-    ],
-    limits: [
-      "Lean szimuláció: alap nézet (marketing copy)",
-      "Forgatókönyv-slotok: korlátozott",
-    ],
-  },
-  pro: {
-    tagline: "Lean cash‑flow + MUDA hőtérkép a mikro‑szivárgásokra.",
-    description:
-      "Operatív és üzemvezetői döntésekhez: fedezeti pont, sávok, és veszteséghőtérkép — lokális számítással, gyors visszajelzéssel.",
-    includes: [
-      "Teljes Lean cash‑flow áttekintés",
-      "MUDA mikro‑szivárgás hőtérkép",
-      "Excel import",
-      "Fedezeti pont kalkulátor",
-      PRO_MULTIUSER_BULLET,
-      PRO_P2P_SYNC_BULLET,
-    ],
-    limits: [
-      "Forgatókönyv-slotok: rugalmas (nem korlátlan)",
-    ],
-  },
-  expert: {
-    tagline: "Komplex üzem- és folyamatszimuláció, gyors ACT ágakkal.",
-    description:
-      "Ha több műszak, több termék, több korlát és több döntési ág van: komplex szimuláció és ACT beavatkozási ágak — nem szerveren, hanem helyben.",
-    includes: [
-      "Komplex üzem- és folyamatszimuláció (marketing copy)",
-      "Korlátlan forgatókönyv-slotok",
-      "Fejlett ACT beavatkozási ágak",
-    ],
-    limits: [
-      "Korlátok: a módszertan és a valós működés szab határt, nem a csomag.",
-    ],
-  },
-} satisfies Record<TierId, TierCopy>;
+const packages = STANDARD_TIER_COPY;
 
 export const MINOSEG_KOLTSEG_FUNNEL = {
   hero: {
@@ -62,14 +18,12 @@ export const MINOSEG_KOLTSEG_FUNNEL = {
   ],
   demoTeaser: {
     title: "Interaktív előnézet: fedezeti pont + hőtérkép (demó)",
-    body:
-      "A demóban előre betöltött minőség‑költség helyzetet kapsz: fedezeti pont, sávok és veszteséghőtérkép — hogy lásd, mit jelent a Lean a napi döntésekben.",
+    body: DEMO_STARTER_BLURB,
     cta: "Megnyitom a Lean szimulációt",
   },
   tiers: {
     defaultSelected: "pro" as TierId,
-    note:
-      "A csomagok ebben a verzióban tájékoztató jellegűek (marketing). A funnel nem implementál új korlátozást a core motorban.",
+    note: "Minden csomag tiszta, lokális alapon működik, rejtett költségek nélkül.",
   },
   packages,
   tierOffers: buildTierOffers(packages),
@@ -88,7 +42,7 @@ export const MINOSEG_KOLTSEG_FUNNEL = {
     },
     {
       q: "Hogyan tudom megosztani a képet a csapattal?",
-      a: "Lokális mentés/export működik. Több eszközös használat esetén P2P szinkron is szóba jöhet — a funnel ezt csak marketingként jelzi, nem épít be új logikát.",
+      a: "Lokális mentés/export működik. Több eszközös használat esetén a titkosított mentés eszközök között vihető át.",
     },
   ],
 } as const;
@@ -117,8 +71,7 @@ export const MINOSEG_KOLTSEG_VARIANTS: Record<
       "Gyors lokális számítás: azonnali visszajelzés a sávokon és a hőtérképen",
       "Local‑first: nincs regisztráció, nincs telemetria, nincs szerver‑oldali adatbázis",
     ],
-    demoTeaserBody:
-      "A demóban előre betöltött minőség‑költség helyzetet kapsz: fedezeti pont, sávok és veszteséghőtérkép — hogy lásd, mit jelent a Lean a napi döntésekben.",
+    demoTeaserBody: DEMO_STARTER_BLURB,
   },
   b: {
     heroTitle: "Hol folyik el a fedezet? Nézd meg 60 másodperc alatt.",
@@ -131,8 +84,7 @@ export const MINOSEG_KOLTSEG_VARIANTS: Record<
       "Lokális számítás → gyors, nem vár a hálózatra",
       "Adatszuverenitás: a működés a te eszközödön marad",
     ],
-    demoTeaserBody:
-      "Kattints, és kapsz egy előre betöltött üzemhelyzetet: sávok, fedezeti pont és hőtérkép. Nem kell beállítanod semmit, csak nézed a jeleket.",
+    demoTeaserBody: DEMO_STARTER_BLURB,
   },
   c: {
     heroTitle: "Minőség‑költség döntések: láss rá a driftre műszakonként.",
@@ -145,8 +97,7 @@ export const MINOSEG_KOLTSEG_VARIANTS: Record<
       "Hőtérkép: hol vannak a mikro‑szivárgások (MUDA jelzések)",
       "Local‑first: nincs központi adatbázis, nincs telemetria",
     ],
-    demoTeaserBody:
-      "A demóban a “minőség vs. költség” kompromisszumot látod: a sávok és a hőtérkép megmutatja, hol kell ACT-ben beavatkozni.",
+    demoTeaserBody: DEMO_STARTER_BLURB,
   },
 };
 

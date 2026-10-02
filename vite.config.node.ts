@@ -9,5 +9,16 @@ export default defineConfig({
   },
   nitro: {
     preset: "node-server",
+    routeRules: {
+      "/assets/**": {
+        headers: { "cache-control": "public, max-age=31536000, immutable" },
+      },
+      "/_build/**": {
+        headers: { "cache-control": "public, max-age=31536000, immutable" },
+      },
+      "/sw.js": {
+        headers: { "cache-control": "public, max-age=0, must-revalidate" },
+      },
+    },
   },
 });

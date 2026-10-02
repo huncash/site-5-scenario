@@ -80,7 +80,7 @@ export function ProfileHeader({
   const { lock, state } = useVault();
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
-  const { openTour, isOpen: tourOpen, stepIndex: tourStep } = useOnboardingTour();
+  const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
   const [kbOpen, setKbOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [omni, setOmni] = useState("");
@@ -88,7 +88,9 @@ export function ProfileHeader({
   const unlocked = state.status === "unlocked" ? state : null;
   const vaultKey = unlocked?.key ?? null;
   const visitorShell = Boolean(visitorDemo) || isDemoProfileName(unlocked?.profile.name);
-  const highlightShortcuts = tourOpen && tourStep === 0;
+  const highlightShortcuts = tourOpen && tourStepId === "welcome-shortcuts";
+  const highlightViewToggle = tourOpen && tourStepId === "pdca";
+  const highlightMenu = tourOpen && tourStepId === "security-close";
 
   const settingsQ = useQuery({
     queryKey: ["settings"],
@@ -192,7 +194,7 @@ export function ProfileHeader({
               </div>
             </div>
 
-            {/* RIGHT: pinned controls (PDCA counter → view toggle → hamburger) */}
+            {/* RIGHT: pinned controls */}
             <div className="flex min-w-0 items-center justify-end gap-2 justify-self-end">
               {rightControls}
               {vaultKey ? (
@@ -280,8 +282,14 @@ export function ProfileHeader({
 
               {showBack ? null : (
               <div
-                className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900/40 px-2"
-                title="Váltás Osztott (2-oszlopos) és Teljes szélességű nézet között"
+                data-tour-anchor="view-toggle"
+                className={cn(
+                  "flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900/40 px-2",
+                  highlightViewToggle
+                    ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
+                    : "",
+                )}
+                title="Osztott vagy teljes szélességű nézet"
               >
                 <Columns2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
                 <Switch
@@ -304,7 +312,7 @@ export function ProfileHeader({
               </div>
               )}
 
-              {/* Keyboard shortcuts quick access (left of hamburger) */}
+              {/* Keyboard shortcuts — left of the main menu */}
               <button
                 type="button"
                 className={cn(
@@ -325,9 +333,15 @@ export function ProfileHeader({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 hover:bg-slate-800/40"
-                    aria-label="Profil menü"
-                    title={`Profil menü — ${profileName}`}
+                    data-tour-anchor="app-menu"
+                    className={cn(
+                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 hover:bg-slate-800/40",
+                      highlightMenu
+                        ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
+                        : "",
+                    )}
+                    aria-label="Főmenü"
+                    title="Főmenü"
                   >
                     <Menu className="h-4 w-4" />
                   </button>
@@ -476,6 +490,7 @@ export function ProfileHeader({
           */}
           {showBack ? null : (
           <div
+            data-tour-anchor="header"
             data-pdca-dial-viewport-center
             className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
           >
@@ -492,7 +507,7 @@ export function ProfileHeader({
               <div className="min-w-0" />
             )}
 
-            <div className="pointer-events-none select-none bg-transparent">
+            <div data-tour-anchor="pdca-dial" className="pointer-events-none select-none bg-transparent">
               <PdcaSemiRotaryKnob mode={pdcaMode ?? "PD"} onModeChange={() => {}} />
             </div>
 
@@ -547,6 +562,7 @@ export function ProfileHeader({
 
         {bottomRow ? (
           <div
+            data-tour-anchor="workspaces"
             className="mt-1 -mx-2 px-2 pt-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4"
             style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
           >
@@ -570,6 +586,10 @@ export function ProfileHeader({
                 <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mentés</div>
                   <div className="mt-1 font-mono">Ctrl/Cmd + S</div>
+                </div>
+                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Lean kereső</div>
+                  <div className="mt-1 font-mono">Ctrl/Cmd + K</div>
                 </div>
                 <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Szumma</div>

@@ -89,7 +89,13 @@ function LoginPage() {
     setError(null);
     try {
       await enterDemoSegment(segmentId, { unlockById, createProfile });
-      await reloadProfiles();
+      try {
+        window.localStorage.setItem("szcenario_home_mode", "dashboard");
+        window.localStorage.setItem("szcenario_onboarding_pending", "1");
+        window.dispatchEvent(new Event("szcenario:home_mode"));
+      } catch {
+        // ignore
+      }
       await navigate({ to: "/" });
     } catch (err: any) {
       setError(err?.message || "Demo belépési hiba.");
@@ -170,6 +176,12 @@ function LoginPage() {
       const ok = await unlockById(targetId, pw);
       if (ok) {
         localStorage.setItem(LAST_PROFILE_KEY, targetId);
+        try {
+          localStorage.setItem("szcenario_home_mode", "dashboard");
+          window.dispatchEvent(new Event("szcenario:home_mode"));
+        } catch {
+          // ignore
+        }
         void navigate({ to: "/" });
       } else {
         setError("Hibás mesterjelszó. Kérjük, próbáld újra.");
@@ -187,6 +199,11 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-6">
+        <div className="flex justify-between text-[12px]">
+          <Link to="/" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+            ← Főoldal
+          </Link>
+        </div>
         {/* Device Status Header */}
         <div className="flex items-center justify-between rounded-xl border border-border/80 bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
@@ -247,7 +264,19 @@ function LoginPage() {
                 <p className="text-muted-foreground">A profil jelenleg meg van nyitva.</p>
               </div>
               <div className="flex gap-1.5">
-                <Button size="sm" className="h-7 text-xs gap-1" onClick={() => void navigate({ to: "/" })}>
+                <Button
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("szcenario_home_mode", "dashboard");
+                      window.dispatchEvent(new Event("szcenario:home_mode"));
+                    } catch {
+                      // ignore
+                    }
+                    void navigate({ to: "/" });
+                  }}
+                >
                   Vezérlőpult
                   <ArrowRight className="h-3 w-3" />
                 </Button>

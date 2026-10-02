@@ -33,3 +33,7 @@ dist-ssr
 
 # Local-only backups (never commit)
 local_backups/
+
+# Billing module local store / build
+bill/data/*.json
+bill/dist

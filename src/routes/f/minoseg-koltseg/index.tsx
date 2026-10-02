@@ -8,6 +8,7 @@ import { FaqSection } from "@/components/funnel/FaqSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PRICING_HERO } from "@/content/pricing/tiers";
 
 export const Route = createFileRoute("/f/minoseg-koltseg/")({
   validateSearch: (s: Record<string, unknown>) => {
@@ -62,24 +63,15 @@ function MinosegKoltsegLandingPage() {
         />
       </div>
 
-      <div className="mt-6 grid gap-4">
-        <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-          <div className="text-sm font-semibold text-slate-100">Csomagok (áttekintés)</div>
-          <div className="mt-1 text-[12px] text-slate-300">
-            A tier identitások fixek, a csomag leírása funnel‑specifikus — így mindenhol egyszerre finomítható.
-          </div>
+      <div className="mt-6 space-y-6">
+        <div>
+          <div className="text-sm font-semibold text-slate-100">Csomagok</div>
+          <p className="mt-1 max-w-3xl text-[13px] text-slate-300">{PRICING_HERO}</p>
           <div className="mt-3">
-            <TierCards offers={c.tierOffers} selected={c.tiers.defaultSelected} checkoutHref="/f/minoseg-koltseg/checkout" ctaLabel="Ingyenes kipróbálás" />
+            <TierCards offers={c.tierOffers} selected={c.tiers.defaultSelected} checkoutHref="/f/minoseg-koltseg/checkout" ctaLabel="Kiválasztom" />
           </div>
         </div>
-
         <FaqSection items={c.faq} />
-
-        <div className="flex justify-center pt-2">
-          <Button asChild size="lg" className="h-11 px-6">
-            <Link to="/f/minoseg-koltseg/demo">Segédeszköz ingyenes kipróbálása</Link>
-          </Button>
-        </div>
       </div>
     </FunnelShell>
   );

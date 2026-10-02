@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as LoginRouteImport } from './routes/login'
@@ -18,6 +19,7 @@ import { Route as ReferencesRouteImport } from './routes/references'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as LoginActivateRouteImport } from './routes/login_.activate'
 import { Route as FAdossagHelyreallitasIndexRouteImport } from './routes/f/adossag-helyreallitas/index'
 import { Route as FAdossagHelyreallitasCheckoutRouteImport } from './routes/f/adossag-helyreallitas/checkout'
 import { Route as FAdossagHelyreallitasDemoRouteImport } from './routes/f/adossag-helyreallitas/demo'
@@ -38,6 +40,11 @@ import { Route as FProjektKontrollingPricingRouteImport } from './routes/f/proje
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -78,6 +85,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const StatsRoute = StatsRouteImport.update({
   id: '/stats',
   path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginActivateRoute = LoginActivateRouteImport.update({
+  id: '/login_/activate',
+  path: '/login/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FAdossagHelyreallitasIndexRoute =
@@ -170,6 +182,7 @@ const FProjektKontrollingPricingRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
@@ -178,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/login/activate': typeof LoginActivateRoute
   '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
   '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
   '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
@@ -197,6 +211,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
@@ -205,6 +220,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/login/activate': typeof LoginActivateRoute
   '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
   '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
   '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
@@ -225,6 +241,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
@@ -233,6 +250,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
+  '/login_/activate': typeof LoginActivateRoute
   '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
   '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
   '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
@@ -254,6 +272,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/connect'
     | '/devices'
     | '/login'
@@ -262,6 +281,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/login/activate'
     | '/f/adossag-helyreallitas/checkout'
     | '/f/adossag-helyreallitas/demo'
     | '/f/adossag-helyreallitas/pricing'
@@ -281,6 +301,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app'
     | '/connect'
     | '/devices'
     | '/login'
@@ -289,6 +310,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/login/activate'
     | '/f/adossag-helyreallitas/checkout'
     | '/f/adossag-helyreallitas/demo'
     | '/f/adossag-helyreallitas/pricing'
@@ -308,6 +330,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/connect'
     | '/devices'
     | '/login'
@@ -316,6 +339,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/settings'
     | '/stats'
+    | '/login_/activate'
     | '/f/adossag-helyreallitas/checkout'
     | '/f/adossag-helyreallitas/demo'
     | '/f/adossag-helyreallitas/pricing'
@@ -336,6 +360,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRoute
   ConnectRoute: typeof ConnectRoute
   DevicesRoute: typeof DevicesRoute
   LoginRoute: typeof LoginRoute
@@ -344,6 +369,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
+  LoginActivateRoute: typeof LoginActivateRoute
   FAdossagHelyreallitasCheckoutRoute: typeof FAdossagHelyreallitasCheckoutRoute
   FAdossagHelyreallitasDemoRoute: typeof FAdossagHelyreallitasDemoRoute
   FAdossagHelyreallitasPricingRoute: typeof FAdossagHelyreallitasPricingRoute
@@ -369,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect': {
@@ -425,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/stats'
       fullPath: '/stats'
       preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login_/activate': {
+      id: '/login_/activate'
+      path: '/login/activate'
+      fullPath: '/login/activate'
+      preLoaderRoute: typeof LoginActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/f/adossag-helyreallitas/': {
@@ -544,6 +584,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRoute,
   ConnectRoute: ConnectRoute,
   DevicesRoute: DevicesRoute,
   LoginRoute: LoginRoute,
@@ -552,6 +593,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
+  LoginActivateRoute: LoginActivateRoute,
   FAdossagHelyreallitasCheckoutRoute: FAdossagHelyreallitasCheckoutRoute,
   FAdossagHelyreallitasDemoRoute: FAdossagHelyreallitasDemoRoute,
   FAdossagHelyreallitasPricingRoute: FAdossagHelyreallitasPricingRoute,

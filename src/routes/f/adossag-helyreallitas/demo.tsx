@@ -17,6 +17,17 @@ function AdossagDemoLoaderPage() {
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
 
+  const preferDashboardHome = () => {
+    try {
+      if (typeof window === "undefined") return;
+      window.localStorage.setItem("szcenario_home_mode", "dashboard");
+      window.localStorage.setItem("szcenario_onboarding_pending", "1");
+      window.dispatchEvent(new Event("szcenario:home_mode"));
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     if (inFlight.current) return;
     if (state.status === "loading") return;
@@ -25,6 +36,7 @@ function AdossagDemoLoaderPage() {
     void (async () => {
       try {
         await enterDemoSegment("demo7_personal_pocket_seasonal_pilot", { unlockById, createProfile });
+        preferDashboardHome();
         await navigate({ to: "/" });
       } catch (e: unknown) {
         inFlight.current = false;

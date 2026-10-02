@@ -1,29 +1,28 @@
-import { useMemo, useState } from "react";
-import { GraduationCap, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, type ReactNode } from "react";
+import { GraduationCap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { KB_ARTICLES, KB_CATEGORIES, type KnowledgeBaseArticle, type KnowledgeBaseCategoryId } from "@/lib/knowledgeBase";
+import { SupportEmbedFrame } from "@/components/support/SupportEmbedModal";
+import { SupportTicketForm } from "@/components/support/SupportTicketForm";
+import { SUPPORT_LAYER_SLUG, SUPPORT_SLA, type SupportLayer } from "@/lib/support";
 
-function normalize(s: string) {
-  return (s ?? "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+const LAYERS: Array<{ id: SupportLayer; label: string; title: string }> = [
+  { id: "tippek", label: "1 · Tippek", title: "GYIK tippek" },
+  { id: "gyik", label: "2 · GYIK", title: "Tudásbázis / GYIK" },
+  { id: "ticket", label: "3 · Írásban", title: "Írásos ügyintézés" },
+];
 
 export function KnowledgeBaseModal({
   open,
   onOpenChange,
   trigger,
+  initialLayer = "gyik",
 }: {
   open?: boolean;
   onOpenChange?: (o: boolean) => void;
-  trigger?: React.ReactNode;
+  trigger?: ReactNode;
+  initialLayer?: SupportLayer;
 }) {
   const [openState, setOpenState] = useState(false);
   const isControlled = open !== undefined;
@@ -32,23 +31,8 @@ export function KnowledgeBaseModal({
     if (!isControlled) setOpenState(o);
     onOpenChange?.(o);
   };
-
-  const [q, setQ] = useState("");
-  const [activeCat, setActiveCat] = useState<KnowledgeBaseCategoryId | "all">("all");
-  const [activeArticle, setActiveArticle] = useState<KnowledgeBaseArticle | null>(null);
-
-  const filtered = useMemo(() => {
-    const nq = normalize(q);
-    const inCat = (a: KnowledgeBaseArticle) => activeCat === "all" || a.category === activeCat;
-    const inQuery = (a: KnowledgeBaseArticle) => {
-      if (!nq) return true;
-      const hay = normalize([a.title, a.summary, a.body, ...(a.tags ?? [])].join(" "));
-      return hay.includes(nq);
-    };
-    return KB_ARTICLES.filter((a) => inCat(a) && inQuery(a));
-  }, [activeCat, q]);
-
-  const categories = KB_CATEGORIES;
+  const [layer, setLayer] = useState<SupportLayer>(initialLayer);
+  const active = LAYERS.find((l) => l.id === layer) ?? LAYERS[1];
 
   return (
     <>
@@ -63,118 +47,57 @@ export function KnowledgeBaseModal({
         </span>
       ) : null}
 
-      <Dialog
-        open={isOpen}
-        onOpenChange={(o) => {
-          setOpen(o);
-          if (o && !activeArticle) setActiveArticle(KB_ARTICLES[0] ?? null);
-        }}
-      >
-        <DialogContent className="sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <Dialog open={isOpen} onOpenChange={setOpen}>
+        <DialogContent className="overflow-hidden p-3 sm:max-w-4xl">
+          <DialogHeader className="px-1">
+            <DialogTitle className="flex items-center gap-2 text-sm">
               <GraduationCap className="h-4 w-4 text-slate-200" />
-              Tudásbázis / GYIK
+              Súgó — {active.title}
             </DialogTitle>
-            <div className="text-xs text-slate-300">
-              Kereshető rendszerleírás, fogalomtár és gyors magyarázatok a fő funkciókról.
-            </div>
           </DialogHeader>
 
-          <div className="grid gap-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="relative w-full sm:max-w-md">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.currentTarget.value)}
-                  placeholder="Keresés: pl. ÁFA, pilot, törlesztés, dedup…"
-                  className="pl-8"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant={activeCat === "all" ? "secondary" : "outline"}
-                  size="sm"
-                  className="h-7"
-                  onClick={() => setActiveCat("all")}
-                >
-                  Összes
-                </Button>
-                {categories.map((c) => (
-                  <Button
-                    key={c.id}
-                    type="button"
-                    variant={activeCat === c.id ? "secondary" : "outline"}
-                    size="sm"
-                    className="h-7"
-                    onClick={() => setActiveCat(c.id)}
-                  >
-                    {c.title}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="md:col-span-1">
-                <div className="max-h-[60vh] overflow-auto rounded-md border border-slate-700/60 bg-slate-900/40 p-2">
-                  {filtered.length === 0 ? (
-                    <div className="p-3 text-xs text-slate-300">Nincs találat.</div>
-                  ) : (
-                    <div className="grid gap-1">
-                      {filtered.map((a) => {
-                        const active = a.id === activeArticle?.id;
-                        return (
-                          <button
-                            key={a.id}
-                            type="button"
-                            onClick={() => setActiveArticle(a)}
-                            className={cn(
-                              "w-full rounded-md px-3 py-2 text-left text-xs hover:bg-slate-800/60",
-                              active && "bg-slate-800/80 border border-slate-700/60",
-                            )}
-                          >
-                            <div className="font-medium text-slate-100">{a.title}</div>
-                            <div className="mt-0.5 line-clamp-2 text-[11px] text-slate-300">{a.summary}</div>
-                            <div className="mt-1">
-                              <Badge variant="secondary" className="text-[10px] font-normal">
-                                {categories.find((c) => c.id === a.category)?.title ?? a.category}
-                              </Badge>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <div className="max-h-[60vh] overflow-auto rounded-md border border-slate-700/60 bg-slate-950/40 p-4">
-                  {activeArticle ? (
-                    <>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-base font-semibold text-white">{activeArticle.title}</div>
-                          <div className="mt-1 text-xs text-slate-300">{activeArticle.summary}</div>
-                        </div>
-                      </div>
-                      <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-slate-200">
-                        {activeArticle.body}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-sm text-slate-300">Válassz egy cikket bal oldalon.</div>
-                  )}
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-wrap gap-1.5">
+            {LAYERS.map((l) => (
+              <Button
+                key={l.id}
+                type="button"
+                size="sm"
+                variant={layer === l.id ? "secondary" : "outline"}
+                className={cn("h-7", layer === l.id && "border-cyan-400/40")}
+                onClick={() => setLayer(l.id)}
+              >
+                {l.label}
+              </Button>
+            ))}
           </div>
+
+          {layer === "ticket" ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <SupportEmbedFrame
+                slug={SUPPORT_LAYER_SLUG.ticket}
+                title="Jegy"
+                fallback={<SupportTicketForm compact />}
+              />
+              <div className="rounded-md border border-slate-700/60 bg-slate-950/40 p-3">
+                <p className="text-[12px] leading-snug text-slate-300">{SUPPORT_SLA}</p>
+                <SupportTicketForm compact />
+              </div>
+            </div>
+          ) : (
+            <SupportEmbedFrame
+              slug={SUPPORT_LAYER_SLUG[layer]}
+              title={active.title}
+              fallback={
+                <p className="text-sm text-slate-300">
+                  {layer === "tippek"
+                    ? "A tippek a support oldalon nyílnak. Offline a helyi súgóikonok továbbra is működnek."
+                    : "A GYIK a support oldalon nyílik. A helyi tudásbázis cikkek a súgóikonokból elérhetők."}
+                </p>
+              }
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
   );
 }
-

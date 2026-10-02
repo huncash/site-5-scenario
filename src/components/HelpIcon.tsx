@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { kbById, type KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
+import { useSupportEmbedOptional } from "@/components/support/SupportEmbedProvider";
 
 /** Címke + hover (`data-exact`) + kattintható sapka. Lean fogalmakhoz. */
 export function LeanTerm({
@@ -43,6 +44,7 @@ export function HelpIcon({
   const [open, setOpen] = useState(false);
   const article = useMemo(() => (kbId ? kbById(kbId) : null), [kbId]);
   const tooltipText = summary ?? article?.summary ?? "Súgó";
+  const embed = useSupportEmbedOptional();
 
   const btnCls = size === "md" ? "h-8 w-8" : "h-6 w-6";
 
@@ -79,6 +81,18 @@ export function HelpIcon({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="whitespace-pre-wrap break-words">{tooltipText}</div>
+        {embed ? (
+          <button
+            type="button"
+            className="mt-2 text-[11px] text-cyan-300 underline-offset-2 hover:underline"
+            onClick={() => {
+              setOpen(false);
+              embed.openEmbed(kbId ? `kb/${kbId}` : "tippek", article?.title ?? title ?? "Súgó");
+            }}
+          >
+            Lecke megnyitása
+          </button>
+        ) : null}
       </PopoverContent>
     </Popover>
   );

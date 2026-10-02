@@ -458,6 +458,25 @@ body,
   }
 }
 
+/* Public door / funnel: 2 ink colors + 1 accent. Body copy is never translucent. */
+.door-page {
+  --door-mute: #b4b8c0;
+  --muted-foreground: #b4b8c0;
+}
+
+.door-page .text-muted-foreground,
+.door-page .text-slate-300,
+.door-page .text-slate-400,
+.door-page .text-slate-500 {
+  color: var(--door-mute);
+  opacity: 1;
+}
+
+.door-page .text-slate-100,
+.door-page .text-slate-200 {
+  color: var(--foreground);
+}
+
 @media print {
   :root {
     color-scheme: light;

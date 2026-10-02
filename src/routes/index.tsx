@@ -185,6 +185,9 @@ import {
 } from "@/lib/referencesNav";
 import { computeWorkspaceTint } from "@/lib/workspaceTint";
 import { ScenarioDoor } from "@/components/ScenarioDoor";
+import { AppLicenseGate } from "@/components/AppLicenseGate";
+import { applyWorkspaceSwitch, publishWorkspaceCatalog, WORKSPACE_SWITCH_EVENT } from "@/lib/workspaceSwitch";
+import { hasWorkspaceAccess, isAppWorkspaceHost, isLocalDevHost } from "@/lib/license";
 import {
   CASE_ENTRY_DEFAULT_WS,
   CASE_ENTRY_TAB_KEY,
@@ -226,6 +229,9 @@ function readHomeMode(): HomeMode {
 function VaultGate() {
   const { state } = useVault();
   const [homeMode, setHomeMode] = useState<HomeMode>("door");
+  const [licenseTick, setLicenseTick] = useState(0);
+  const appHost = typeof window !== "undefined" && isAppWorkspaceHost();
+  const licensed = hasWorkspaceAccess() || isLocalDevHost();
 
   useEffect(() => {
     setHomeMode(readHomeMode());
@@ -244,6 +250,20 @@ function VaultGate() {
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
         Betöltés…
       </div>
+    );
+  }
+  if (appHost) {
+    if (!licensed) {
+      return <AppLicenseGate onGranted={() => setLicenseTick((n) => n + 1)} />;
+    }
+    if (state.status !== "unlocked") return <ScenarioDoor />;
+    void licenseTick;
+    return (
+      <FinanceDashboard
+        vaultKey={state.key}
+        profileId={state.profile.id}
+        profileName={state.profile.name}
+      />
     );
   }
   // Marketing/door is the default home, even when a demo profile auto-unlocks.
@@ -778,6 +798,16 @@ function FinanceDashboard({
     }
   }, [activeWs]);
 
+  useEffect(() => {
+    const onSwitch = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      if (!id) return;
+      applyWorkspaceSwitch(id, { setActiveWs, setMiddleWs });
+    };
+    window.addEventListener(WORKSPACE_SWITCH_EVENT, onSwitch as EventListener);
+    return () => window.removeEventListener(WORKSPACE_SWITCH_EVENT, onSwitch as EventListener);
+  }, []);
+
   const stepBottomTab = useCallback(
     (delta: -1 | 1) => {
       const order: SubTab[] = ["cashflow", "ledger", "deals", "inventory"];
@@ -1248,6 +1278,17 @@ function FinanceDashboard({
     },
     [workspaceMetaById],
   );
+
+  useEffect(() => {
+    publishWorkspaceCatalog(
+      workspaceMetas.map((w) => ({
+        id: w.id,
+        label: workspaceDisplayName(w.id),
+        hint: w.type === "project" ? "Projekt" : w.type === "business" ? "Vállalkozás" : "Tér",
+        keywords: [w.id, w.alias, w.type, w.description].filter(Boolean).join(" "),
+      })),
+    );
+  }, [workspaceDisplayName, workspaceMetas]);
 
   const workspaceTabLabel = useCallback(
     (wsId: string) => {
