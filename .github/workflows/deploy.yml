@@ -113,19 +113,35 @@ jobs:
             # Old manual deploy used PM2 name site-5 under /var/www/site-5 — that must not keep port 4100.
             pm2 delete site-5 >/dev/null 2>&1 || true
             pm2 delete "$SITE_SLUG" >/dev/null 2>&1 || true
+            sleep 1
+            if command -v fuser >/dev/null 2>&1; then
+              fuser -k 4100/tcp >/dev/null 2>&1 || true
+            fi
+            test -f "$APP_DIR/shared/.env.production"
             test -f "$RELEASE_DIR/scripts/static-origin.mjs"
-            pm2 start "$RELEASE_DIR/scripts/static-origin.mjs" \
-              --name "$SITE_SLUG" \
-              --cwd "$RELEASE_DIR" \
-              --interpreter node \
-              --node-args="--env-file=$APP_DIR/shared/.env.production" \
-              --time \
-              --output "/var/log/$SITE_SLUG/out.log" \
-              --error "/var/log/$SITE_SLUG/err.log"
+            test -d "$RELEASE_DIR/.output/public"
+            test -f "$RELEASE_DIR/ecosystem.config.cjs"
+            set -a
+            # shellcheck disable=SC1091
+            . "$APP_DIR/shared/.env.production"
+            set +a
+            export NODE_ENV="${NODE_ENV:-production}"
+            export HOST="${HOST:-127.0.0.1}"
+            export PORT="${PORT:-4100}"
+            export STATIC_ROOT="$RELEASE_DIR/.output/public"
+            export RELEASE_DIR
+            export SITE_SLUG
+            pm2 start "$RELEASE_DIR/ecosystem.config.cjs" --update-env
             pm2 save
             sleep 3
             pm2 describe "$SITE_SLUG" | tee /tmp/pm2-szcenario.txt
-            grep -q "online" /tmp/pm2-szcenario.txt
+            if ! grep -q "online" /tmp/pm2-szcenario.txt; then
+              echo "==== $SITE_SLUG err.log ===="
+              tail -n 80 "/var/log/$SITE_SLUG/err.log" || true
+              echo "==== $SITE_SLUG out.log ===="
+              tail -n 80 "/var/log/$SITE_SLUG/out.log" || true
+              exit 1
+            fi
             pm2 describe "$SITE_SLUG" | grep -E "exec cwd|script path" | tee /tmp/pm2-cwd.txt
             grep -q "$RELEASE_DIR" /tmp/pm2-cwd.txt
 

@@ -3,12 +3,57 @@
  * No React SSR, no database — Cloudflare cache-eli, a VPS csak cache-miss-t szolgál ki.
  */
 import { createServer } from "node:http";
+import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const HOST = process.env.HOST || "0.0.0.0";
-const PORT = Number(process.env.PORT || process.env.NITRO_PORT || 4100);
-const ROOT = path.resolve(process.cwd(), ".output/public");
+process.on("uncaughtException", (error) => {
+  console.error("[static-origin] uncaughtException", error);
+  process.exit(1);
+});
+process.on("unhandledRejection", (error) => {
+  console.error("[static-origin] unhandledRejection", error);
+  process.exit(1);
+});
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const RELEASE_ROOT = path.resolve(HERE, "..");
+
+function resolvePort() {
+  const raw = process.env.PORT || process.env.NITRO_PORT || "4100";
+  const port = Number(raw);
+  if (!Number.isFinite(port) || port <= 0 || port > 65535) {
+    console.error("[static-origin] érvénytelen PORT", { raw, cwd: process.cwd() });
+    process.exit(1);
+  }
+  return port;
+}
+
+function resolveRoot() {
+  const candidates = [
+    process.env.STATIC_ROOT,
+    path.resolve(process.cwd(), ".output/public"),
+    path.resolve(RELEASE_ROOT, ".output/public"),
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    const abs = path.resolve(candidate);
+    if (existsSync(path.join(abs, "index.html")) || existsSync(path.join(abs, "_shell.html"))) {
+      return abs;
+    }
+  }
+  console.error("[static-origin] nincs statikus build", {
+    cwd: process.cwd(),
+    scriptDir: HERE,
+    releaseRoot: RELEASE_ROOT,
+    candidates,
+  });
+  process.exit(1);
+}
+
+const HOST = process.env.HOST || "127.0.0.1";
+const PORT = resolvePort();
+const ROOT = resolveRoot();
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -110,12 +155,18 @@ const server = createServer(async (req, res) => {
     res.writeHead(status, headers);
     res.end(body);
   } catch (error) {
-    console.error(error);
+    console.error("[static-origin] request failed", error);
     res.writeHead(500, { "cache-control": "no-store" });
     res.end("Internal error");
   }
 });
 
+server.on("error", (error) => {
+  const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+  console.error("[static-origin] listen failed", { host: HOST, port: PORT, root: ROOT, code, error });
+  process.exit(1);
+});
+
 server.listen(PORT, HOST, () => {
-  console.log(`szcenario static origin ${HOST}:${PORT} → ${ROOT}`);
+  console.log(`[static-origin] ${HOST}:${PORT} → ${ROOT}`);
 });
