@@ -12,7 +12,7 @@ fi
 RELEASE_DIR="$APP_DIR/releases/$SHA"
 ENVF="$APP_DIR/shared/.env.production"
 LOG_DIR="/var/log/$SITE_SLUG"
-PORT_N=4100
+PORT_N=5100
 CURRENT_USER="$(whoami)"
 
 need() {
@@ -24,7 +24,7 @@ need() {
   echo "ok $1"
 }
 
-ss_4100() {
+ss_5100() {
   ss -tlnH 2>/dev/null | awk '{print $4}' | grep -E ":${PORT_N}$" || true
 }
 
@@ -52,24 +52,21 @@ kill_pids() {
   done
 }
 
-kill_own_4100() {
+kill_own_5100() {
   local pids pid cmdline cwd attempt=1
   while [ $attempt -le 5 ]; do
     pids="$(fuser "${PORT_N}/tcp" 2>/dev/null || true)"
-    if [ -z "$pids" ] && [ -z "$(ss_4100)" ]; then
+    if [ -z "$pids" ] && [ -z "$(ss_5100)" ]; then
       break
     fi
     echo ">> cleanup attempt $attempt: fuser ${PORT_N}: ${pids:-none}"
     
-    # 1. fuser alapú kill (sudo nélkül, saját userre)
     fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
     
-    # 2. lsof alapú kill
     if command -v lsof >/dev/null 2>&1; then
       lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r kill -9 >/dev/null 2>&1 || true
     fi
     
-    # 3. Node folyamatok átvizsgálása és lelövése cgroup/cwd alapján
     for pid in $(pgrep -u "$CURRENT_USER" -x node || true); do
       cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
       cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
@@ -86,8 +83,7 @@ kill_own_4100() {
   done
 }
 
-delete_pm2_4100() {
-  # PM2 démon tiszta leállítása, hogy ne élessze újra a beragadt appot
+delete_pm2_5100() {
   pm2 kill >/dev/null 2>&1 || true
 }
 
@@ -102,9 +98,9 @@ need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
 echo ">> pm2 kill + free $PORT_N"
-delete_pm2_4100
-kill_own_4100
-busy="$(ss_4100)"
+delete_pm2_5100
+kill_own_5100
+busy="$(ss_5100)"
 if [ -n "$busy" ]; then
   echo "port $PORT_N still busy after cleanup"
   echo "$busy"
@@ -117,8 +113,11 @@ echo ">> ensure $ENVF"
 mkdir -p "$APP_DIR/shared" "$LOG_DIR"
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
-  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=4100' > "$ENVF"
+  printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' > "$ENVF"
   chmod 600 "$ENVF" || true
+else
+  # Biztosítsuk, hogy a meglévő .env-ben is 5100 legyen a PORT
+  sed -i 's/^PORT=.*/PORT=5100/' "$ENVF" || true
 fi
 echo ">> ls shared"
 ls -la "$APP_DIR/shared/"
@@ -130,7 +129,7 @@ set -a
 set +a
 export NODE_ENV="${NODE_ENV:-production}"
 export HOST="${HOST:-127.0.0.1}"
-export PORT="${PORT:-4100}"
+export PORT="${PORT:-5100}"
 export STATIC_ROOT="$RELEASE_DIR/.output/public"
 export BUILD_SHA="$SHA"
 export RELEASE_DIR
