@@ -149,7 +149,7 @@ export function HoverCoachTooltip() {
 
   return (
     <div
-      className="pointer-events-none fixed z-[9999] max-w-[260px] rounded-md border border-slate-500/45 bg-slate-950 px-2.5 py-2 text-[12px] leading-snug text-slate-50 shadow-xl"
+      className="pointer-events-none fixed z-[9999] max-w-[260px] rounded-md border border-border bg-[var(--dropdown-bg)] px-2.5 py-2 text-[12px] leading-snug text-[var(--text-main)] shadow-xl"
       style={style}
       role="status"
       aria-live="polite"

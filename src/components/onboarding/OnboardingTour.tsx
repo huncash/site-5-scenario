@@ -113,7 +113,7 @@ export function OnboardingTour(props: {
         return (
           <div
             key={s.id}
-            className="pointer-events-none absolute rounded-xl ring-2 ring-cyan-300/80 shadow-[0_0_0_6px_rgba(34,211,238,0.18)]"
+            className="pointer-events-none absolute rounded-xl ring-2 ring-primary/80 shadow-[0_0_0_6px_color-mix(in_srgb,var(--accent-color)_18%,transparent)]"
             style={{
               top: s.r.top - 4,
               left: s.r.left - 4,
@@ -122,7 +122,7 @@ export function OnboardingTour(props: {
             }}
           >
             {label ? (
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-cyan-400 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-950">
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
                 {label}
               </div>
             ) : null}
@@ -132,22 +132,22 @@ export function OnboardingTour(props: {
 
       <div
         className={cn(
-          "pointer-events-auto absolute left-1/2 w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-2xl border border-slate-700 bg-slate-950/95 p-3 text-slate-100 shadow-2xl backdrop-blur",
+          "pointer-events-auto absolute left-1/2 w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-2xl border border-border bg-card p-3 text-foreground shadow-2xl",
           cardAtTop ? "top-4" : "bottom-14",
         )}
       >
         <div className="flex items-start justify-between gap-2 pr-1">
           <div className="min-w-0">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
               {stepIndex + 1}/{steps.length}
             </div>
-            <h2 id="onboarding-title" className="text-sm font-semibold text-slate-100">
+            <h2 id="onboarding-title" className="text-sm font-semibold text-foreground">
               {step?.title ?? "—"}
             </h2>
           </div>
           <button
             type="button"
-            className="rounded-md px-1.5 text-slate-400 hover:text-slate-100"
+            className="rounded-md px-1.5 text-muted-foreground hover:text-foreground"
             aria-label="Bezárás"
             onClick={() => onOpenChange(false)}
           >
@@ -155,15 +155,15 @@ export function OnboardingTour(props: {
           </button>
         </div>
 
-        {step?.body ? <p className="mt-1 text-[13px] leading-snug text-slate-300">{step.body}</p> : null}
+        {step?.body ? <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{step.body}</p> : null}
 
         {step?.visuals?.length ? (
           <div className="mt-2 grid gap-1.5">
             {step.visuals.map((v) => {
               const Ico = v.icon ? ICON[v.icon] : null;
               return (
-                <div key={v.caption} className="flex items-start gap-2 text-[12px] text-slate-200">
-                  {Ico ? <Ico className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" /> : null}
+                <div key={v.caption} className="flex items-start gap-2 text-[12px] text-foreground">
+                  {Ico ? <Ico className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> : null}
                   <span className={Ico ? undefined : "font-mono text-[11px] leading-snug"}>{v.caption}</span>
                 </div>
               );
@@ -176,8 +176,8 @@ export function OnboardingTour(props: {
             <span
               key={i}
               className={cn(
-                "h-1 flex-1 rounded-full bg-slate-800",
-                i <= stepIndex ? "bg-cyan-300/50" : "",
+                "h-1 flex-1 rounded-full bg-border",
+                i <= stepIndex ? "bg-primary/50" : "",
               )}
             />
           ))}
@@ -185,14 +185,14 @@ export function OnboardingTour(props: {
 
         <div className="mt-2 flex items-center justify-between gap-2">
           <div className="flex gap-1">
-            <Button type="button" variant="ghost" className="h-8 px-2 text-slate-300" onClick={onSkip}>
+            <Button type="button" variant="ghost" className="h-8 px-2 text-muted-foreground" onClick={onSkip}>
               Kihagyás
             </Button>
             {embed && lessonSlug ? (
               <Button
                 type="button"
                 variant="ghost"
-                className="h-8 px-2 text-cyan-300"
+                className="h-8 px-2 text-primary"
                 onClick={() => embed.openEmbed(lessonSlug, step?.title ?? "Lecke")}
               >
                 Lecke
@@ -200,15 +200,15 @@ export function OnboardingTour(props: {
             ) : null}
           </div>
           <div className="flex gap-1.5">
-            <Button type="button" variant="outline" className="h-8 border-slate-700 bg-slate-950/30" onClick={onPrev} disabled={stepIndex === 0}>
+            <Button type="button" variant="outline" className="h-8" onClick={onPrev} disabled={stepIndex === 0}>
               Előző
             </Button>
             {last ? (
-              <Button type="button" className="h-8 bg-cyan-500/90 text-slate-950 hover:bg-cyan-400" onClick={onFinish}>
+              <Button type="button" className="h-8" onClick={onFinish}>
                 Bezárás
               </Button>
             ) : (
-              <Button type="button" className="h-8 bg-cyan-500/90 text-slate-950 hover:bg-cyan-400" onClick={onNext}>
+              <Button type="button" className="h-8" onClick={onNext}>
                 Tovább
               </Button>
             )}

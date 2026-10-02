@@ -1,4 +1,5 @@
 import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
+import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -45,6 +46,8 @@ export const PROJEKT_KONTROLLING_FUNNEL = {
       a: "Olyan jelzések összessége, ami kiemeli: hol borul a runway/teher, hol csúszik el a projekt‑fedezet, és hol kell ACT-ben beavatkozni (helyi számítással).",
     },
     PRICING_VAT_FAQ,
+    WHY_FAQ,
+    PRO_CHART_FAQ,
   ],
 } as const;
 

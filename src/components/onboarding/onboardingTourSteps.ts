@@ -29,7 +29,7 @@ export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
   {
     id: "demo",
     title: "Mintahelyzet",
-    body: "Előre betöltött példa. Nem banki kivonat, nem élő ügyféladat.",
+    body: "Előre betöltött példa. Nem banki kivonat, nem élő ügyféladat. A PRO-sáv nem jóslat: a múltból számolt mozgástér.",
     visuals: [
       { icon: "panels", caption: "A számok a böngészőben készülnek." },
       { icon: "menu", caption: "Kilépés: Főmenü → Másik eset." },

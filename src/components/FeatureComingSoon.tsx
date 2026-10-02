@@ -89,19 +89,19 @@ export function FeatureComingSoonDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md sm:rounded-xl">
+      <DialogContent className="max-w-lg border-border bg-card text-foreground sm:rounded-xl">
         <DialogHeader className="space-y-3">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300">
             <Construction className="h-5 w-5" aria-hidden />
           </div>
           <DialogTitle className="text-lg tracking-tight">Funkció előkészítés alatt</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            <span className="font-medium text-slate-200">{title}</span>
+            <span className="font-medium text-foreground">{title}</span>
             <span className="mt-2 block leading-relaxed">{purpose}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-lg border border-dashed border-slate-600/70 bg-slate-900/50 px-4 py-5">
+        <div className="rounded-lg border border-dashed border-border bg-[var(--dropdown-hover)] px-4 py-5">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-300/90">
             [Szerkeszthető Tartalom Helye - PLACEHOLDER]
           </div>

@@ -15,7 +15,7 @@ export function SectionSettingsGear({
     <button
       type="button"
       className={cn(
-        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/60 bg-slate-950/50 text-slate-200 hover:bg-slate-900",
+        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-[var(--dropdown-hover)] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white",
         className,
       )}
       title={title}

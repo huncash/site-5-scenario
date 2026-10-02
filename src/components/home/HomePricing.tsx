@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PricingCompareTable } from "@/components/home/PricingCompareTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 import {
   formatHuf,
   PRICING_HERO,
@@ -103,12 +104,12 @@ export function HomePricing(props: { campus?: boolean }) {
 
       <div className="rounded-2xl border border-white/12 bg-card px-4 py-3">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">GYIK</div>
-        <details className="mt-1">
-          <summary className="cursor-pointer py-2 text-left text-sm font-medium text-foreground">
-            {PRICING_VAT_FAQ.q}
-          </summary>
-          <p className="pb-2 text-[13px] text-muted-foreground">{PRICING_VAT_FAQ.a}</p>
-        </details>
+        {[WHY_FAQ, PRO_CHART_FAQ, PRICING_VAT_FAQ].map((item) => (
+          <details key={item.q} className="mt-1">
+            <summary className="cursor-pointer py-2 text-left text-sm font-medium text-foreground">{item.q}</summary>
+            <p className="pb-2 text-[13px] text-muted-foreground">{item.a}</p>
+          </details>
+        ))}
       </div>
     </section>
   );

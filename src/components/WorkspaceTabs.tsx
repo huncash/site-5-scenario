@@ -50,7 +50,7 @@ export function WorkspaceTabs({
   };
 
   const tabBase =
-    "relative -mb-px inline-flex h-8 items-center gap-1.5 rounded-t-lg border border-b-0 px-2.5 text-xs font-medium transition-all duration-200";
+    "relative -mb-px inline-flex h-8 max-w-full shrink-0 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-t-lg border border-b-0 px-2.5 text-xs font-medium transition-all duration-200";
 
   const tabBtn = (
     wsId: string,
@@ -67,7 +67,7 @@ export function WorkspaceTabs({
         className={`${tabBase} ${
           isActive
             ? "z-10 text-foreground"
-            : "border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-900/70 hover:text-slate-100"
+            : "border-border bg-card/50 text-muted-foreground hover:bg-card hover:text-foreground"
         }`}
         style={{
           ...(isActive
@@ -89,8 +89,8 @@ export function WorkspaceTabs({
         aria-pressed={isActive}
         title={labelFor(wsId)}
       >
-        <Folder className="h-3.5 w-3.5" />
-        {labelFor(wsId)}
+        <Folder className="h-3.5 w-3.5 shrink-0" />
+        <span className="max-w-[7rem] truncate sm:max-w-[11rem]">{labelFor(wsId)}</span>
       </button>
     );
   };
@@ -134,30 +134,29 @@ export function WorkspaceTabs({
   }, [leftIds, rightIds]);
 
   return (
-    <div className={`grid grid-cols-2 items-end gap-2 pb-0.5 ${className ?? ""}`.trim()}>
-      {/* LEFT HALF: Magán + Céges */}
-      <div className="flex min-w-0 flex-wrap items-end gap-2 pr-1">
-        {leftIds.map((id) => tabBtn(id, tintByWs.map.get(id)))}
-      </div>
-
-      {/* RIGHT HALF: Projektek start at 50% + add button pinned right */}
-      <div className="flex min-w-0 items-end gap-3 pl-2">
-        <div key={stripKey} className="flex min-w-0 flex-1 flex-wrap items-end gap-2">
+    <div className={`flex min-w-0 items-end gap-2 pb-0.5 ${className ?? ""}`.trim()}>
+      <div className="grid min-w-0 flex-1 grid-cols-2 items-end gap-2">
+        <div className="no-scrollbar flex min-w-0 flex-nowrap items-end gap-2 overflow-x-auto pr-1">
+          {leftIds.map((id) => tabBtn(id, tintByWs.map.get(id)))}
+        </div>
+        <div key={stripKey} className="no-scrollbar flex min-w-0 flex-nowrap items-end gap-2 overflow-x-auto">
           {rightIds.map((id) => tabBtn(id, tintByWs.map.get(id)))}
         </div>
-        {onOpenCreate ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="h-8 shrink-0 px-2.5 text-xs"
-            onClick={onOpenCreate}
-            title="Új..."
-          >
-            + Új...
-          </Button>
-        ) : null}
       </div>
+      {onOpenCreate ? (
+        <div className="btn-new-item-wrap">
+          <button
+            type="button"
+            className="btn-new-item"
+            onClick={onOpenCreate}
+            title="Új munkaterület"
+            aria-label="Új munkaterület"
+          >
+            <span aria-hidden="true">+</span>
+            <span className="btn-new-item-label">Új</span>
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

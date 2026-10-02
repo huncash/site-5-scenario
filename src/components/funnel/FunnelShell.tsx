@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { PaletteToggle } from "@/components/PaletteToggle";
+import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,18 +17,19 @@ export function FunnelShell(props: {
     // NOTE: the app shell disables document scroll (html/body/#root overflow hidden),
     // so funnel pages must provide their own scroll container.
     <div className="door-page h-dvh overflow-x-hidden overflow-y-auto bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-background">
+      <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <Link to="/" className="block min-w-0 truncate text-sm font-semibold text-foreground">
               Szcenárió
             </Link>
-            <div className="text-[11px] text-muted-foreground">Local‑first · offline‑first</div>
+            <div className="truncate text-[11px] leading-tight text-muted-foreground" title="Jövőképek és döntési pályák • 100% lokális biztonság">
+              Jövőképek és döntési pályák • 100% lokális biztonság
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {rightSlot}
-            <PaletteToggle />
-            <ThemeToggle />
+            <ViewSettingsMenu />
             <Button
               asChild
               size="sm"
@@ -54,8 +54,11 @@ export function FunnelShell(props: {
       </main>
 
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 text-xs text-muted-foreground">
-          Nincs regisztráció, nincs telemetria — a működés a te eszközödön fut.
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-xs text-muted-foreground">
+          <span>Nincs regisztráció, nincs telemetria — a működés a te eszközödön fut.</span>
+          <Link to="/about" className="underline-offset-4 hover:text-foreground hover:underline">
+            Rólunk
+          </Link>
         </div>
       </footer>
     </div>

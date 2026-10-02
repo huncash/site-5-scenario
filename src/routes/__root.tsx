@@ -127,7 +127,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "/logo.svg" },
-      { name: "theme-color", content: "#0b1220" },
+      { name: "theme-color", content: "#071511" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "Szcenárió" },
       {
@@ -138,9 +138,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/logo.svg", type: "image/svg+xml" },
+      { rel: "icon", type: "image/svg+xml", href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'%3E%3Crect width='32' height='32' rx='6' fill='%23071511'/%3E%3Cpath d='M16 6L8 22H24L16 6Z' fill='%2310b981' fill-opacity='0.25'/%3E%3Cpath d='M16 10L10 22H22L16 10Z' fill='%2310b981'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ecfdf5'/%3E%3C/svg%3E" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "mask-icon", href: "/logo.svg", color: "#00f0ff" },
+      { rel: "mask-icon", href: "/logo.svg", color: "#10b981" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },

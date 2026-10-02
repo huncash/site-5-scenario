@@ -3,8 +3,7 @@ import { useNavigate, Link } from "@tanstack/react-router";
 import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { PaletteToggle } from "@/components/PaletteToggle";
+import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
 import {
   enterDemoSegment,
@@ -15,6 +14,16 @@ import {
 } from "@/lib/demoSession";
 import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
 import { HomePricing } from "@/components/home/HomePricing";
+import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
+import {
+  DAILY_OPS_BODY,
+  DAILY_OPS_TITLE,
+  HERO_HEADLINE,
+  HERO_SUBHEADLINE,
+  WHY_BODY,
+  WHY_LEAD,
+  WHY_TITLE,
+} from "@/content/branding";
 import { DEMO_STARTER_BLURB } from "@/content/pricing/tiers";
 import { useVault } from "@/lib/vault";
 import { localdb } from "@/lib/localdb";
@@ -183,15 +192,16 @@ export function ScenarioDoor() {
       data-exact-ignore
       className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background outline-none"
     >
-      <header className="sticky top-0 z-30 border-b border-border bg-background">
+      <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-foreground">Szcenárió</div>
-            <div className="text-[11px] text-muted-foreground">Local‑first · offline‑first</div>
+            <div className="truncate text-[11px] leading-tight text-muted-foreground" title="Jövőképek és döntési pályák • 100% lokális biztonság">
+              Jövőképek és döntési pályák • 100% lokális biztonság
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <PaletteToggle />
-            <ThemeToggle />
+            <ViewSettingsMenu />
             <Button
               asChild
               className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
@@ -208,15 +218,15 @@ export function ScenarioDoor() {
             szcenario.hu
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Hibamegelőző vezetés- és döntéstámogatás kompromisszumok nélkül.
+            {HERO_HEADLINE}
           </h1>
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Teljes adatkontroll a saját gépeden: lokális számítás, nulla telemetria. Nézd meg a működés közben a mintaprojekteket, vagy válaszd ki a számodra releváns modult.
+            {HERO_SUBHEADLINE}
           </p>
           <div className="mx-auto flex max-w-2xl items-start justify-center gap-2 text-left text-[12px] text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
             <span>
-              <span className="font-semibold text-foreground">100% Local-First biztonság:</span> Adataid a böngészőben maradnak. Biztonságos mentés fájl-exporttal vagy közvetlen eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla felhős kockázat.
+              <span className="font-semibold text-foreground">100% Local-First biztonság:</span> Az adataid a böngésződben maradnak. Biztonságos mentés fájl-exporttal vagy közvetlen eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla felhős kockázat.
             </span>
           </div>
         </div>
@@ -238,7 +248,7 @@ export function ScenarioDoor() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         type="button"
-                        className="h-9 bg-cyan-500 px-3 text-slate-950 hover:bg-cyan-400"
+                        className="btn-demo h-9 bg-cyan-500 px-3 text-slate-950 hover:bg-cyan-400"
                         disabled={busyId !== null || resetBusy}
                         onClick={() => void openCase(b.segmentId)}
                       >
@@ -261,6 +271,35 @@ export function ScenarioDoor() {
                   További vendéglátós mintahelyzetek
                 </button>
               </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                PRO-grafikon
+              </div>
+              <ProChartSketch />
+              <ProChartCallout />
+            </section>
+
+            <section className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {DAILY_OPS_TITLE}
+              </div>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{DAILY_OPS_BODY}</p>
+            </section>
+
+            <section className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {WHY_TITLE}
+              </div>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{WHY_LEAD}</p>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{WHY_BODY}</p>
+              <Link
+                to="/about"
+                className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
+              >
+                Rólunk — a teljes háttérnarratíva
+              </Link>
             </section>
 
             <section className="space-y-3">
@@ -392,6 +431,10 @@ export function ScenarioDoor() {
         {error ? <p className="text-center text-xs font-medium text-destructive">{error}</p> : null}
 
         <div className="border-t border-border/40 pt-6 text-center">
+          <Link to="/about" className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+            Rólunk
+          </Link>
+          <span className="mx-2 text-muted-foreground/50">·</span>
           <button
             type="button"
             className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
@@ -489,7 +532,7 @@ function ShotLabel({ children }: { children: ReactNode }) {
 
 function PdcaShot() {
   return (
-    <div className="grid h-full grid-cols-2 gap-2 rounded-lg bg-[#0b0f19] p-2">
+    <div className="grid h-full grid-cols-2 gap-2 rounded-lg bg-[var(--app-bg)] p-2">
       <div className="flex flex-col rounded-md border border-amber-300/30 bg-amber-500/[0.06] p-2">
         <div className="text-[9px] font-semibold uppercase tracking-wider text-amber-200/80">PLAN</div>
         <div className="mt-2 flex items-end justify-between gap-3">
@@ -538,7 +581,7 @@ function PdcaShot() {
 function CashflowShot() {
   const bars = [28, 46, 38, 62, 54, 71];
   return (
-    <div className="flex h-full flex-col rounded-lg bg-[#0b0f19] p-2">
+    <div className="flex h-full flex-col rounded-lg bg-[var(--app-bg)] p-2">
       <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">Halmozott eredmény</div>
       <div className="relative mt-2 min-h-0 flex-1">
         <div className="absolute inset-0 flex items-end gap-1.5">
@@ -560,7 +603,7 @@ function CashflowShot() {
 
 function WorkspaceShot() {
   return (
-    <div className="flex h-full flex-col rounded-lg bg-[#0b0f19] p-2">
+    <div className="flex h-full flex-col rounded-lg bg-[var(--app-bg)] p-2">
       <div className="flex gap-1">
         {["Magán", "Vállalkozás", "Projekt"].map((x, i) => (
           <div
@@ -592,7 +635,7 @@ function ItemsShot() {
     { n: "Rezsi", v: "180 e", w: "34%" },
   ];
   return (
-    <div className="flex h-full flex-col gap-2 rounded-lg bg-[#0b0f19] p-2">
+    <div className="flex h-full flex-col gap-2 rounded-lg bg-[var(--app-bg)] p-2">
       {rows.map((r) => (
         <div key={r.n} className="flex items-center gap-2">
           <div className="w-16 shrink-0 text-[10px] text-slate-400">{r.n}</div>

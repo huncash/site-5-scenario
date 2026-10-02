@@ -4,11 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CalendarClock,
-  Columns2,
   Download,
   GraduationCap,
   Lock,
-  Maximize2,
   Menu,
   Sparkles,
   QrCode,
@@ -28,13 +26,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
 import { KnowledgeBaseModal } from "@/components/KnowledgeBaseModal";
 import { PdcaSemiRotaryKnob } from "@/components/PdcaSemiRotaryKnob";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { decryptJSON } from "@/lib/crypto";
 import { EMPTY_SETTINGS, type CustomSettings, type WorkspaceMeta } from "@/lib/finance";
 import { localdb } from "@/lib/localdb";
@@ -151,8 +149,8 @@ export function ProfileHeader({
 
   return (
     <header
-      className="sticky top-0 z-50 shrink-0 border-b border-slate-800/70 text-slate-100 backdrop-blur-md"
-      style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
+      className="sticky top-0 z-50 shrink-0 border-b border-border text-foreground backdrop-blur-md"
+      style={{ background: "var(--ws-canvas-bg, var(--app-bg))" }}
     >
       <div className={`w-full px-2 sm:px-3 md:px-4 ${showBack ? "py-2" : "pt-1.5 pb-0.5"}`}>
         <div className="grid w-full gap-2">
@@ -165,7 +163,7 @@ export function ProfileHeader({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="h-9 shrink-0 border-slate-700 bg-slate-900/40 text-slate-100 hover:bg-slate-800/40"
+                    className="h-9 shrink-0 border-border bg-card/40 text-foreground hover:bg-accent"
                     onClick={back}
                     title="Vissza a műszerfalra"
                     aria-label="Vissza a műszerfalra"
@@ -184,9 +182,9 @@ export function ProfileHeader({
                 </Link>
                 )}
                 <div className="min-w-0 leading-tight">
-                  <div className="truncate text-sm font-semibold tracking-tight text-slate-100">Szcenárió</div>
+                  <div className="truncate text-sm font-semibold tracking-tight text-foreground">Szcenárió</div>
                   <div className="flex min-w-0 items-center gap-2">
-                    <div className="truncate text-xs text-slate-300" title={profileHint ?? profileName}>
+                    <div className="truncate text-xs text-muted-foreground" title={profileHint ?? profileName}>
                       {profileName}
                     </div>
                   </div>
@@ -207,34 +205,34 @@ export function ProfileHeader({
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700/70 bg-slate-900/40 px-2 text-[11px] font-mono tabular-nums text-slate-100 hover:bg-slate-900/60"
+                      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border bg-card/40 px-2 text-[11px] font-mono tabular-nums text-foreground hover:bg-accent"
                       onClick={() => {
                         setProfileOpen((v) => !v);
                       }}
                       aria-label={`PDCA ciklusok — ${pdcaSum}`}
                       title="Profil panel (PDCA számláló)"
                     >
-                      <span className="text-slate-300 leading-none">PDCA</span>
+                      <span className="text-muted-foreground leading-none">PDCA</span>
                       <span className="leading-none">#{pdcaSum}</span>
                     </button>
                   </PopoverTrigger>
                   <PopoverContent
                     align="end"
-                    className="w-72 border border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md"
+                    className="w-72 border border-border bg-popover text-popover-foreground"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate text-sm font-semibold">{profileName}</div>
                           {visitorShell ? (
-                            <div className="mt-0.5 text-[11px] text-slate-300">Gazdasági eset — ingyenes demó</div>
+                            <div className="mt-0.5 text-[11px] text-muted-foreground">Gazdasági eset — ingyenes demó</div>
                           ) : (
-                            <div className="mt-0.5 text-[11px] text-slate-300">
+                            <div className="mt-0.5 text-[11px] text-muted-foreground">
                               Profil ID: <span className="font-mono">{profileId}</span>
                             </div>
                           )}
                         </div>
-                        <div className="shrink-0 rounded-md border border-slate-700/70 bg-slate-900/50 px-2 py-1 text-[10px] font-mono tabular-nums text-slate-100">
+                        <div className="shrink-0 rounded-md border border-border bg-card/50 px-2 py-1 text-[10px] font-mono tabular-nums text-foreground">
                           PDCA #{pdcaSum}
                         </div>
                       </div>
@@ -244,7 +242,7 @@ export function ProfileHeader({
                           asChild
                           size="sm"
                           variant="outline"
-                          className="h-8 border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                          className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
                           <Link to="/stats" search={{ profile: profileId }}>
                             Aktivitás
@@ -254,7 +252,7 @@ export function ProfileHeader({
                           asChild
                           size="sm"
                           variant="outline"
-                          className="h-8 border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                          className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
                           <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
                             Beállítások
@@ -266,7 +264,7 @@ export function ProfileHeader({
                         type="button"
                         size="sm"
                         variant="secondary"
-                        className="h-8 w-full justify-center border border-slate-700 bg-slate-950/30 text-slate-100 hover:bg-slate-800/40"
+                        className="h-8 w-full justify-center border border-border bg-card/30 text-foreground hover:bg-accent"
                         onClick={() => {
                           void leaveVisitorCase();
                         }}
@@ -280,43 +278,18 @@ export function ProfileHeader({
                 </Popover>
               ) : null}
 
-              {showBack ? null : (
-              <div
-                data-tour-anchor="view-toggle"
-                className={cn(
-                  "flex h-9 shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900/40 px-2",
-                  highlightViewToggle
-                    ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
-                    : "",
-                )}
-                title="Osztott vagy teljes szélességű nézet"
-              >
-                <Columns2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
-                <Switch
-                  checked={viewMode === "full"}
-                  onCheckedChange={(v) => {
-                    if (onViewModeChange) {
-                      onViewModeChange(v ? "full" : "split");
-                      return;
-                    }
-                    openComingSoon({
-                      title: "Nézet mód (split / full)",
-                      purpose:
-                        "Osztott és teljes oldalas PDCA elrendezés váltása. Ezen a felületen a nézetvezérlő nincs bekötve.",
-                      featureId: "header.view_mode",
-                    });
-                  }}
-                  aria-label={viewMode === "full" ? "Teljes oldalas nézet" : "Osztott nézet"}
-                />
-                <Maximize2 className="h-4 w-4 text-slate-300" aria-hidden="true" />
-              </div>
-              )}
+              <ViewSettingsMenu
+                showSplit
+                viewMode={viewMode ?? "split"}
+                onViewModeChange={onViewModeChange}
+                highlightSplit={highlightViewToggle}
+              />
 
               {/* Keyboard shortcuts — left of the main menu */}
               <button
                 type="button"
                 className={cn(
-                  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 text-slate-100 hover:bg-slate-800/40",
+                  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card/40 text-foreground hover:bg-accent",
                   highlightShortcuts
                     ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
                     : "",
@@ -335,7 +308,7 @@ export function ProfileHeader({
                     type="button"
                     data-tour-anchor="app-menu"
                     className={cn(
-                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-900/40 hover:bg-slate-800/40",
+                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card/40 hover:bg-accent",
                       highlightMenu
                         ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
                         : "",
@@ -348,7 +321,7 @@ export function ProfileHeader({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-56 border border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md"
+                  className="min-w-56 border border-border bg-popover text-popover-foreground"
                 >
                   {visitorShell ? null : (
                     <>
@@ -504,8 +477,8 @@ export function ProfileHeader({
                     : "",
                 )}
               >
-                <p className="text-xs leading-snug text-slate-300">
-                  <span className="font-semibold uppercase tracking-wider text-slate-200">
+                <p className="text-xs leading-snug text-muted-foreground">
+                  <span className="font-semibold uppercase tracking-wider text-foreground">
                     A helyzet:{" "}
                   </span>
                   {situationLead}
@@ -522,7 +495,7 @@ export function ProfileHeader({
             <div className="flex min-w-0 w-full flex-col items-stretch justify-end gap-1">
               <button
                 type="button"
-                className="inline-flex h-8 w-auto max-w-full shrink-0 self-start items-center justify-center whitespace-nowrap rounded-md border border-slate-700 bg-slate-900/40 px-2 text-xs text-slate-100 transition-colors hover:bg-slate-800/40 sm:px-3"
+                className="inline-flex h-8 w-auto max-w-full shrink-0 self-start items-center justify-center whitespace-nowrap rounded-md border border-border bg-card/40 px-2 text-xs text-foreground transition-colors hover:bg-accent sm:px-3"
                 onClick={() => {
                   if (onRotatePdca) {
                     onRotatePdca();
@@ -540,7 +513,7 @@ export function ProfileHeader({
               >
                 <span className="truncate">👈 Forgasd el a váltótárcsát</span>
               </button>
-              <div className="flex h-9 min-w-0 w-full items-center overflow-hidden rounded-lg border border-slate-700 bg-slate-900/40 px-3 focus-within:border-slate-500">
+              <div className="flex h-9 min-w-0 w-full items-center overflow-hidden rounded-lg border border-border bg-card/40 px-3 focus-within:border-ring">
                 <Input
                   value={omni}
                   onChange={(e) => setOmni(e.currentTarget.value)}
@@ -551,11 +524,11 @@ export function ProfileHeader({
                     }
                   }}
                   placeholder="Globális keresés — funkciók, tételek, célok…"
-                  className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-slate-100 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <button
                   type="button"
-                  className="cursor-pointer border-none bg-transparent p-1 text-slate-300 transition-colors hover:text-slate-100"
+                  className="cursor-pointer border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
                   title="Keresés"
                   aria-label="Keresés"
                   onClick={openOmniSearch}
@@ -572,7 +545,7 @@ export function ProfileHeader({
           <div
             data-tour-anchor="workspaces"
             className="mt-1 -mx-2 px-2 pt-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4"
-            style={{ background: "var(--ws-canvas-bg, #0b0f19)" }}
+            style={{ background: "var(--ws-canvas-bg, var(--app-bg))" }}
           >
             {bottomRow}
           </div>
@@ -581,41 +554,41 @@ export function ProfileHeader({
         <KnowledgeBaseModal open={kbOpen} onOpenChange={setKbOpen} />
 
         <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
-          <DialogContent className="max-w-xl border-slate-700 bg-slate-950/95 text-slate-100 shadow-2xl backdrop-blur">
+          <DialogContent className="max-w-xl border-border bg-card text-foreground shadow-2xl">
             <div className="space-y-3">
               <div className="pr-8">
-                <DialogTitle className="text-lg font-semibold text-slate-100">Gyorsbillentyűk</DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-slate-300">
+                <DialogTitle className="text-lg font-semibold text-foreground">Gyorsbillentyűk</DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-muted-foreground">
                   Navigáció és fókuszváltás desktopon. Ha épp beviteli mezőben gépelsz, a navigációs gyorsbillentyűk nem futnak.
                 </DialogDescription>
               </div>
 
-              <div className="grid gap-2 text-[13px] text-slate-200 sm:grid-cols-2">
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mentés</div>
+              <div className="grid gap-2 text-[13px] text-foreground sm:grid-cols-2">
+                <div className="rounded-xl border border-border bg-card/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Mentés</div>
                   <div className="mt-1 font-mono">Ctrl/Cmd + S</div>
                 </div>
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Lean kereső</div>
+                <div className="rounded-xl border border-border bg-card/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lean kereső</div>
                   <div className="mt-1 font-mono">Ctrl/Cmd + K</div>
                 </div>
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Szumma</div>
+                <div className="rounded-xl border border-border bg-card/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Szumma</div>
                   <div className="mt-1 font-mono">Alt + Shift + End</div>
                 </div>
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Alsó fülek</div>
+                <div className="rounded-xl border border-border bg-card/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Alsó fülek</div>
                   <div className="mt-1 font-mono">Alt + Shift + ← / →</div>
                 </div>
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Munkaterek</div>
+                <div className="rounded-xl border border-border bg-card/40 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Munkaterek</div>
                   <div className="mt-1 font-mono">PageUp / PageDown</div>
-                  <div className="mt-1 text-[11px] text-slate-400">Fallback: Alt+Shift+PageUp/PageDown, Ctrl+Alt+←/→</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">Fallback: Alt+Shift+PageUp/PageDown, Ctrl+Alt+←/→</div>
                 </div>
-                <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 p-3 sm:col-span-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">PDCA negyed forgatás</div>
+                <div className="rounded-xl border border-border bg-card/40 p-3 sm:col-span-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">PDCA negyed forgatás</div>
                   <div className="mt-1 font-mono">↓</div>
-                  <div className="mt-1 text-[11px] text-slate-400">Fallback: Alt + Shift + ↓</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">Fallback: Alt + Shift + ↓</div>
                 </div>
               </div>
             </div>

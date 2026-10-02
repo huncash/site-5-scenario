@@ -1,4 +1,5 @@
 import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
+import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -41,6 +42,8 @@ export const ADOSSAG_HELYREALLITAS_FUNNEL = {
       a: "Nem. A funnel csak marketing wrapper. Nincs lezárás, nincs telemetria, nincs automatikus ping.",
     },
     PRICING_VAT_FAQ,
+    WHY_FAQ,
+    PRO_CHART_FAQ,
   ],
 } as const;
 

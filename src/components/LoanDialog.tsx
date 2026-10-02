@@ -270,7 +270,7 @@ export function LoanDialog({
             </div>
             <div className="max-h-64 overflow-y-auto custom-scrollbar">
               <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-slate-900/80 text-slate-200 backdrop-blur-md">
+                <thead className="sticky top-0 bg-[var(--card-bg)] text-[var(--text-main)] backdrop-blur-md">
                   <tr>
                     <th className="px-3 py-2 text-left font-medium">#</th>
                     <th className="px-3 py-2 text-left font-medium">Esedékesség</th>

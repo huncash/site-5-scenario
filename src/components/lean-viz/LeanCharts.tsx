@@ -13,12 +13,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const CURRENCY = "HUF";
-const INK = "#cbd5e1";
-const FOCUS = "#7dd3fc";
-const UP = "#34d399";
+const INK = "var(--text-main)";
+const FOCUS = "var(--accent-color)";
+const UP = "var(--accent-emerald, #10b981)";
 const DOWN = "#fb7185";
-const MUTED = "rgba(148,163,184,0.35)";
-const AXIS = "#94a3b8";
+const MUTED = "color-mix(in srgb, var(--card-border) 72%, transparent)";
+const AXIS = "var(--text-muted)";
 
 function niceTicks(min: number, max: number, count = 5): number[] {
   const lo = Math.min(min, max);
@@ -141,7 +141,7 @@ export function ChartChrome({
           <div className="flex flex-wrap items-center gap-1">
             <button
               type="button"
-              className="rounded-md border border-slate-700/60 bg-slate-900/40 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-900/60"
+              className="rounded-md border border-border bg-[var(--dropdown-hover)] px-2 py-1 text-[11px] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white"
               onClick={onPrev}
               title="Előző"
               aria-label="Előző időszak"
@@ -153,7 +153,7 @@ export function ChartChrome({
             ) : null}
             <button
               type="button"
-              className="rounded-md border border-slate-700/60 bg-slate-900/40 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-900/60"
+              className="rounded-md border border-border bg-[var(--dropdown-hover)] px-2 py-1 text-[11px] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white"
               onClick={onNext}
               title="Következő"
               aria-label="Következő időszak"
@@ -167,8 +167,8 @@ export function ChartChrome({
                 className={cn(
                   "rounded-md border px-2 py-1 text-[11px]",
                   span === n
-                    ? "border-slate-400/50 bg-slate-700/70 text-white"
-                    : "border-slate-700/60 bg-slate-900/40 text-slate-200 hover:bg-slate-900/60",
+                    ? "border-[var(--accent-color)] bg-[var(--accent-color)] text-white"
+                    : "border-border bg-[var(--dropdown-hover)] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white",
                 )}
                 onClick={() => onSpan(n)}
               >
@@ -393,7 +393,7 @@ export function BulletGraph({ item }: { item: BulletDatum }) {
   const gapPct = item.target !== 0 ? (gap / item.target) * 100 : 0;
   const fact = `Tény ${formatBullet(item.actual, item.unit)}, küszöb ${formatBullet(item.target, item.unit)} — ${
     gap >= 0 ? "fölötte" : "alatta"
-  } ${Math.abs(gapPct).toFixed(0)}%. A sáv a tény, a fehér vonal a küszöb.`;
+  } ${Math.abs(gapPct).toFixed(0)}%. A sáv a tény, a kontrasztos vonal a küszöb.`;
 
   return (
     <div className="min-w-0" data-exact={item.hint ?? fact}>
@@ -406,16 +406,16 @@ export function BulletGraph({ item }: { item: BulletDatum }) {
           {formatBullet(item.actual, item.unit)} / {formatBullet(item.target, item.unit)}
         </span>
       </div>
-      <div className="relative mt-1 h-3.5 overflow-hidden rounded-sm bg-slate-800/80">
-        <div className="absolute inset-y-0 left-0 bg-slate-700/80" style={{ width: "60%" }} />
-        <div className="absolute inset-y-0 left-0 bg-slate-600/70" style={{ width: "85%" }} />
-        <div className="absolute inset-y-0 left-0 bg-slate-500/50" style={{ width: "100%" }} />
+      <div className="relative mt-1 h-3.5 overflow-hidden rounded-sm bg-[var(--dropdown-hover)]">
+        <div className="absolute inset-y-0 left-0 bg-[color-mix(in_srgb,var(--card-bg)_70%,var(--app-bg))]" style={{ width: "60%" }} />
+        <div className="absolute inset-y-0 left-0 bg-[color-mix(in_srgb,var(--card-border)_55%,var(--card-bg))]" style={{ width: "85%" }} />
+        <div className="absolute inset-y-0 left-0 bg-[color-mix(in_srgb,var(--card-border)_35%,var(--card-bg))]" style={{ width: "100%" }} />
         <div
-          className="absolute inset-y-[3px] left-0 rounded-sm bg-sky-300"
+          className="absolute inset-y-[3px] left-0 rounded-sm bg-[var(--accent-color)]"
           style={{ width: `${actualPct}%` }}
         />
         <div
-          className="absolute top-0 h-full w-0.5 bg-white"
+          className="absolute top-0 h-full w-0.5 bg-[var(--text-main)]"
           style={{ left: `${targetPct}%` }}
           aria-hidden
         />
@@ -738,13 +738,13 @@ export function FlowSankey({
                 width={bar}
                 height={snk.heights[i] ?? row}
                 rx={2}
-                fill="#94a3b8"
+                fill={MUTED}
               />
               <text x={nameX} y={cy} fill={INK} fontSize={8}>
                 {clipLabel(s, nameChars)}
                 <title>{s}</title>
               </text>
-              <text x={valX} y={cy} textAnchor="end" fill="#e2e8f0" fontSize={8} fontFamily="ui-monospace, monospace">
+              <text x={valX} y={cy} textAnchor="end" fill={INK} fontSize={8} fontFamily="ui-monospace, monospace">
                 {compactHuf(v)}
               </text>
             </g>

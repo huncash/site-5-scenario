@@ -78,22 +78,22 @@ export function computeWorkspaceTint(
     const alpha = clamp((100 - i * stepPct) / 100, 0.22, 1);
 
     // Base theme color per category (dark workspace)
-    // personal: warm beige/olive
-    // business: steel/graphite (not dead gray)
+    // personal: emerald
+    // business: steel/graphite
     // project: caramel/sand
     let hue = 42;
     let sat = 22;
     let light = 56;
     if (group === "personal") {
-      hue = lerp(44, 110, gt); // beige -> olive
-      sat = lerp(26, 22, gt);
-      light = lerp(62, 58, gt);
+      hue = lerp(160, 152, gt);
+      sat = lerp(48, 36, gt);
+      light = lerp(48, 58, gt);
     } else if (group === "business") {
-      hue = 210; // steel-blue gray
-      sat = lerp(20, 12, gt);
+      hue = 215;
+      sat = lerp(16, 10, gt);
       light = lerp(58, 70, gt);
     } else {
-      hue = lerp(28, 38, gt); // caramel -> sand
+      hue = lerp(28, 38, gt);
       sat = lerp(42, 30, gt);
       light = lerp(56, 72, gt);
     }
@@ -102,10 +102,9 @@ export function computeWorkspaceTint(
     const accentL = clamp(light, 46, 78);
 
     const accent = hsl(hue, accentS, accentL, 1);
-    const accentBorder = hsl(hue, clamp(accentS + 6, 18, 86), clamp(accentL - 8, 32, 74), clamp(0.35 + alpha * 0.45, 0.35, 0.85));
-    const accentBg = hsl(hue, clamp(accentS, 18, 80), clamp(accentL - 34, 18, 46), clamp(0.16 + alpha * 0.22, 0.16, 0.42));
-    const accentText = hsl(hue, clamp(accentS, 10, 90), clamp(accentL + 18, 70, 88), 1);
-    const canvasBg = hsl(hue, clamp(accentS, 12, 70), 10, clamp(0.28 + alpha * 0.18, 0.28, 0.46));
+    const accentBorder = `color-mix(in srgb, ${accent} 48%, var(--card-border))`;
+    const accentBg = `color-mix(in srgb, ${accent} 26%, var(--dropdown-hover))`;
+    const accentText = "var(--text-main)";
 
     map.set(uniq[i], {
       idx: i,
@@ -117,13 +116,12 @@ export function computeWorkspaceTint(
       sat,
       light,
       // Inactive tabs must be dark glass (no white / no dead gray)
-      tabBgIdle: "rgba(15, 23, 42, 0.50)", // slate-900/50
+      tabBgIdle: "color-mix(in srgb, var(--card-bg) 72%, transparent)",
       tabBgActive: accentBg,
-      tabBorder: "rgba(30, 41, 59, 0.85)", // slate-800
+      tabBorder: "var(--card-border)",
       tabTop: accentBorder,
-      // Workspace canvas is fixed dark (no light canvas)
-      pageBg: "#0b0f19",
-      canvasBg,
+      pageBg: "var(--app-bg)",
+      canvasBg: "var(--app-bg)",
       accent,
       accentBg,
       accentBorder,

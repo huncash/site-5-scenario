@@ -5,7 +5,7 @@ export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const label = isDark
-    ? "Váltás magas kontrasztú világos módra"
+    ? "Váltás világos módra"
     : "Váltás sötét módra";
 
   return (

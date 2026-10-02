@@ -11,6 +11,7 @@ export type UiPrefs = {
   id: "ui";
   theme: UiTheme;
   palette?: UiPalette;
+  a11y?: boolean;
 };
 
 export type MeshSchema = {

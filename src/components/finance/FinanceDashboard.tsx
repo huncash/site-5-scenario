@@ -142,6 +142,7 @@ import { getMeshDeviceId, setMeshActiveProfile, useMeshRepository } from "@/lib/
 import { TransactionListItem } from "@/components/TransactionListItem";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HelpIcon, LeanTerm } from "@/components/HelpIcon";
+import { ProChartCallout } from "@/components/home/ProChartExplain";
 import { LedgerTxnRow } from "@/components/LedgerTxnRow";
 import { KpiQuickBar } from "@/components/KpiQuickBar";
 import { WorkspacePanels, WorkspaceTabs, type PdcaMode } from "@/components/WorkspaceTabs";
@@ -838,6 +839,12 @@ export function FinanceDashboard({
     if (typeof sessionStorage === "undefined") return;
     const v = sessionStorage.getItem("ui:viewMode");
     if (v === "full" || v === "split") setViewMode(v);
+    const onMode = (event: Event) => {
+      const mode = (event as CustomEvent<string>).detail;
+      if (mode === "full" || mode === "split") setViewMode(mode);
+    };
+    window.addEventListener("szcenario:view_mode", onMode as EventListener);
+    return () => window.removeEventListener("szcenario:view_mode", onMode as EventListener);
   }, []);
   useEffect(() => {
     if (typeof sessionStorage === "undefined") return;
@@ -5728,7 +5735,12 @@ export function FinanceDashboard({
 
         <div className="viz-split">
           <ChartChrome
-            title="Halmozott eredmény"
+            title={
+              <span className="inline-flex items-center gap-1">
+                Halmozott eredmény
+                <HelpIcon kbId="pro-chart" title="Hogyan értelmezzük a PRO-grafikont?" />
+              </span>
+            }
             span={vizSpan}
             onSpan={onVizSpan}
             onPrev={onVizPrev}
@@ -5737,13 +5749,14 @@ export function FinanceDashboard({
             legend={
               <>
                 <ChartLegendSwatch color="#34d399" label="Optimista" line />
-                <ChartLegendSwatch color="#7dd3fc" label="Reális" line />
+                <ChartLegendSwatch color="var(--accent-color)" label="Reális" line />
                 <ChartLegendSwatch color="#fb7185" label="Pesszimista" line />
               </>
             }
           >
             <SmallMultiples series={whatIf.multiples} xLabel="Hónap" yLabel="Ft" />
           </ChartChrome>
+          <ProChartCallout className="mt-2 rounded-xl border border-border/60 bg-card px-4 py-3" />
         </div>
 
         <div className="viz-split">
@@ -6146,7 +6159,7 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color="#7dd3fc" label="Honnan" />
+                    <ChartLegendSwatch color="var(--accent-color)" label="Honnan" />
                     <ChartLegendSwatch color="#94a3b8" label="Költséghely" />
                   </>
                 }
@@ -6465,7 +6478,7 @@ export function FinanceDashboard({
           }
         }}
       >
-        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto border border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md">
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto border border-border bg-card text-foreground">
           {(() => {
             const key = timelineMonthKey ?? timeline6MonthKeys[timeline6MonthKeys.length - 1] ?? null;
             const monthTxns = key ? (txnsByMonthKey.get(key) ?? []) : [];
@@ -6552,7 +6565,7 @@ export function FinanceDashboard({
 
                 <div className="rounded-md border border-border/60 bg-background/40">
                   <table className="w-full text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur">
+                    <thead className="sticky top-0 z-10 bg-card/90 backdrop-blur">
                       <tr className="border-b border-border/60 text-[11px] text-slate-300">
                         <th className="px-2 py-1.5 text-left font-medium">Dátum</th>
                         <th className="px-2 py-1.5 text-left font-medium">Megnevezés</th>
@@ -6658,8 +6671,8 @@ export function FinanceDashboard({
           title={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
         >
           <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <polygon points="100,0 0,0 100,100" fill="rgba(15,23,42,0.78)" />
-            <polyline points="0,0 100,100" stroke="rgba(148,163,184,0.55)" strokeWidth="4" fill="none" />
+            <polygon points="100,0 0,0 100,100" fill="var(--card-bg)" fillOpacity="0.78" />
+            <polyline points="0,0 100,100" stroke="var(--card-border)" strokeWidth="4" fill="none" />
           </svg>
           <span className="relative z-10 block">
             {ledgerCollapsed ? (
@@ -7635,7 +7648,7 @@ export function FinanceDashboard({
                     <>
                       <ChartLegendSwatch color="#34d399" label="Bevétel" line />
                       <ChartLegendSwatch color="#fb7185" label="Kiadás" line />
-                      <ChartLegendSwatch color="#7dd3fc" label="Megtakarítás" line />
+                      <ChartLegendSwatch color="var(--accent-color)" label="Megtakarítás" line />
                     </>
                   }
                 >
@@ -7674,7 +7687,7 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color="#7dd3fc" label="Honnan" />
+                      <ChartLegendSwatch color="var(--accent-color)" label="Honnan" />
                       <ChartLegendSwatch color="#94a3b8" label="Költséghely" />
                     </>
                   }
@@ -10276,7 +10289,7 @@ export function FinanceDashboard({
                   </Dialog>
                   <div className="max-h-[50vh] overflow-auto rounded-md border border-border/60 bg-background/40">
                     <table className="w-full text-xs">
-                      <thead className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur">
+                      <thead className="sticky top-0 z-10 bg-card/90 backdrop-blur">
                         <tr className="border-b border-border/60 text-[11px] text-slate-300">
                           <th className="px-2 py-1.5 text-left font-medium">Hónap</th>
                           <th className="px-2 py-1.5 text-right font-medium">Bevétel</th>
@@ -11690,7 +11703,7 @@ export function FinanceDashboard({
                       )}
                       <div className="max-h-[60vh] overflow-auto rounded-md border border-border/60 bg-background/40">
                         <table className="w-full text-xs">
-                          <thead className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur">
+                          <thead className="sticky top-0 z-10 bg-card/90 backdrop-blur">
                             <tr className="border-b border-border/60 text-[11px] text-slate-300">
                               <th className="px-2 py-1.5 text-left font-medium">Dátum</th>
                               <th className="px-2 py-1.5 text-left font-medium">Megnevezés</th>
@@ -12182,7 +12195,7 @@ export function FinanceDashboard({
               </div>
 
               {selectedCount > 0 && (
-                <div className="fixed bottom-4 left-1/2 z-50 w-[min(980px,calc(100%-2rem))] -translate-x-1/2 rounded-xl border border-slate-700 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-md">
+                <div className="fixed bottom-4 left-1/2 z-50 w-[min(980px,calc(100%-2rem))] -translate-x-1/2 rounded-xl border border-border bg-card/90 p-3 shadow-2xl">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="text-sm font-medium text-slate-100">
                       Kijelölve: <span className="font-mono">{selectedCount}</span> db
@@ -15710,15 +15723,16 @@ function WorkspaceTabsLegacy({
           );
         })}
 
-        <div className="flex items-center gap-1">
+        <div className="btn-new-item-wrap">
           <button
             type="button"
             onClick={onCustom}
-            className={`${tabBase} ${idle}`}
+            className="btn-new-item"
             title="Új munkaterület hozzáadása"
+            aria-label="Új munkaterület hozzáadása"
           >
             <Plus className="h-3.5 w-3.5" />
-            Új…
+            <span className="btn-new-item-label">Új</span>
           </button>
           <HelpIcon kbId="new-workspace" />
         </div>

@@ -161,7 +161,7 @@ export function MudaHeatmap({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="rounded-md border border-slate-700/60 bg-slate-900/40 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-900/60"
+            className="rounded-md border border-border bg-[var(--dropdown-hover)] px-2 py-1 text-[11px] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white"
             onClick={() => {
               onSelectDay?.(null);
               setCursorMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1));
@@ -173,7 +173,7 @@ export function MudaHeatmap({
           <div className="min-w-[140px] text-center text-[11px] text-slate-200">{monthLabel}</div>
           <button
             type="button"
-            className="rounded-md border border-slate-700/60 bg-slate-900/40 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-900/60"
+            className="rounded-md border border-border bg-[var(--dropdown-hover)] px-2 py-1 text-[11px] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white"
             onClick={() => {
               onSelectDay?.(null);
               setCursorMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));

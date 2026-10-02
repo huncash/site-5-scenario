@@ -220,7 +220,7 @@ export function LeanConsultantPanel({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md">
+        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto border-border bg-card text-foreground">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-300" />
@@ -381,7 +381,7 @@ export function LeanConsultantPanel({
           if (!v) setFollowup(null);
         }}
       >
-        <DialogContent className="max-w-lg border-slate-700 bg-slate-900/90 text-slate-100 backdrop-blur-md">
+        <DialogContent className="max-w-lg border-border bg-card text-foreground">
           <DialogHeader>
             <DialogTitle>Oké — hogyan vigyük végig?</DialogTitle>
             <DialogDescription>

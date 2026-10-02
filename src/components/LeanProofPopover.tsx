@@ -40,7 +40,7 @@ export function LeanProofPopover({
         side="bottom"
         align="start"
         sideOffset={14}
-        className="w-[420px] max-w-[calc(100vw-1.5rem)] border border-slate-700 bg-slate-900/90 p-3 text-slate-100 backdrop-blur-md"
+        className="w-[420px] max-w-[calc(100vw-1.5rem)] border border-border bg-popover p-3 text-popover-foreground"
       >
         <div className="text-xs font-semibold">📌 Állítás</div>
         <div className="mt-1 text-xs text-slate-200">{proof.claim}</div>

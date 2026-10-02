@@ -57,7 +57,7 @@ export function HelpIcon({
           size="icon"
           className={cn(
             btnCls,
-            "ml-[1pt] shrink-0 rounded-full bg-slate-800/40 text-slate-200 hover:bg-slate-700/60 hover:text-white",
+            "ml-[1pt] shrink-0 rounded-full border border-border bg-[var(--dropdown-hover)] text-[var(--text-main)] hover:bg-[var(--accent-color)] hover:text-white",
             className,
           )}
           data-help-icon
@@ -72,7 +72,7 @@ export function HelpIcon({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-64 max-w-[min(16rem,calc(100vw-2rem))] border border-slate-500/45 bg-slate-950 p-2.5 text-[12px] leading-snug text-slate-50 shadow-xl"
+        className="w-64 max-w-[min(16rem,calc(100vw-2rem))] border border-border bg-[var(--dropdown-bg)] p-2.5 text-[12px] leading-snug text-[var(--text-main)] shadow-xl"
         align="start"
         side="bottom"
         sideOffset={14}
@@ -84,7 +84,7 @@ export function HelpIcon({
         {embed ? (
           <button
             type="button"
-            className="mt-2 text-[11px] text-cyan-300 underline-offset-2 hover:underline"
+            className="mt-2 text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
             onClick={() => {
               setOpen(false);
               embed.openEmbed(kbId ? `kb/${kbId}` : "tippek", article?.title ?? title ?? "Súgó");

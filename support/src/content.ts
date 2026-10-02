@@ -58,6 +58,10 @@ export const TIPS = [
   { q: "Van telefonos support?", a: "Nincs. Kizárólag írásban, jeggyel." },
   { q: "Mennyi a válaszidő?", a: "Átlagosan 24 órán belül, írásban." },
   { q: "Hol a videó?", a: "YouTube-on. A saját szerver nem tárol videófájlt." },
+  {
+    q: "A PRO-grafikon a jövőt mutatja?",
+    a: "Nem. Nem valóság és nem jóslat: a múlt adataidból a lehetséges kimenetelek szórását és a mozgásteret számolja.",
+  },
 ];
 
 export const FAQ = [
@@ -65,4 +69,12 @@ export const FAQ = [
   { q: "Miért nincs telefonszám?", a: "A pontosabb ügyintézéshez írásos jegy kell — nincs telefonos sor." },
   { q: "Hol kérek segítséget?", a: "A 3. réteg: írásos jegyűrlap, e-mailben." },
   { q: "Működik offline?", a: "Az app igen. A support iframe hálózatot kér; offline a helyi súgó marad." },
+  {
+    q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",
+    a: "Igen. A hagyományos „jó/rossz év” találgatás kevés. Itt a szcenárió-módszertan Lean eszközökkel és a múlt adataiból számolt szórással fut: strukturált jövőkép, a napi működtetésben is.",
+  },
+  {
+    q: "Hogyan értelmezzük a Pesszimista – Realista – Optimista (PRO) grafikont?",
+    a: "Nem a valóságot és nem jóslatot látsz. A modell a múltbeli adataidból, szezonális mintákból és a beállított paraméterekből rajzol mozgásteret: szórási hibát csökkent, és megmutatja a pesszimista tartalékot vs. az optimista kapacitásigényt.",
+  },
 ];

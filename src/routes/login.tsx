@@ -184,7 +184,7 @@ function LoginPage() {
         }
         void navigate({ to: "/" });
       } else {
-        setError("Hibás mesterjelszó. Kérjük, próbáld újra.");
+        setError("Hibás mesterjelszó. Próbáld újra.");
       }
     } catch (err: any) {
       setError(err?.message || "Hiba történt a feloldás során.");

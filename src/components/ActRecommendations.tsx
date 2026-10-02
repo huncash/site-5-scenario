@@ -26,8 +26,8 @@ const TYPE_META: Record<
   OPTIMIZATION: {
     label: "OPTIMIZATION",
     icon: Lightbulb,
-    badgeCls: "bg-sky-500/20 text-sky-300 border-sky-500/40",
-    borderCls: "border-sky-500/40",
+    badgeCls: "bg-[color-mix(in_srgb,var(--accent-color)_20%,transparent)] text-[var(--accent-color)] border-[color-mix(in_srgb,var(--accent-color)_40%,transparent)]",
+    borderCls: "border-[color-mix(in_srgb,var(--accent-color)_40%,transparent)]",
   },
   SUCCESS: {
     label: "SUCCESS",
@@ -47,7 +47,7 @@ export function ActRecommendations({
   emptyHint?: string;
 }) {
   return (
-    <div className="card-module flex flex-col rounded-lg border border-border/60 bg-slate-900/40 p-3">
+    <div className="card-module flex flex-col rounded-lg border border-border/60 bg-[var(--card-bg)] p-3">
       <div className="flex shrink-0 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <LeanTerm
           className="text-sm font-medium text-slate-200"
@@ -77,7 +77,7 @@ export function ActRecommendations({
               <div
                 key={r.id}
                 className={cn(
-                  "rounded-md border bg-black/20 p-2.5 transition-all duration-200 hover:bg-slate-900/40",
+                  "rounded-md border bg-[color-mix(in_srgb,var(--card-bg)_88%,var(--app-bg))] p-2.5 transition-all duration-200 hover:bg-[var(--dropdown-hover)]",
                   meta.borderCls,
                 )}
               >

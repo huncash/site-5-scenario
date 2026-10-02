@@ -27,7 +27,7 @@ function nodeRow({
   kpis?: Array<{ label: string; value: string; className?: string; title?: string }>;
 }) {
   return (
-    <div className="relative rounded-md border border-border/60 bg-background/40 px-3 py-2">
+    <div className="relative rounded-md border border-border/60 bg-[var(--card-bg)] px-3 py-2">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate text-xs font-semibold text-slate-100">{title}</div>
@@ -180,7 +180,7 @@ export function AssetTree({
                 badges: [
                   {
                     label: "cég",
-                    className: "border-sky-500/30 bg-sky-500/10 text-sky-200",
+                className: "border-[color-mix(in_srgb,var(--accent-color)_35%,transparent)] bg-[color-mix(in_srgb,var(--accent-color)_12%,transparent)] text-[var(--accent-color)]",
                     title: "Céges oldal — telephely, eszköz, flotta a vállalkozáshoz kötve.",
                   },
                 ],
@@ -189,7 +189,7 @@ export function AssetTree({
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-lg border border-border/60 bg-background/30 p-3">
+          <div className="rounded-lg border border-border/60 bg-[var(--card-bg)] p-3">
             <div className="mb-2 flex items-center justify-between">
               <LeanTerm
                 className="text-xs font-semibold uppercase tracking-wider text-slate-200"
@@ -214,12 +214,12 @@ export function AssetTree({
                   const links = [
                     { label: "magán", className: "border-slate-500/30 bg-slate-500/10 text-slate-200" },
                     ...(szekhelyLocs.length > 0
-                      ? [{ label: "cég: székhely", className: "border-sky-500/30 bg-sky-500/10 text-sky-200" }]
+                      ? [{ label: "cég: székhely", className: "border-[color-mix(in_srgb,var(--accent-color)_35%,transparent)] bg-[color-mix(in_srgb,var(--accent-color)_12%,transparent)] text-[var(--accent-color)]" }]
                       : []),
                   ];
                   return (
                     <div key={p.id} className="relative">
-                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-slate-950" />
+                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-[var(--card-bg)]" />
                       {nodeRow({
                         title: p.name,
                         subtitle: p.address,
@@ -247,7 +247,7 @@ export function AssetTree({
             )}
           </div>
 
-          <div className="rounded-lg border border-border/60 bg-background/30 p-3">
+          <div className="rounded-lg border border-border/60 bg-[var(--card-bg)] p-3">
             <div className="mb-2 flex items-center justify-between">
               <LeanTerm
                 className="text-xs font-semibold uppercase tracking-wider text-slate-200"
@@ -271,11 +271,11 @@ export function AssetTree({
                   const s = vehicleStats.get(v.id) ?? { expense: 0, count: 0 };
                   const badge =
                     v.type === "company_fleet"
-                      ? { label: "cég: flotta", className: "border-sky-500/30 bg-sky-500/10 text-sky-200" }
+                      ? { label: "cég: flotta", className: "border-[color-mix(in_srgb,var(--accent-color)_35%,transparent)] bg-[color-mix(in_srgb,var(--accent-color)_12%,transparent)] text-[var(--accent-color)]" }
                       : { label: "magán→cég", className: "border-amber-500/30 bg-amber-500/10 text-amber-200" };
                   return (
                     <div key={v.id} className="relative">
-                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-slate-950" />
+                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-[var(--card-bg)]" />
                       {nodeRow({
                         title: `${v.name} (${v.plateNumber})`,
                         subtitle: v.type === "company_fleet" ? "Flotta jármű" : "Magánautó üzleti használat",
@@ -297,12 +297,12 @@ export function AssetTree({
                   const links = [
                     isOwn
                       ? { label: "magán→cég", className: "border-amber-500/30 bg-amber-500/10 text-amber-200", title: "Saját ingóság üzleti használat" }
-                      : { label: "cég", className: "border-sky-500/30 bg-sky-500/10 text-sky-200" },
+                      : { label: "cég", className: "border-[color-mix(in_srgb,var(--accent-color)_35%,transparent)] bg-[color-mix(in_srgb,var(--accent-color)_12%,transparent)] text-[var(--accent-color)]" },
                     ...(a.project_id ? [{ label: "projekt", className: "border-violet-500/30 bg-violet-500/10 text-violet-200" }] : []),
                   ];
                   return (
                     <div key={a.id} className="relative">
-                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-slate-950" />
+                      <div className="absolute -left-[18px] top-3 h-2.5 w-2.5 rounded-full border border-border bg-[var(--card-bg)]" />
                       {nodeRow({
                         title: a.name,
                         subtitle,

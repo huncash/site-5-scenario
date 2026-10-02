@@ -37,7 +37,7 @@ export const TIER_CORE: TierCore[] = [
 ];
 
 export const PRICING_HERO =
-  "Válassza ki a vállalkozása méretéhez és céljaihoz illeszkedő konstrukciót. Minden csomag tiszta, lokális alapon működik, rejtett költségek és bonyolult szerverfüggőség nélkül.";
+  "Válaszd ki a vállalkozásod méretéhez és céljaidhoz illeszkedő konstrukciót. Minden csomag tiszta, lokális alapon működik, rejtett költségek és bonyolult szerverfüggőség nélkül.";
 
 export const PRICING_NET_NOTE =
   "Áraink nettóban értendőek, és a megrendelő országa szerinti áfával együtt kerülnek kiállításra.";
@@ -48,7 +48,7 @@ export const PRICING_VAT_FAQ = {
 } as const;
 
 export const DEMO_STARTER_BLURB =
-  "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheti a cash-flow fókuszokat és a likviditási mutatókat.";
+  "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheted a működést!";
 
 export const TIER_SLOGAN: Record<TierId, string> = {
   starter: "Gyors átlátás, alapvető cash-flow és biztonságos lokális adatszuverenitás.",

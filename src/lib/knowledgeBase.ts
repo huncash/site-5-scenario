@@ -1,10 +1,20 @@
+import {
+  DAILY_OPS_BODY,
+  PRO_ARTICLE_BODY,
+  PRO_ARTICLE_SUMMARY,
+  PRO_ARTICLE_TITLE,
+  WHY_BODY,
+  WHY_LEAD,
+} from "@/content/branding";
+
 export type KnowledgeBaseCategoryId =
   | "workspaces"
   | "promote"
   | "loans"
   | "cashflow"
   | "bank-sync"
-  | "settings";
+  | "settings"
+  | "scenario";
 
 export type KnowledgeBaseArticleId =
   | "workspaces-projects"
@@ -34,7 +44,9 @@ export type KnowledgeBaseArticleId =
   | "deals-overview"
   | "deals-margin"
   | "deals-promote"
-  | "deals-consolidation";
+  | "deals-consolidation"
+  | "pro-chart"
+  | "why-szcenario";
 
 export type KnowledgeBaseArticle = {
   id: KnowledgeBaseArticleId;
@@ -52,6 +64,7 @@ export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }
   { id: "cashflow", title: "4. Cashflow & Megtakarítások" },
   { id: "bank-sync", title: "5. Banki Szinkron & Hash Dedup" },
   { id: "settings", title: "6. Beállítások & Danger Zone" },
+  { id: "scenario", title: "7. Szcenárió & PRO-grafikon" },
 ];
 
 export const KB_ARTICLES: KnowledgeBaseArticle[] = [
@@ -523,6 +536,41 @@ Mentéskor:
 💡 Pro Tip / Legjobb gyakorlat
 - Konszolidáció mellett is tartsd külön a projekt státuszokat (terv/lekötött/tény), így nem mosódik össze a pipeline és a tényleges pénzmozgás.`,
     tags: ["ernyő", "konszolidáció", "pilot"],
+  },
+  {
+    id: "why-szcenario",
+    category: "scenario",
+    title: "Miért „Szcenárió” — túl a jó/rossz éven",
+    summary:
+      "Nem két találgatott év. A szcenárió-módszertan Lean eszközökkel és a múlt adataiból számolt szórással ad strukturált, alacsonyabb hibahatárú jövőképet.",
+    body: `🎯 Mire jó?
+- Hogy a tervezés ne merüljön ki egy „jó” és egy „rossz” év beírásában.
+
+⚙️ Hogyan működik?
+${WHY_LEAD}
+
+${WHY_BODY}
+
+${DAILY_OPS_BODY}
+
+💡 Pro Tip / Legjobb gyakorlat
+- Frissítsd a múltbeli adatokat, ha változik a piac: a szórás és a mozgástér azonnal újraszámolódik, és látszik, hol kell beavatkozni.`,
+    tags: ["szcenárió", "lean", "jövőkép", "márka"],
+  },
+  {
+    id: "pro-chart",
+    category: "scenario",
+    title: PRO_ARTICLE_TITLE,
+    summary: PRO_ARTICLE_SUMMARY,
+    body: `🎯 Mire jó?
+- Mozgástér, nem jóslat: pesszimista tartalék vs. optimista kapacitás, szórási hibával.
+
+⚙️ Hogyan működik?
+${PRO_ARTICLE_BODY}
+
+💡 Pro Tip / Legjobb gyakorlat
+- A grafikont a saját múltad és a beállított paraméterek frissítésével olvasd. Ha egy szoftver „pontos negyedéves bevételt” ígér, az téved.`,
+    tags: ["PRO", "pesszimista", "realista", "optimista", "szórás"],
   },
 ];
 
