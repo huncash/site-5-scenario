@@ -53,50 +53,37 @@ kill_pids() {
 }
 
 kill_own_4100() {
-  local pids pid cmdline cwd
-  pids="$(sudo fuser "${PORT_N}/tcp" 2>/dev/null || true)"
-  echo ">> fuser ${PORT_N}: ${pids:-none}"
-  # szándékos word-split: fuser PID listát ad
-  # shellcheck disable=SC2086
-  kill_pids $pids
-  sudo fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
-  if command -v lsof >/dev/null 2>&1; then
-    sudo lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r sudo kill -9 >/dev/null 2>&1 || true
-  fi
-  for pid in $(pgrep -u "$ME" -x node || true); do
-    cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
-    cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
-    case "$cmdline $cwd" in
-      *static-origin.mjs*|*"/.output/server/index.mjs"*|*signaling-server.js*|*"/var/www/szcenario"*)
-        echo ">> kill node $pid"
-        sudo kill -9 "$pid" >/dev/null 2>&1 || true
-        ;;
-    esac
+  local pids pid cmdline cwd attempt=1
+  while [ $attempt -le 5 ]; do
+    pids="$(sudo fuser "${PORT_N}/tcp" 2>/dev/null || true)"
+    if [ -z "$pids" ] && [ -z "$(ss_4100)" ]; then
+      break
+    fi
+    echo ">> cleanup attempt $attempt: fuser ${PORT_N}: ${pids:-none}"
+    # shellcheck disable=SC2086
+    kill_pids $pids
+    sudo fuser -k "${PORT_N}/tcp" >/dev/null 2>&1 || true
+    if command -v lsof >/dev/null 2>&1; then
+      sudo lsof -t -iTCP:"$PORT_N" -sTCP:LISTEN 2>/dev/null | xargs -r sudo kill -9 >/dev/null 2>&1 || true
+    fi
+    for pid in $(pgrep -u "$ME" -x node || true); do
+      cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+      cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null || true)"
+      case "$cmdline $cwd" in
+        *static-origin.mjs*|*"/.output/server/index.mjs"*|*signaling-server.js*|*"/var/www/$SITE_SLUG"*)
+          echo ">> kill node $pid"
+          sudo kill -9 "$pid" >/dev/null 2>&1 || true
+          ;;
+      esac
+    done
+    sleep 1
+    attempt=$((attempt + 1))
   done
 }
 
 delete_pm2_4100() {
-  local name
-  pm2 delete site-5 >/dev/null 2>&1 || true
-  pm2 delete szcenario >/dev/null 2>&1 || true
-  pm2 jlist 2>/dev/null | node -e '
-    let s = "";
-    process.stdin.on("data", (d) => { s += d; });
-    process.stdin.on("end", () => {
-      let apps = [];
-      try { apps = JSON.parse(s); } catch { process.exit(0); }
-      for (const a of apps) {
-        const p = String((a.pm2_env || {}).pm_exec_path || "");
-        if (/static-origin|\.output\/server|signaling-server|szcenario/.test(p)) {
-          console.log(a.name);
-        }
-      }
-    });
-  ' | while read -r name; do
-    [ -n "$name" ] || continue
-    echo ">> pm2 delete $name"
-    pm2 delete "$name" >/dev/null 2>&1 || true
-  done
+  # Teljes PM2 démon leállítás a szellemfolyamatok és auto-restart elkerülésére
+  pm2 kill >/dev/null 2>&1 || true
 }
 
 echo ">> activate $SHA"
@@ -109,12 +96,9 @@ grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
 need "$RELEASE_DIR/.output/public"
 
-echo ">> pm2 delete + free $PORT_N"
+echo ">> pm2 kill + free $PORT_N"
 delete_pm2_4100
 kill_own_4100
-sleep 2
-kill_own_4100
-sleep 1
 busy="$(ss_4100)"
 if [ -n "$busy" ]; then
   echo "port $PORT_N still busy even with sudo cleanup"
