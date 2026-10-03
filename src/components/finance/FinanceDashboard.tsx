@@ -214,6 +214,7 @@ import { MASTER_BASELINE, resolveWorkspaceBaseline } from "@/lib/masterBaseline"
 import { buildEducationWhatIf, isEducationSegment } from "@/lib/educationCases";
 import { buildIndustryWhatIf, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment } from "@/lib/resilienceCases";
+import { scenarioLens } from "@/lib/scenarioLens";
 import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
 import { buildStrategyWhatIf, isStrategySegment } from "@/lib/strategyCases";
 const CHART_COLORS = [
@@ -1066,6 +1067,7 @@ export function FinanceDashboard({
     return segmentIdFromDemoName(profileName);
   }, [profileName, settings]);
   const surface = useMemo(() => scenarioSurface(demoSegmentId), [demoSegmentId]);
+  const lens = useMemo(() => scenarioLens(demoSegmentId, locale), [demoSegmentId, locale]);
   const isVisitorDemo = Boolean(demoSegmentId) || isDemoProfileName(profileName);
   const visitorCaseTitle = visitorTitleForSegment(demoSegmentId, locale);
   const visitorCaseLead = visitorLeadForSegment(demoSegmentId, locale);
@@ -1364,12 +1366,6 @@ export function FinanceDashboard({
       fallback: baselineForSegment(demoSegmentId),
     });
   }, [activeWorkspaceMeta, demoSegmentId, settings, workspaceMetas]);
-
-  useEffect(() => {
-    if (!surface.showFinanceModules && (activeSubTab === "cashflow" || activeSubTab === "ledger" || activeSubTab === "deals")) {
-      setActiveSubTab("inventory");
-    }
-  }, [activeSubTab, surface.showFinanceModules]);
 
   const activeFolderTint = useMemo(() => {
     const byId = new Map(workspaceMetas.map((w) => [w.id, w] as const));
@@ -5880,9 +5876,8 @@ export function FinanceDashboard({
       {educationPanel("PLAN")}
       {industryPanel("PLAN")}
       {strategyPanel("PLAN")}
-      {surface.showFinanceModules ? whatIfPanel : null}
-      {surface.showFinanceModules ? (
-        <>
+      {whatIfPanel}
+      <>
       <GoalCard
         goal={activeGoal}
         goals={goals}
@@ -5900,8 +5895,7 @@ export function FinanceDashboard({
       />
       {savingsBucketsPanel}
       {plannedSimPanel}
-        </>
-      ) : null}
+      </>
     </div>
   );
 
@@ -7166,22 +7160,10 @@ export function FinanceDashboard({
       )}
     >
       <div className="relative z-10 min-w-0 p-1.5">
-        {surface.showFinanceModules ? (
-          <>
-            {activeSubTab === "cashflow" ? lockedDoCashflow : null}
-            {activeSubTab === "ledger" ? lockedDoLedger : null}
-            {activeSubTab === "deals" ? lockedDoDeals : null}
-            {activeSubTab === "inventory" ? lockedDoInventory : null}
-          </>
-        ) : (
-          <div className="pdca-tile-grid">
-            {resiliencePanel("DO")}
-            {educationPanel("DO")}
-            {industryPanel("DO")}
-            {strategyPanel("DO")}
-            {lockedDoInventory}
-          </div>
-        )}
+        {activeSubTab === "cashflow" ? lockedDoCashflow : null}
+        {activeSubTab === "ledger" ? lockedDoLedger : null}
+        {activeSubTab === "deals" ? lockedDoDeals : null}
+        {activeSubTab === "inventory" ? lockedDoInventory : null}
       </div>
     </div>
   );
@@ -7192,7 +7174,7 @@ export function FinanceDashboard({
         <CardTitle className="text-sm font-medium text-muted-foreground">
           <LeanTerm
             title="CHECK — összegzés"
-            exact={pdcaPhaseExact("CHECK", surface)}
+            exact={pdcaPhaseExact("CHECK", surface, demoSegmentId)}
           >
             CHECK — összegzés
           </LeanTerm>
@@ -8091,7 +8073,7 @@ export function FinanceDashboard({
         />
       </div>
 
-      {settings.showKpiQuickBar && surface.showFinanceModules ? <KpiQuickBar /> : null}
+      {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
 
       <ExportQrDialog open={exportOpen} onOpenChange={setExportOpen} />
 
@@ -9384,7 +9366,7 @@ export function FinanceDashboard({
             onStartNewPlanningCycle={startNewPlanningCycle}
             onNewImprovementGoal={newImprovementGoal}
             useMasterGrid
-            phaseExactFor={(phase) => pdcaPhaseExact(phase, surface)}
+            phaseExactFor={(phase) => pdcaPhaseExact(phase, surface, demoSegmentId)}
             leftContent={lockedLeftContent}
             rightContent={lockedRightContent}
           />
@@ -12843,17 +12825,19 @@ export function FinanceDashboard({
       <BottomNav
         activeSubTab={activeSubTab}
         onChangeSubTab={setActiveSubTab}
-        inventoryLabel={
-          surface.showFinanceModules
-            ? activeWorkspace === "personal" || activeWorkspace === "__all"
+        labels={{
+          cashflow: lens.tabs.cashflow,
+          items: lens.tabs.items,
+          deals: lens.tabs.deals,
+          inventory:
+            (activeWorkspace === "personal" || activeWorkspace === "__all") &&
+            (lens.tabs.inventory === "Leltár" || lens.tabs.inventory === "Inventory")
               ? t("dash.assets")
-              : t("dash.inventory")
-            : t("dash.stock")
-        }
+              : lens.tabs.inventory,
+        }}
         isSzummaActive={activeWs === "szumma"}
         onToggleSzumma={toggleSzumma}
         onOpenCreate={() => setPdcaNewOpen(true)}
-        hideFinanceTabs={!surface.showFinanceModules}
       />
     </div>
   );

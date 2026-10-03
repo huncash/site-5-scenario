@@ -10,17 +10,17 @@ describe("scenarioSurface", () => {
     expect(scenarioSurface("demo8_strategy_new_line").inheritMasterBaseline).toBe(true);
   });
 
-  it("hides finance on BCP / physical education", () => {
+  it("keeps the full finance chrome on BCP / physical / lean lenses", () => {
     expect(scenarioSurface("demo11_resilience_saas_outage")).toMatchObject({
-      showFinanceModules: false,
+      showFinanceModules: true,
       showPhysicalKpis: true,
     });
     expect(scenarioSurface("demo17_edu_campus_energy")).toMatchObject({
-      showFinanceModules: false,
+      showFinanceModules: true,
       showPhysicalKpis: true,
     });
     expect(scenarioSurface("demo16_edu_lean_vsm")).toMatchObject({
-      showFinanceModules: false,
+      showFinanceModules: true,
       showLean: true,
     });
   });

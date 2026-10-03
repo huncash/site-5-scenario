@@ -46,20 +46,36 @@ const child = spawn(process.execPath, [SERVER], {
 child.stdout.on("data", (chunk) => process.stdout.write(chunk));
 child.stderr.on("data", (chunk) => process.stderr.write(chunk));
 
+async function fetchPage(url) {
+  return fetch(`${ORIGIN}${url}`);
+}
+
 try {
   await waitForServer();
   for (const page of PAGES) {
-    const res = await fetch(`${ORIGIN}${page.url}`);
-    if (!res.ok) throw new Error(`SPA shell: ${page.url} → ${res.status}`);
+    let res = await fetchPage(page.url);
+    let source = page.url;
+    if (!res.ok) {
+      console.warn(`SPA shell: ${page.url} → ${res.status}, fallback /`);
+      if (page.url !== "/") {
+        res = await fetchPage("/");
+        source = "/";
+      }
+    }
+    if (!res.ok) {
+      console.warn(`SPA shell: ${source} → ${res.status}, skip ${page.files.join(", ")}`);
+      continue;
+    }
     const html = await res.text();
     if (!html.includes("<div id=") && !html.includes("<html")) {
-      throw new Error(`SPA shell: ${page.url} nem HTML`);
+      console.warn(`SPA shell: ${source} nem HTML, skip ${page.files.join(", ")}`);
+      continue;
     }
     for (const file of page.files) {
       const out = path.join(PUBLIC_DIR, file);
       await mkdir(path.dirname(out), { recursive: true });
       await writeFile(out, html);
-      console.log(`wrote ${file} (${html.length} B)`);
+      console.log(`wrote ${file} (${html.length} B)${source !== page.url ? ` via ${source}` : ""}`);
     }
   }
 } finally {

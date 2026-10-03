@@ -1,8 +1,9 @@
 import { educationCaseById, isEducationSegment } from "@/lib/educationCases";
-import { industryCaseById, industryShowsFinance, industryShowsPhysical, isIndustrySegment } from "@/lib/industryCases";
+import { industryCaseById, industryShowsPhysical, isIndustrySegment } from "@/lib/industryCases";
 import type { MasterBaselineContext, OrgKind } from "@/lib/masterBaseline";
 import { inheritMasterBaseline, MASTER_BASELINE } from "@/lib/masterBaseline";
 import { isResilienceSegment, resilienceCaseById } from "@/lib/resilienceCases";
+import { scenarioLens } from "@/lib/scenarioLens";
 import { isStrategySegment } from "@/lib/strategyCases";
 
 export type ScenarioFamily = "finance" | "strategy" | "resilience" | "education" | "industry";
@@ -22,7 +23,7 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
   if (isResilienceSegment(segmentId)) {
     return {
       family: "resilience",
-      showFinanceModules: false,
+      showFinanceModules: true,
       showPhysicalKpis: true,
       showLean: false,
       inheritMasterBaseline: true,
@@ -42,7 +43,7 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
     if (kind === "lean") {
       return {
         family: "education",
-        showFinanceModules: false,
+        showFinanceModules: true,
         showPhysicalKpis: false,
         showLean: true,
         inheritMasterBaseline: true,
@@ -50,7 +51,7 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
     }
     return {
       family: "education",
-      showFinanceModules: false,
+      showFinanceModules: true,
       showPhysicalKpis: true,
       showLean: false,
       inheritMasterBaseline: true,
@@ -60,7 +61,7 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
     const kind = industryCaseById(segmentId).kind;
     return {
       family: "industry",
-      showFinanceModules: industryShowsFinance(kind),
+      showFinanceModules: true,
       showPhysicalKpis: industryShowsPhysical(kind),
       showLean: kind !== "wms",
       inheritMasterBaseline: true,
@@ -84,21 +85,12 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
   };
 }
 
-export function pdcaPhaseExact(phase: "PLAN" | "DO" | "CHECK" | "ACT", surface: ScenarioSurface): string {
-  if (phase === "PLAN") {
-    return "PLAN — Master Baseline, kiinduló készlet, célszám, tervezett beavatkozási irány. Itt még nem a futás van.";
-  }
-  if (phase === "DO") {
-    return surface.showFinanceModules
-      ? "DO — élő pénzáramlás, allokáció, napi üzem. Ami most történik, nem a tervkártya."
-      : "DO — élő folyamat, erőforrás-allokáció, terhelés. Ami most történik, nem a tervkártya.";
-  }
-  if (phase === "CHECK") {
-    return "CHECK — terv–tény, szűk keresztmetszet, veszteség. Miért tart a mutató ott, ahol.";
-  }
-  return surface.showFinanceModules
-    ? "ACT — helyesbítés, árazás, keret, a következő kör standardja."
-    : "ACT — SMED / Poka-Yoke protokoll, redundancia, a következő kör standardja.";
+export function pdcaPhaseExact(
+  phase: "PLAN" | "DO" | "CHECK" | "ACT",
+  _surface: ScenarioSurface,
+  segmentId?: string | null,
+): string {
+  return scenarioLens(segmentId).pdca[phase];
 }
 
 export function baselineForSegment(segmentId: string | null | undefined): MasterBaselineContext {

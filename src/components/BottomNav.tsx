@@ -4,19 +4,17 @@ import { useI18n } from "@/i18n";
 export function BottomNav({
   activeSubTab,
   onChangeSubTab,
-  inventoryLabel,
+  labels,
   isSzummaActive,
   onToggleSzumma,
   onOpenCreate,
-  hideFinanceTabs,
 }: {
   activeSubTab: "cashflow" | "ledger" | "deals" | "inventory";
   onChangeSubTab: (t: "cashflow" | "ledger" | "deals" | "inventory") => void;
-  inventoryLabel: string;
+  labels?: { cashflow?: string; items?: string; deals?: string; inventory?: string };
   isSzummaActive: boolean;
   onToggleSzumma: () => void;
   onOpenCreate: () => void;
-  hideFinanceTabs?: boolean;
 }) {
   const { t } = useI18n();
   const tabCls = (on: boolean) =>
@@ -43,15 +41,13 @@ export function BottomNav({
       style={{ background: "var(--ws-canvas-bg, var(--app-bg))" }}
     >
       <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
-        {hideFinanceTabs ? null : (
-          <>
         <button
           type="button"
           className={tabCls(activeSubTab === "cashflow")}
           style={activeStyle(activeSubTab === "cashflow")}
           onClick={() => onChangeSubTab("cashflow")}
         >
-          {t("dash.cashflow")}
+          {labels?.cashflow ?? t("dash.cashflow")}
         </button>
         <button
           type="button"
@@ -59,7 +55,7 @@ export function BottomNav({
           style={activeStyle(activeSubTab === "ledger")}
           onClick={() => onChangeSubTab("ledger")}
         >
-          {t("dash.items")}
+          {labels?.items ?? t("dash.items")}
         </button>
         <button
           type="button"
@@ -67,17 +63,15 @@ export function BottomNav({
           style={activeStyle(activeSubTab === "deals")}
           onClick={() => onChangeSubTab("deals")}
         >
-          {t("dash.deals")}
+          {labels?.deals ?? t("dash.deals")}
         </button>
-          </>
-        )}
         <button
           type="button"
           className={tabCls(activeSubTab === "inventory")}
           style={activeStyle(activeSubTab === "inventory")}
           onClick={() => onChangeSubTab("inventory")}
         >
-          {inventoryLabel}
+          {labels?.inventory ?? t("dash.inventory")}
         </button>
       </div>
 

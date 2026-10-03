@@ -33,10 +33,10 @@ describe("industryCases", () => {
     expect(sim.wards.find((w) => w.id === "nicu")!.kept).toBe(false);
   });
 
-  it("fuel and tax keep finance, hospital hides it", () => {
+  it("hospital keeps the full chrome and physical KPIs", () => {
     expect(scenarioSurface("demo20_industry_hospital_blackout")).toMatchObject({
       family: "industry",
-      showFinanceModules: false,
+      showFinanceModules: true,
       showPhysicalKpis: true,
       showLean: true,
     });
