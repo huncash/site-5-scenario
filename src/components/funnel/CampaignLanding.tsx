@@ -10,16 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PRICING_HERO } from "@/content/pricing/tiers";
-import { DEMO_SEGMENTS } from "@/lib/demoSeed";
+import { publicSegmentById } from "@/lib/demoCatalog";
 import { CAMPAIGN_PATHS, CAMPAIGN_SEGMENT_IDS, type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, enterCampaignChooser } from "@/lib/campaignSession";
+import { caseTitle, useI18n } from "@/i18n";
 
 export function CampaignLanding(props: { campaignId: CampaignId }) {
   const { campaignId } = props;
+  const { locale } = useI18n();
   const c = CAMPAIGN_FUNNELS[campaignId];
   const navigate = useNavigate();
   const cases = CAMPAIGN_SEGMENT_IDS[campaignId]
-    .map((id) => DEMO_SEGMENTS.find((s) => s.id === id))
+    .map((id) => publicSegmentById(id))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   if (typeof window !== "undefined") {
@@ -50,7 +52,7 @@ export function CampaignLanding(props: { campaignId: CampaignId }) {
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {cases.map((s) => (
-                <li key={s.id}>{s.title}</li>
+                <li key={s.id}>{caseTitle(s.id, locale) ?? s.title}</li>
               ))}
             </ul>
             <ul className="space-y-1 text-[12px] text-slate-300">

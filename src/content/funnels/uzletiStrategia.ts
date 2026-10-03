@@ -8,7 +8,7 @@ export const UZLETI_STRATEGIA_FUNNEL = {
     eyebrow: "Üzleti és stratégiai tervezés",
     title: "Stratégiai esetek a PDCA-ban, Master Baseline törzzsel",
     subtitle:
-      "Termékvonal, beszerzési infláció, új piac, Kahn-féle elágazás. A cég alapadatait egyszer viszed be — a projektek öröklik. PRO pályák, helyi cash-flow.",
+      "Kahn-féle elágazás a Master Baseline törzsből: hitel vagy organikus, olcsó+kötbéres vagy drága+rugalmas. A cég alapadatait egyszer viszed be — a projekt örökli. PRO pályák, helyi cash-flow.",
     primaryCta: "Esetek megnyitása",
     secondaryCta: "Csomagok megtekintése",
   },

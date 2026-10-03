@@ -8,14 +8,14 @@ export function FaqSection(props: { items: ReadonlyArray<{ q: string; a: string 
   return (
     <div className="rounded-xl border border-border/60 bg-background/30 px-4 py-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="text-sm font-semibold text-slate-100">GYIK</div>
+        <div className="text-sm font-semibold text-slate-100">Gyakran Ismételt Kérdések</div>
         {embed ? (
           <button
             type="button"
             className="text-[11px] text-cyan-300 underline-offset-2 hover:underline"
-            onClick={() => embed.openEmbed("gyik", "GYIK")}
+            onClick={() => embed.openEmbed("gyik", "Gyakran Ismételt Kérdések")}
           >
-            Teljes GYIK
+            Teljes lista
           </button>
         ) : null}
       </div>

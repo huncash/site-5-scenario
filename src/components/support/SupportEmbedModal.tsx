@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
+import { useI18n } from "@/i18n";
 import { supportEmbedUrl } from "@/lib/support";
 
 export function SupportEmbedFrame({
@@ -14,9 +15,10 @@ export function SupportEmbedFrame({
   title: string;
   fallback?: ReactNode;
 }) {
+  const { locale, t } = useI18n();
   const [failed, setFailed] = useState(false);
   const timer = useRef<number | null>(null);
-  const src = supportEmbedUrl(slug);
+  const src = `${supportEmbedUrl(slug)}#${locale}`;
 
   useEffect(() => {
     setFailed(false);
@@ -47,7 +49,7 @@ export function SupportEmbedFrame({
         />
       ) : (
         <div className="p-4 text-sm text-slate-300">
-          {fallback ?? <p>A support oldal most nem érhető el. A helyi súgó továbbra is a készülékeden van.</p>}
+          {fallback ?? <p>{t("support.embedFail")}</p>}
         </div>
       )}
     </div>
@@ -67,6 +69,8 @@ export function SupportEmbedModal({
   title: string;
   fallback?: ReactNode;
 }) {
+  const { t } = useI18n();
+  const tClose = t("chrome.close");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -83,7 +87,7 @@ export function SupportEmbedModal({
       <button
         type="button"
         className="absolute inset-0 bg-black/80"
-        aria-label="Bezárás"
+        aria-label={tClose}
         onClick={() => onOpenChange(false)}
       />
       <div
@@ -97,7 +101,7 @@ export function SupportEmbedModal({
           <button
             type="button"
             className="rounded-md px-1.5 text-slate-400 hover:text-slate-100"
-            aria-label="Bezárás"
+            aria-label={tClose}
             onClick={() => onOpenChange(false)}
           >
             ×

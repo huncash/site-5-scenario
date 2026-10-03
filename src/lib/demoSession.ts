@@ -12,9 +12,19 @@ import { industryCaseById, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment, resilienceEntryWorkspace } from "@/lib/resilienceCases";
 import { isStrategySegment } from "@/lib/strategyCases";
 import { localdb } from "@/lib/localdb";
+import { caseLead, caseTitle } from "@/i18n/cases";
+import { readClientLocale, type Locale } from "@/i18n/locale";
+import { isCoreCaseId, KAHN_SEGMENT_ID, publicDemoSegments } from "@/lib/coreCases";
+import {
+  readScenarioDoorStep,
+  writeScenarioDoorStep,
+  SCENARIO_DOOR_STEP_KEY,
+  type ScenarioDoorStep,
+} from "@/lib/doorStep";
+
+export { readScenarioDoorStep, writeScenarioDoorStep, SCENARIO_DOOR_STEP_KEY, type ScenarioDoorStep };
 
 export const LAST_PROFILE_KEY = "vault:lastProfile";
-export const SCENARIO_DOOR_STEP_KEY = "ui:scenarioDoorStep";
 export const CASE_ENTRY_TAB_KEY = "ui:caseEntryTab";
 export const CASE_ENTRY_DEFAULT_WS = "Vállalkozás1";
 
@@ -27,23 +37,12 @@ export function writeCaseEntryTab(wsId: string = CASE_ENTRY_DEFAULT_WS) {
   }
 }
 
-export type ScenarioDoorStep =
-  | "type"
-  | "industry"
-  | "hospitality"
-  | "strategy"
-  | "resilience"
-  | "education"
-  | "healthcare"
-  | "manufacturing"
-  | "logistics"
-  | "services";
-
 export function doorStepForSegment(segmentId: string | null | undefined): ScenarioDoorStep {
   if (isEducationSegment(segmentId)) return "education";
   if (isResilienceSegment(segmentId)) return "resilience";
   if (isStrategySegment(segmentId)) return "strategy";
   if (isIndustrySegment(segmentId)) return industryCaseById(segmentId).door;
+  if (segmentId === "demo7_personal_pocket_seasonal_pilot") return "inner";
   return "hospitality";
 }
 
@@ -59,42 +58,20 @@ export function isDemoProfileName(name: unknown): boolean {
     .startsWith("DEMO ");
 }
 
-export function visitorTitleForSegment(segmentId: string | null | undefined): string | null {
+export function visitorTitleForSegment(
+  segmentId: string | null | undefined,
+  locale: Locale = readClientLocale(),
+): string | null {
   if (!segmentId) return null;
-  return DEMO_SEGMENTS.find((s) => s.id === segmentId)?.title ?? null;
+  return caseTitle(segmentId, locale) ?? DEMO_SEGMENTS.find((s) => s.id === segmentId)?.title ?? null;
 }
 
-export function visitorLeadForSegment(segmentId: string | null | undefined): string | null {
+export function visitorLeadForSegment(
+  segmentId: string | null | undefined,
+  locale: Locale = readClientLocale(),
+): string | null {
   if (!segmentId) return null;
-  return DEMO_SEGMENTS.find((s) => s.id === segmentId)?.lead ?? null;
-}
-
-export function readScenarioDoorStep(): ScenarioDoorStep {
-  if (typeof window === "undefined") return "type";
-  try {
-    const raw = sessionStorage.getItem(SCENARIO_DOOR_STEP_KEY);
-    if (raw === "hospitality" || raw === "economic") return "hospitality";
-    if (raw === "strategy") return "strategy";
-    if (raw === "education" || raw === "training") return "education";
-    if (raw === "resilience" || raw === "crisis" || raw === "disaster") return "resilience";
-    if (raw === "industry") return "industry";
-    if (raw === "healthcare") return "healthcare";
-    if (raw === "manufacturing") return "manufacturing";
-    if (raw === "logistics") return "logistics";
-    if (raw === "services") return "services";
-    return "type";
-  } catch {
-    return "type";
-  }
-}
-
-export function writeScenarioDoorStep(step: ScenarioDoorStep) {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.setItem(SCENARIO_DOOR_STEP_KEY, step);
-  } catch {
-    /* ignore */
-  }
+  return caseLead(segmentId, locale) ?? DEMO_SEGMENTS.find((s) => s.id === segmentId)?.lead ?? null;
 }
 
 function norm(s: unknown) {
@@ -107,7 +84,7 @@ function norm(s: unknown) {
 
 export async function dedupeAllDemoProfiles() {
   const list = await localdb.listProfiles();
-  const allowedNorm = new Set(DEMO_SEGMENTS.map((s) => norm(s.name)));
+  const allowedNorm = new Set(publicDemoSegments().map((s) => norm(s.name)));
   const legacyNames = new Set<string>(["DEMO / Fűszer (DUPE)"]);
 
   for (const p of list) {
@@ -142,7 +119,7 @@ export async function ensureDemoPackProfilesExist() {
   const list = await localdb.listProfiles();
   const existingKeys = new Set(list.map((p) => norm(p.name)));
 
-  for (const seg of DEMO_SEGMENTS) {
+  for (const seg of publicDemoSegments()) {
     const k = norm(seg.name);
     if (existingKeys.has(k)) continue;
     const salt = randomSaltB64();
@@ -163,7 +140,7 @@ export async function enterRememberedOrFirstDemo(vault: {
   const lastId = typeof window !== "undefined" ? localStorage.getItem(LAST_PROFILE_KEY) : null;
   const last = lastId ? list.find((p) => p.id === lastId) : null;
   const fromLast = last ? segmentIdFromDemoName(last.name) : null;
-  const segmentId = fromLast ?? DEMO_SEGMENTS[0]!.id;
+  const segmentId = fromLast && isCoreCaseId(fromLast) ? fromLast : KAHN_SEGMENT_ID;
   await enterDemoSegment(segmentId, vault);
   return segmentId;
 }

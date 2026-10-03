@@ -1,3 +1,4 @@
+import { caseTitle, useI18n } from "@/i18n";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HelpIcon } from "@/components/HelpIcon";
 import { KahnDecisionTree } from "@/components/strategy/KahnDecisionTree";
@@ -14,44 +15,44 @@ import {
   type StrategyTone,
 } from "@/lib/strategyCases";
 
-const TONE_LABEL: Record<StrategyTone, string> = {
-  opt: "Optimista",
-  real: "Realista",
-  pess: "Pesszimista",
-};
-
 export function StrategyCasePanel(props: {
   segmentId: string | null | undefined;
   signals: StrategySignal[];
   inheritedFrom: string;
   phase?: "PLAN" | "DO" | "CHECK" | "ACT";
 }) {
+  const { t, locale } = useI18n();
   if (!isStrategySegment(props.segmentId)) return null;
   const cse = strategyCaseById(props.segmentId as StrategyCaseId);
+  const TONE_LABEL: Record<StrategyTone, string> = {
+    opt: t("dash.optimistic"),
+    real: t("brand.real"),
+    pess: t("dash.pessimistic"),
+  };
   const kahn = isKahnForkSegment(props.segmentId);
   const newLine = isNewLineSegment(props.segmentId);
   const phaseHint = kahn
     ? props.phase === "PLAN"
-      ? "PLAN: a törzs adott. A fa a döntési csomópontot mutatja — melyik jövőágra kötsz készpénzt."
+      ? t("panel.kahnPlan")
       : props.phase === "ACT"
-        ? "ACT: egy ágat viszel, vagy tartalékot tartasz. A stop-loss a pesszimista ágon van."
-        : "CHECK: a három ág PRO mikrojelzése. Nem jóslat — elágazás."
+        ? t("panel.kahnAct")
+        : t("panel.kahnCheck")
     : props.phase === "PLAN"
-      ? "PLAN: a core törzs adott. Itt csak a döntés rétegét mozgatod."
+      ? t("panel.stratPlan")
       : props.phase === "ACT"
-        ? "ACT: a három pálya beavatkozása — csapda, árrés, kilépés."
-        : "CHECK: cash-flow mikrojelzések a három pályán.";
+        ? t("panel.stratAct")
+        : t("panel.stratCheck");
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {kahn ? "Kahn-féle jövőkutató sablon" : "Üzleti és stratégiai tervezés"}
+            {kahn ? t("panel.kahnTitle") : t("panel.stratTitle")}
           </p>
           <h3 className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-foreground">
-            {cse.title}
-            {kahn ? <HelpIcon kbId="kahn-rand" title="Herman Kahn és a RAND" /> : null}
+            {caseTitle(cse.id, locale) ?? cse.title}
+            {kahn ? <HelpIcon kbId="kahn-rand" title={t("panel.kahnHelp")} /> : null}
           </h3>
           <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
         </div>
@@ -59,13 +60,14 @@ export function StrategyCasePanel(props: {
           {MASTER_BASELINE_LABEL} → {props.inheritedFrom}
         </span>
       </div>
-      {newLine ? <StrategyBranchWalk storyId="new-line" /> : null}
-      {kahn ? (
+      {props.phase === "PLAN" && newLine ? <StrategyBranchWalk storyId="new-line" /> : null}
+      {props.phase === "PLAN" && kahn ? (
         <>
           <StrategyBranchWalk storyId="loan-whatif" />
           <KahnDecisionTree />
         </>
       ) : null}
+      {(props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
       <ul className="mt-3 grid gap-2 sm:grid-cols-3">
         {props.signals.map((s) => (
           <li key={s.tone} className="rounded-lg border border-border/50 bg-background/40 p-2.5">
@@ -78,6 +80,7 @@ export function StrategyCasePanel(props: {
           </li>
         ))}
       </ul>
+      ) : null}
     </section>
   );
 }

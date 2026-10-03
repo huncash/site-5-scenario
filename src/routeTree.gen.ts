@@ -26,26 +26,10 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as StrategiaRouteImport } from './routes/strategia'
 import { Route as LoginActivateRouteImport } from './routes/login_.activate'
-import { Route as FAdossagHelyreallitasIndexRouteImport } from './routes/f/adossag-helyreallitas/index'
-import { Route as FAdossagHelyreallitasCheckoutRouteImport } from './routes/f/adossag-helyreallitas/checkout'
-import { Route as FAdossagHelyreallitasDemoRouteImport } from './routes/f/adossag-helyreallitas/demo'
-import { Route as FAdossagHelyreallitasPricingRouteImport } from './routes/f/adossag-helyreallitas/pricing'
-import { Route as FMinosegKoltsegIndexRouteImport } from './routes/f/minoseg-koltseg/index'
-import { Route as FMinosegKoltsegCheckoutRouteImport } from './routes/f/minoseg-koltseg/checkout'
-import { Route as FMinosegKoltsegDemoRouteImport } from './routes/f/minoseg-koltseg/demo'
-import { Route as FMinosegKoltsegPricingRouteImport } from './routes/f/minoseg-koltseg/pricing'
-import { Route as FMultiSiteIndexRouteImport } from './routes/f/multi-site/index'
-import { Route as FMultiSiteCheckoutRouteImport } from './routes/f/multi-site/checkout'
-import { Route as FMultiSiteDemoRouteImport } from './routes/f/multi-site/demo'
-import { Route as FMultiSitePricingRouteImport } from './routes/f/multi-site/pricing'
 import { Route as FOktatasSzimulacioIndexRouteImport } from './routes/f/oktatas-szimulacio/index'
 import { Route as FOktatasSzimulacioCheckoutRouteImport } from './routes/f/oktatas-szimulacio/checkout'
 import { Route as FOktatasSzimulacioDemoRouteImport } from './routes/f/oktatas-szimulacio/demo'
 import { Route as FOktatasSzimulacioPricingRouteImport } from './routes/f/oktatas-szimulacio/pricing'
-import { Route as FProjektKontrollingIndexRouteImport } from './routes/f/projekt-kontrolling/index'
-import { Route as FProjektKontrollingCheckoutRouteImport } from './routes/f/projekt-kontrolling/checkout'
-import { Route as FProjektKontrollingDemoRouteImport } from './routes/f/projekt-kontrolling/demo'
-import { Route as FProjektKontrollingPricingRouteImport } from './routes/f/projekt-kontrolling/pricing'
 import { Route as FUzletiStrategiaIndexRouteImport } from './routes/f/uzleti-strategia/index'
 import { Route as FUzletiStrategiaCheckoutRouteImport } from './routes/f/uzleti-strategia/checkout'
 import { Route as FUzletiStrategiaDemoRouteImport } from './routes/f/uzleti-strategia/demo'
@@ -140,70 +124,6 @@ const LoginActivateRoute = LoginActivateRouteImport.update({
   path: '/login/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FAdossagHelyreallitasIndexRoute =
-  FAdossagHelyreallitasIndexRouteImport.update({
-    id: '/f/adossag-helyreallitas/',
-    path: '/f/adossag-helyreallitas/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FAdossagHelyreallitasCheckoutRoute =
-  FAdossagHelyreallitasCheckoutRouteImport.update({
-    id: '/f/adossag-helyreallitas/checkout',
-    path: '/f/adossag-helyreallitas/checkout',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FAdossagHelyreallitasDemoRoute =
-  FAdossagHelyreallitasDemoRouteImport.update({
-    id: '/f/adossag-helyreallitas/demo',
-    path: '/f/adossag-helyreallitas/demo',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FAdossagHelyreallitasPricingRoute =
-  FAdossagHelyreallitasPricingRouteImport.update({
-    id: '/f/adossag-helyreallitas/pricing',
-    path: '/f/adossag-helyreallitas/pricing',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FMinosegKoltsegIndexRoute = FMinosegKoltsegIndexRouteImport.update({
-  id: '/f/minoseg-koltseg/',
-  path: '/f/minoseg-koltseg/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMinosegKoltsegCheckoutRoute = FMinosegKoltsegCheckoutRouteImport.update({
-  id: '/f/minoseg-koltseg/checkout',
-  path: '/f/minoseg-koltseg/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMinosegKoltsegDemoRoute = FMinosegKoltsegDemoRouteImport.update({
-  id: '/f/minoseg-koltseg/demo',
-  path: '/f/minoseg-koltseg/demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMinosegKoltsegPricingRoute = FMinosegKoltsegPricingRouteImport.update({
-  id: '/f/minoseg-koltseg/pricing',
-  path: '/f/minoseg-koltseg/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMultiSiteIndexRoute = FMultiSiteIndexRouteImport.update({
-  id: '/f/multi-site/',
-  path: '/f/multi-site/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMultiSiteCheckoutRoute = FMultiSiteCheckoutRouteImport.update({
-  id: '/f/multi-site/checkout',
-  path: '/f/multi-site/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMultiSiteDemoRoute = FMultiSiteDemoRouteImport.update({
-  id: '/f/multi-site/demo',
-  path: '/f/multi-site/demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FMultiSitePricingRoute = FMultiSitePricingRouteImport.update({
-  id: '/f/multi-site/pricing',
-  path: '/f/multi-site/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FOktatasSzimulacioIndexRoute = FOktatasSzimulacioIndexRouteImport.update({
   id: '/f/oktatas-szimulacio/',
   path: '/f/oktatas-szimulacio/',
@@ -224,29 +144,6 @@ const FOktatasSzimulacioPricingRoute =
   FOktatasSzimulacioPricingRouteImport.update({
     id: '/f/oktatas-szimulacio/pricing',
     path: '/f/oktatas-szimulacio/pricing',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FProjektKontrollingIndexRoute =
-  FProjektKontrollingIndexRouteImport.update({
-    id: '/f/projekt-kontrolling/',
-    path: '/f/projekt-kontrolling/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FProjektKontrollingCheckoutRoute =
-  FProjektKontrollingCheckoutRouteImport.update({
-    id: '/f/projekt-kontrolling/checkout',
-    path: '/f/projekt-kontrolling/checkout',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FProjektKontrollingDemoRoute = FProjektKontrollingDemoRouteImport.update({
-  id: '/f/projekt-kontrolling/demo',
-  path: '/f/projekt-kontrolling/demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FProjektKontrollingPricingRoute =
-  FProjektKontrollingPricingRouteImport.update({
-    id: '/f/projekt-kontrolling/pricing',
-    path: '/f/projekt-kontrolling/pricing',
     getParentRoute: () => rootRouteImport,
   } as any)
 const FUzletiStrategiaIndexRoute = FUzletiStrategiaIndexRouteImport.update({
@@ -311,32 +208,16 @@ export interface FileRoutesByFullPath {
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
   '/login/activate': typeof LoginActivateRoute
-  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
-  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
-  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
-  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
-  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
-  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
-  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
-  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
-  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
-  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
-  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
-  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
   '/f/uzleti-strategia/checkout': typeof FUzletiStrategiaCheckoutRoute
   '/f/uzleti-strategia/demo': typeof FUzletiStrategiaDemoRoute
   '/f/uzleti-strategia/pricing': typeof FUzletiStrategiaPricingRoute
   '/f/valsag-reziliencia/checkout': typeof FValsagRezilienciaCheckoutRoute
   '/f/valsag-reziliencia/demo': typeof FValsagRezilienciaDemoRoute
   '/f/valsag-reziliencia/pricing': typeof FValsagRezilienciaPricingRoute
-  '/f/adossag-helyreallitas/': typeof FAdossagHelyreallitasIndexRoute
-  '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
-  '/f/multi-site/': typeof FMultiSiteIndexRoute
   '/f/oktatas-szimulacio/': typeof FOktatasSzimulacioIndexRoute
-  '/f/projekt-kontrolling/': typeof FProjektKontrollingIndexRoute
   '/f/uzleti-strategia/': typeof FUzletiStrategiaIndexRoute
   '/f/valsag-reziliencia/': typeof FValsagRezilienciaIndexRoute
 }
@@ -358,32 +239,16 @@ export interface FileRoutesByTo {
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
   '/login/activate': typeof LoginActivateRoute
-  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
-  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
-  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
-  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
-  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
-  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
-  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
-  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
-  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
-  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
-  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
-  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
   '/f/uzleti-strategia/checkout': typeof FUzletiStrategiaCheckoutRoute
   '/f/uzleti-strategia/demo': typeof FUzletiStrategiaDemoRoute
   '/f/uzleti-strategia/pricing': typeof FUzletiStrategiaPricingRoute
   '/f/valsag-reziliencia/checkout': typeof FValsagRezilienciaCheckoutRoute
   '/f/valsag-reziliencia/demo': typeof FValsagRezilienciaDemoRoute
   '/f/valsag-reziliencia/pricing': typeof FValsagRezilienciaPricingRoute
-  '/f/adossag-helyreallitas': typeof FAdossagHelyreallitasIndexRoute
-  '/f/minoseg-koltseg': typeof FMinosegKoltsegIndexRoute
-  '/f/multi-site': typeof FMultiSiteIndexRoute
   '/f/oktatas-szimulacio': typeof FOktatasSzimulacioIndexRoute
-  '/f/projekt-kontrolling': typeof FProjektKontrollingIndexRoute
   '/f/uzleti-strategia': typeof FUzletiStrategiaIndexRoute
   '/f/valsag-reziliencia': typeof FValsagRezilienciaIndexRoute
 }
@@ -406,32 +271,16 @@ export interface FileRoutesById {
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
   '/login_/activate': typeof LoginActivateRoute
-  '/f/adossag-helyreallitas/checkout': typeof FAdossagHelyreallitasCheckoutRoute
-  '/f/adossag-helyreallitas/demo': typeof FAdossagHelyreallitasDemoRoute
-  '/f/adossag-helyreallitas/pricing': typeof FAdossagHelyreallitasPricingRoute
-  '/f/minoseg-koltseg/checkout': typeof FMinosegKoltsegCheckoutRoute
-  '/f/minoseg-koltseg/demo': typeof FMinosegKoltsegDemoRoute
-  '/f/minoseg-koltseg/pricing': typeof FMinosegKoltsegPricingRoute
-  '/f/multi-site/checkout': typeof FMultiSiteCheckoutRoute
-  '/f/multi-site/demo': typeof FMultiSiteDemoRoute
-  '/f/multi-site/pricing': typeof FMultiSitePricingRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
-  '/f/projekt-kontrolling/checkout': typeof FProjektKontrollingCheckoutRoute
-  '/f/projekt-kontrolling/demo': typeof FProjektKontrollingDemoRoute
-  '/f/projekt-kontrolling/pricing': typeof FProjektKontrollingPricingRoute
   '/f/uzleti-strategia/checkout': typeof FUzletiStrategiaCheckoutRoute
   '/f/uzleti-strategia/demo': typeof FUzletiStrategiaDemoRoute
   '/f/uzleti-strategia/pricing': typeof FUzletiStrategiaPricingRoute
   '/f/valsag-reziliencia/checkout': typeof FValsagRezilienciaCheckoutRoute
   '/f/valsag-reziliencia/demo': typeof FValsagRezilienciaDemoRoute
   '/f/valsag-reziliencia/pricing': typeof FValsagRezilienciaPricingRoute
-  '/f/adossag-helyreallitas/': typeof FAdossagHelyreallitasIndexRoute
-  '/f/minoseg-koltseg/': typeof FMinosegKoltsegIndexRoute
-  '/f/multi-site/': typeof FMultiSiteIndexRoute
   '/f/oktatas-szimulacio/': typeof FOktatasSzimulacioIndexRoute
-  '/f/projekt-kontrolling/': typeof FProjektKontrollingIndexRoute
   '/f/uzleti-strategia/': typeof FUzletiStrategiaIndexRoute
   '/f/valsag-reziliencia/': typeof FValsagRezilienciaIndexRoute
 }
@@ -455,32 +304,16 @@ export interface FileRouteTypes {
     | '/stats'
     | '/strategia'
     | '/login/activate'
-    | '/f/adossag-helyreallitas/checkout'
-    | '/f/adossag-helyreallitas/demo'
-    | '/f/adossag-helyreallitas/pricing'
-    | '/f/minoseg-koltseg/checkout'
-    | '/f/minoseg-koltseg/demo'
-    | '/f/minoseg-koltseg/pricing'
-    | '/f/multi-site/checkout'
-    | '/f/multi-site/demo'
-    | '/f/multi-site/pricing'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
-    | '/f/projekt-kontrolling/checkout'
-    | '/f/projekt-kontrolling/demo'
-    | '/f/projekt-kontrolling/pricing'
     | '/f/uzleti-strategia/checkout'
     | '/f/uzleti-strategia/demo'
     | '/f/uzleti-strategia/pricing'
     | '/f/valsag-reziliencia/checkout'
     | '/f/valsag-reziliencia/demo'
     | '/f/valsag-reziliencia/pricing'
-    | '/f/adossag-helyreallitas/'
-    | '/f/minoseg-koltseg/'
-    | '/f/multi-site/'
     | '/f/oktatas-szimulacio/'
-    | '/f/projekt-kontrolling/'
     | '/f/uzleti-strategia/'
     | '/f/valsag-reziliencia/'
   fileRoutesByTo: FileRoutesByTo
@@ -502,32 +335,16 @@ export interface FileRouteTypes {
     | '/stats'
     | '/strategia'
     | '/login/activate'
-    | '/f/adossag-helyreallitas/checkout'
-    | '/f/adossag-helyreallitas/demo'
-    | '/f/adossag-helyreallitas/pricing'
-    | '/f/minoseg-koltseg/checkout'
-    | '/f/minoseg-koltseg/demo'
-    | '/f/minoseg-koltseg/pricing'
-    | '/f/multi-site/checkout'
-    | '/f/multi-site/demo'
-    | '/f/multi-site/pricing'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
-    | '/f/projekt-kontrolling/checkout'
-    | '/f/projekt-kontrolling/demo'
-    | '/f/projekt-kontrolling/pricing'
     | '/f/uzleti-strategia/checkout'
     | '/f/uzleti-strategia/demo'
     | '/f/uzleti-strategia/pricing'
     | '/f/valsag-reziliencia/checkout'
     | '/f/valsag-reziliencia/demo'
     | '/f/valsag-reziliencia/pricing'
-    | '/f/adossag-helyreallitas'
-    | '/f/minoseg-koltseg'
-    | '/f/multi-site'
     | '/f/oktatas-szimulacio'
-    | '/f/projekt-kontrolling'
     | '/f/uzleti-strategia'
     | '/f/valsag-reziliencia'
   id:
@@ -549,32 +366,16 @@ export interface FileRouteTypes {
     | '/stats'
     | '/strategia'
     | '/login_/activate'
-    | '/f/adossag-helyreallitas/checkout'
-    | '/f/adossag-helyreallitas/demo'
-    | '/f/adossag-helyreallitas/pricing'
-    | '/f/minoseg-koltseg/checkout'
-    | '/f/minoseg-koltseg/demo'
-    | '/f/minoseg-koltseg/pricing'
-    | '/f/multi-site/checkout'
-    | '/f/multi-site/demo'
-    | '/f/multi-site/pricing'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
-    | '/f/projekt-kontrolling/checkout'
-    | '/f/projekt-kontrolling/demo'
-    | '/f/projekt-kontrolling/pricing'
     | '/f/uzleti-strategia/checkout'
     | '/f/uzleti-strategia/demo'
     | '/f/uzleti-strategia/pricing'
     | '/f/valsag-reziliencia/checkout'
     | '/f/valsag-reziliencia/demo'
     | '/f/valsag-reziliencia/pricing'
-    | '/f/adossag-helyreallitas/'
-    | '/f/minoseg-koltseg/'
-    | '/f/multi-site/'
     | '/f/oktatas-szimulacio/'
-    | '/f/projekt-kontrolling/'
     | '/f/uzleti-strategia/'
     | '/f/valsag-reziliencia/'
   fileRoutesById: FileRoutesById
@@ -597,32 +398,16 @@ export interface RootRouteChildren {
   StatsRoute: typeof StatsRoute
   StrategiaRoute: typeof StrategiaRoute
   LoginActivateRoute: typeof LoginActivateRoute
-  FAdossagHelyreallitasCheckoutRoute: typeof FAdossagHelyreallitasCheckoutRoute
-  FAdossagHelyreallitasDemoRoute: typeof FAdossagHelyreallitasDemoRoute
-  FAdossagHelyreallitasPricingRoute: typeof FAdossagHelyreallitasPricingRoute
-  FMinosegKoltsegCheckoutRoute: typeof FMinosegKoltsegCheckoutRoute
-  FMinosegKoltsegDemoRoute: typeof FMinosegKoltsegDemoRoute
-  FMinosegKoltsegPricingRoute: typeof FMinosegKoltsegPricingRoute
-  FMultiSiteCheckoutRoute: typeof FMultiSiteCheckoutRoute
-  FMultiSiteDemoRoute: typeof FMultiSiteDemoRoute
-  FMultiSitePricingRoute: typeof FMultiSitePricingRoute
   FOktatasSzimulacioCheckoutRoute: typeof FOktatasSzimulacioCheckoutRoute
   FOktatasSzimulacioDemoRoute: typeof FOktatasSzimulacioDemoRoute
   FOktatasSzimulacioPricingRoute: typeof FOktatasSzimulacioPricingRoute
-  FProjektKontrollingCheckoutRoute: typeof FProjektKontrollingCheckoutRoute
-  FProjektKontrollingDemoRoute: typeof FProjektKontrollingDemoRoute
-  FProjektKontrollingPricingRoute: typeof FProjektKontrollingPricingRoute
   FUzletiStrategiaCheckoutRoute: typeof FUzletiStrategiaCheckoutRoute
   FUzletiStrategiaDemoRoute: typeof FUzletiStrategiaDemoRoute
   FUzletiStrategiaPricingRoute: typeof FUzletiStrategiaPricingRoute
   FValsagRezilienciaCheckoutRoute: typeof FValsagRezilienciaCheckoutRoute
   FValsagRezilienciaDemoRoute: typeof FValsagRezilienciaDemoRoute
   FValsagRezilienciaPricingRoute: typeof FValsagRezilienciaPricingRoute
-  FAdossagHelyreallitasIndexRoute: typeof FAdossagHelyreallitasIndexRoute
-  FMinosegKoltsegIndexRoute: typeof FMinosegKoltsegIndexRoute
-  FMultiSiteIndexRoute: typeof FMultiSiteIndexRoute
   FOktatasSzimulacioIndexRoute: typeof FOktatasSzimulacioIndexRoute
-  FProjektKontrollingIndexRoute: typeof FProjektKontrollingIndexRoute
   FUzletiStrategiaIndexRoute: typeof FUzletiStrategiaIndexRoute
   FValsagRezilienciaIndexRoute: typeof FValsagRezilienciaIndexRoute
 }
@@ -748,90 +533,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/f/adossag-helyreallitas/': {
-      id: '/f/adossag-helyreallitas/'
-      path: '/f/adossag-helyreallitas'
-      fullPath: '/f/adossag-helyreallitas/'
-      preLoaderRoute: typeof FAdossagHelyreallitasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/adossag-helyreallitas/checkout': {
-      id: '/f/adossag-helyreallitas/checkout'
-      path: '/f/adossag-helyreallitas/checkout'
-      fullPath: '/f/adossag-helyreallitas/checkout'
-      preLoaderRoute: typeof FAdossagHelyreallitasCheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/adossag-helyreallitas/demo': {
-      id: '/f/adossag-helyreallitas/demo'
-      path: '/f/adossag-helyreallitas/demo'
-      fullPath: '/f/adossag-helyreallitas/demo'
-      preLoaderRoute: typeof FAdossagHelyreallitasDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/adossag-helyreallitas/pricing': {
-      id: '/f/adossag-helyreallitas/pricing'
-      path: '/f/adossag-helyreallitas/pricing'
-      fullPath: '/f/adossag-helyreallitas/pricing'
-      preLoaderRoute: typeof FAdossagHelyreallitasPricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/minoseg-koltseg/': {
-      id: '/f/minoseg-koltseg/'
-      path: '/f/minoseg-koltseg'
-      fullPath: '/f/minoseg-koltseg/'
-      preLoaderRoute: typeof FMinosegKoltsegIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/minoseg-koltseg/checkout': {
-      id: '/f/minoseg-koltseg/checkout'
-      path: '/f/minoseg-koltseg/checkout'
-      fullPath: '/f/minoseg-koltseg/checkout'
-      preLoaderRoute: typeof FMinosegKoltsegCheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/minoseg-koltseg/demo': {
-      id: '/f/minoseg-koltseg/demo'
-      path: '/f/minoseg-koltseg/demo'
-      fullPath: '/f/minoseg-koltseg/demo'
-      preLoaderRoute: typeof FMinosegKoltsegDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/minoseg-koltseg/pricing': {
-      id: '/f/minoseg-koltseg/pricing'
-      path: '/f/minoseg-koltseg/pricing'
-      fullPath: '/f/minoseg-koltseg/pricing'
-      preLoaderRoute: typeof FMinosegKoltsegPricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/multi-site/': {
-      id: '/f/multi-site/'
-      path: '/f/multi-site'
-      fullPath: '/f/multi-site/'
-      preLoaderRoute: typeof FMultiSiteIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/multi-site/checkout': {
-      id: '/f/multi-site/checkout'
-      path: '/f/multi-site/checkout'
-      fullPath: '/f/multi-site/checkout'
-      preLoaderRoute: typeof FMultiSiteCheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/multi-site/demo': {
-      id: '/f/multi-site/demo'
-      path: '/f/multi-site/demo'
-      fullPath: '/f/multi-site/demo'
-      preLoaderRoute: typeof FMultiSiteDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/multi-site/pricing': {
-      id: '/f/multi-site/pricing'
-      path: '/f/multi-site/pricing'
-      fullPath: '/f/multi-site/pricing'
-      preLoaderRoute: typeof FMultiSitePricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/f/oktatas-szimulacio/': {
       id: '/f/oktatas-szimulacio/'
       path: '/f/oktatas-szimulacio'
@@ -858,34 +559,6 @@ declare module '@tanstack/react-router' {
       path: '/f/oktatas-szimulacio/pricing'
       fullPath: '/f/oktatas-szimulacio/pricing'
       preLoaderRoute: typeof FOktatasSzimulacioPricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/projekt-kontrolling/': {
-      id: '/f/projekt-kontrolling/'
-      path: '/f/projekt-kontrolling'
-      fullPath: '/f/projekt-kontrolling/'
-      preLoaderRoute: typeof FProjektKontrollingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/projekt-kontrolling/checkout': {
-      id: '/f/projekt-kontrolling/checkout'
-      path: '/f/projekt-kontrolling/checkout'
-      fullPath: '/f/projekt-kontrolling/checkout'
-      preLoaderRoute: typeof FProjektKontrollingCheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/projekt-kontrolling/demo': {
-      id: '/f/projekt-kontrolling/demo'
-      path: '/f/projekt-kontrolling/demo'
-      fullPath: '/f/projekt-kontrolling/demo'
-      preLoaderRoute: typeof FProjektKontrollingDemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f/projekt-kontrolling/pricing': {
-      id: '/f/projekt-kontrolling/pricing'
-      path: '/f/projekt-kontrolling/pricing'
-      fullPath: '/f/projekt-kontrolling/pricing'
-      preLoaderRoute: typeof FProjektKontrollingPricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/f/uzleti-strategia/': {
@@ -965,32 +638,16 @@ const rootRouteChildren: RootRouteChildren = {
   StatsRoute: StatsRoute,
   StrategiaRoute: StrategiaRoute,
   LoginActivateRoute: LoginActivateRoute,
-  FAdossagHelyreallitasCheckoutRoute: FAdossagHelyreallitasCheckoutRoute,
-  FAdossagHelyreallitasDemoRoute: FAdossagHelyreallitasDemoRoute,
-  FAdossagHelyreallitasPricingRoute: FAdossagHelyreallitasPricingRoute,
-  FMinosegKoltsegCheckoutRoute: FMinosegKoltsegCheckoutRoute,
-  FMinosegKoltsegDemoRoute: FMinosegKoltsegDemoRoute,
-  FMinosegKoltsegPricingRoute: FMinosegKoltsegPricingRoute,
-  FMultiSiteCheckoutRoute: FMultiSiteCheckoutRoute,
-  FMultiSiteDemoRoute: FMultiSiteDemoRoute,
-  FMultiSitePricingRoute: FMultiSitePricingRoute,
   FOktatasSzimulacioCheckoutRoute: FOktatasSzimulacioCheckoutRoute,
   FOktatasSzimulacioDemoRoute: FOktatasSzimulacioDemoRoute,
   FOktatasSzimulacioPricingRoute: FOktatasSzimulacioPricingRoute,
-  FProjektKontrollingCheckoutRoute: FProjektKontrollingCheckoutRoute,
-  FProjektKontrollingDemoRoute: FProjektKontrollingDemoRoute,
-  FProjektKontrollingPricingRoute: FProjektKontrollingPricingRoute,
   FUzletiStrategiaCheckoutRoute: FUzletiStrategiaCheckoutRoute,
   FUzletiStrategiaDemoRoute: FUzletiStrategiaDemoRoute,
   FUzletiStrategiaPricingRoute: FUzletiStrategiaPricingRoute,
   FValsagRezilienciaCheckoutRoute: FValsagRezilienciaCheckoutRoute,
   FValsagRezilienciaDemoRoute: FValsagRezilienciaDemoRoute,
   FValsagRezilienciaPricingRoute: FValsagRezilienciaPricingRoute,
-  FAdossagHelyreallitasIndexRoute: FAdossagHelyreallitasIndexRoute,
-  FMinosegKoltsegIndexRoute: FMinosegKoltsegIndexRoute,
-  FMultiSiteIndexRoute: FMultiSiteIndexRoute,
   FOktatasSzimulacioIndexRoute: FOktatasSzimulacioIndexRoute,
-  FProjektKontrollingIndexRoute: FProjektKontrollingIndexRoute,
   FUzletiStrategiaIndexRoute: FUzletiStrategiaIndexRoute,
   FValsagRezilienciaIndexRoute: FValsagRezilienciaIndexRoute,
 }

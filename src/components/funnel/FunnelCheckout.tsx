@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { CountryVatPicker } from "@/components/home/CountryVatPicker";
 import { PriceBreakdown } from "@/components/home/PriceBreakdown";
 import type { TierCopy, TierCore, TierId } from "@/content/pricing/tiers";
-import { formatHuf, TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
+import { TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
 import { countryFromTaxId, resolveVat, SELLER_COUNTRY, splitVat } from "@/content/pricing/vat";
+import { useI18n } from "@/i18n";
 import { readCampaignAttribution } from "@/lib/campaignSession";
 import { useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import {
@@ -29,6 +30,7 @@ export function FunnelCheckout(props: {
 }) {
   const { eyebrow, funnelName, tier, copy } = props;
   const navigate = useNavigate();
+  const { t, money, locale } = useI18n();
   const [interval, setInterval] = useBillingInterval();
   const [country, setCountry] = useState(SELLER_COUNTRY);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
@@ -51,6 +53,7 @@ export function FunnelCheckout(props: {
   const vat = resolveVat({ country, taxId });
   const dueNet = tier ? chargeHuf(tier.id, interval) : 0;
   const due = splitVat(dueNet, vat.rate).gross;
+  const vatLabel = locale === "en" ? vat.labelEn : vat.labelHu;
 
   const goBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
@@ -59,18 +62,18 @@ export function FunnelCheckout(props: {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!tier || !copy) {
-      setError("Válassz csomagot az előző oldalon.");
+      setError(t("pricing.pickTier"));
       return;
     }
     const n = name.trim();
     const m = email.trim();
     const addr = address.trim();
     if (!n || !m || !addr) {
-      setError("Név, e-mail és számlázási cím kell a díjbekérőhöz.");
+      setError(t("pricing.needBilling"));
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)) {
-      setError("Az e-mail cím formája hibás.");
+      setError(t("pricing.badEmail"));
       return;
     }
     setError(null);
@@ -100,33 +103,26 @@ export function FunnelCheckout(props: {
 
   if (thanks) {
     return (
-      <FunnelShell
-        eyebrow={eyebrow}
-        title="Köszönjük a megrendelést"
-        subtitle="Hamarosan e-mailt kapsz a díjbekérővel és az első belépéshez szükséges adattal. A fizetési szolgáltató még nincs bekötve — ez a folyamat placeholder."
-      >
+      <FunnelShell eyebrow={eyebrow} title={t("pricing.thanksTitle")} subtitle={t("pricing.thanksSub")}>
         <div className="mx-auto grid w-full max-w-xl gap-4">
           <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-slate-200">
-            A levél a(z) <span className="font-medium text-slate-50">{thanks.email}</span> címre megy (későbbi űrlap‑automatizáció).
-            A számlázási adatok nem kerülnek az appba.
+            {t("pricing.thanksMail", { email: thanks.email })}
           </div>
           <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Első belépés</div>
-            <p className="mt-1 text-sm text-slate-300">
-              A QR vagy a link a mesterjelszó beállításához visz. Nincs előre beégetett jelszó a programban.
-            </p>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{t("pricing.firstLogin")}</div>
+            <p className="mt-1 text-sm text-slate-300">{t("pricing.firstLoginBody")}</p>
             {thanks.qr ? (
-              <img src={thanks.qr} alt="Aktiváló QR" className="mx-auto mt-3 h-40 w-40 rounded-md bg-white p-1" />
+              <img src={thanks.qr} alt={t("pricing.firstLogin")} className="mx-auto mt-3 h-40 w-40 rounded-md bg-white p-1" />
             ) : null}
             <div className="mt-3 break-all rounded-md border border-border/50 bg-slate-950/40 px-3 py-2 font-mono text-[11px] text-slate-300">
               {thanks.url}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button type="button" onClick={() => void navigate({ to: "/login/activate", search: { k: thanks.token } })}>
-                Aktiváló oldal
+                {t("pricing.activatePage")}
               </Button>
               <Button type="button" variant="outline" onClick={goBack}>
-                Vissza
+                {t("chrome.back")}
               </Button>
             </div>
           </div>
@@ -136,14 +132,10 @@ export function FunnelCheckout(props: {
   }
 
   return (
-    <FunnelShell
-      eyebrow={eyebrow}
-      title="Megrendelés"
-      subtitle="Éves előfizetés az alapértelmezett. A fizetés díjbekérő után történik — a szolgáltatóintegráció később csatlakozik."
-    >
+    <FunnelShell eyebrow={eyebrow} title={t("pricing.checkoutTitle")} subtitle={t("pricing.checkoutSub")}>
       <div className="mx-auto grid w-full max-w-2xl gap-4">
         <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Csomag</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{t("pricing.pack")}</div>
           {tier && copy ? (
             <div className="mt-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -153,13 +145,13 @@ export function FunnelCheckout(props: {
               <p className="mt-1 text-sm text-slate-300">{copy.tagline}</p>
             </div>
           ) : (
-            <p className="mt-2 text-sm text-slate-300">Nincs kiválasztott csomag. Lépj vissza.</p>
+            <p className="mt-2 text-sm text-slate-300">{t("pricing.noTier")}</p>
           )}
         </div>
 
         <form className="grid gap-4" onSubmit={submit}>
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-100">Fizetési gyakoriság</legend>
+            <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.intervalLegend")}</legend>
             <div className="mt-2">
               <CountryVatPicker country={country} onChange={setCountry} />
             </div>
@@ -172,7 +164,7 @@ export function FunnelCheckout(props: {
                 )}
                 onClick={() => setInterval("yearly")}
               >
-                <div className="text-sm font-semibold text-slate-100">Évente (alapértelmezett)</div>
+                <div className="text-sm font-semibold text-slate-100">{t("pricing.yearlyDefault")}</div>
                 <div className="mt-2">
                   <PriceBreakdown netMonthly={monthly} interval="yearly" vat={vat} compact />
                 </div>
@@ -185,62 +177,62 @@ export function FunnelCheckout(props: {
                 )}
                 onClick={() => setInterval("monthly")}
               >
-                <div className="text-sm font-semibold text-slate-100">Havonta</div>
+                <div className="text-sm font-semibold text-slate-100">{t("pricing.monthly")}</div>
                 <div className="mt-2">
                   <PriceBreakdown netMonthly={monthly} interval="monthly" vat={vat} compact />
                 </div>
               </button>
             </div>
             <div className="mt-3 text-sm text-slate-200">
-              Fizetendő most: <span className="font-semibold text-slate-50">{formatHuf(due)} bruttó</span>
+              {t("pricing.dueNow")}: <span className="font-semibold text-slate-50">{money(due)} {t("pricing.gross")}</span>
               {" · "}
-              {formatHuf(dueNet)} nettó + {vat.labelHu}
-              {interval === "yearly" ? " (egy év)" : " (első hónap)"}
+              {money(dueNet)} {t("pricing.net")} + {vatLabel}
+              {interval === "yearly" ? ` ${t("pricing.forYear")}` : ` ${t("pricing.forMonth")}`}
             </div>
           </fieldset>
 
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-100">Fizetési mód</legend>
+            <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.payMethod")}</legend>
             <div className="mt-2 grid gap-2">
               <label className="flex items-start gap-2 rounded-lg border border-border/50 px-3 py-2 text-sm">
                 <input type="radio" name="pay" className="mt-1" checked={payMethod === "hu_transfer"} onChange={() => setPayMethod("hu_transfer")} />
                 <span>
-                  <span className="font-medium text-slate-100">Belföldi banki utalás</span>
-                  <span className="mt-0.5 block text-[12px] text-slate-400">Díjbekérő alapján. A közlemény és a számlaadatok a levélben lesznek (placeholder).</span>
+                  <span className="font-medium text-slate-100">{t("pricing.transfer")}</span>
+                  <span className="mt-0.5 block text-[12px] text-slate-400">{t("pricing.transferHint")}</span>
                 </span>
               </label>
               <label className="flex items-start gap-2 rounded-lg border border-border/50 px-3 py-2 text-sm">
                 <input type="radio" name="pay" className="mt-1" checked={payMethod === "wise"} onChange={() => setPayMethod("wise")} />
                 <span>
-                  <span className="font-medium text-slate-100">Wise — nemzetközi utalás</span>
-                  <span className="mt-0.5 block text-[12px] text-slate-400">Wise fogadóadatok a díjbekérőn (placeholder, nincs Wise‑API).</span>
+                  <span className="font-medium text-slate-100">{t("pricing.wise")}</span>
+                  <span className="mt-0.5 block text-[12px] text-slate-400">{t("pricing.wiseHint")}</span>
                 </span>
               </label>
             </div>
           </fieldset>
 
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-100">Számlázás és kapcsolat</legend>
-            <p className="text-[12px] text-slate-400">Ezek a mezők a díjbekérőhöz kellenek. Az app nem tölti be őket a pénzügyekbe.</p>
+            <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.billingContact")}</legend>
+            <p className="text-[12px] text-slate-400">{t("pricing.billingNote")}</p>
             <div className="mt-3 grid gap-3">
               <label className="grid gap-1 text-[12px] text-slate-300">
-                Kapcsolattartó neve
+                {t("pricing.contactName")}
                 <Input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
-                Cég / számlázási név
+                {t("pricing.companyName")}
                 <Input value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
-                Adószám (ha van)
+                {t("pricing.taxId")}
                 <Input value={taxId} onChange={(e) => setTaxId(e.target.value)} autoComplete="off" />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
-                Számlázási cím
+                {t("pricing.address")}
                 <Input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" required />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
-                E-mail
+                {t("pricing.email")}
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
               </label>
             </div>
@@ -249,10 +241,10 @@ export function FunnelCheckout(props: {
           {error ? <p className="text-[12px] text-rose-300">{error}</p> : null}
           <div className="flex flex-wrap gap-2">
             <Button type="submit" className="h-10" disabled={!tier}>
-              Megrendelés elküldése
+              {t("pricing.submitOrder")}
             </Button>
             <Button type="button" variant="outline" className="h-10" onClick={goBack}>
-              Vissza
+              {t("chrome.back")}
             </Button>
           </div>
         </form>

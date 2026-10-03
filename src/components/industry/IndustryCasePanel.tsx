@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HospitalTriageSim } from "@/components/industry/HospitalTriageSim";
@@ -17,13 +18,13 @@ import {
   type IndustrySignal,
 } from "@/lib/industryCases";
 
-const TONE_LABEL: Record<NarrativeTone, string> = {
-  opt: "Optimista",
-  real: "Realista",
-  pess: "Pesszimista",
-};
-
 function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kind"], "hospital"> }) {
+  const { t } = useI18n();
+  const TONE_LABEL: Record<NarrativeTone, string> = {
+    opt: t("dash.optimistic"),
+    real: t("brand.real"),
+    pess: t("dash.pessimistic"),
+  };
   const story = useMemo(() => industryWalk(kind), [kind]);
   const [path, setPath] = useState<string[]>([]);
   if (!story) return null;
@@ -36,7 +37,7 @@ function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kin
       <div className="narr-walk-head">
         <span className="surv-label-chip">{story.title}</span>
         <button type="button" className="narr-reset" onClick={() => setPath([])} disabled={path.length === 0}>
-          Új szál
+          {t("panel.newThread")}
         </button>
       </div>
       <ol className="crisis-tl">
@@ -69,21 +70,23 @@ function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kin
       </ol>
       <aside className={`narr-climax narr-climax-${climax.tone}`}>
         <div className="narr-climax-head">
-          <span className="surv-label-chip">{terminal ? "Végkifejlet" : "Élő számítás"}</span>
+          <span className="surv-label-chip">{terminal ? t("panel.terminal") : t("panel.live")}</span>
           <span className={`surv-value-chip narr-tone-${climax.tone}`}>{climax.title}</span>
         </div>
         <dl className="narr-climax-metrics">
           <div>
-            <dt>Készpénz / kötés</dt>
+            <dt>{t("panel.cashBind")}</dt>
             <dd>{formatNarrativeCash(climax.cashHuf)}</dd>
           </div>
           <div>
-            <dt>Runway</dt>
-            <dd>{climax.runwayMonths} hó</dd>
+            <dt>{t("panel.runway")}</dt>
+            <dd>
+              {climax.runwayMonths} {t("panel.monthShort")}
+            </dd>
           </div>
           <div>
-            <dt>Megtérülés</dt>
-            <dd>{climax.beMonth == null ? "horizonton túl" : `${climax.beMonth}. hó`}</dd>
+            <dt>{t("panel.payback")}</dt>
+            <dd>{climax.beMonth == null ? t("panel.beyondHorizon") : t("panel.monthN", { n: climax.beMonth })}</dd>
           </div>
         </dl>
         <p className="narr-climax-lock">{climax.lockIn}</p>
@@ -94,6 +97,12 @@ function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kin
 }
 
 function SignalCards({ signals }: { signals: IndustrySignal[] }) {
+  const { t } = useI18n();
+  const TONE_LABEL: Record<NarrativeTone, string> = {
+    opt: t("dash.optimistic"),
+    real: t("brand.real"),
+    pess: t("dash.pessimistic"),
+  };
   if (!signals.length) return null;
   return (
     <ul className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -114,46 +123,43 @@ export function IndustryCasePanel(props: {
   phase?: "PLAN" | "DO" | "CHECK" | "ACT";
   baseline?: MasterBaselineContext | null;
 }) {
+  const { locale, t } = useI18n();
   if (!isIndustrySegment(props.segmentId)) return null;
   const cse = industryCaseById(props.segmentId as IndustryCaseId);
   const whatIf = buildIndustryWhatIf({ caseId: cse.id, horizonMonths: 12 });
   const phaseHint =
-    cse.kind === "hospital"
-      ? "PLAN/DO: a kW-ot osztod. ICU és NICU a Lean triázs teteje."
-      : cse.kind === "supply" || cse.kind === "quality"
-        ? "CHECK: OEE, SMED, selejt. ACT: helyettesítő vagy tételzár."
-        : cse.kind === "wms"
-          ? "DO: a WMS sötét. A fizikai dokk a BCP."
-          : cse.kind === "fuel"
-            ? "CHECK: üres km és fuvardíj. ACT: útvonal, kihasználtság, frekvencia."
-            : cse.kind === "tax"
-              ? "CHECK: cash és muda. ACT: vágás a változón vagy áthárítás."
-              : "CHECK: migrációs óra és TTR. ACT: local-first, dual-run vagy fizeted.";
+    props.phase === "PLAN"
+      ? t("panel.industryPlan")
+      : props.phase === "DO"
+        ? t("panel.industryDo")
+        : props.phase === "ACT"
+          ? t("panel.industryAct")
+          : t("panel.industryCheck");
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {cse.door === "healthcare"
-            ? "Egészségügy · krízis"
+            ? t("panel.doorHealthcare")
             : cse.door === "manufacturing"
-              ? "Termelőipar · Lean"
+              ? t("panel.doorManufacturing")
               : cse.door === "logistics"
-                ? "Logisztika · BCP"
-                : "Működés / szabályozás"}
+                ? t("panel.doorLogistics")
+                : t("panel.doorServices")}
           {cse.kind === "saas" || cse.kind === "supply" || cse.kind === "wms" || cse.kind === "fuel" ? (
-            <HelpIcon kbId="lesson-bcp" title="Szcenárió-lecke" />
+            <HelpIcon kbId="lesson-bcp" title={t("panel.lesson")} />
           ) : null}
         </p>
-        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{cse.title}</h3>
+        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(cse.id, locale) ?? cse.title}</h3>
         <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
       </div>
       <div className="mt-3 grid gap-3">
-        {cse.kind === "hospital" ? <HospitalTriageSim /> : <Walk kind={cse.kind} />}
+        {props.phase === "DO" ? cse.kind === "hospital" ? <HospitalTriageSim /> : <Walk kind={cse.kind} /> : null}
         {cse.kind !== "tax" && cse.kind !== "fuel" ? (
           <PhysicalOpsPanel segmentId={props.segmentId} baseline={props.baseline} phase={props.phase} />
         ) : null}
-        {whatIf ? <SignalCards signals={whatIf.signals} /> : null}
+        {whatIf && (props.phase === "CHECK" || props.phase === "ACT") ? <SignalCards signals={whatIf.signals} /> : null}
       </div>
     </section>
   );

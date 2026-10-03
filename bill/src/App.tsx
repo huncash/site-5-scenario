@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
+import { formatCurrency } from "@/i18n/currency";
+import { LangSwitch, useSiteLocale } from "@/i18n/miniLocale";
 import { MONTHLY_HUF, YEARLY_DISCOUNT_PCT, yearlyPriceHuf } from "../server/catalog";
 import {
   countryFromTaxId,
@@ -9,6 +11,8 @@ import {
   splitVat,
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
+import { SiteFooter } from "@/components/SiteFooter";
+import { billCopy, tierLabel } from "./copy";
 
 type PayMethod = "stripe" | "barion" | "hu_transfer";
 
@@ -28,18 +32,10 @@ type TransferInfo = {
   proformaNumber?: string;
 };
 
-const TIERS: Record<string, string> = {
-  starter: "Alapcsomag",
-  pro: "Üzleti / Pro",
-  expert: "Nagyvállalati / Enterprise",
-  campus: "Hallgatói / Campus",
-};
-
-function money(n: number) {
-  return `${new Intl.NumberFormat("hu-HU").format(n)} Ft`;
-}
-
 export function App() {
+  const { locale, toggleLocale } = useSiteLocale();
+  const t = billCopy(locale);
+  const money = (n: number) => formatCurrency(n, locale);
   const q = useMemo(() => new URLSearchParams(window.location.search), []);
   const tier = q.get("tier") ?? "pro";
   const interval = q.get("interval") === "monthly" ? "monthly" : "yearly";
@@ -57,8 +53,13 @@ export function App() {
   const [lookupBusy, setLookupBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lookupNote, setLookupNote] = useState<string | null>(null);
+  const [lookupOk, setLookupOk] = useState(false);
   const [transfer, setTransfer] = useState<TransferInfo | null>(null);
   const [cfg, setCfg] = useState({ stripe: false, barion: false, transfer: true });
+
+  useEffect(() => {
+    document.title = locale === "en" ? "Szcenárió — payment" : "Szcenárió — fizetés";
+  }, [locale]);
 
   useEffect(() => {
     void fetch("/api/billing/config")
@@ -76,6 +77,7 @@ export function App() {
 
   const monthlyNet = MONTHLY_HUF[tier as keyof typeof MONTHLY_HUF] ?? MONTHLY_HUF.pro;
   const vat = resolveVat({ country, taxId });
+  const vatLabel = locale === "en" ? vat.labelEn : vat.labelHu;
   const yearlyNet = yearlyPriceHuf(monthlyNet);
   const dueNet = interval === "yearly" ? yearlyNet : monthlyNet;
   const due = splitVat(dueNet, vat.rate);
@@ -86,6 +88,7 @@ export function App() {
   const lookup = async () => {
     setLookupBusy(true);
     setLookupNote(null);
+    setLookupOk(false);
     setError(null);
     try {
       const res = await fetch("/api/billing/lookup", {
@@ -95,14 +98,15 @@ export function App() {
       });
       const data = (await res.json()) as { ok?: boolean; name?: string; address?: string; source?: string; error?: string };
       if (!data.ok) {
-        setLookupNote(data.error || "Nincs találat.");
+        setLookupNote(t.lookupEmpty);
         return;
       }
       if (data.name) setName(data.name);
       if (data.address) setAddress(data.address);
-      setLookupNote(data.source === "vies" ? "VIES kitöltötte a cégadatokat." : "NAV-proxy kitöltötte a cégadatokat.");
+      setLookupOk(true);
+      setLookupNote(data.source === "vies" ? t.lookupVies : t.lookupNav);
     } catch {
-      setLookupNote("A lekérdezés most nem elérhető.");
+      setLookupNote(t.lookupOffline);
     } finally {
       setLookupBusy(false);
     }
@@ -125,7 +129,7 @@ export function App() {
         transfer?: TransferInfo;
       };
       if (!data.ok) {
-        setError(data.error || "A rendelést nem sikerült rögzíteni.");
+        setError(data.error || t.errOrder);
         return;
       }
       if (data.hostedUrl) {
@@ -134,20 +138,30 @@ export function App() {
       }
       if (data.transfer) setTransfer(data.transfer);
     } catch {
-      setError("Hálózati hiba.");
+      setError(t.errNet);
     } finally {
       setBusy(false);
     }
   };
 
+  const top = (
+    <div className="top">
+      <div className="brand">{t.brand}</div>
+      <div className="top-right">
+        <LangSwitch locale={locale} onToggle={toggleLocale} />
+      </div>
+    </div>
+  );
+
   if (thanks) {
     return (
       <div className="wrap">
-        <div className="top">
-          <div className="brand">Szcenárió · számla</div>
-        </div>
-        <h1>Köszönjük</h1>
-        <p className="muted">Ha a fizetés sikeres, a számla a megadott e-mailre megy. {orderQ ? `Rendelés: ${orderQ}` : ""}</p>
+        {top}
+        <h1>{t.thanksTitle}</h1>
+        <p className="muted">
+          {t.thanksBody} {orderQ ? `${t.order}: ${orderQ}` : ""}
+        </p>
+        <SiteFooter inline />
       </div>
     );
   }
@@ -157,74 +171,71 @@ export function App() {
     const vatAmt = transfer.amountHuf - net;
     return (
       <div className="wrap">
-        <div className="top">
-          <div className="brand">Szcenárió · számla</div>
-          <div className="muted">{transfer.label}</div>
-        </div>
-        <h1>Belföldi átutalás</h1>
-        <p className="muted">A díjbekérőhöz ezeket add meg a bankodban. A jóváírás után a végszámla automatikusan megy.</p>
+        {top}
+        <h1>{t.transferTitle}</h1>
+        <p className="muted">{t.transferLead}</p>
         {transfer.proformaNumber ? (
-          <p className="ok">Díjbekérő: {transfer.proformaNumber} — a Számlázz.hu a megadott e-mailre is elküldi.</p>
+          <p className="ok">
+            {t.proforma}: {transfer.proformaNumber} {t.proformaMail}
+          </p>
         ) : null}
         <div className="steps" style={{ marginTop: 16 }}>
           <div className="step">
-            <b>1. Összeg (bruttó fizetendő)</b>
+            <b>{t.stepAmount}</b>
             <div className="code">{money(transfer.amountHuf)}</div>
             <div className="hint">
-              {money(net)} nettó + {transfer.vatLabel ?? transfer.vatCode ?? "ÁFA"}
+              {money(net)} {t.net} + {vatLabel}
               {vatAmt > 0 ? ` = ${money(vatAmt)}` : ""}
-              {transfer.buyerCountry ? ` · ${countryLabel(transfer.buyerCountry)}` : ""}
+              {transfer.buyerCountry ? ` · ${countryLabel(transfer.buyerCountry, locale)}` : ""}
             </div>
           </div>
           <div className="step">
-            <b>2. Kedvezményezett</b>
+            <b>{t.stepPayee}</b>
             <div className="code">{transfer.name}</div>
             <div className="hint">{transfer.bank}</div>
           </div>
           <div className="step">
-            <b>3. Számlaszám / IBAN</b>
+            <b>{t.stepIban}</b>
             <div className="code">{transfer.iban}</div>
           </div>
           <div className="step">
-            <b>4. Közlemény — ezt írd be pontosan</b>
+            <b>{t.stepMemo}</b>
             <div className="code">{transfer.code}</div>
-            <div className="hint">Ebből párosítjuk a befizetést. Más szöveget ne tegyél mellé.</div>
+            <div className="hint">{t.stepMemoHint}</div>
           </div>
         </div>
+        <SiteFooter inline />
       </div>
     );
   }
 
   return (
     <div className="wrap">
-      <div className="top">
-        <div className="brand">Szcenárió · számla</div>
-        <div className="muted">bill.szcenario.hu</div>
-      </div>
-      <h1>Fizetés</h1>
+      {top}
+      <h1>{t.payTitle}</h1>
       <p className="muted">
-        {TIERS[tier] ?? tier} · {interval === "yearly" ? "éves" : "havi"}
-        {ref === "campus" ? " · campus" : ""}. A kártyaadat a Stripe / Barion hosted oldalán marad.
+        {tierLabel(locale, tier)} · {interval === "yearly" ? t.intervalYear : t.intervalMonth}
+        {ref === "campus" ? ` · ${t.campus}` : ""}. {t.cardNote}
       </p>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <div className="muted">Listaár nettó. Fizetendő = nettó + ÁFA, a megrendelő országa szerint.</div>
+        <div className="muted">{t.listNet}</div>
         <div style={{ marginTop: 10, fontSize: 22, fontWeight: 650 }}>
-          {money(due.gross)} bruttó {interval === "yearly" ? "/ év" : "/ hó"}
+          {money(due.gross)} {t.gross} {interval === "yearly" ? t.perYear : t.perMonth}
         </div>
         <div className="muted" style={{ marginTop: 6 }}>
-          {money(due.net)} nettó · +{vat.labelHu}
+          {money(due.net)} {t.net} · +{vatLabel}
           {due.vat > 0 ? ` = ${money(due.vat)}` : ""}
         </div>
         <div className="hint" style={{ marginTop: 8 }}>
-          Éves csomag: {money(yearly.net)} nettó / {money(yearly.gross)} bruttó · −{YEARLY_DISCOUNT_PCT}%
+          {t.yearlyPack}: {money(yearly.net)} {t.net} / {money(yearly.gross)} {t.gross} · −{YEARLY_DISCOUNT_PCT}%
         </div>
         <div className="hint">
-          12× havi: {money(monthly12.net)} nettó / {money(monthly12.gross)} bruttó
+          {t.monthly12}: {money(monthly12.net)} {t.net} / {money(monthly12.gross)} {t.gross}
         </div>
         {saveNet > 0 ? (
           <div className="ok" style={{ marginTop: 6 }}>
-            Éves fizetéssel {money(saveNet)} nettóval kevesebb, mint 12 havi díj.
+            {t.yearlySave.replace("{n}", money(saveNet))}
           </div>
         ) : null}
       </div>
@@ -232,59 +243,60 @@ export function App() {
       <form className="card" style={{ marginTop: 16 }} onSubmit={(e) => void submit(e)}>
         <div className="grid2">
           <label>
-            Cégnév / név
+            {t.name}
             <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="organization" required />
           </label>
           <label>
-            E-mail
+            {t.email}
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
           </label>
         </div>
         <div className="row">
           <label>
-            Megrendelő országa
+            {t.country}
             <select value={country} onChange={(e) => setCountry(e.target.value)}>
               {VAT_COUNTRIES.map((c) => (
                 <option key={c} value={c}>
-                  {countryLabel(c)} ({c})
+                  {countryLabel(c, locale)} ({c})
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Számlázási cím
+            {t.address}
             <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" required />
           </label>
           <label>
-            Adószám
-            <input value={taxId} onChange={(e) => setTaxId(e.target.value)} autoComplete="off" placeholder="12345678-2-41 vagy DE123456789" />
+            {t.taxId}
+            <input value={taxId} onChange={(e) => setTaxId(e.target.value)} autoComplete="off" placeholder={t.taxPh} />
           </label>
           <button type="button" className="btn" disabled={lookupBusy || taxId.trim().length < 8} onClick={() => void lookup()}>
-            {lookupBusy ? "Lekérdezés…" : "Cégadatok NAV / VIES alapján"}
+            {lookupBusy ? t.lookupBusy : t.lookup}
           </button>
-          {lookupNote ? <div className={lookupNote.includes("kitöltötte") ? "ok" : "hint"}>{lookupNote}</div> : null}
+          {lookupNote ? <div className={lookupOk ? "ok" : "hint"}>{lookupNote}</div> : null}
         </div>
 
         <div className="row">
-          <div className="muted">Fizetési mód</div>
+          <div className="muted">{t.payMethod}</div>
           <div className="pay">
             <button type="button" className={payMethod === "hu_transfer" ? "on" : ""} onClick={() => setPayMethod("hu_transfer")}>
-              Belföldi átutalás — díjbekérő, egyedi közlemény
+              {t.transfer}
             </button>
             <button type="button" className={payMethod === "stripe" ? "on" : ""} onClick={() => setPayMethod("stripe")}>
-              Stripe — kártya, Apple Pay, Google Pay {cfg.stripe ? "" : "(kulcs nincs beállítva)"}
+              {t.stripe} {cfg.stripe ? "" : t.noKey}
             </button>
             <button type="button" className={payMethod === "barion" ? "on" : ""} onClick={() => setPayMethod("barion")}>
-              Barion — kártya, Apple Pay, Google Pay {cfg.barion ? "" : "(kulcs nincs beállítva)"}
+              {t.barion} {cfg.barion ? "" : t.noKey}
             </button>
           </div>
         </div>
 
         {error ? <p className="err">{error}</p> : null}
         <button className="btn primary" style={{ marginTop: 16, width: "100%" }} disabled={busy} type="submit">
-          {busy ? "Feldolgozás…" : `Tovább · ${money(due.gross)} bruttó`}
+          {busy ? t.busy : t.submit.replace("{n}", money(due.gross))}
         </button>
       </form>
+      <SiteFooter inline />
     </div>
   );
 }

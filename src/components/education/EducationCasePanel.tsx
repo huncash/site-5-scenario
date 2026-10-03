@@ -1,3 +1,4 @@
+import { caseTitle, useI18n } from "@/i18n";
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
 import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
@@ -20,6 +21,7 @@ function formatMetric(n: number, unit: string) {
 }
 
 function MixChart({ points, unit, label }: { points: EducationPoint[]; unit: string; label: string }) {
+  const { t } = useI18n();
   if (points.length < 2) return null;
   const w = 360;
   const h = 140;
@@ -65,13 +67,13 @@ function MixChart({ points, unit, label }: { points: EducationPoint[]; unit: str
       </svg>
       <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
         <li>
-          <ChartLegendSwatch tone="opt" label="Optimista" line />
+          <ChartLegendSwatch tone="opt" label={t("dash.optimistic")} line />
         </li>
         <li>
-          <ChartLegendSwatch tone="real" label="Realista" line />
+          <ChartLegendSwatch tone="real" label={t("brand.real")} line />
         </li>
         <li>
-          <ChartLegendSwatch tone="pess" label="Pesszimista" line />
+          <ChartLegendSwatch tone="pess" label={t("dash.pessimistic")} line />
         </li>
       </ul>
     </figure>
@@ -79,13 +81,20 @@ function MixChart({ points, unit, label }: { points: EducationPoint[]; unit: str
 }
 
 function KpiTrio({ kpis }: { kpis: EducationKpi[] }) {
+  const { t } = useI18n();
   return (
     <div className="grid gap-2 sm:grid-cols-3">
       {kpis.map((k) => (
         <div key={k.id} className="rounded-lg border border-border/50 bg-background/40 p-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
           <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground/80">
-            {k.family === "finance" ? "Pénzügy" : k.family === "lean" ? "Lean / Poka-Yoke" : k.family === "energy" ? "Energia" : "Idő"}
+            {k.family === "finance"
+              ? t("panel.familyFinance")
+              : k.family === "lean"
+                ? t("panel.familyLean")
+                : k.family === "energy"
+                  ? t("panel.familyEnergy")
+                  : t("panel.familyTime")}
           </p>
           <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{k.hint}</p>
           <dl className="mt-2 grid gap-1 text-[12px]">
@@ -114,50 +123,55 @@ export function EducationCasePanel(props: {
   model?: EducationModel | null;
   baseline?: MasterBaselineContext | null;
 }) {
+  const { locale, t } = useI18n();
   if (!isEducationSegment(props.segmentId)) return null;
   const model = props.model ?? buildEducationModel(props.segmentId as EducationCaseId);
   const physical = buildPhysicalDashboard(props.segmentId, props.baseline);
   const startup = model.kind === "startup";
   const phaseHint = startup
     ? props.phase === "PLAN"
-      ? "PLAN: fix tőke. Marketing / fejlesztés / bér + Poka-Yoke tartalék."
+      ? t("panel.eduStartupPlan")
       : props.phase === "DO"
-        ? "DO: a döntés késleltetve hat. A sáv a helyi szórás."
+        ? t("panel.eduStartupDo")
         : props.phase === "ACT"
-          ? "ACT: átrendezed a keretet, vagy növeled a tartalékot."
-          : "CHECK: opt–real–pess sáv, fedezet, fizetésképtelenség."
+          ? t("panel.eduStartupAct")
+          : t("panel.eduStartupCheck")
     : props.phase === "PLAN"
-      ? "PLAN: a törzs adott. Itt a tréning-specifikus réteg — Lean, kvóta, izoláció."
+      ? t("panel.eduOtherPlan")
       : props.phase === "DO"
-        ? "DO: a gyakorlat fut. OEE, kvóta, izoláció — nem új törzsadat."
+        ? t("panel.eduOtherDo")
         : props.phase === "ACT"
-          ? "ACT: SMED, kvóta, izoláció, analóg protokoll — beavatkozás a három pályán."
-          : "CHECK: burn / OEE / kvóta / izoláció a PRO sávokon.";
+          ? t("panel.eduOtherAct")
+          : t("panel.eduOtherCheck");
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Oktatás · szimulációs tréning
+          {t("panel.eduTitle")}
           {model.kind === "campus" || model.kind === "cyber" ? (
-            <HelpIcon kbId="lesson-campus" title="Szcenárió-lecke" />
+            <HelpIcon kbId="lesson-campus" title={t("panel.lesson")} />
           ) : null}
         </p>
-        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{model.title}</h3>
+        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</h3>
         <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
       </div>
       <div className="mt-3 grid gap-3">
         {physical ? (
           <PhysicalOpsPanel segmentId={props.segmentId} baseline={props.baseline} phase={props.phase} />
-        ) : startup ? (
+        ) : startup && (props.phase === "DO" || props.phase === "PLAN") ? (
           <CampusAllocationSim />
-        ) : (
+        ) : props.phase === "CHECK" || props.phase === "ACT" || (!physical && !startup) ? (
           <>
-            <KpiTrio kpis={model.kpis} />
-            <MixChart points={model.series} unit={model.seriesUnit} label={model.seriesLabel} />
+            {props.phase !== "ACT" ? (
+              <>
+                <KpiTrio kpis={model.kpis} />
+                <MixChart points={model.series} unit={model.seriesUnit} label={model.seriesLabel} />
+              </>
+            ) : null}
           </>
-        )}
-        {!physical && model.extras.length ? (
+        ) : null}
+        {!physical && model.extras.length && (props.phase === "CHECK" || props.phase === "ACT") ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[28rem] text-left text-[12px]">
               <thead>

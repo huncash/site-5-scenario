@@ -10,12 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PRICING_HERO } from "@/content/pricing/tiers";
 import { RESILIENCE_SEGMENTS } from "@/lib/resilienceCases";
+import { caseTitle, useI18n } from "@/i18n";
 
 export const Route = createFileRoute("/f/valsag-reziliencia/")({
   component: ValsagRezilienciaLandingPage,
 });
 
 function ValsagRezilienciaLandingPage() {
+  const { locale } = useI18n();
   const c = VALSAG_REZILIENCIA_FUNNEL;
   return (
     <FunnelShell eyebrow={c.hero.eyebrow} title={c.hero.title} subtitle={c.hero.subtitle}>
@@ -32,8 +34,13 @@ function ValsagRezilienciaLandingPage() {
               <Badge variant="secondary" className="text-[11px]">offline</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
-              {RESILIENCE_SEGMENTS.map((s) => (
-                <li key={s.id}>{s.title}</li>
+              {RESILIENCE_SEGMENTS.filter((s) =>
+                s.id === "demo11_resilience_saas_outage" ||
+                s.id === "demo12_resilience_community_grid" ||
+                s.id === "demo13_resilience_home_blackout" ||
+                s.id === "demo14_resilience_demography"
+              ).map((s) => (
+                <li key={s.id}>{caseTitle(s.id, locale) ?? s.title}</li>
               ))}
             </ul>
             <div className="flex flex-wrap items-center gap-2 pt-1">

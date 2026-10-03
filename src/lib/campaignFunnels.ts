@@ -1,6 +1,4 @@
-import { EDUCATION_CASE_IDS } from "@/lib/educationCases";
-import { STRATEGY_CASE_IDS } from "@/lib/strategyCases";
-import type { ScenarioDoorStep } from "@/lib/demoSession";
+import type { ScenarioDoorStep } from "@/lib/doorStep";
 
 export const CAMPAIGN_IDS = ["bcp", "strategia", "kozosseg", "oktatas", "makro"] as const;
 export type CampaignId = (typeof CAMPAIGN_IDS)[number];
@@ -60,9 +58,9 @@ export const CAMPAIGN_DOOR_STEP: Record<CampaignId, ScenarioDoorStep> = {
 
 export const CAMPAIGN_SEGMENT_IDS: Record<CampaignId, readonly string[]> = {
   bcp: ["demo11_resilience_saas_outage"],
-  strategia: STRATEGY_CASE_IDS,
+  strategia: ["demo19_strategy_kahn_fork"],
   kozosseg: ["demo12_resilience_community_grid", "demo13_resilience_home_blackout"],
-  oktatas: EDUCATION_CASE_IDS,
+  oktatas: ["demo15_edu_startup_cashflow", "demo16_edu_lean_vsm"],
   makro: ["demo14_resilience_demography"],
 };
 

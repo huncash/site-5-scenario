@@ -3,24 +3,32 @@ import { PRICING_ALIGN_GRID } from "@/components/home/pricingLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
-import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
-import {
-  formatHuf,
-  PRICING_CUMULATIVE_NOTE,
-  PRICING_HERO,
-  PRICING_NET_NOTE,
-  PRICING_VAT_FAQ,
-  TIER_AUDIENCE,
-  TIER_CARD_HIGHLIGHTS,
-  TIER_CORE,
-  TIER_MONTHLY_HUF,
-  TIER_SLOGAN,
-  yearlyPriceHuf,
-} from "@/content/pricing/tiers";
+import { formatHuf, TIER_CORE, TIER_MONTHLY_HUF, yearlyPriceHuf, type TierId } from "@/content/pricing/tiers";
 import { billCheckoutUrl } from "@/lib/billing";
 import type { BillingInterval } from "@/lib/funnelOrder";
-import { useI18n } from "@/i18n";
+import { useI18n, type MessageKey } from "@/i18n";
 import { cn } from "@/lib/utils";
+
+const TIER_SLOGAN_KEY: Record<TierId, MessageKey> = {
+  starter: "pricing.sloganStarter",
+  pro: "pricing.sloganPro",
+  expert: "pricing.sloganExpert",
+};
+const TIER_AUDIENCE_KEY: Record<TierId, MessageKey> = {
+  starter: "pricing.audienceStarter",
+  pro: "pricing.audiencePro",
+  expert: "pricing.audienceExpert",
+};
+const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
+  starter: "pricing.starter",
+  pro: "pricing.pro",
+  expert: "pricing.expert",
+};
+const TIER_HIGHLIGHTS: Record<TierId, MessageKey[]> = {
+  starter: ["pricing.hs1", "pricing.hs2", "pricing.hs3", "pricing.hs4", "pricing.hs5"],
+  pro: ["pricing.hp1", "pricing.hp2", "pricing.hp3", "pricing.hp4", "pricing.hp5"],
+  expert: ["pricing.he1", "pricing.he2", "pricing.he3", "pricing.he4", "pricing.he5"],
+};
 
 const CAMPUS_MONTHLY_HUF = 1_490;
 
@@ -40,13 +48,13 @@ export function HomePricing(props: { campus?: boolean }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.packages")}</div>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">{PRICING_HERO}</p>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t("pricing.hero")}</p>
         </div>
         <BillingIntervalToggle />
       </div>
 
       <p className="max-w-2xl text-[13px] italic leading-relaxed text-muted-foreground">
-        „{PRICING_NET_NOTE}”
+        „{t("pricing.netNote")}”
       </p>
 
       {campus ? <CampusStrip interval={interval} /> : null}
@@ -55,7 +63,7 @@ export function HomePricing(props: { campus?: boolean }) {
         <div className="hidden lg:block" aria-hidden />
         {TIER_CORE.map((p) => {
           const href = billCheckoutUrl({ tier: p.id, interval });
-          const recommended = p.badge === "Ajánlott";
+          const recommended = p.id === "pro";
           return (
             <article
               key={p.id}
@@ -65,16 +73,16 @@ export function HomePricing(props: { campus?: boolean }) {
               )}
             >
               <div className="flex flex-wrap items-center gap-1.5">
-                <h3 className="text-sm font-semibold text-foreground">{p.label}</h3>
-                {p.badge ? <Badge variant={recommended ? "default" : "secondary"}>{p.badge}</Badge> : null}
+                <h3 className="text-sm font-semibold text-foreground">{t(TIER_LABEL_KEY[p.id])}</h3>
+                {p.badge ? <Badge variant={recommended ? "default" : "secondary"}>{t("pricing.recommended")}</Badge> : null}
               </div>
-              <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{TIER_SLOGAN[p.id]}</p>
-              <p className="mt-2 text-[12px] leading-snug text-muted-foreground">{TIER_AUDIENCE[p.id]}</p>
+              <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t(TIER_SLOGAN_KEY[p.id])}</p>
+              <p className="mt-2 text-[12px] leading-snug text-muted-foreground">{t(TIER_AUDIENCE_KEY[p.id])}</p>
               <ul className="mt-3 space-y-1.5 text-[12px] leading-snug text-foreground">
-                {TIER_CARD_HIGHLIGHTS[p.id].map((line) => (
+                {TIER_HIGHLIGHTS[p.id].map((line) => (
                   <li key={line} className="flex gap-2">
                     <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-foreground/70" aria-hidden />
-                    <span>{line}</span>
+                    <span>{t(line)}</span>
                   </li>
                 ))}
               </ul>
@@ -101,7 +109,7 @@ export function HomePricing(props: { campus?: boolean }) {
                     window.location.assign(billCheckoutUrl({ tier: p.id, interval }));
                   }}
                 >
-                  Megrendelem
+                  {t("pricing.order")}
                 </a>
               </Button>
             </article>
@@ -109,16 +117,22 @@ export function HomePricing(props: { campus?: boolean }) {
         })}
       </div>
 
-      <p className="text-[12px] leading-relaxed text-muted-foreground">{PRICING_CUMULATIVE_NOTE}</p>
+      <p className="text-[12px] leading-relaxed text-muted-foreground">{t("pricing.cumulative")}</p>
 
       <PricingCompareTable />
 
       <div className="rounded-2xl border border-white/12 bg-card px-4 py-3">
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">GYIK</div>
-        {[WHY_FAQ, PRO_CHART_FAQ, PRICING_VAT_FAQ].map((item) => (
-          <details key={item.q} className="mt-1">
-            <summary className="cursor-pointer py-2 text-left text-sm font-medium text-foreground">{item.q}</summary>
-            <p className="pb-2 text-[13px] text-muted-foreground">{item.a}</p>
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.faq")}</div>
+        {(
+          [
+            ["brand.faqWhyQ", "brand.faqWhyA"],
+            ["brand.faqProQ", "brand.faqProA"],
+            ["brand.faqVatQ", "brand.faqVatA"],
+          ] as const
+        ).map(([q, a]) => (
+          <details key={q} className="mt-1">
+            <summary className="cursor-pointer py-2 text-left text-sm font-medium text-foreground">{t(q)}</summary>
+            <p className="pb-2 text-[13px] text-muted-foreground">{t(a)}</p>
           </details>
         ))}
       </div>
@@ -133,11 +147,9 @@ function CampusStrip({ interval }: { interval: BillingInterval }) {
   const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
   return (
     <div className="rounded-2xl border border-dashed border-cyan-400/35 bg-cyan-500/[0.06] p-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Campus</div>
-      <div className="mt-1 text-sm font-semibold text-foreground">Hallgatói / szimbolikus díj</div>
-      <p className="mt-1 text-[13px] text-muted-foreground">
-        Oktatási keret. Nem része a nyilvános táblázatnak. A motor ugyanaz; a díj szimbolikus.
-      </p>
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("pricing.campus")}</div>
+      <div className="mt-1 text-sm font-semibold text-foreground">{t("pricing.campusTitle")}</div>
+      <p className="mt-1 text-[13px] text-muted-foreground">{t("pricing.campusBody")}</p>
       <div className="mt-2">
         <div className="text-lg font-semibold text-foreground">
           {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval))} {per}
@@ -154,7 +166,7 @@ function CampusStrip({ interval }: { interval: BillingInterval }) {
             window.location.assign(billCheckoutUrl({ tier: "campus", interval, ref: "campus" }));
           }}
         >
-          Hallgatói megrendelés
+          {t("pricing.campusOrder")}
         </a>
       </Button>
     </div>

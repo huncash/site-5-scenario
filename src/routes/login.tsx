@@ -30,8 +30,9 @@ import {
 } from "lucide-react";
 import { ImportQrDialog } from "@/components/ProfileTransfer";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
-import { useI18n } from "@/i18n";
-import { DEMO_PASSWORD, DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
+import { caseBlurb, caseTitle, useI18n } from "@/i18n";
+import { publicDemoSegments } from "@/lib/coreCases";
+import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
 import {
   LAST_PROFILE_KEY,
   dedupeAllDemoProfiles,
@@ -46,7 +47,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { state, unlockById, lock, beginCreate, backToPicker, createProfile } = useVault();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -132,7 +133,7 @@ function LoginPage() {
                   ? ("demo7_personal_pocket_seasonal_pilot" as const)
                   : null;
     const segId = (byNum ?? (demo as DemoSegmentId)) as DemoSegmentId;
-    if (!DEMO_SEGMENTS.some((s) => s.id === segId)) return;
+    if (!isDemoSegmentId(segId)) return;
     void handleDemoLogin(segId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.status]);
@@ -200,7 +201,8 @@ function LoginPage() {
   const hasProfiles = profiles.length > 0;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="door-page flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background" data-site-footer-host>
+    <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex items-center justify-between text-[12px]">
           <Link to="/" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
@@ -412,7 +414,7 @@ function LoginPage() {
                 </div>
 
                 <div className="mt-3 grid grid-cols-1 gap-2">
-                  {DEMO_SEGMENTS.map((s) => (
+                  {publicDemoSegments().map((s) => (
                     <Button
                       key={s.id}
                       variant="secondary"
@@ -420,18 +422,15 @@ function LoginPage() {
                       className="w-full justify-start gap-2 text-xs"
                       disabled={busy}
                       onClick={() => void handleDemoLogin(s.id)}
-                      title={s.blurb}
+                      title={caseBlurb(s.id, locale) ?? s.blurb}
                     >
                       <ShieldCheck className="h-3.5 w-3.5" />
-                      <span className="font-medium">{s.title}</span>
+                      <span className="font-medium">{caseTitle(s.id, locale) ?? s.title}</span>
                     </Button>
                   ))}
                 </div>
 
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Tipp: autologin pl. <span className="font-mono">/login?demo=7</span> vagy{" "}
-                  <span className="font-mono">/login?demo=demo7_personal_pocket_seasonal_pilot</span>.
-                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground">{t("login.demoTip")}</p>
 
                 {/* DEMO reset moved to Settings → Danger Zone */}
               </div>
@@ -451,6 +450,7 @@ function LoginPage() {
           void backToPicker();
         }}
       />
+    </div>
     </div>
   );
 }

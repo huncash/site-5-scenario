@@ -10,12 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PRICING_HERO } from "@/content/pricing/tiers";
 import { EDUCATION_SEGMENTS } from "@/lib/educationCases";
+import { caseTitle, useI18n } from "@/i18n";
 
 export const Route = createFileRoute("/f/oktatas-szimulacio/")({
   component: OktatasSzimulacioLandingPage,
 });
 
 function OktatasSzimulacioLandingPage() {
+  const { locale } = useI18n();
   const c = OKTATAS_SZIMULACIO_FUNNEL;
   return (
     <FunnelShell eyebrow={c.hero.eyebrow} title={c.hero.title} subtitle={c.hero.subtitle}>
@@ -32,8 +34,8 @@ function OktatasSzimulacioLandingPage() {
               <Badge variant="secondary" className="text-[11px]">offline</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
-              {EDUCATION_SEGMENTS.map((s) => (
-                <li key={s.id}>{s.title}</li>
+              {EDUCATION_SEGMENTS.filter((s) => s.id === "demo15_edu_startup_cashflow" || s.id === "demo16_edu_lean_vsm").map((s) => (
+                <li key={s.id}>{caseTitle(s.id, locale) ?? s.title}</li>
               ))}
             </ul>
             <div className="flex flex-wrap items-center gap-2 pt-1">

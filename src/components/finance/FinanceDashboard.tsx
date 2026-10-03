@@ -132,6 +132,7 @@ import { decryptJSON, encryptJSON } from "@/lib/crypto";
 import { useVault } from "@/lib/vault";
 import { localdb, type BankRawRow, type EncGoalRow, type EncTxnRow, type Profile } from "@/lib/localdb";
 import { currencyUnit } from "@/i18n/currency";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { getWorkspaceTransactionsGuard } from "@/lib/workspaceGuard";
 import { sha256Hex } from "@/lib/hash";
@@ -568,6 +569,7 @@ export function FinanceDashboard({
   const { lock, state } = useVault();
   const meshRepo = useMeshRepository();
   const { openReferences } = useReferencesNav();
+  const { t, locale } = useI18n();
 
   useEffect(() => {
     setMeshActiveProfile(profileId, profileName);
@@ -1065,8 +1067,8 @@ export function FinanceDashboard({
   }, [profileName, settings]);
   const surface = useMemo(() => scenarioSurface(demoSegmentId), [demoSegmentId]);
   const isVisitorDemo = Boolean(demoSegmentId) || isDemoProfileName(profileName);
-  const visitorCaseTitle = visitorTitleForSegment(demoSegmentId);
-  const visitorCaseLead = visitorLeadForSegment(demoSegmentId);
+  const visitorCaseTitle = visitorTitleForSegment(demoSegmentId, locale);
+  const visitorCaseLead = visitorLeadForSegment(demoSegmentId, locale);
   const demoPackHealRef = useRef(false);
   useEffect(() => {
     if (!demoSegmentId || !vaultKey) return;
@@ -1222,11 +1224,11 @@ export function FinanceDashboard({
   const workspaceDisplayName = useCallback(
     (wsId: string) => {
       const meta = workspaceMetaById.get(wsId);
-      if (wsId === "personal") return "Magán";
-      if (wsId === "__all") return "Szumma";
+      if (wsId === "personal") return t("chrome.personal");
+      if (wsId === "__all") return t("dash.szumma");
       return (meta?.alias ?? wsId) as string;
     },
-    [workspaceMetaById],
+    [t, workspaceMetaById],
   );
 
   useEffect(() => {
@@ -1234,11 +1236,11 @@ export function FinanceDashboard({
       workspaceMetas.map((w) => ({
         id: w.id,
         label: workspaceDisplayName(w.id),
-        hint: w.type === "project" ? "Projekt" : w.type === "business" ? "Vállalkozás" : "Tér",
+        hint: w.type === "project" ? t("chrome.project") : w.type === "business" ? t("chrome.business") : t("dash.space"),
         keywords: [w.id, w.alias, w.type, w.description].filter(Boolean).join(" "),
       })),
     );
-  }, [workspaceDisplayName, workspaceMetas]);
+  }, [t, workspaceDisplayName, workspaceMetas]);
 
   const workspaceTabLabel = useCallback(
     (wsId: string) => {
@@ -3539,14 +3541,14 @@ export function FinanceDashboard({
       chart,
       waterfall,
       multiples: [
-        { id: "opt", label: "Optimista", points: chart.map((c) => ({ x: c.month, y: c.optimistic })), active: whatIfScenario === "optimistic" },
-        { id: "real", label: "Reális", points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: whatIfScenario === "realistic" },
-        { id: "pess", label: "Pesszimista", points: chart.map((c) => ({ x: c.month, y: c.pessimistic })), active: whatIfScenario === "pessimistic" },
+        { id: "opt", label: t("dash.optimistic"), points: chart.map((c) => ({ x: c.month, y: c.optimistic })), active: whatIfScenario === "optimistic" },
+        { id: "real", label: t("dash.realistic"), points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: whatIfScenario === "realistic" },
+        { id: "pess", label: t("dash.pessimistic"), points: chart.map((c) => ({ x: c.month, y: c.pessimistic })), active: whatIfScenario === "pessimistic" },
       ],
       strategySignals: strategyWhatIf?.signals ?? [],
       strategyInheritedFrom: strategyWhatIf?.inheritedFrom ?? "",
     };
-  }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, settings.recurring, txns, txnGrossHuf, vizSpan, whatIfScenario]);
+  }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, settings.recurring, t, txns, txnGrossHuf, vizSpan, whatIfScenario]);
 
   const leanInsights = useMemo(() => {
     if (!businessMode || activeWorkspace === "__all") return null;
@@ -5695,7 +5697,7 @@ export function FinanceDashboard({
         <div className="flex flex-col gap-2 min-[560px]:flex-row min-[560px]:items-start min-[560px]:justify-between">
           <div className="min-w-0">
             <CardTitle className="text-sm font-medium text-slate-200">
-              Munkaszimuláció
+              {t("dash.workSim")}
             </CardTitle>
           </div>
           <div className="flex flex-wrap items-center gap-1 min-[560px]:justify-end">
@@ -5707,7 +5709,7 @@ export function FinanceDashboard({
               onClick={() => setWhatIfScenario("optimistic")}
               title="Ha a forgalom jobb, a költség szorosabb."
             >
-              Optimista
+              {t("dash.optimistic")}
             </Button>
             <Button
               type="button"
@@ -5717,7 +5719,7 @@ export function FinanceDashboard({
               onClick={() => setWhatIfScenario("realistic")}
               title="A jelenlegi ritmus folytatása."
             >
-              Reális
+              {t("dash.realistic")}
             </Button>
             <Button
               type="button"
@@ -5727,7 +5729,7 @@ export function FinanceDashboard({
               onClick={() => setWhatIfScenario("pessimistic")}
               title="Ha a bevétel csúszik vagy esik, a költség nő."
             >
-              Pesszimista
+              {t("dash.pessimistic")}
             </Button>
           </div>
         </div>
@@ -5813,13 +5815,13 @@ export function FinanceDashboard({
             windowLabel={`${whatIf.chart[0]?.month ?? ""} – ${whatIf.chart[whatIf.chart.length - 1]?.month ?? ""}`}
             legend={
               <>
-                <ChartLegendSwatch tone="opt" label="Optimista" line />
-                <ChartLegendSwatch tone="real" label="Reális" line />
-                <ChartLegendSwatch tone="pess" label="Pesszimista" line />
+                <ChartLegendSwatch tone="opt" label={t("dash.optimistic")} line />
+                <ChartLegendSwatch tone="real" label={t("dash.realistic")} line />
+                <ChartLegendSwatch tone="pess" label={t("dash.pessimistic")} line />
               </>
             }
           >
-            <SmallMultiples series={whatIf.multiples} xLabel="Hónap" yLabel={currencyUnit()} />
+            <SmallMultiples series={whatIf.multiples} xLabel={t("dash.month")} yLabel={currencyUnit()} />
           </ChartChrome>
           <ProChartCallout className="mt-2 rounded-xl border border-border/60 bg-card px-4 py-3" />
         </div>
@@ -8028,13 +8030,13 @@ export function FinanceDashboard({
 
         <div className="grid gap-2 sm:grid-cols-3">
           <Button type="button" variant="outline" onClick={promotePlanToDo} title="Projekt élesítése (PLAN→DO)">
-            🚀 Projekt Élesítése
+            🚀 {t("dash.goLive")}
           </Button>
           <Button type="button" variant="outline" onClick={newImprovementGoal} title="Új fejlesztési cél">
-            🎯 Új Fejlesztési Cél
+            🎯 {t("dash.newGoal")}
           </Button>
           <Button type="button" variant="outline" onClick={quickSave} title="Gyors mentés (encrypted JSON)">
-            💾 Gyors mentés
+            💾 {t("chrome.quickSave")}
           </Button>
         </div>
       </CardContent>
@@ -12844,9 +12846,9 @@ export function FinanceDashboard({
         inventoryLabel={
           surface.showFinanceModules
             ? activeWorkspace === "personal" || activeWorkspace === "__all"
-              ? "Vagyon"
-              : "Leltár"
-            : "Készlet / tartalék"
+              ? t("dash.assets")
+              : t("dash.inventory")
+            : t("dash.stock")
         }
         isSzummaActive={activeWs === "szumma"}
         onToggleSzumma={toggleSzumma}

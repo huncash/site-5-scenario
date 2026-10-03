@@ -41,7 +41,7 @@ function Loading() {
 
 function VaultGate() {
   const { state } = useVault();
-  const { locale } = useI18n();
+  const { locale, fxRate } = useI18n();
   const [homeMode, setHomeMode] = useState<HomeMode>("door");
   const [licenseTick, setLicenseTick] = useState(0);
   const appHost = typeof window !== "undefined" && isAppWorkspaceHost();
@@ -65,7 +65,7 @@ function VaultGate() {
     state.status === "unlocked" ? (
       <Suspense fallback={<Loading />}>
         <FinanceDashboard
-          key={locale}
+          key={`${locale}:${fxRate}`}
           vaultKey={state.key}
           profileId={state.profile.id}
           profileName={state.profile.name}

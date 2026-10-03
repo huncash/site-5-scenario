@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -19,6 +20,7 @@ import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourPr
 import { SupportEmbedProvider } from "@/components/support/SupportEmbedProvider";
 import { LeanCommandPalette } from "@/components/LeanCommandPalette";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SiteFooter } from "@/components/SiteFooter";
 import { LocaleProvider, useI18n } from "@/i18n";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
@@ -177,6 +179,11 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function RootFooter() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return <SiteFooter pathname={pathname} />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -209,6 +216,7 @@ function RootComponent() {
               <OnboardingTourProvider>
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
+                <RootFooter />
                 <LeanCommandPalette />
                 <HoverCoachTooltip />
                 <Toaster richColors closeButton position="top-center" />

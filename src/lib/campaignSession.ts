@@ -10,7 +10,7 @@ import {
   type CampaignId,
   type CampaignUtm,
 } from "@/lib/campaignFunnels";
-import { writeScenarioDoorStep } from "@/lib/demoSession";
+import { writeScenarioDoorStep } from "@/lib/doorStep";
 
 const ATTR_KEY = "ui:campaignAttribution";
 

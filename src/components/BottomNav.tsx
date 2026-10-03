@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n";
 
 export function BottomNav({
   activeSubTab,
@@ -17,6 +18,7 @@ export function BottomNav({
   onOpenCreate: () => void;
   hideFinanceTabs?: boolean;
 }) {
+  const { t } = useI18n();
   const tabCls = (on: boolean) =>
     cn(
       "inline-flex h-7 items-center rounded-md border px-2 py-0.5 text-xs font-medium transition-all duration-200",
@@ -49,7 +51,7 @@ export function BottomNav({
           style={activeStyle(activeSubTab === "cashflow")}
           onClick={() => onChangeSubTab("cashflow")}
         >
-          Cashflow
+          {t("dash.cashflow")}
         </button>
         <button
           type="button"
@@ -57,7 +59,7 @@ export function BottomNav({
           style={activeStyle(activeSubTab === "ledger")}
           onClick={() => onChangeSubTab("ledger")}
         >
-          Tételek
+          {t("dash.items")}
         </button>
         <button
           type="button"
@@ -65,7 +67,7 @@ export function BottomNav({
           style={activeStyle(activeSubTab === "deals")}
           onClick={() => onChangeSubTab("deals")}
         >
-          Üzletek
+          {t("dash.deals")}
         </button>
           </>
         )}
@@ -97,9 +99,9 @@ export function BottomNav({
                   color: "var(--text-muted)",
                 } as const)
           }
-          title="Szumma (összes munkaterület)"
+          title={t("dash.szummaTitle")}
         >
-          Szumma
+          {t("dash.szumma")}
         </button>
 
         <div className="btn-new-item-wrap">
@@ -107,11 +109,11 @@ export function BottomNav({
             type="button"
             onClick={onOpenCreate}
             className="btn-new-item h-7"
-            title="Új..."
-            aria-label="Új munkaterület"
+            title={t("dash.new")}
+            aria-label={t("dash.newAria")}
           >
             <span aria-hidden="true">+</span>
-            <span className="btn-new-item-label">Új</span>
+            <span className="btn-new-item-label">{t("dash.new")}</span>
           </button>
         </div>
       </div>

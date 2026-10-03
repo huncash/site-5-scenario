@@ -5,7 +5,7 @@ import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useVault } from "@/lib/vault";
-import { writeScenarioDoorStep } from "@/lib/demoSession";
+import { writeScenarioDoorStep } from "@/lib/doorStep";
 
 export const Route = createFileRoute("/f/valsag-reziliencia/demo")({
   component: ValsagRezilienciaDemoLoaderPage,

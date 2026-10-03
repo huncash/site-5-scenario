@@ -4,11 +4,13 @@ import {
   type DisplayCurrency,
   type Locale,
 } from "@/i18n/locale";
+import { FALLBACK_HUF_PER_EUR, getHufPerEur } from "@/lib/mnbRate";
 
 export type { DisplayCurrency };
+export { FALLBACK_HUF_PER_EUR, getHufPerEur };
 
-/** Offline display rate only — amounts stay HUF in the model. Not a live FX quote. */
-export const DISPLAY_HUF_PER_EUR = 400;
+/** Last known MNB mid-rate fallback. Live quote via getHufPerEur(). Model stays HUF. */
+export const DISPLAY_HUF_PER_EUR = FALLBACK_HUF_PER_EUR;
 
 export function currencyUnit(locale: Locale = readClientLocale()): "Ft" | "€" {
   return currencyForLocale(locale) === "EUR" ? "€" : "Ft";
@@ -16,7 +18,7 @@ export function currencyUnit(locale: Locale = readClientLocale()): "Ft" | "€" 
 
 export function hufToDisplay(valueHuf: number, locale: Locale = readClientLocale()): number {
   if (!Number.isFinite(valueHuf)) return 0;
-  return currencyForLocale(locale) === "EUR" ? valueHuf / DISPLAY_HUF_PER_EUR : valueHuf;
+  return currencyForLocale(locale) === "EUR" ? valueHuf / getHufPerEur() : valueHuf;
 }
 
 export function formatCurrency(value: number, currentLanguage: Locale = readClientLocale()): string {

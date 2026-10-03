@@ -6,17 +6,15 @@ const packages = STANDARD_TIER_COPY;
 export const OKTATAS_SZIMULACIO_FUNNEL = {
   hero: {
     eyebrow: "Oktatási és szimulációs tréningek",
-    title: "Négy PDCA-eset: startup cash-flow, Lean VSM, campus energia, kiberincidens",
+    title: "Két PDCA-eset: startup cash-flow és Lean VSM",
     subtitle:
-      "Pénzügyi sáv és Lean / Poka-Yoke mikro együtt. Diák-, tanműhely- és campus-lépték, helyi számítás.",
+      "Pénzügyi sáv és Lean / Poka-Yoke mikro együtt. Diák- és tanműhely-lépték, helyi számítás.",
     primaryCta: "Esetek megnyitása",
     secondaryCta: "Csomagok megtekintése",
   },
   proofBullets: [
     "Startup: burn rate, fedezeti pont, fix/változó — PRO sáv",
     "Lean VSM: OEE, SMED, Poka-Yoke, átfutási idő + kiesés Ft",
-    "Campus: hőhullám, passzív hűtés, kollégiumi kWh-kvóta",
-    "Kiber: izolációs idő, analóg vizsga, helyreállás",
   ],
   demoTeaser: {
     title: "Interaktív előnézet: oktatási tréning (demó)",
@@ -36,7 +34,7 @@ export const OKTATAS_SZIMULACIO_FUNNEL = {
     },
     {
       q: "Ez ügyféladat?",
-      a: "Nem. Diák- és campus-léptékű minta. Nincs felhő, nincs telemetria.",
+      a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő, nincs telemetria.",
     },
     PRICING_VAT_FAQ,
     WHY_FAQ,

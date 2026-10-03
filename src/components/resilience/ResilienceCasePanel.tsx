@@ -1,3 +1,4 @@
+import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
@@ -13,9 +14,26 @@ import {
   type TfrRow,
 } from "@/lib/resilienceCases";
 
-function formatMetric(n: number, unit: string) {
-  const digits = unit === "TFR" || unit === "nap" ? 1 : n < 10 ? 1 : 0;
-  return `${n.toLocaleString("hu-HU", { maximumFractionDigits: digits })} ${unit}`;
+function formatMetric(n: number, unit: string, locale: "hu" | "en" = "hu") {
+  const digits = unit === "TFR" || unit === "nap" || unit === "day" ? 1 : n < 10 ? 1 : 0;
+  return `${n.toLocaleString(locale === "en" ? "en-IE" : "hu-HU", { maximumFractionDigits: digits })} ${unit}`;
+}
+
+function ProLegend() {
+  const { t } = useI18n();
+  return (
+    <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+      <li>
+        <ChartLegendSwatch tone="opt" label={t("dash.optimistic")} line />
+      </li>
+      <li>
+        <ChartLegendSwatch tone="real" label={t("brand.real")} line />
+      </li>
+      <li>
+        <ChartLegendSwatch tone="pess" label={t("dash.pessimistic")} line />
+      </li>
+    </ul>
+  );
 }
 
 function PhysicalHourChart({ points, unit, label }: { points: HourPoint[]; unit: string; label: string }) {
@@ -60,17 +78,7 @@ function PhysicalHourChart({ points, unit, label }: { points: HourPoint[]; unit:
           {Math.round(yMax)}
         </text>
       </svg>
-      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-        <li>
-          <ChartLegendSwatch tone="opt" label="Optimista" line />
-        </li>
-        <li>
-          <ChartLegendSwatch tone="real" label="Realista" line />
-        </li>
-        <li>
-          <ChartLegendSwatch tone="pess" label="Pesszimista" line />
-        </li>
-      </ul>
+      <ProLegend />
     </figure>
   );
 }
@@ -162,23 +170,24 @@ export function ResilienceCasePanel(props: {
   model?: ResilienceModel | null;
   baseline?: MasterBaselineContext | null;
 }) {
+  const { locale, t } = useI18n();
   if (!isResilienceSegment(props.segmentId)) return null;
   const model = props.model ?? buildResilienceModel(props.segmentId as ResilienceCaseId);
   const phaseHint =
     props.phase === "PLAN"
-      ? "PLAN: tartalék idő és helyreállás. A pesszimista sáv itt érettség, nem riadó."
+      ? t("panel.resilPlan")
       : props.phase === "DO"
-        ? "DO: a protokoll él — tartalék, mesh, készlet. Nem Ft-oszlop."
+        ? t("panel.resilDo")
       : props.phase === "ACT"
-        ? "ACT: protokoll — redundancia, local-first, helyi ellátás, készlet."
-        : "CHECK: ResourceRunway, EnergyAutonomy, TTR — a motor fizikai korlátot is visz.";
+        ? t("panel.resilAct")
+        : t("panel.resilCheck");
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            BCP · Működési reziliencia · Strategic foresight
+            {t("panel.resilEyebrow")}
             <HelpIcon
               kbId={
                 model.kind === "bcp"
@@ -189,23 +198,29 @@ export function ResilienceCasePanel(props: {
                       ? "lesson-household"
                       : "lesson-demography"
               }
-              title="Szcenárió-lecke"
+              title={t("panel.lesson")}
             />
           </p>
-          <h3 className="mt-0.5 text-sm font-semibold text-foreground">{model.title}</h3>
+          <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</h3>
           <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
         </div>
       </div>
       <div className="mt-3 grid gap-3">
         {model.kind === "macro" ? (
-          <>
-            <KpiTrio kpis={model.kpis} />
+          props.phase === "PLAN" ? (
             <TfrMatrix rows={model.tfrRows} replacement={model.replacementTfr} />
-          </>
+          ) : props.phase === "CHECK" || props.phase === "ACT" ? (
+            <>
+              <KpiTrio kpis={model.kpis} />
+              {props.phase === "CHECK" ? <TfrMatrix rows={model.tfrRows} replacement={model.replacementTfr} /> : null}
+            </>
+          ) : (
+            <KpiTrio kpis={model.kpis} />
+          )
         ) : (
           <PhysicalOpsPanel segmentId={props.segmentId} baseline={props.baseline} phase={props.phase} />
         )}
-        {model.extras.length && model.kind === "macro" ? (
+        {model.extras.length && model.kind === "macro" && (props.phase === "CHECK" || props.phase === "ACT") ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[28rem] text-left text-[12px]">
               <thead>

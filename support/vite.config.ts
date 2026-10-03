@@ -7,6 +7,11 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 export default defineConfig({
   root,
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("../src", import.meta.url)),
+    },
+  },
   server: { port: 5120, host: true },
   preview: { port: 5120, host: true },
   build: {

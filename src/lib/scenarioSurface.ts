@@ -86,23 +86,19 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
 
 export function pdcaPhaseExact(phase: "PLAN" | "DO" | "CHECK" | "ACT", surface: ScenarioSurface): string {
   if (phase === "PLAN") {
-    return "tervezés — célok, szimuláció, örökölt törzs. Itt tervezel, mielőtt élesítesz.";
+    return "PLAN — Master Baseline, kiinduló készlet, célszám, tervezett beavatkozási irány. Itt még nem a futás van.";
   }
   if (phase === "DO") {
     return surface.showFinanceModules
-      ? "végrehajtás — élő pénzáramlás, tételek, tartozások. Ami most történik."
-      : "végrehajtás — élő folyamat, készlet, tartalék, protokoll. Ami most történik.";
+      ? "DO — élő pénzáramlás, allokáció, napi üzem. Ami most történik, nem a tervkártya."
+      : "DO — élő folyamat, erőforrás-allokáció, terhelés. Ami most történik, nem a tervkártya.";
   }
   if (phase === "CHECK") {
-    return surface.showPhysicalKpis
-      ? "ellenőrzés — fizikai / logisztikai mutatók, TTR, tartalék, kvóta."
-      : surface.showLean
-        ? "ellenőrzés — Lean, OEE, muda és a havi hőtérkép."
-        : "ellenőrzés — szükséglet, vágy, befektetés, muda és a havi hőtérkép.";
+    return "CHECK — terv–tény, szűk keresztmetszet, veszteség. Miért tart a mutató ott, ahol.";
   }
   return surface.showFinanceModules
-    ? "beavatkozás — árazás, keret, átütemezés."
-    : "beavatkozás — protokoll, redundancia, kvóta, stop-loss.";
+    ? "ACT — helyesbítés, árazás, keret, a következő kör standardja."
+    : "ACT — SMED / Poka-Yoke protokoll, redundancia, a következő kör standardja.";
 }
 
 export function baselineForSegment(segmentId: string | null | undefined): MasterBaselineContext {

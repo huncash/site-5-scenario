@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { en } from "@/i18n/en";
 import { hu } from "@/i18n/hu";
 import { translate } from "@/i18n";
+import { caseCopyIds, caseTitle } from "@/i18n/cases";
 import { DISPLAY_HUF_PER_EUR, formatCurrency, currencyUnit } from "@/i18n/currency";
 import { currencyForLocale, DEFAULT_LOCALE, isLocale, otherLocale } from "@/i18n/locale";
+import { parseMnbEur } from "@/lib/mnbRate";
 import { TERMS } from "@/i18n/terms";
 
 function keysOf(obj: unknown, prefix = ""): string[] {
@@ -50,9 +52,25 @@ describe("i18n", () => {
   it("formats HUF and converted EUR from the same HUF value", () => {
     const hu = formatCurrency(DISPLAY_HUF_PER_EUR, "hu");
     const en = formatCurrency(DISPLAY_HUF_PER_EUR, "en");
-    expect(hu).toMatch(/400/);
+    expect(hu).toMatch(/368|367/);
     expect(hu).toMatch(/Ft|HUF/);
     expect(en).toMatch(/1/);
     expect(en).toMatch(/€|EUR/);
+  });
+
+  it("parses official MNB EUR mid-rate from SOAP XML", () => {
+    const xml =
+      '&lt;MNBCurrentExchangeRates&gt;&lt;Day date="2026-10-02"&gt;&lt;Rate unit="1" curr="EUR"&gt;367,87000&lt;/Rate&gt;&lt;/Day&gt;&lt;/MNBCurrentExchangeRates&gt;';
+    const quote = parseMnbEur(xml);
+    expect(quote?.rate).toBeCloseTo(367.87, 2);
+    expect(quote?.date).toBe("2026-10-02");
+  });
+
+  it("overlays EN demo case titles", () => {
+    expect(caseCopyIds()).toHaveLength(18);
+    expect(caseTitle("demo1_multisite_operator", "hu")).toBe("Több vendéglátóhely egy kézben");
+    expect(caseTitle("demo1_multisite_operator", "en")).toBe("Several hospitality sites in one hand");
+    expect(caseTitle("demo11_resilience_saas_outage", "en")).toMatch(/SaaS/);
+    expect(caseTitle("demo26_industry_saas_exit", "en")).toBeNull();
   });
 });

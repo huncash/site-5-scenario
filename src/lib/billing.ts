@@ -1,5 +1,6 @@
 import { applyAttributionSearchParams, type CampaignUtm } from "@/lib/campaignFunnels";
 import { readCampaignAttribution } from "@/lib/campaignSession";
+import { readClientLocale } from "@/i18n/locale";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
 export const BILL_CHECKOUT_ORIGIN = "https://bill.szcenario.hu";
@@ -28,5 +29,6 @@ export function billCheckoutUrl(opts: {
     { id: stored?.id, utm: opts.utm ?? stored?.utm },
     opts.ref ? { ref: opts.ref } : undefined,
   );
+  url.searchParams.set("lang", readClientLocale());
   return url.toString();
 }

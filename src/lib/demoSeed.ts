@@ -4,51 +4,36 @@ import type { CustomSettings, Transaction, WorkspaceMeta } from "@/lib/finance";
 import { EMPTY_SETTINGS } from "@/lib/finance";
 import { inheritMasterBaseline, MASTER_BASELINE } from "@/lib/masterBaseline";
 import { baselineForSegment } from "@/lib/scenarioSurface";
+import { DEMO_PASSWORD, HOSPITALITY_SEGMENTS, type DemoSegmentId } from "@/lib/demoCatalog";
 import {
   EDUCATION_SEGMENTS,
   educationCaseById,
   educationSurface,
   isEducationSegment,
-  type EducationCaseId,
 } from "@/lib/educationCases";
 import {
   INDUSTRY_SEGMENTS,
   industryCaseById,
   industrySurface,
   isIndustrySegment,
-  type IndustryCaseId,
 } from "@/lib/industryCases";
 import {
   isResilienceSegment,
   RESILIENCE_SEGMENTS,
   resilienceCaseById,
   resilienceSurface,
-  type ResilienceCaseId,
 } from "@/lib/resilienceCases";
 import {
   isStrategySegment,
   STRATEGY_SEGMENTS,
   strategyCaseById,
   strategySurface,
-  type StrategyCaseId,
 } from "@/lib/strategyCases";
+
+export { DEMO_PASSWORD, type DemoSegmentId };
 
 const VAULT_SESSION_KEY = "vault:key:v2";
 
-export type DemoSegmentId =
-  | "demo1_multisite_operator"
-  | "demo2_premium_nightlife"
-  | "demo3_specialty_cafe_tea"
-  | "demo4_fine_dining_bistro"
-  | "demo5_pastry_gelato"
-  | "demo6_event_catering_popup"
-  | "demo7_personal_pocket_seasonal_pilot"
-  | StrategyCaseId
-  | ResilienceCaseId
-  | EducationCaseId
-  | IndustryCaseId;
-
-export const DEMO_PASSWORD = "demo";
 export const DEMO_GENERATED_TAG = "generated:test";
 
 export const DEMO_SEGMENTS: Array<{
@@ -56,71 +41,9 @@ export const DEMO_SEGMENTS: Array<{
   name: string;
   title: string;
   blurb: string;
-  /** Látogatónak: mi ez a helyzet, teljes mondatban. */
   lead: string;
   baseRevenueNetHuf: number;
-}> = [
-  {
-    id: "demo1_multisite_operator",
-    name: "DEMO 1 — Láncvezető / multi‑site HoReCa operátor",
-    title: "Több vendéglátóhely egy kézben",
-    blurb: "Három–nyolc egység, közös beszerzés. A kérdés: a költséget központosítod-e, vagy egységenként hagyod.",
-    lead: "Több étterem vagy kávézó van egy kézben. A forgalom megvan, a beszerzés és a hatósági teher viszont szétszóródik. A költséget egy helyre húzni, vagy egységenként hagyni olcsóbb?",
-    baseRevenueNetHuf: 18_000_000,
-  },
-  {
-    id: "demo2_premium_nightlife",
-    name: "DEMO 2 — Premium cocktail bar & high‑end nightlife",
-    title: "Éjszakai bár, magas vendégköltés",
-    blurb: "Kevesebb vendég, magas esti számla, drága üzem. A kérdés: a hétvége kitartja-e a gyengébb hónapokat.",
-    lead: "Kevesen jönnek, de sokat költenek. A hétvége viszi a hetet. A személyzetet és a biztonságot akkor is ki kell fizetni, ha hétköznap csend van; a drága készlet a polcon vár, a pénz addig nem forog. Kitartja-e a magas vendégköltés a gyengébb hónapokat?",
-    baseRevenueNetHuf: 7_800_000,
-  },
-  {
-    id: "demo3_specialty_cafe_tea",
-    name: "DEMO 3 — Specialty kávézó & újhullámos teázó",
-    title: "Nappali kávézó, változó kereslet",
-    blurb: "Stabil nappali forgalom; nő a tej-, cukor- és gluténmentes igény. A kérdés: trendet látsz-e, vagy csak zajt.",
-    lead: "A nappali forgalom egyenletes, a vendég viszont egyre gyakrabban kér állati tej-, cukor- vagy gluténmentes italt és ételt. Tartós eltolódás ez a rendelésben, vagy csak átmeneti hullám?",
-    baseRevenueNetHuf: 6_000_000,
-  },
-  {
-    id: "demo4_fine_dining_bistro",
-    name: "DEMO 4 — Fine dining & bisztró éttermek",
-    title: "Étterem: minőség és költség",
-    blurb: "Magasabb árfekvés, szigorú konyhai rutin. A kérdés: hol csúszik el a fedezet.",
-    lead: "A minőséghez drága alapanyag és szigorú konyhai rend kell. Fedezi-e a számla ezt a költséget, vagy valamelyik tételen elfogy a haszon?",
-    baseRevenueNetHuf: 11_000_000,
-  },
-  {
-    id: "demo5_pastry_gelato",
-    name: "DEMO 5 — Kézműves cukrászda & fagylaltmanufaktúra",
-    title: "Cukrászda: szezon és hűtés",
-    blurb: "Cukrászda és fagylalt; a tél csendes. A kérdés: a holtszezon mit visz el.",
-    lead: "Nyáron megy, télen visszaesik, a hűtés viszont egész évben megy. Mennyit visznek el a csendes hónapok a nyári többletből?",
-    baseRevenueNetHuf: 4_900_000,
-  },
-  {
-    id: "demo6_event_catering_popup",
-    name: "DEMO 6 — Event catering & pop‑up gasztro‑klubok",
-    title: "Rendezvényes vendéglátás",
-    blurb: "Catering és alkalmi kitelepülés, hullámzó bevétel. A kérdés: egy rendezvény viszi-e a hónapot.",
-    lead: "A bevétel hullámzik. A logisztika és a személyzet egy-egy estére ugrik meg. Kitartja-e egy nagyobb megbízás a hónapot, vagy utána lyuk marad?",
-    baseRevenueNetHuf: 9_000_000,
-  },
-  {
-    id: "demo7_personal_pocket_seasonal_pilot",
-    name: "DEMO 7 — Magán zsebből induló szezonális pilot vendéglátás",
-    title: "Saját zsebből indított vendéglátás",
-    blurb: "Magán jövedelem és kis plusz, tagi kölcsön. Példa a növekedésre, nem ajánlat.",
-    lead: "Valaki a saját fizetéséből indít egy kis vendéglátást, és a cégnek tagi kölcsönt ad. A magánkeret és a céges működés egymást húzza. Ez példa, nem ajánlat.",
-    baseRevenueNetHuf: 2_900_000,
-  },
-  ...STRATEGY_SEGMENTS,
-  ...RESILIENCE_SEGMENTS,
-  ...EDUCATION_SEGMENTS,
-  ...INDUSTRY_SEGMENTS,
-];
+}> = [...HOSPITALITY_SEGMENTS, ...STRATEGY_SEGMENTS, ...RESILIENCE_SEGMENTS, ...EDUCATION_SEGMENTS, ...INDUSTRY_SEGMENTS];
 
 /** Visitor-facing names + törzsadat per economic case (not the generic Vállalkozás2/Projekt2 shells). */
 export function caseSurface(segmentId: DemoSegmentId): {

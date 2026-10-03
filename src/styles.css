@@ -1528,6 +1528,67 @@ html[data-accessibility="active"] body {
   letter-spacing: 0.03em;
 }
 
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--card-border, var(--border));
+  background: color-mix(in srgb, var(--app-bg, var(--background)) 88%, #02110c);
+  color: var(--text-muted, var(--muted-foreground));
+}
+.site-footer-inner {
+  margin: 0 auto;
+  max-width: 72rem;
+  padding: 1.25rem 1rem 1.5rem;
+  display: grid;
+  gap: 0.85rem;
+}
+.site-footer-brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+}
+.site-footer-name {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--text-main, var(--foreground));
+}
+.site-footer-copy,
+.site-footer-ver,
+.site-footer-note {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+.site-footer-ver {
+  border: 1px solid var(--card-border, var(--border));
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  letter-spacing: 0.04em;
+}
+.site-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+}
+.site-footer-nav a {
+  font-size: 0.75rem;
+  font-weight: 550;
+  color: var(--accent-emerald, var(--accent));
+  text-underline-offset: 3px;
+}
+.site-footer-nav a:hover {
+  text-decoration: underline;
+}
+@media (min-width: 640px) {
+  .site-footer-inner {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: end;
+    padding: 1.4rem 1.25rem 1.65rem;
+  }
+  .site-footer-note {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Public door / funnel: 2 ink colors + 1 accent. Body copy is never translucent. */
 .door-page {
   --door-mute: var(--muted-foreground);
@@ -1847,48 +1908,30 @@ html.light-mode [class*="border-slate-8"] {
 }
 
 .sector-1 {
-  left: 22px;
-  top: 18px;
+  left: 24px;
+  top: 22px;
 }
 
 .sector-2 {
-  left: 58px;
-  top: 40px;
+  left: 82px;
+  top: 46px;
 }
 
 .sector-3 {
-  left: 106px;
-  top: 40px;
+  left: 140px;
+  top: 22px;
 }
 
-.sector-4 {
-  left: 142px;
-  top: 18px;
+.sector-lang {
+  left: 82px;
+  top: 4px;
 }
 
-.lang-pair {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 1px;
-  font-size: 9px;
+.lang-mark {
+  font-size: 11px;
   font-weight: 750;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: 1;
-  color: var(--text-muted);
-}
-
-.lang-pair .is-on {
-  color: var(--text-main);
-}
-
-.lang-pair .lang-sep {
-  opacity: 0.45;
-  font-weight: 600;
-}
-
-.view-settings-icon-btn.lang-btn:hover .lang-pair,
-.view-settings-icon-btn.lang-btn:hover .lang-pair .is-on {
-  color: #ffffff;
 }
 
 .view-settings-icon-btn {

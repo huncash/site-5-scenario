@@ -138,6 +138,28 @@ async function shellFile() {
 const server = createServer(async (req, res) => {
   try {
     const urlPath = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`).pathname;
+    if (urlPath === "/mnb-rates") {
+      const upstream = await fetch("http://www.mnb.hu/arfolyamok.asmx", {
+        method: req.method || "POST",
+        headers: {
+          "Content-Type": "text/xml; charset=utf-8",
+          SOAPAction: "http://www.mnb.hu/webservices/MNBArfolyamServiceSoap/GetCurrentExchangeRates",
+        },
+        body: req.method === "GET" ? undefined : await new Promise((resolve, reject) => {
+          const chunks = [];
+          req.on("data", (c) => chunks.push(c));
+          req.on("end", () => resolve(Buffer.concat(chunks)));
+          req.on("error", reject);
+        }),
+      });
+      const xml = await upstream.text();
+      res.writeHead(upstream.ok ? 200 : upstream.status, {
+        "content-type": "text/xml; charset=utf-8",
+        "cache-control": "no-store",
+      });
+      res.end(xml);
+      return;
+    }
     if (urlPath === "/healthz") {
       res.writeHead(200, {
         "content-type": "text/plain; charset=utf-8",

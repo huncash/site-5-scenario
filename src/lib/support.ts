@@ -1,3 +1,5 @@
+import { readClientLocale } from "@/i18n/locale";
+
 export const SUPPORT_ORIGIN_PROD = "https://support.szcenario.hu";
 export const SUPPORT_MAIL = "support@szcenario.hu";
 export const SUPPORT_SLA =
@@ -15,7 +17,9 @@ export function supportPublicOrigin(): string {
 export function supportEmbedUrl(slug: string): string {
   const clean = slug.replace(/^\/+/, "");
   const path = clean.startsWith("embed/") ? `/${clean}` : `/embed/${clean}`;
-  return `${supportPublicOrigin()}${path}`;
+  const url = new URL(`${supportPublicOrigin()}${path}`);
+  url.searchParams.set("lang", readClientLocale());
+  return url.toString();
 }
 
 export const SUPPORT_LAYER_SLUG: Record<SupportLayer, string> = {

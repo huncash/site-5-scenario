@@ -24,8 +24,17 @@
 html, body, #root { margin: 0; min-height: 100%; background: var(--app-bg); color: var(--text-main); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 64px; }
-.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; }
+.top-right { display: flex; align-items: center; gap: 10px; }
 .brand { font-weight: 650; }
+.lang-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; height: 32px; padding: 0 10px;
+  border: 1px solid var(--card-border); border-radius: 999px;
+  background: var(--dropdown-hover); color: var(--text-main);
+  font-size: 11px; font-weight: 750; letter-spacing: 0.06em; cursor: pointer;
+}
+.lang-btn:hover { border-color: var(--accent-emerald); }
 .muted { color: var(--text-muted); font-size: 13px; line-height: 1.45; }
 h1 { font-size: 28px; margin: 0 0 8px; }
 label { display: grid; gap: 6px; font-size: 12px; color: var(--text-muted); }
@@ -50,3 +59,16 @@ input, select { height: 40px; border-radius: 10px; border: 1px solid var(--card-
 .step b { display: block; margin-bottom: 4px; }
 .code { font-family: ui-monospace, monospace; background: var(--app-bg); border: 1px solid var(--card-border); padding: 8px 10px; border-radius: 8px; word-break: break-all; }
 .hint { font-size: 11px; color: var(--text-muted); }
+.site-footer {
+  margin: 36px -16px 0;
+  border-top: 1px solid var(--card-border);
+  background: color-mix(in srgb, var(--app-bg) 88%, #02110c);
+  color: var(--text-muted);
+}
+.site-footer-inner { padding: 18px 16px 8px; display: grid; gap: 12px; }
+.site-footer-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+.site-footer-name { font-size: 13px; font-weight: 650; color: var(--text-main); }
+.site-footer-copy, .site-footer-ver, .site-footer-note { font-size: 11px; line-height: 1.45; }
+.site-footer-ver { border: 1px solid var(--card-border); border-radius: 999px; padding: 1px 7px; letter-spacing: 0.04em; }
+.site-footer-nav { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.site-footer-nav a { font-size: 12px; font-weight: 550; }

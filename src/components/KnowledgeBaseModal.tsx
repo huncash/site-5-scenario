@@ -10,7 +10,7 @@ import { SUPPORT_LAYER_SLUG, SUPPORT_SLA, type SupportLayer } from "@/lib/suppor
 
 const LAYERS: Array<{ id: SupportLayer; label: string; title: string }> = [
   { id: "tippek", label: "1 · Tippek", title: "GYIK tippek" },
-  { id: "gyik", label: "2 · GYIK", title: "Tudásbázis / GYIK" },
+  { id: "gyik", label: "2 · GYIK", title: "Gyakran Ismételt Kérdések" },
   { id: "ticket", label: "3 · Írásban", title: "Írásos ügyintézés" },
 ];
 

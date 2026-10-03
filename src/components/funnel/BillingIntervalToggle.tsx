@@ -7,6 +7,7 @@ import {
   writeBillingInterval,
   type BillingInterval,
 } from "@/lib/funnelOrder";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export function useBillingInterval() {
@@ -33,6 +34,7 @@ export function useBillingInterval() {
 
 export function BillingIntervalToggle(props: { className?: string }) {
   const [interval, setInterval] = useBillingInterval();
+  const { t } = useI18n();
   return (
     <div className={cn("inline-flex rounded-lg border border-white/15 bg-card p-1", props.className)}>
       <button
@@ -43,7 +45,7 @@ export function BillingIntervalToggle(props: { className?: string }) {
         )}
         onClick={() => setInterval("yearly")}
       >
-        Évente
+        {t("pricing.yearly")}
       </button>
       <button
         type="button"
@@ -53,7 +55,7 @@ export function BillingIntervalToggle(props: { className?: string }) {
         )}
         onClick={() => setInterval("monthly")}
       >
-        Havonta
+        {t("pricing.monthly")}
       </button>
     </div>
   );

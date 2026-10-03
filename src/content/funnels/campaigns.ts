@@ -87,10 +87,10 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
       secondaryCta: "Csomagok",
     },
     chooserIntro:
-      "A cég törzse a Master Baseline. A stratégiai esetek ezt öröklik — termékvonal, árinfláció, új piac, Kahn-féle elágazás. PRO pályák, helyi cash-flow.",
+      "A cég törzse a Master Baseline. A nyilvános stratégiai eset a Kahn-féle elágazás: hitel vagy organikus, majd olcsó+kötbéres vagy drága+rugalmas. PRO pályák, helyi cash-flow.",
     proofBullets: [
       "Master Baseline: a core számokat nem kell duplán megadni",
-      "PDCA-esetek: termékvonal, árinfláció, új piac, Kahn-féle elágazás",
+      "Kahn-féle elágazás: hitel vagy organikus, kötbér vagy rugalmasság",
       "PRO: likviditási csapda, árrés, runway, stop-loss",
     ],
     caseHeading: "Stratégiai esetek",
@@ -161,26 +161,25 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     id: "oktatas",
     seoTitle: "Szcenárió — Oktatás és szimulációs tréning",
     seoDescription:
-      "Kockázatmentes döntési szimuláció képzéshez. Startup cash-flow, Lean VSM, campus energia, kiberincidens.",
+      "Kockázatmentes döntési szimuláció képzéshez. Startup cash-flow és Lean VSM.",
     hero: {
       eyebrow: "Oktatás és szimulációs tréning",
       title: "Kockázatmentes döntési szimuláció képzéshez",
       subtitle:
-        "Oktatóknak, hallgatóknak, mentoroknak. Startup cash-flow, Lean VSM, campus energia, kiberincidens. Diák-lépték, helyi számítás.",
+        "Oktatóknak, hallgatóknak, mentoroknak. Startup cash-flow és Lean VSM. Diák-lépték, helyi számítás.",
       primaryCta: "Tréning-esetek",
       secondaryCta: "Csomagok",
     },
     chooserIntro:
-      "Fix PDCA. Pénzügyi sáv és Lean / Poka-Yoke mikro ugyanazon a moszaikon. Diák- és campus-lépték.",
+      "Fix PDCA. Pénzügyi sáv és Lean / Poka-Yoke mikro ugyanazon a moszaikon. Diák- és tanműhely-lépték.",
     proofBullets: [
       "Startup: burn rate, fedezeti pont, PRO sáv",
       "Lean VSM: OEE, SMED, Poka-Yoke",
-      "Campus energia és kiberincidens — kWh, izoláció, helyreállás",
     ],
-    caseHeading: "Négy tréning-eset",
+    caseHeading: "Két tréning-eset",
     demoTeaser: {
       title: "Interaktív előnézet: oktatási tréning",
-      body: "Négy eset a választóban. Nincs automata belépés egyetlen pályára.",
+      body: "Két eset a választóban. Nincs automata belépés egyetlen pályára.",
       cta: "Megnyitom a tréning-eseteket",
     },
     tiers: {
@@ -192,7 +191,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     faq: [
       {
         q: "Ez ügyféladat?",
-        a: "Nem. Diák- és campus-léptékű minta. Nincs felhő, nincs telemetria.",
+        a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő, nincs telemetria.",
       },
       MEASURE_FAQ,
       PRICING_VAT_FAQ,

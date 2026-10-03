@@ -12,4 +12,15 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      proxy: {
+        "/mnb-rates": {
+          target: "http://www.mnb.hu",
+          changeOrigin: true,
+          rewrite: () => "/arfolyamok.asmx",
+        },
+      },
+    },
+  },
 });

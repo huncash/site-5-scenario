@@ -201,18 +201,13 @@ export function ViewSettingsMenu({
 
           <button
             type="button"
-            className={cn("view-settings-icon-btn lang-btn menu-sector sector-4", locale === "en" && "is-active")}
+            className={cn("view-settings-icon-btn lang-btn menu-sector sector-lang")}
             role="menuitem"
             title={t("view.lang")}
             aria-label={t("view.langAria")}
-            aria-pressed={locale === "en"}
             onClick={toggleLocale}
           >
-            <span className="lang-pair" aria-hidden="true">
-              <span className={locale === "hu" ? "is-on" : undefined}>{localeLabel("hu")}</span>
-              <span className="lang-sep">/</span>
-              <span className={locale === "en" ? "is-on" : undefined}>{localeLabel("en")}</span>
-            </span>
+            <span className="lang-mark">{localeLabel(locale)}</span>
           </button>
         </div>
       </div>
