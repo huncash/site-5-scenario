@@ -176,6 +176,8 @@ export const en: DeepString<typeof hu> = {
     aboutLink: "About — the full background",
     typesTitle: "Scenario types",
     typesLead: "18 cases: 7 base + 11 lenses. Industry, logistics, or inner zones — one branch, one decision frame. Kahn sits above, one click.",
+    kahnBridge:
+      "One step from here: the Kahn method — a multi-branch outlook from the trunk, not a forecast, but a fork before you bind the resource.",
     kahnEyebrow: "Featured demo — 1 click",
     kahnTitle: "Kahn futures research & strategic fork",
     kahnBody:

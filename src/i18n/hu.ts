@@ -173,6 +173,8 @@ export const hu = {
     aboutLink: "Rólunk — a teljes háttérnarratíva",
     typesTitle: "Szcenárió fajták",
     typesLead: "18 eset: 7 alapeset + 11 lencse. Iparág, logisztika, vagy belső zóna — egy ág, egy döntési keret. A Kahn-demó fent, egy kattintás.",
+    kahnBridge:
+      "Innen egy lépés a Kahn-féle módszer: többágú jövőkép a törzsből — nem jóslat, hanem elágazás, mielőtt elkötelezed az erőforrást.",
     kahnEyebrow: "Kiemelt demó — 1 kattintás",
     kahnTitle: "Kahn-féle jövőkutató & stratégiai elágazás",
     kahnBody:

@@ -160,6 +160,38 @@ export function ScenarioDoor() {
 
         {step === "type" ? (
           <div className="space-y-12">
+            <section className="space-y-5" aria-labelledby="door-why-heading">
+              <h2
+                id="door-why-heading"
+                className="max-w-3xl text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
+              >
+                {t("brand.whyTitle")}
+              </h2>
+              <p className="max-w-3xl text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+                {t("brand.whyLead")}
+              </p>
+              <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
+                {t("brand.whyBody")}
+              </p>
+              <div className="max-w-3xl space-y-2 border-l-2 border-cyan-400/40 pl-4">
+                <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-cyan-200/90">
+                  {t("brand.dailyOpsTitle")}
+                </p>
+                <p className="text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
+                  {t("brand.dailyOpsBody")}
+                </p>
+              </div>
+              <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-cyan-100/90 sm:text-[15px]">
+                {t("door.kahnBridge")}
+              </p>
+              <Link
+                to="/about"
+                className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
+              >
+                {t("door.aboutLink")}
+              </Link>
+            </section>
+
             <section className="space-y-3">
               <button
                 type="button"
@@ -185,27 +217,6 @@ export function ScenarioDoor() {
               </div>
               <ProChartSketch />
               <ProChartCallout />
-            </section>
-
-            <section className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("brand.dailyOpsTitle")}
-              </div>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.dailyOpsBody")}</p>
-            </section>
-
-            <section className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("brand.whyTitle")}
-              </div>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.whyLead")}</p>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.whyBody")}</p>
-              <Link
-                to="/about"
-                className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
-              >
-                {t("door.aboutLink")}
-              </Link>
             </section>
 
             <section className="space-y-3">
