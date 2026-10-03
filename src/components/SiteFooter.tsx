@@ -51,7 +51,7 @@ function isDashboardSurfaceMounted(): boolean {
   return Boolean(document.querySelector(DASH_SURFACE));
 }
 
-export function useSiteFooterVisible(pathname?: string) {
+export function useSiteFooterVisible(pathname?: string, opts?: { ignoreHomeMode?: boolean }) {
   const homeMode = useHomeMode();
   const loc = currentLocation();
   const path = pathname ?? loc.pathname;
@@ -60,7 +60,8 @@ export function useSiteFooterVisible(pathname?: string) {
     hostname: loc.hostname,
     port: loc.port,
     pathname: path,
-    homeMode,
+    // inline marketing surfaces (door/bill/support): homeMode ne nyomja el
+    homeMode: opts?.ignoreHomeMode ? "door" : homeMode,
     embed,
   });
 }
@@ -100,7 +101,7 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
 export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
   const locale = useLiveLocale();
   const homeMode = useHomeMode();
-  const visible = useSiteFooterVisible(props.pathname);
+  const visible = useSiteFooterVisible(props.pathname, { ignoreHomeMode: Boolean(props.inline) });
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [dashMounted, setDashMounted] = useState(false);
 
@@ -116,6 +117,7 @@ export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
   }, [props.pathname, visible, homeMode]);
 
   useEffect(() => {
+    // inline: bill / support / door saját markup — nincs portal-host kellék
     if (!visible || props.inline || dashMounted || homeMode === "dashboard") {
       setHost((prev) => (prev === null ? prev : null));
       return;
@@ -127,10 +129,20 @@ export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
     };
     apply();
     const id = window.requestAnimationFrame(apply);
-    return () => window.cancelAnimationFrame(id);
+    const mo =
+      typeof MutationObserver !== "undefined"
+        ? new MutationObserver(() => apply())
+        : null;
+    mo?.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      window.cancelAnimationFrame(id);
+      mo?.disconnect();
+    };
   }, [visible, props.inline, props.pathname, dashMounted, homeMode]);
 
-  const hide = !visible || dashMounted || homeMode === "dashboard";
+  // inline (bill/support/door): csak a marketing-láthatóság számít — ne nyomja el a homeMode
+  const hide =
+    !visible || (!props.inline && (dashMounted || homeMode === "dashboard"));
   if (hide) return null;
   const node = <FooterMarkup locale={locale} />;
   if (props.inline) return node;

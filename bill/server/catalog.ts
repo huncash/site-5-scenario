@@ -1,5 +1,6 @@
 export type BillTier = "starter" | "pro" | "expert" | "campus";
 export type BillInterval = "yearly" | "monthly";
+export type SlotPackId = "slot_plus_1" | "slot_plus_3" | "slot_plus_5";
 
 const MONTHLY_HUF: Record<BillTier, number> = {
   starter: 8_900,
@@ -9,11 +10,38 @@ const MONTHLY_HUF: Record<BillTier, number> = {
 };
 
 const LABELS: Record<BillTier, string> = {
-  starter: "Alapcsomag",
-  pro: "Üzleti / Pro",
-  expert: "Nagyvállalati / Enterprise",
+  starter: "Alap",
+  pro: "Pro",
+  expert: "Enterprise",
   campus: "Hallgatói / Campus",
 };
+
+export const SLOT_PACK_HUF: Record<SlotPackId, number> = {
+  slot_plus_1: 2_900,
+  slot_plus_3: 7_900,
+  slot_plus_5: 11_900,
+};
+
+export const SLOT_PACK_SLOTS: Record<SlotPackId, number> = {
+  slot_plus_1: 1,
+  slot_plus_3: 3,
+  slot_plus_5: 5,
+};
+
+export const SLOT_PACK_LABELS: Record<SlotPackId, string> = {
+  slot_plus_1: "+1 Extra Szcenárió Slot",
+  slot_plus_3: "+3 Extra Szcenárió Slot csomag",
+  slot_plus_5: "+5 Extra Szcenárió Slot csomag",
+};
+
+export function isSlotPackId(v: unknown): v is SlotPackId {
+  return v === "slot_plus_1" || v === "slot_plus_3" || v === "slot_plus_5";
+}
+
+/** Campus / zárt oktatás: slot-mátrix kizárva. */
+export function slotPackAllowedForTier(tier: BillTier): boolean {
+  return tier !== "campus";
+}
 
 const YEARLY_DISCOUNT_PCT = 15;
 

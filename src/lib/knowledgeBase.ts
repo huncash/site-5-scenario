@@ -53,7 +53,8 @@ export type KnowledgeBaseArticleId =
   | "lesson-household"
   | "lesson-bcp"
   | "lesson-demography"
-  | "lesson-campus";
+  | "lesson-campus"
+  | "lesson-kahn";
 
 export type KnowledgeBaseArticle = {
   id: KnowledgeBaseArticleId;
@@ -599,8 +600,30 @@ A Szcenárió ugyanezt viszi a Master Baseline törzsre (demo: 14 fős core, 8,4
 A PRO sáv a kimenet: optimista bővítés, realista tartás, pesszimista tartalék (stop-loss). A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
 
 💡 Pro Tip / Legjobb gyakorlat
-- Először a pesszimista ágat számold. Az „olcsó” hitel a kilépésnél drága lehet — Kahn óta ez a módszer lényege.`,
-    tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás"],
+- Először a pesszimista ágat számold. Az „olcsó” hitel a kilépésnél drága lehet — Kahn óta ez a módszer lényege.
+
+A teljes esettanulmány-lecke a support tudástárban: Core → Kapacitás-projekt → Magán.`,
+    tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás", "demo19"],
+  },
+  {
+    id: "lesson-kahn",
+    category: "lessons",
+    title: "Kahn-elágazás — Core, projekt, Magán",
+    summary:
+      "Három fül egy történetben. Hitel vagy saját tartalék; kötbér vs rugalmas kilépés. A rosszabb kimenetet előbb számolod.",
+    body: `🎯 Mire jó?
+- Hogy a bővítési döntés ne absztrakt mátrix legyen: lásd a törzset, a projektet és a magán kockázatot egy láncban.
+
+⚙️ Hogyan működik?
+1) Core üzem = a ház (14 fős működés).
+2) Kapacitás-projekt = hitel vs saját tartalék, olcsó+kötbéres vs drága+rugalmas, három sáv.
+3) Magán = ha bejön, kivét; ha elbukik, kivét-csökkentés a tartalékidő miatt.
+
+A teljes lecke a support.szcenario.hu tudástárban (kahn-strategiai-elagazas).
+
+💡 Pro Tip / Legjobb gyakorlat
+- A döntés ára az, amit akkor fizetsz, ha visszalépsz. Először a rosszabb ágat olvasd.`,
+    tags: ["kahn", "demo19", "Magán", "Core", "kötbér", "runway"],
   },
   {
     id: "lesson-community",

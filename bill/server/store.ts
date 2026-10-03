@@ -45,6 +45,17 @@ export type Order = {
   invoiceNumber?: string;
   proformaNumber?: string;
   lines?: InvoiceLine[];
+  /** Saját ajánlói kód (ezt mások használják). */
+  referralCode?: string;
+  /** A vásárláskor megadott ajánló kód. */
+  referredBy?: string;
+  permanentSlots?: number;
+  referralAwarded?: boolean;
+  referralRejectedReason?: string;
+  /** Stripe payment_method fingerprint vagy egyéb kártya-ujjlenyomat. */
+  cardFingerprint?: string;
+  /** Slot bővítő pack (nem campus). */
+  slotPack?: string;
 };
 
 const dir = fileURLToPath(new URL("../data", import.meta.url));
@@ -109,6 +120,13 @@ export async function getOrderByLicenseToken(token: string): Promise<Order | nul
     orders.find((o) => o.transferCode && o.transferCode.toUpperCase() === t.toUpperCase()) ??
     null
   );
+}
+
+export async function listOrdersByReferralCode(code: string): Promise<Order[]> {
+  const c = code.trim().toUpperCase();
+  if (!c) return [];
+  const orders = await load();
+  return orders.filter((o) => (o.referralCode ?? "").toUpperCase() === c);
 }
 
 export async function updateOrder(id: string, patch: Partial<Order>): Promise<Order | null> {

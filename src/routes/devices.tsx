@@ -4,6 +4,8 @@ import { z } from "zod";
 import { useMemo, useState } from "react";
 import { Check, Pencil, X } from "lucide-react";
 
+import { ViewerInvitePanel } from "@/components/access/ViewerInvitePanel";
+import { AccessModeBanner } from "@/components/access/AccessModeBanner";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { useMeshRepository, getMeshDeviceId } from "@/lib/mesh/meshRepository";
 import { useVault } from "@/lib/vault";
@@ -69,12 +71,15 @@ function DevicesPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
       <ProfileHeader profileId={profileId} profileName={profileName} showBack />
+      <AccessModeBanner />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl space-y-4 px-6 py-6">
           <div>
             <h1 className="text-lg font-semibold tracking-tight">Eszközeim</h1>
             <p className="mt-1 text-xs text-muted-foreground">Ezen a profilon ismert eszközök.</p>
           </div>
+
+          <ViewerInvitePanel />
 
           <div className="rounded border p-3 text-xs text-muted-foreground">
             Saját eszköz azonosító: <span className="font-mono">{getMeshDeviceId()}</span>

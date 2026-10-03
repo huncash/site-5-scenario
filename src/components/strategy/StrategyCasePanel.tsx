@@ -52,7 +52,7 @@ export function StrategyCasePanel(props: {
           </p>
           <h3 className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-foreground">
             {caseTitle(cse.id, locale) ?? cse.title}
-            {kahn ? <HelpIcon kbId="kahn-rand" title={t("panel.kahnHelp")} /> : null}
+            {kahn ? <HelpIcon kbId="lesson-kahn" title={t("panel.kahnHelp")} /> : null}
           </h3>
           <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
         </div>

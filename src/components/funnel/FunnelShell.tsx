@@ -18,7 +18,7 @@ export function FunnelShell(props: {
   return (
     // NOTE: the app shell disables document scroll (html/body/#root overflow hidden),
     // so funnel pages must provide their own scroll container.
-    <div className="door-page h-dvh overflow-x-hidden overflow-y-auto bg-background" data-site-footer-host>
+    <div className="door-page h-dvh overflow-x-hidden overflow-y-auto bg-background">
       <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
@@ -55,6 +55,7 @@ export function FunnelShell(props: {
         {children}
       </main>
 
+      <div data-site-footer-host />
     </div>
   );
 }

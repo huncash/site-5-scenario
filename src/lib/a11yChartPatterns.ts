@@ -36,7 +36,14 @@ export function a11yPatternClassForColor(color: string): string {
   if (c.includes("94a3b8") || c.includes("chart-4") || c.includes("muted") || c.includes("slate")) {
     return A11Y_PATTERN_CLASS["pattern-h-stripe"];
   }
-  if (c.includes("accent") || c.includes("chart-1") || c.includes("06b6d4") || c.includes("cyan")) {
+  if (
+    c.includes("accent") ||
+    c.includes("chart-1") ||
+    c.includes("06b6d4") ||
+    c.includes("38bdf8") ||
+    c.includes("cyan") ||
+    c.includes("sky")
+  ) {
     return A11Y_PATTERN_CLASS["pattern-dots"];
   }
   if (c.includes("34d399") || c.includes("10b981") || c.includes("chart-2") || c.includes("emerald") || c.includes("green")) {

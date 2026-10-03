@@ -1,5 +1,13 @@
 import type { TierId, TierOffer } from "@/content/pricing/tiers";
-import { formatHuf, PRICING_NET_NOTE, TIER_COMPARE_ROWS, TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
+import {
+  formatHuf,
+  PRICING_IOT_NOTE,
+  PRICING_NET_NOTE,
+  PRICING_SEAT_DEF,
+  TIER_COMPARE_ROWS,
+  TIER_MONTHLY_HUF,
+  yearlyPriceHuf,
+} from "@/content/pricing/tiers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
@@ -42,6 +50,9 @@ export function TierCards(props: {
         <p className="text-[13px] italic leading-relaxed text-slate-300">„{PRICING_NET_NOTE}”</p>
         <BillingIntervalToggle />
       </div>
+      <p className="rounded-lg border border-border/50 bg-background/40 px-3 py-2 text-[12px] leading-relaxed text-slate-300">
+        {PRICING_SEAT_DEF}
+      </p>
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
@@ -113,10 +124,20 @@ export function TierCards(props: {
               </td>
             ))}
           </tr>
-          {TIER_COMPARE_ROWS.map((row) => (
+          {TIER_COMPARE_ROWS.map((row) => {
+            const isSeat = row.feature.includes("Seat");
+            return (
             <tr key={row.feature}>
-              <th className="border-b border-border/30 px-3 py-1.5 text-[12px] font-medium text-slate-300">
+              <th
+                className="border-b border-border/30 px-3 py-1.5 text-[12px] font-medium text-slate-300"
+                title={isSeat ? PRICING_SEAT_DEF : undefined}
+              >
                 {row.feature}
+                {isSeat ? (
+                  <span className="mt-1 block text-[10px] font-normal leading-snug text-slate-400">
+                    {PRICING_SEAT_DEF}
+                  </span>
+                ) : null}
               </th>
               {offers.map((t) => (
                 <td
@@ -130,10 +151,15 @@ export function TierCards(props: {
                 </td>
               ))}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
+      <p className="text-[12px] leading-relaxed text-slate-400">{PRICING_SEAT_DEF}</p>
+      <aside className="rounded-xl border border-border/50 bg-card/60 px-3 py-2.5">
+        <p className="text-[13px] leading-relaxed text-slate-300">{PRICING_IOT_NOTE}</p>
+      </aside>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { billEnv } from "./env.ts";
 import { barionPaymentSucceeded } from "./barion.ts";
+import { applyReferralOnPaid, ensureOrderReferralCode } from "./referral.ts";
 import { issueSzamlazzInvoice } from "./szamlazz.ts";
 import { getOrder, getOrderByProviderRef, getOrderByTransferCode, updateOrder, type Order } from "./store.ts";
 
@@ -26,9 +27,24 @@ function stripeOk(payload: string, header: string | null): boolean {
   }
 }
 
-async function markPaidAndInvoice(order: Order, providerRef?: string): Promise<Order> {
-  if (order.status === "invoiced") return order;
-  let next = (await updateOrder(order.id, { status: "paid", providerRef: providerRef ?? order.providerRef })) ?? order;
+async function markPaidAndInvoice(
+  order: Order,
+  providerRef?: string,
+  cardFingerprint?: string | null,
+): Promise<Order> {
+  if (order.status === "invoiced") {
+    await applyReferralOnPaid(order, { cardFingerprint });
+    return order;
+  }
+  const patch: Partial<Order> = {
+    status: "paid",
+    providerRef: providerRef ?? order.providerRef,
+  };
+  if (cardFingerprint) patch.cardFingerprint = cardFingerprint;
+  let next = (await updateOrder(order.id, patch)) ?? order;
+  await ensureOrderReferralCode(next);
+  await applyReferralOnPaid(next, { cardFingerprint });
+  next = (await getOrder(order.id)) ?? next;
   if (next.invoiceNumber) return next;
   const inv = await issueSzamlazzInvoice(next);
   if (inv.number) {
@@ -60,7 +76,13 @@ export async function handleBillingWebhook(req: Request): Promise<Response> {
     if (type.startsWith("checkout.session.") && orderId) {
       const order = await getOrder(orderId);
       if (order && (obj.payment_status === "paid" || type === "checkout.session.completed")) {
-        await markPaidAndInvoice(order, String(obj.id ?? ""));
+        const cardFp =
+          String(
+            (obj.metadata as { cardFingerprint?: string } | undefined)?.cardFingerprint ??
+              (obj.payment_intent as { payment_method?: string } | undefined)?.payment_method ??
+              "",
+          ) || null;
+        await markPaidAndInvoice(order, String(obj.id ?? ""), cardFp);
       }
     }
     return Response.json({ ok: true });
@@ -71,9 +93,7 @@ export async function handleBillingWebhook(req: Request): Promise<Response> {
     if (!paymentId) return Response.json({ ok: false, error: "missing PaymentId" }, { status: 400 });
     const ok = await barionPaymentSucceeded(paymentId);
     if (!ok) return Response.json({ ok: true, pending: true });
-    const order =
-      (await getOrderByProviderRef(paymentId)) ??
-      (await getOrder(String(body.PaymentRequestId ?? "")));
+    const order = await getOrderByProviderRef(paymentId);
     if (order) await markPaidAndInvoice(order, paymentId);
     return Response.json({ ok: true });
   }

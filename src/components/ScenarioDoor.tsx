@@ -3,6 +3,7 @@ import { useNavigate, Link } from "@tanstack/react-router";
 import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { SiteFooter } from "@/components/SiteFooter";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { CAMPAIGN_FUNNELS } from "@/content/funnels/campaigns";
 import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
@@ -61,6 +62,14 @@ export function ScenarioDoor() {
   useEffect(() => {
     captureCampaignFromLocation({ doorStep: true });
     setCampaignId(readCampaignId());
+    try {
+      const refCode = new URLSearchParams(window.location.search).get("referral");
+      if (refCode && /^REF-/i.test(refCode)) {
+        sessionStorage.setItem("szcenario_pending_referral", refCode.trim().toUpperCase());
+      }
+    } catch {
+      // ignore
+    }
     const stored = readScenarioDoorStep();
     setStep(
       stored === "hospitality" ||
@@ -116,7 +125,6 @@ export function ScenarioDoor() {
       tabIndex={-1}
       data-exact-ignore
       className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background outline-none"
-      data-site-footer-host
     >
       <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
@@ -181,9 +189,6 @@ export function ScenarioDoor() {
                   {t("brand.dailyOpsBody")}
                 </p>
               </div>
-              <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-cyan-100/90 sm:text-[15px]">
-                {t("door.kahnBridge")}
-              </p>
               <Link
                 to="/about"
                 className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
@@ -192,7 +197,21 @@ export function ScenarioDoor() {
               </Link>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-4" aria-labelledby="door-case-heading">
+              <div className="space-y-2">
+                <h2
+                  id="door-case-heading"
+                  className="max-w-3xl text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
+                >
+                  {t("brand.caseStudyTitle")}
+                </h2>
+                <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
+                  {t("brand.caseStudyLead")}
+                </p>
+                <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-cyan-100/90 sm:text-[15px]">
+                  {t("door.kahnBridge")}
+                </p>
+              </div>
               <button
                 type="button"
                 disabled={busyId !== null || resetBusy}
@@ -209,14 +228,33 @@ export function ScenarioDoor() {
                   {busyId === KAHN_SEGMENT_ID ? t("door.opening") : t("door.kahnCta")}
                 </span>
               </button>
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("brand.proChartHeading")}
+                </div>
+                <ProChartSketch />
+                <ProChartCallout />
+              </div>
             </section>
 
-            <section className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("brand.proChartHeading")}
-              </div>
-              <ProChartSketch />
-              <ProChartCallout />
+            <section className="space-y-4" aria-labelledby="door-infra-heading">
+              <h2
+                id="door-infra-heading"
+                className="max-w-3xl text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
+              >
+                {t("brand.infraTitle")}
+              </h2>
+              <p className="max-w-3xl text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+                {t("brand.infraLead")}
+              </p>
+              <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
+                {t("brand.infraBody")}
+              </p>
+              <dl className="grid gap-3 sm:grid-cols-3">
+                <DoorFact term={t("brand.infraPoint1Title")}>{t("brand.infraPoint1Body")}</DoorFact>
+                <DoorFact term={t("brand.infraPoint2Title")}>{t("brand.infraPoint2Body")}</DoorFact>
+                <DoorFact term={t("brand.infraPoint3Title")}>{t("brand.infraPoint3Body")}</DoorFact>
+              </dl>
             </section>
 
             <section className="space-y-3">
@@ -551,6 +589,7 @@ export function ScenarioDoor() {
           </button>
         </div>
       </div>
+      <SiteFooter inline />
     </div>
   );
 }

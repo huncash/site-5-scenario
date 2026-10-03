@@ -6,13 +6,24 @@ import { fileURLToPath } from "node:url";
 import { createServer as createViteServer, type ViteDevServer } from "vite";
 
 import { barionConfigured, createBarionPayment } from "./barion.ts";
-import { isBillInterval, isBillTier, tierLabel, type BillInterval, type BillTier } from "./catalog.ts";
+import {
+  isBillInterval,
+  isBillTier,
+  isSlotPackId,
+  slotPackAllowedForTier,
+  SLOT_PACK_HUF,
+  SLOT_PACK_LABELS,
+  tierLabel,
+  type BillInterval,
+  type BillTier,
+} from "./catalog.ts";
 import { billEnv } from "./env.ts";
 import { quotePackage } from "./quote.ts";
+import { ensureOrderReferralCode } from "./referral.ts";
 import { createStripeCheckout, stripeConfigured } from "./stripe.ts";
 import { createOrder, getOrder, getOrderByLicenseToken, newTransferCode, updateOrder, type Buyer, type InvoiceLine, type Order, type PayMethod } from "./store.ts";
 import { grossFromLines, issueSzamlazzProforma } from "./szamlazz.ts";
-import { countryFromTaxId, SELLER_COUNTRY } from "./vat.ts";
+import { countryFromTaxId, SELLER_COUNTRY, splitVat } from "./vat.ts";
 import { lookupCompany } from "./vies.ts";
 import { handleBillingWebhook } from "./webhooks.ts";
 
@@ -319,16 +330,23 @@ async function handleApi(req: Request): Promise<Response> {
 
   if (req.method === "GET" && p === "/api/billing/license") {
     const token = url.searchParams.get("token") ?? "";
-    const order = await getOrderByLicenseToken(token);
+    let order = await getOrderByLicenseToken(token);
     if (!order) return Response.json({ ok: false }, { status: 404 });
     const allowed = order.status === "paid" || order.status === "invoiced" || order.status === "awaiting_transfer";
     if (!allowed) return Response.json({ ok: false, status: order.status }, { status: 403 });
+    order = await ensureOrderReferralCode(order);
+    const packs: string[] = [];
+    if (order.slotPack && isSlotPackId(order.slotPack)) packs.push(order.slotPack);
     return Response.json({
       ok: true,
       token: order.transferCode || order.id,
       tier: order.tier,
       interval: order.interval,
       status: order.status,
+      referralCode: order.referralCode,
+      permanentSlots: order.permanentSlots ?? 0,
+      slotPacks: packs,
+      referralAwarded: Boolean(order.referralAwarded),
     });
   }
 
@@ -346,14 +364,9 @@ async function handleApi(req: Request): Promise<Response> {
       vatCode: q.vat.vatCode,
       treatment: q.vat.treatment,
       labelHu: q.vat.labelHu,
-      labelEn: q.vat.labelEn,
       net: q.due.net,
       vat: q.due.vat,
       gross: q.due.gross,
-      yearly: q.yearly,
-      monthly: q.monthly,
-      monthly12: q.monthly12,
-      saveNet: q.saveNet,
     });
   }
 

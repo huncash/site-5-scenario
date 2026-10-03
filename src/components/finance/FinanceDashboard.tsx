@@ -204,6 +204,11 @@ import {
   seedDemoDataForSegment,
   segmentIdFromDemoName,
 } from "@/lib/demoSeed";
+import { AccessModeBanner } from "@/components/access/AccessModeBanner";
+import { SlotCapacityChooser } from "@/components/access/SlotCapacityChooser";
+import { denyMutateIfViewer } from "@/lib/accessRole";
+import { readSlotLedger } from "@/lib/license";
+import { checkScenarioSlotCapacity } from "@/lib/scenarioSlots";
 import { denyShowcaseWrite } from "@/lib/versionPolicy";
 import { EducationCasePanel } from "@/components/education/EducationCasePanel";
 import { IndustryCasePanel } from "@/components/industry/IndustryCasePanel";
@@ -217,8 +222,18 @@ import { isResilienceSegment } from "@/lib/resilienceCases";
 import { scenarioLens } from "@/lib/scenarioLens";
 import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
 import { buildStrategyWhatIf, isKahnForkSegment, isStrategySegment } from "@/lib/strategyCases";
-} from "@/lib/strategyCases";
-import { formatMoney } from "@/lib/finance";
+import {
+  GuidedTourRestoreChip,
+  KahnCaseGuide,
+  KahnCoreLinkStrip,
+  KahnPersonalImpact,
+  KahnProjectStopLossBanner,
+  KahnWorkspaceHint,
+} from "@/components/strategy/KahnCaseGuide";
+import { requestWorkspaceSwitch } from "@/lib/workspaceSwitch";
+import type { KahnGuideWorkspace } from "@/lib/kahnGuide";
+import { KAHN_FOCUS_IDS, KAHN_JARGON } from "@/lib/kahnCrossTab";
+
 const CHART_COLORS = [
   "var(--color-chart-1)",
   "var(--color-chart-2)",
@@ -622,10 +637,7 @@ export function FinanceDashboard({
   const [pdcaMode, setPdcaMode] = useState<PdcaMode>("PD");
   const [pdcaNewOpen, setPdcaNewOpen] = useState(false);
   const [wsCreateDenied, setWsCreateDenied] = useState(false);
-  const denyWorkspaceCreate = () => {
-    setWsCreateDenied(true);
-    toast.warning("Ez a funkció a jelenlegi verzióban nem engedélyezett.");
-  };
+  const [slotChooserOpen, setSlotChooserOpen] = useState(false);
   type SubTab = "cashflow" | "ledger" | "deals" | "inventory";
   // Globális alsó fül: master perspektíva (felső fül váltás nem írja felül).
   const [activeSubTab, setActiveSubTab] = useState<SubTab>("cashflow");
@@ -1213,6 +1225,21 @@ export function FinanceDashboard({
     }));
   }, [demoSegmentId, isVisitorDemo, settings.workspaces]);
 
+  const denyWorkspaceCreate = () => {
+    if (denyMutateIfViewer()) {
+      toast.warning("Olvasói módban nem hozható létre munkaterület.");
+      return;
+    }
+    const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
+    const cap = checkScenarioSlotCapacity(used, readSlotLedger());
+    if (!cap.ok) {
+      setSlotChooserOpen(true);
+      setWsCreateDenied(false);
+      return;
+    }
+    setWsCreateDenied(true);
+    toast.warning("Ez a funkció a jelenlegi verzióban nem engedélyezett.");
+  };
   const workspaceMetaById = useMemo(() => {
     const m = new Map<string, (typeof workspaceMetas)[number]>();
     for (const w of workspaceMetas) m.set(w.id, w);
@@ -5732,17 +5759,18 @@ export function FinanceDashboard({
           </div>
         </div>
       </CardHeader>
+      <CardContent className="grid items-start gap-3">
         {whatIf.kahnMetrics ? (
           <>
             <div className="grid grid-cols-3 gap-2">
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title="Rosszabb kimenet — tartalékidő"
-                  exact="Hány hónapig bírja a készpénz a rosszabb pályán, mielőtt elfogy."
-                  summary="A pesszimista ág runwaye. Cél: legalább 4 hónap."
+                  title={KAHN_JARGON.runway.termHu}
+                  exact={KAHN_JARGON.runway.exactHu}
+                  summary={KAHN_JARGON.runway.exactHu}
                 >
-                  Tartalékidő (rossz ág)
+                  Runway
                 </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {whatIf.kahnMetrics.worseRunwayMonths} hó
@@ -5751,11 +5779,11 @@ export function FinanceDashboard({
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title="Kilépési ár (olcsó szerződés)"
-                  exact="Amennyit fizetsz, ha az olcsóbb hitelből idő előtt kilépsz."
-                  summary="Nem megtérülés — a visszalépés ára. A rugalmas szerződésen ez 0."
+                  title={KAHN_JARGON.penalty.termHu}
+                  exact={KAHN_JARGON.penalty.exactHu}
+                  summary={KAHN_JARGON.penalty.exactHu}
                 >
-                  Kilépési ár
+                  Kötbér vs. Kilépés
                 </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {formatMoney(whatIf.kahnMetrics.exitPenaltyHuf, "HUF")}
@@ -5764,11 +5792,11 @@ export function FinanceDashboard({
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title="Döntési ablak"
-                  exact="Ennyi időd van dönteni, amíg az opció / foglaló érvényes keretben marad."
-                  summary="60 nap: ág mellett döntés vagy tartalék."
+                  title={KAHN_JARGON.stopLoss.termHu}
+                  exact={KAHN_JARGON.stopLoss.exactHu}
+                  summary={KAHN_JARGON.stopLoss.exactHu}
                 >
-                  Döntési ablak
+                  Stop-loss
                 </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {whatIf.kahnMetrics.decisionDays} nap
@@ -5866,7 +5894,6 @@ export function FinanceDashboard({
             </div>
           </>
         )}
-        </div>
 
         <div className="viz-split">
           <ChartChrome
@@ -5941,8 +5968,39 @@ export function FinanceDashboard({
       <IndustryCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
     ) : null;
   const kahnDemo = isKahnForkSegment(demoSegmentId);
+  const goKahnWorkspace = useCallback((ws: KahnGuideWorkspace) => {
+    if (ws === "personal") {
+      requestWorkspaceSwitch("personal");
+      setPdcaMode("PD");
+    } else if (ws === "project") {
+      requestWorkspaceSwitch("Projekt1");
+      setPdcaMode("PD");
+    } else {
+      requestWorkspaceSwitch("Vállalkozás1");
+      setPdcaMode("PD");
+    }
+    const focusId =
+      ws === "personal"
+        ? KAHN_FOCUS_IDS.personal
+        : ws === "project"
+          ? KAHN_FOCUS_IDS.project
+          : KAHN_FOCUS_IDS.core;
+    window.setTimeout(() => {
+      document.getElementById(focusId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+  }, []);
   const planStack = (
     <div className="pdca-tile-grid">
+      {kahnDemo ? (
+        <>
+          <KahnCaseGuide
+            scenario={whatIfScenario}
+            activeWorkspace={activeWorkspace}
+            onGoWorkspace={goKahnWorkspace}
+          />
+          <GuidedTourRestoreChip />
+        </>
+      ) : null}
       {surface.inheritMasterBaseline ? (
         <MasterBaselineCard
           context={inheritedBaseline}
@@ -5953,13 +6011,46 @@ export function FinanceDashboard({
           }
         />
       ) : null}
+      {kahnDemo && activeWorkspace !== "personal" && activeWorkspace !== "Projekt1" ? (
+        <KahnCoreLinkStrip
+          scenario={whatIfScenario}
+          onGoProject={() => goKahnWorkspace("project")}
+          onGoPersonal={() => goKahnWorkspace("personal")}
+        />
+      ) : null}
+      {kahnDemo && activeWorkspace === "Projekt1" ? (
+        <div id={KAHN_FOCUS_IDS.project} className="grid gap-2">
+          <KahnWorkspaceHint
+            kind="project"
+            onGoPersonal={() => goKahnWorkspace("personal")}
+            onGoOther={() => goKahnWorkspace("business")}
+          />
+          <KahnProjectStopLossBanner
+            scenario={whatIfScenario}
+            onGoPersonal={() => goKahnWorkspace("personal")}
+          />
+          {strategyPanel("PLAN")}
+        </div>
+      ) : (
+        <>
+          {kahnDemo && activeWorkspace !== "personal" ? (
+            <KahnWorkspaceHint
+              kind="business"
+              onGoPersonal={() => goKahnWorkspace("personal")}
+              onGoOther={() => goKahnWorkspace("project")}
+            />
+          ) : null}
+          {strategyPanel("PLAN")}
+        </>
+      )}
+      {kahnDemo && activeWorkspace === "personal" ? (
+        <KahnPersonalImpact scenario={whatIfScenario} onGoProject={() => goKahnWorkspace("project")} />
+      ) : null}
       {resiliencePanel("PLAN")}
       {educationPanel("PLAN")}
       {industryPanel("PLAN")}
-      {strategyPanel("PLAN")}
-      {/* Kahn PLAN: fa + cél; a KPI/grafikon CHECK-en — elkerüli a generic ROI keveredést. */}
+      {/* Kahn PLAN: fa a strategyPanel-en; KPI/grafikon CHECK-en. */}
       {kahnDemo ? null : whatIfPanel}
-      {whatIfPanel}
       <>
       <GoalCard
         goal={activeGoal}
@@ -7831,7 +7922,7 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color="#34d399" label="Bevétel" line />
+                      <ChartLegendSwatch color="#38bdf8" label="Bevétel" line />
                       <ChartLegendSwatch color="#fb7185" label="Kiadás" line />
                       <ChartLegendSwatch color="var(--accent-color)" label="Megtakarítás" line />
                     </>
@@ -8135,7 +8226,11 @@ export function FinanceDashboard({
           profileHint={visitorCaseLead ?? undefined}
           situationLead={visitorCaseLead ?? undefined}
           visitorDemo={isVisitorDemo}
-          onAddDevice={isVisitorDemo ? undefined : () => setExportOpen(true)}
+          onAddDevice={
+            isVisitorDemo || denyMutateIfViewer()
+              ? undefined
+              : () => setExportOpen(true)
+          }
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           pdcaMode={pdcaMode}
@@ -8152,6 +8247,16 @@ export function FinanceDashboard({
               labelFor={workspaceTabLabel}
               colorFor={workspaceColorCls}
               onOpenCreate={() => {
+                if (denyMutateIfViewer()) {
+                  toast.warning("Olvasói módban nem hozható létre munkaterület.");
+                  return;
+                }
+                const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
+                const cap = checkScenarioSlotCapacity(used, readSlotLedger());
+                if (!cap.ok) {
+                  setSlotChooserOpen(true);
+                  return;
+                }
                 setWsCreateDenied(false);
                 setPdcaNewOpen(true);
               }}
@@ -8160,9 +8265,23 @@ export function FinanceDashboard({
         />
       </div>
 
+      <AccessModeBanner />
+
       {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
 
       <ExportQrDialog open={exportOpen} onOpenChange={setExportOpen} />
+
+      <Dialog open={slotChooserOpen} onOpenChange={setSlotChooserOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Kapacitás bővítése</DialogTitle>
+          </DialogHeader>
+          <SlotCapacityChooser
+            used={workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1)}
+            onClose={() => setSlotChooserOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={pdcaNewOpen}
@@ -10222,6 +10341,7 @@ export function FinanceDashboard({
                         </div>
                       </div>
 
+                      <div className="mt-4 grid gap-3 sm:grid-cols-3">
                         {whatIf.kahnMetrics ? (
                           <>
                             <div
@@ -10283,7 +10403,6 @@ export function FinanceDashboard({
                             </div>
                           </>
                         )}
-                        </div>
                       </div>
 
                       <div className="mt-3 h-64">
@@ -12958,7 +13077,19 @@ export function FinanceDashboard({
         }}
         isSzummaActive={activeWs === "szumma"}
         onToggleSzumma={toggleSzumma}
-        onOpenCreate={() => setPdcaNewOpen(true)}
+        onOpenCreate={() => {
+          if (denyMutateIfViewer()) {
+            toast.warning("Olvasói módban nem hozható létre munkaterület.");
+            return;
+          }
+          const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
+          const cap = checkScenarioSlotCapacity(used, readSlotLedger());
+          if (!cap.ok) {
+            setSlotChooserOpen(true);
+            return;
+          }
+          setPdcaNewOpen(true);
+        }}
       />
     </div>
   );

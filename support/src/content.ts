@@ -3,6 +3,7 @@ import householdMd from "../content/lessons/02-maganszemely-infrastruktura.md?ra
 import bcpMd from "../content/lessons/03-vallalati-bcp.md?raw";
 import tfrMd from "../content/lessons/04-demografiai-implozio.md?raw";
 import campusMd from "../content/lessons/05-oktatasi-campus.md?raw";
+import kahnMd from "../content/lessons/06-kahn-strategiai-elagazas.md?raw";
 
 export const SUPPORT_MAIL = "support@szcenario.hu";
 export const SUPPORT_SLA =
@@ -103,6 +104,15 @@ export const THEORY_LESSONS: Lesson[] = [
     body: campusMd,
     markdown: true,
   },
+  {
+    slug: "kahn-strategiai-elagazas",
+    kbId: "lesson-kahn",
+    title: "Kahn-féle stratégiai elágazás — Core üzem, projekt és magán biztonság",
+    summary:
+      "Három fül egy történetben: törzs, bővítési döntés, személyes kockázat. Hitel vagy saját tartalék — a rosszabb kimenetet előbb.",
+    body: kahnMd,
+    markdown: true,
+  },
 ];
 
 export const ALL_LESSONS: Lesson[] = [...LESSONS, ...THEORY_LESSONS];
@@ -115,7 +125,7 @@ export const KAHN_BONBON = {
   eyebrow: "Tudástár · Történeti sablon",
   title: "Herman Kahn és a RAND Corporation",
   p1: "A szcenárió-alapú tervezés nem két találgatott év. Kahn a RAND-nál a hidegháborúban többágú jövőképet rajzolt: elágazás, mielőtt elkötelezed az erőforrást.",
-  p2: "Ugyanez a módszer viszi ma a Master Baseline törzset: optimista bővítés, realista tartás, pesszimista tartalék. A fa a te eszközödön fut — local-first, nulla telemetria.",
+  p2: "Ma ugyanez a módszer: Core üzem (törzs) → Kapacitás-projekt (döntési fa) → Magán (személyes kockázat). A teljes lecke a tudástárban: Kahn-féle stratégiai elágazás.",
   foot: "Local-first · nincs felhő-adat · nincs használatküldés",
 } as const;
 

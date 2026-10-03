@@ -1,4 +1,14 @@
 import { billPublicOrigin } from "@/lib/billing";
+import { ensureReferralCode, permanentSlotsFromCredits, writeReferralCode } from "@/lib/referral";
+import {
+  addPurchasedPack,
+  emptySlotLedger,
+  isSlotPackId,
+  normalizeTierId,
+  type SlotLedger,
+  type SlotPackId,
+  type SlotTierId,
+} from "@/lib/scenarioSlots";
 
 export type LicenseStatus = "paid" | "invoiced" | "awaiting_transfer" | "local";
 
@@ -8,9 +18,16 @@ export type LicenseEntitlement = {
   interval: string;
   status: LicenseStatus;
   verifiedAt: string;
+  /** Saját ajánlói kód (bill / helyi). */
+  referralCode?: string;
+  /** Permanent slotok a bill szerint. */
+  permanentSlots?: number;
+  /** Megvásárolt bővítő pack id-k ismétléssel. */
+  slotPacks?: SlotPackId[];
 };
 
 const KEY = "szcenario_license_v1";
+const LEDGER_KEY = "szcenario_slot_ledger_v1";
 
 export function readLicense(): LicenseEntitlement | null {
   try {
@@ -26,6 +43,8 @@ export function readLicense(): LicenseEntitlement | null {
 
 export function writeLicense(e: LicenseEntitlement): void {
   localStorage.setItem(KEY, JSON.stringify(e));
+  if (e.referralCode) writeReferralCode(e.referralCode);
+  syncLedgerFromLicense(e);
 }
 
 export function clearLicense(): void {
@@ -53,6 +72,53 @@ export function isAppWorkspaceHost(): boolean {
   return h === "app.szcenario.hu" || h.startsWith("app.");
 }
 
+export function readSlotLedger(): SlotLedger {
+  try {
+    const raw = localStorage.getItem(LEDGER_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as SlotLedger;
+      if (parsed?.tier) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  const lic = readLicense();
+  const tier = normalizeTierId(lic?.tier ?? (isLocalDevHost() ? "local" : "starter"));
+  return emptySlotLedger(tier);
+}
+
+export function writeSlotLedger(ledger: SlotLedger): void {
+  localStorage.setItem(LEDGER_KEY, JSON.stringify(ledger));
+  window.dispatchEvent(new Event("szcenario:slot_ledger"));
+}
+
+function syncLedgerFromLicense(e: LicenseEntitlement): void {
+  const tier = normalizeTierId(e.tier) as SlotTierId;
+  let ledger = emptySlotLedger(tier);
+  for (const pack of e.slotPacks ?? []) {
+    if (isSlotPackId(pack)) ledger = addPurchasedPack(ledger, pack, 1);
+  }
+  const bonus = Math.max(e.permanentSlots ?? 0, permanentSlotsFromCredits());
+  ledger = { ...ledger, permanentBonus: bonus };
+  writeSlotLedger(ledger);
+}
+
+export function grantLocalLicense(tier: SlotTierId = "local"): LicenseEntitlement {
+  const code = ensureReferralCode();
+  const entitlement: LicenseEntitlement = {
+    token: `local-${code}`,
+    tier,
+    interval: "yearly",
+    status: "local",
+    verifiedAt: new Date().toISOString(),
+    referralCode: code,
+    permanentSlots: permanentSlotsFromCredits(),
+    slotPacks: [],
+  };
+  writeLicense(entitlement);
+  return entitlement;
+}
+
 export async function verifyBillLicense(token: string): Promise<LicenseEntitlement | null> {
   const t = token.trim();
   if (!t) return null;
@@ -66,20 +132,40 @@ export async function verifyBillLicense(token: string): Promise<LicenseEntitleme
       tier?: string;
       interval?: string;
       status?: string;
+      referralCode?: string;
+      permanentSlots?: number;
+      slotPacks?: string[];
     };
     if (!data.ok || !data.token) return null;
     const status = data.status;
     if (status !== "paid" && status !== "invoiced" && status !== "awaiting_transfer") return null;
+    const packs = (data.slotPacks ?? []).filter(isSlotPackId);
     const entitlement: LicenseEntitlement = {
       token: data.token,
       tier: String(data.tier ?? ""),
       interval: String(data.interval ?? "yearly"),
       status,
       verifiedAt: new Date().toISOString(),
+      referralCode: data.referralCode ?? ensureReferralCode(),
+      permanentSlots: Number(data.permanentSlots ?? 0),
+      slotPacks: packs,
     };
     writeLicense(entitlement);
     return entitlement;
   } catch {
     return null;
   }
+}
+
+export function recordLocalSlotPackPurchase(packId: SlotPackId): SlotLedger {
+  const ledger = addPurchasedPack(readSlotLedger(), packId, 1);
+  writeSlotLedger(ledger);
+  const lic = readLicense();
+  if (lic) {
+    writeLicense({
+      ...lic,
+      slotPacks: [...(lic.slotPacks ?? []), packId],
+    });
+  }
+  return ledger;
 }

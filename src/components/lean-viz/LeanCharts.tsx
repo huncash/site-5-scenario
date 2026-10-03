@@ -27,6 +27,8 @@ const CURRENCY = "HUF";
 const INK = "var(--text-main)";
 const FOCUS = "var(--accent-color)";
 const UP = "var(--accent-emerald, #10b981)";
+/** Bevétel: nem zöld skála — elkülönül a Megtakarítás accent-zöldjétől. */
+const INCOME = "#38bdf8";
 const DOWN = "#fb7185";
 const MUTED = "color-mix(in srgb, var(--card-border) 72%, transparent)";
 const AXIS = "var(--text-muted)";

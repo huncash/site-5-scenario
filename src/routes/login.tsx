@@ -201,7 +201,7 @@ function LoginPage() {
   const hasProfiles = profiles.length > 0;
 
   return (
-    <div className="door-page flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background" data-site-footer-host>
+    <div className="door-page flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background">
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex items-center justify-between text-[12px]">
@@ -451,6 +451,8 @@ function LoginPage() {
         }}
       />
     </div>
+      <div data-site-footer-host />
     </div>
   );
 }
+

@@ -40,6 +40,8 @@ export function App() {
   const tier = q.get("tier") ?? "pro";
   const interval = q.get("interval") === "monthly" ? "monthly" : "yearly";
   const ref = q.get("ref") ?? "";
+  const referral = (q.get("referral") ?? "").trim().toUpperCase();
+  const slotPack = q.get("slotPack") ?? "";
   const thanks = q.get("thanks") === "1";
   const orderQ = q.get("order") ?? "";
 

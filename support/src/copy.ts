@@ -85,7 +85,7 @@ const KAHN_EN = {
   eyebrow: "Knowledge · historical template",
   title: "Herman Kahn and the RAND Corporation",
   p1: "Scenario planning is not two guessed years. At RAND in the Cold War, Kahn drew a multi-branch outlook: a fork before you bind the resource.",
-  p2: "The same method now carries the Master Baseline trunk: optimistic expansion, realistic hold, pessimistic reserve. The tree runs on your device — local-first, zero telemetry.",
+  p2: "Same method today: Core plant (trunk) → Capacity project (decision tree) → Personal (private risk). Full lesson in the knowledge base: Kahn strategic fork.",
   foot: "Local-first · no cloud data · no usage send",
 } as const;
 
@@ -127,6 +127,11 @@ const THEORY_EN: Record<string, { title: string; summary: string }> = {
   "oktatasi-campus-valsaghelyzet": {
     title: "Campus emergencies — cyber, heat island and local loop",
     summary: "Analog exam, kWh quota, plastic-free canteen. Student BCP on your own machine.",
+  },
+  "kahn-strategiai-elagazas": {
+    title: "Kahn strategic fork — core plant, project and personal safety",
+    summary:
+      "Three tabs, one story: trunk, expansion decision, personal risk. Loan or own reserve — worse outcome first.",
   },
 };
 

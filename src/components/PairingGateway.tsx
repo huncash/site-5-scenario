@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { Copy } from "lucide-react";
 
+import { ACCESS_ROLE, type AccessRole } from "@/lib/accessRole";
 import { useMeshRepository } from "@/lib/mesh/meshRepository";
 import { setMeshTransport } from "@/lib/mesh/meshRepository";
 import { WebRTCDataTransport } from "@/lib/mesh/transport";
+import { isViewerInviteRevokedLocally } from "@/lib/viewerInvite";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -37,7 +39,13 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-export function PairingGateway({ sessionId }: { sessionId?: string }) {
+export function PairingGateway({
+  sessionId,
+  accessRole = ACCESS_ROLE.OWNER_EDITOR,
+}: {
+  sessionId?: string;
+  accessRole?: AccessRole;
+}) {
   const repo = useMeshRepository();
   const [status, setStatus] = useState<string>("");
   const [mode, setMode] = useState<"offer" | "answer">(() => {
@@ -52,19 +60,35 @@ export function PairingGateway({ sessionId }: { sessionId?: string }) {
   const [qr, setQr] = useState<string>("");
 
   const clean = useMemo(() => sessionId?.trim() || "", [sessionId]);
+  const viewer = accessRole === ACCESS_ROLE.VIEWER_READONLY;
 
   useEffect(() => {
     if (!clean) {
       setStatus("Hiányzó session paraméter.");
       return;
     }
+    if (viewer && isViewerInviteRevokedLocally(clean)) {
+      setStatus("Ez az olvasói kulcs visszavonva.");
+      return;
+    }
     void repo
-      .save("pairingSessions", { id: clean, created_at: new Date().toISOString() })
-      .then(() => setStatus(`Session mentve: ${clean}`))
+      .save("pairingSessions", {
+        id: clean,
+        created_at: new Date().toISOString(),
+        role: accessRole,
+        revoked: viewer ? isViewerInviteRevokedLocally(clean) : false,
+      })
+      .then(() =>
+        setStatus(
+          viewer
+            ? `Olvasói session: ${clean} (VIEWER_READONLY)`
+            : `Session mentve: ${clean}`,
+        ),
+      )
       .catch((e: unknown) =>
         setStatus(e instanceof Error ? e.message : "Nem sikerült menteni a session-t."),
       );
-  }, [clean, repo]);
+  }, [accessRole, clean, repo, viewer]);
 
   const transport = useMemo(
     () => new WebRTCDataTransport({ channelLabel: `mesh:${clean || "session"}` }),
@@ -116,6 +140,12 @@ export function PairingGateway({ sessionId }: { sessionId?: string }) {
   return (
     <div className="mx-auto max-h-[80vh] w-full max-w-[500px] space-y-3 overflow-y-auto px-6 py-10">
       <h1 className="text-lg font-semibold tracking-tight">Párosítás</h1>
+      {viewer ? (
+        <div className="rounded border border-amber-400/40 bg-amber-500/10 p-3 text-[12px] text-amber-100">
+          Olvasói mód (VIEWER_READONLY): szcenáriók és elemzés engedélyezett; adatbevitel, törlés, nyers export
+          tiltva. A tulajdonos egyoldalúan visszavonhatja a kulcsot.
+        </div>
+      ) : null}
       <div className="rounded border p-3 text-sm">{status || "Inicializálás…"}</div>
 
       <div className="flex items-center gap-2 text-xs">
