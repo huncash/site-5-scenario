@@ -908,11 +908,40 @@ html.a11y-vision .pro-swatch-opt {
 }
 .kahn-root,
 .kahn-question,
+.kahn-case-lead,
 .kahn-branch,
+.kahn-node,
 .kahn-bonbon {
   background: var(--background);
   border: 1px solid var(--border);
   color: var(--foreground);
+}
+.kahn-case-lead {
+  margin: 0 auto;
+  max-width: 36rem;
+  border-radius: 0.75rem;
+  padding: 0.45rem 0.75rem;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+.kahn-nodes {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kahn-nodes-2 {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .kahn-nodes-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.kahn-node {
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.7rem;
 }
 .kahn-root {
   margin-inline: auto;

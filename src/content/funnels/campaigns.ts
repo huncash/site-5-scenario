@@ -87,10 +87,10 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
       secondaryCta: "Csomagok",
     },
     chooserIntro:
-      "A cég törzse a Master Baseline. A nyilvános stratégiai eset a Kahn-féle elágazás: hitel vagy organikus, majd olcsó+kötbéres vagy drága+rugalmas. PRO pályák, helyi cash-flow.",
+      "A cég törzse a Master Baseline. Kahn-esettanulmány: 4,5 M hitel vagy 3×1,1 M organikus; A kötbéres / B rugalmas. PRO pályák, helyi cash-flow.",
     proofBullets: [
       "Master Baseline: a core számokat nem kell duplán megadni",
-      "Kahn-féle elágazás: hitel vagy organikus, kötbér vagy rugalmasság",
+      "Kahn: hitel/organikus → A kötbér / B rugalmas → PRO",
       "PRO: likviditási csapda, árrés, runway, stop-loss",
     ],
     caseHeading: "Stratégiai esetek",

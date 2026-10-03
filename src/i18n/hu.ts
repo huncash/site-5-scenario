@@ -16,9 +16,9 @@ export const hu = {
       "Interaktív előnézet: A rendszer egy valós, előre betöltött helyzeten keresztül mutatja be a motort. Nincs szükség regisztrációra – egy kattintással áttekintheti a cash-flow fókuszokat és a likviditási mutatókat.",
     whyTitle: "Miért „Szcenárió” – és miért megy ez túl a hagyományos tervezésen?",
     whyLead:
-      "A legtöbb üzleti szoftverben a szcenáriótervezés kimerül annyiban, hogy beírsz egy „jó” és egy „rossz” évet, aztán reménykedel, hogy a valóság valahol a kettő között lesz. Ez a valóságban édeskevés.",
+      "A legtöbb üzleti szoftverben a szcenáriótervezés kimerül annyiban, hogy beírsz egy „jó” és egy „rossz” évet, és feltételezed, hogy a valóság valahol a kettő között lesz. Ez a valóságban édeskevés.",
     whyBody:
-      "Azért kapta az app ezt a nevet, mert a hagyományos, elkopott szcenárió-módszertant ötvöztük a Lean szemléletmóddal és a folyamatoptimalizálás eszközrendszerével. Nem elégszünk meg azzal, hogy találgatunk: a múlt adataiból kiindulva, valós statisztikai szórásokkal dolgozunk, így a modell nem egy légből kapott becslés, hanem egy strukturált, alacsonyabb hibahatárú jövőkép.",
+      "Azért kapta az app ezt a nevet, mert a hagyományos szcenárió-módszertant ötvöztük a Lean szemléletmóddal és a folyamatoptimalizálás eszközrendszerével. Nem elégszünk meg azzal, hogy találgatunk: a múlt adataiból kiindulva, valós statisztikai szórásokkal dolgozunk, így a modell nem egy légből kapott becslés, hanem egy strukturált, alacsonyabb hibahatárú jövőkép.",
     dailyOpsTitle: "Nemcsak indításkor",
     dailyOpsBody:
       "A legtöbben csak egy új projekt vagy cég indításakor terveznek előre. De mi történik utána? Ez a rendszer a bevált Lean eszközökkel kombinálva nemcsak a startnál segít, hanem a napi működtetésben, a folyamatos finomhangolásban és a szűk keresztmetszetek kezelésében is.",
@@ -178,7 +178,7 @@ export const hu = {
     kahnEyebrow: "Kiemelt demó — 1 kattintás",
     kahnTitle: "Kahn-féle jövőkutató & stratégiai elágazás",
     kahnBody:
-      "What-if szálak a Master Baseline törzsből: hitel vagy organikus, olcsó+kötbéres vagy drága+rugalmas. Nem jóslat — elágazás. Azonnal futhat.",
+      "14 fős core, 2. sor: 4,5 M hitel vagy 3×1,1 M organikus; A 0,9%/hó+850 ezer kötbér, B 1,25%/hó kötbér nélkül. PRO bővítés/tartás/tartalék — nem jóslat. Azonnal futhat.",
     kahnCta: "Kipróbálom a Kahn-fát",
     pillarIndustry: "Iparág",
     pillarIndustryBlurb: "Vendéglátás, egészségügy, gyártás — a működés pénzben és kapacitásban mért feltételei.",
@@ -250,7 +250,7 @@ export const hu = {
       },
       strategy: {
         title: "Üzleti és stratégiai tervezés",
-        blurb: "Kahn-féle elágazás a Master Baseline törzsből — what-if szálak, nem jóslat.",
+        blurb: "Kahn: hitel/organikus → A/B → PRO. Konkrét Ft-számok a törzsből — nem jóslat.",
       },
       education: {
         title: "Oktatás / szimulációs tréning",
@@ -470,9 +470,9 @@ export const hu = {
     resilCheck: "CHECK: ResourceRunway, EnergyAutonomy, TTR — a motor fizikai korlátot is visz.",
     resilAct: "ACT: protokoll — redundancia, local-first, helyi ellátás, készlet.",
     resilEyebrow: "BCP · Működési reziliencia · Strategic foresight",
-    kahnPlan: "PLAN: a törzs adott. A fa a döntési csomópontot mutatja — melyik jövőágra kötsz készpénzt.",
-    kahnCheck: "CHECK: a három ág PRO mikrojelzése. Nem jóslat — elágazás.",
-    kahnAct: "ACT: egy ágat viszel, vagy tartalékot tartasz. A stop-loss a pesszimista ágon van.",
+    kahnPlan: "PLAN: a törzs adott. 1) hitel vagy organikus, 2) A/B szerződés, 3) PRO sáv — melyik jövőágra kötsz készpénzt.",
+    kahnCheck: "CHECK: bővítés commit, organikus opció, A-kötbér vs B-kilépés. Nem jóslat — elágazás.",
+    kahnAct: "ACT: egy ágat viszel, vagy tartalékot tartasz. Stop-loss a pesszimista ágon (≥4 hó runway, árrés ≥12%).",
     stratPlan: "PLAN: a core törzs adott. Itt csak a döntés rétegét mozgatod.",
     stratCheck: "CHECK: cash-flow mikrojelzések a három pályán.",
     stratAct: "ACT: a három pálya beavatkozása — csapda, árrés, kilépés.",

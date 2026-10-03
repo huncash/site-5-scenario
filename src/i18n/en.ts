@@ -19,7 +19,7 @@ export const en: DeepString<typeof hu> = {
       "Interactive preview: the engine runs on a real, preloaded case. No registration — one click shows cash-flow focus and liquidity gauges.",
     whyTitle: "Why “Szcenárió” — and why it goes past ordinary planning",
     whyLead:
-      "Most business software treats scenarios as typing in a “good year” and a “bad year”, then hoping reality lands between them. That is not enough.",
+      "Most business software treats scenarios as typing in a “good year” and a “bad year”, and assuming reality lands between them. That is not enough.",
     whyBody:
       "The app is named for this: classic scenario method, joined with Lean and process tools. We do not guess. The model starts from your past data and real statistical spread — a structured outlook with a tighter error band, not a number pulled from the air.",
     dailyOpsTitle: "Not only at launch",
@@ -181,7 +181,7 @@ export const en: DeepString<typeof hu> = {
     kahnEyebrow: "Featured demo — 1 click",
     kahnTitle: "Kahn futures research & strategic fork",
     kahnBody:
-      "What-if threads from the Master Baseline trunk: loan or organic, cheap+penalty or dear+flexible. Not a forecast — a fork. Runs now.",
+      "14-person core, second line: 4.5M loan or 3×1.1M organic; A 0.9%/mo+850k penalty, B 1.25%/mo no penalty. PRO expand/hold/reserve — not a forecast. Runs now.",
     kahnCta: "Try the Kahn tree",
     pillarIndustry: "Industry",
     pillarIndustryBlurb: "Hospitality, healthcare, manufacturing — operations measured in cash and capacity.",
@@ -250,7 +250,7 @@ export const en: DeepString<typeof hu> = {
       },
       strategy: {
         title: "Business and strategic planning",
-        blurb: "Kahn fork from the Master Baseline trunk — what-if threads, not a forecast.",
+        blurb: "Kahn: loan/organic → A/B → PRO. Concrete HUF from the trunk — not a forecast.",
       },
       education: {
         title: "Education / simulation training",
@@ -470,9 +470,9 @@ export const en: DeepString<typeof hu> = {
     resilCheck: "CHECK: ResourceRunway, EnergyAutonomy, TTR — the engine also carries a physical limit.",
     resilAct: "ACT: protocol — redundancy, local-first, local supply, stock.",
     resilEyebrow: "BCP · Operational resilience · Strategic foresight",
-    kahnPlan: "PLAN: the trunk is given. The tree shows the decision node — which future branch you bind cash to.",
-    kahnCheck: "CHECK: PRO micro-signals on the three branches. Not a forecast — a fork.",
-    kahnAct: "ACT: you carry one branch, or you hold reserve. Stop-loss sits on the pessimistic branch.",
+    kahnPlan: "PLAN: trunk given. 1) loan or organic, 2) A/B contract, 3) PRO band — which future branch you bind cash to.",
+    kahnCheck: "CHECK: expansion commit, organic option, A-penalty vs B-exit. Not a forecast — a fork.",
+    kahnAct: "ACT: stay on a branch, or hold reserve. Stop-loss on the pessimistic band (≥4 mo runway, margin ≥12%).",
     stratPlan: "PLAN: the core trunk is given. Here you only move the decision layer.",
     stratCheck: "CHECK: cash-flow micro-signals on the three paths.",
     stratAct: "ACT: intervention on the three paths — trap, margin, exit.",

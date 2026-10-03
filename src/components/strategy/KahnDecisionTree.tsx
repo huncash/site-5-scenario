@@ -3,6 +3,7 @@ import { MASTER_BASELINE_LABEL } from "@/lib/masterBaseline";
 import {
   kahnDecisionTree,
   type KahnBranch,
+  type KahnForkNode,
   type StrategyTone,
 } from "@/lib/strategyCases";
 
@@ -11,6 +12,19 @@ const TONE_LABEL: Record<StrategyTone, string> = {
   real: "Realista",
   pess: "Pesszimista",
 };
+
+function ForkNodeCard({ node }: { node: KahnForkNode }) {
+  return (
+    <li className={`kahn-node kahn-branch-${node.tone}`}>
+      <div className="flex items-center justify-between gap-2">
+        <ChartLegendSwatch tone={node.tone} label={TONE_LABEL[node.tone]} line />
+        <span className="kahn-branch-chip">{node.label}</span>
+      </div>
+      <p className="mt-1.5 font-mono text-[11px] tabular-nums text-foreground">{node.amountHint}</p>
+      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{node.detail}</p>
+    </li>
+  );
+}
 
 function BranchCard({ branch }: { branch: KahnBranch }) {
   return (
@@ -28,13 +42,33 @@ function BranchCard({ branch }: { branch: KahnBranch }) {
 export function KahnDecisionTree() {
   const tree = kahnDecisionTree();
   return (
-    <div className="kahn-tree" role="img" aria-label="Kahn-féle stratégiai döntési fa: bővítés, tartás, tartalék">
+    <div
+      className="kahn-tree"
+      role="img"
+      aria-label="Kahn-féle stratégiai döntési fa: hitel vagy organikus, A/B szerződés, majd PRO bővítés–tartás–tartalék"
+    >
       <div className="kahn-root">
         <span className="kahn-root-label">{MASTER_BASELINE_LABEL}</span>
         <span className="kahn-root-name">{tree.root}</span>
       </div>
       <div className="kahn-stem" aria-hidden />
-      <p className="kahn-question">{tree.question}</p>
+      <p className="kahn-case-lead">{tree.caseLead}</p>
+      <div className="kahn-stem" aria-hidden />
+      <p className="kahn-question">{tree.financingQuestion}</p>
+      <ul className="kahn-nodes kahn-nodes-2">
+        {tree.financing.map((n) => (
+          <ForkNodeCard key={n.id} node={n} />
+        ))}
+      </ul>
+      <div className="kahn-stem" aria-hidden />
+      <p className="kahn-question">{tree.contractQuestion}</p>
+      <ul className="kahn-nodes kahn-nodes-2">
+        {tree.contracts.map((n) => (
+          <ForkNodeCard key={n.id} node={n} />
+        ))}
+      </ul>
+      <div className="kahn-stem" aria-hidden />
+      <p className="kahn-question">{tree.outcomeQuestion}</p>
       <div className="kahn-fork" aria-hidden>
         <span className="kahn-fork-arm" />
         <span className="kahn-fork-arm kahn-fork-arm-mid" />

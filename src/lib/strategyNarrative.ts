@@ -1,4 +1,5 @@
 import { MASTER_BASELINE } from "@/lib/masterBaseline";
+import { KAHN_FORK } from "@/lib/strategyCases";
 
 export type NarrativeTone = "opt" | "real" | "pess";
 
@@ -121,29 +122,31 @@ export function newLineStory(): NarrativeStory {
 }
 
 export function loanWhatIfStory(): NarrativeStory {
+  const a = KAHN_FORK.contractA;
+  const b = KAHN_FORK.contractB;
   return {
     id: "loan-whatif",
-    title: "Komplex stratégiai projekt — Mi lenne, ha…",
+    title: "Kahn-esettanulmány — kapacitás-elágazás",
     root: MASTER_BASELINE.businessAlias,
     startId: "credit",
     steps: [
       {
         id: "credit",
         month: 0,
-        question: "Felveszünk-e külső hitelt a fejlesztéshez, vagy organikus növekedésre építünk?",
+        question: "Felveszünk-e külső hitelt a 2. sor / új műszakhoz, vagy organikus növekedésre építünk?",
         choices: [
           {
             id: "organic",
             label: "Organikus",
             tone: "real",
-            lead: "Nincs kamat, nincs kötbér. Lassabb felfutás, a core tartja a házat.",
+            lead: `Nincs kamat, nincs kötbér. ${KAHN_FORK.organicCommitMonths}× ${formatHuf(KAHN_FORK.organicMonthlyCommitHuf)}/hó a törzsből.`,
             next: null,
           },
           {
             id: "loan",
             label: "Külső hitel",
             tone: "opt",
-            lead: "Gyorsabb kapacitás. A következő fordulat a konstrukciót választja.",
+            lead: `${formatHuf(KAHN_FORK.loanDrawHuf)} lehívás. A következő fordulat az A/B konstrukciót választja.`,
             next: "terms",
           },
         ],
@@ -155,16 +158,16 @@ export function loanWhatIfStory(): NarrativeStory {
         choices: [
           {
             id: "cheap",
-            label: "A — olcsóbb, kötbéres",
+            label: a.label,
             tone: "opt",
-            lead: "Alacsonyabb kamat, de 6 hónapig nem léphetsz ki kötbér nélkül.",
+            lead: `${a.monthlyRatePct}%/hó, ${a.lockMonths} hó zár, kilépési kötbér ${formatHuf(a.exitPenaltyHuf)}.`,
             next: null,
           },
           {
             id: "flex",
-            label: "B — drágább, rugalmas",
+            label: b.label,
             tone: "real",
-            lead: "Magasabb kamat, előtörlesztés szabad. Stop-loss él.",
+            lead: `${b.monthlyRatePct}%/hó, előtörlesztés szabad, kötbér 0. Stop-loss él.`,
             next: null,
           },
         ],
@@ -208,45 +211,54 @@ export function resolveNarrative(storyId: "new-line" | "loan-whatif", path: stri
 
   if (storyId === "loan-whatif") {
     if (ids.includes("organic")) {
+      const burn = KAHN_FORK.organicMonthlyCommitHuf * KAHN_FORK.organicCommitMonths;
       return {
         title: "Organikus végkifejlet",
         tone: "real",
-        cashHuf: cash0 + Math.round(inc * 0.18),
+        cashHuf: cash0 + Math.round(inc * 0.18) - Math.round(burn * 0.35),
         runwayMonths: 11,
         beMonth: 9,
-        lockIn: "Nincs kötbér, nincs kamat. A core ritmusa.",
+        lockIn: `Nincs kötbér, nincs kamat. ${KAHN_FORK.organicCommitMonths} hó belső kötés a törzsből.`,
         wow: "A szál önfinanszírozott. Lassabb, de a törzs nem adósodik.",
       };
     }
     if (ids.includes("cheap")) {
       return {
-        title: "Olcsó hitel + kötbér",
+        title: "Olcsó hitel + kötbér (A)",
         tone: "opt",
-        cashHuf: cash0 + Math.round(inc * 0.42) - 180_000,
+        cashHuf:
+          cash0 +
+          KAHN_FORK.loanDrawHuf * 0.15 +
+          Math.round(inc * 0.28) -
+          KAHN_FORK.contractA.monthlyInterestHuf * 3,
         runwayMonths: 8,
         beMonth: 5,
-        lockIn: "6 hónap kötbér. Kilépés = 2 havi törlesztés.",
+        lockIn: `${KAHN_FORK.contractA.lockMonths} hó zár. Kilépés = ${formatHuf(KAHN_FORK.contractA.exitPenaltyHuf)} kötbér.`,
         wow: "Gyors klímax, de a szál bezár. A motor számolja a kilépési árat.",
       };
     }
     if (ids.includes("flex")) {
       return {
-        title: "Rugalmas hitel",
+        title: "Rugalmas hitel (B)",
         tone: "real",
-        cashHuf: cash0 + Math.round(inc * 0.22) - 310_000,
+        cashHuf:
+          cash0 +
+          KAHN_FORK.loanDrawHuf * 0.12 +
+          Math.round(inc * 0.18) -
+          KAHN_FORK.contractB.monthlyInterestHuf * 3,
         runwayMonths: 7,
         beMonth: 7,
-        lockIn: "Előtörlesztés szabad. Stop-loss él.",
+        lockIn: "Előtörlesztés szabad, kötbér 0. Stop-loss él.",
         wow: "Drágább szál, de bármikor lezárható — a döntés nem végleges.",
       };
     }
     return {
       title: "Hitelág — konstrukció nélkül",
       tone: "opt",
-      cashHuf: cash0,
+      cashHuf: cash0 + KAHN_FORK.loanDrawHuf,
       runwayMonths: 6,
       beMonth: null,
-      lockIn: "Válaszd az A vagy B konstrukciót.",
+      lockIn: "Válaszd az A (kötbéres) vagy B (rugalmas) konstrukciót.",
       wow: "A következő fordulat a kötöttséget dönti el.",
     };
   }

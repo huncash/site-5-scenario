@@ -585,17 +585,21 @@ ${PRO_ARTICLE_BODY}
     category: "scenario",
     title: "Herman Kahn és a RAND — a szcenárió eredete",
     summary:
-      "A többágú jövőkép-tervezés Kahn és a RAND hidegháborús munkájából jön. Itt ugyanez a fa fut local-first: bővítés, tartás, tartalék.",
+      "Többágú jövőkép Kahn/RAND nyomán. Itt: hitel vagy organikus → A/B szerződés → PRO bővítés/tartás/tartalék — local-first.",
     body: `🎯 Mire jó?
 - Hogy a döntés előtt több lehetséges jövőt láss, ne egyetlen jóslatot.
 
 ⚙️ Hogyan működik?
 Herman Kahn a RAND Corporationnél a hidegháborúban dolgozta ki a szcenárió-módszert: alternatív jövőket rajzolsz, mielőtt elkötelezed az erőforrást. Nem riadó és nem jóslat — elágazás.
 
-A Szcenárió ugyanezt viszi a Master Baseline törzsre. A PDCA-ban a fa három ága a klasszikus PRO sáv: optimista bővítés, realista / meglepetésmentes tartás, pesszimista tartalék. A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
+A Szcenárió ugyanezt viszi a Master Baseline törzsre (demo: 14 fős core, 8,4 M Ft/hó). Két döntési fordulat:
+1) 4,5 M külső hitel vagy 3×1,1 M organikus kötés
+2) A: 0,9%/hó + 850 ezer kilépési kötbér · B: 1,25%/hó, kötbér 0
+
+A PRO sáv a kimenet: optimista bővítés, realista tartás, pesszimista tartalék (stop-loss). A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
 
 💡 Pro Tip / Legjobb gyakorlat
-- Először a pesszimista ágat számold. Aki a nehéz sávot is látja, az tartja a folytonosságot — Kahn óta ez a módszer lényege.`,
+- Először a pesszimista ágat számold. Az „olcsó” hitel a kilépésnél drága lehet — Kahn óta ez a módszer lényege.`,
     tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás"],
   },
   {

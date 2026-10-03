@@ -102,10 +102,10 @@ const BY_ID_HU: Record<string, Pack> = {
   demo19_strategy_kahn_fork: {
     tabs: { cashflow: "Cashflow", items: "Tételek", deals: "Ágak", inventory: "Leltár" },
     pdca: {
-      PLAN: "PLAN — Kahn-elágazás a törzsből: hitel vagy organikus.",
-      DO: "DO — a választott ág élő cash-flowja, nem jóslat.",
-      CHECK: "CHECK — kötbér vs rugalmasság, runway, árrés.",
-      ACT: "ACT — ág mellett döntés, vagy tartalék a pesszimista sávon.",
+      PLAN: "PLAN — 1) hitel 4,5 M vagy organikus 3×1,1 M, 2) A/B szerződés.",
+      DO: "DO — a választott ág élő cash-flowja (kamat, foglaló, opció), nem jóslat.",
+      CHECK: "CHECK — A-kötbér 850 ezer vs B-kilépés, runway ≥4 hó, árrés ≥12%.",
+      ACT: "ACT — egy ág mellett döntés, vagy tartalék a pesszimista sávon.",
     },
   },
   demo20_industry_hospital_blackout: {
@@ -199,9 +199,9 @@ const BY_ID_EN: Record<string, Pack> = {
   demo19_strategy_kahn_fork: {
     tabs: { cashflow: "Cashflow", items: "Items", deals: "Forks", inventory: "Inventory" },
     pdca: {
-      PLAN: "PLAN — Kahn fork from the trunk: loan or organic.",
-      DO: "DO — live cash of the chosen branch, not a forecast.",
-      CHECK: "CHECK — penalty vs flexibility, runway, margin.",
+      PLAN: "PLAN — 1) 4.5M loan or 3×1.1M organic, 2) A/B contract.",
+      DO: "DO — live cash of the chosen branch (interest, deposit, option), not a forecast.",
+      CHECK: "CHECK — A-penalty 850k vs B-exit, runway ≥4 mo, margin ≥12%.",
       ACT: "ACT — stay on a branch, or reserve the pessimistic band.",
     },
   },

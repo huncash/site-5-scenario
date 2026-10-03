@@ -4,6 +4,7 @@ import {
   buildStrategyWhatIf,
   isKahnForkSegment,
   isStrategySegment,
+  KAHN_FORK,
   kahnDecisionTree,
   STRATEGY_SEGMENTS,
 } from "./strategyCases";
@@ -34,10 +35,17 @@ describe("strategyCases", () => {
     expect(isStrategySegment("demo1_multisite_operator")).toBe(false);
   });
 
-  it("builds a Kahn fork with three visual branches", () => {
+  it("builds a Kahn case-study tree with financing, contracts and PRO branches", () => {
     expect(isKahnForkSegment("demo19_strategy_kahn_fork")).toBe(true);
     const tree = kahnDecisionTree();
+    expect(tree.financing.map((n) => n.id)).toEqual(["loan", "organic"]);
+    expect(tree.contracts.map((n) => n.id)).toEqual(["cheap", "flex"]);
     expect(tree.branches.map((b) => b.tone)).toEqual(["opt", "real", "pess"]);
+    expect(tree.financing[0]!.amountHint).toContain("4");
+    expect(tree.contracts[0]!.amountHint).toMatch(/850/);
+    const kahn = STRATEGY_SEGMENTS.find((s) => s.id === "demo19_strategy_kahn_fork");
+    expect(kahn?.baseRevenueNetHuf).toBe(8_400_000);
+    expect(KAHN_FORK.loanDrawHuf).toBe(4_500_000);
     const w = buildStrategyWhatIf({
       caseId: "demo19_strategy_kahn_fork",
       baseIncome: 8_400_000,
@@ -47,5 +55,10 @@ describe("strategyCases", () => {
     });
     expect(w.inheritedFrom).toBeTruthy();
     expect(w.signals.map((s) => s.tone)).toEqual(["opt", "real", "pess"]);
+    expect(w.signals[2]!.detail).toMatch(/850|kötbér/i);
+    // 3. hónap (i=2): A-kötbér sokk — a havi pess nettó élesen gyengébb, mint az előző hónap
+    const pessNet1 = w.chart[1]!.pessimistic - w.chart[0]!.pessimistic;
+    const pessNet2 = w.chart[2]!.pessimistic - w.chart[1]!.pessimistic;
+    expect(pessNet2).toBeLessThan(pessNet1 - KAHN_FORK.contractA.exitPenaltyHuf * 0.8);
   });
 });

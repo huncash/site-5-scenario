@@ -45,8 +45,10 @@ const EN: Record<string, CaseCopy> = {
   },
   demo19_strategy_kahn_fork: {
     title: "Kahn futures research & strategic fork",
-    blurb: "What-if threads: loan or organic, then cheap+penalty or dear+flexible. Kahn tree from the trunk — not a forecast, a fork.",
-    lead: "The core plant is given. First turn: external loan or organic growth. If loan, A is cheaper with a penalty, B is dearer but flexible. The engine counts the climax live.",
+    blurb:
+      "14-person core plant, second line / new shift. First loan or organic, then A (cheap+penalty) or B (dear+flexible). PRO: expand / hold / reserve — not a forecast.",
+    lead:
+      "Master Baseline trunk is given (8.4M HUF/mo net, 4.2M cash). Before a 6–8 month capacity build: 4.5M external loan or 3×1.1M organic commit. If loan: A 0.9%/mo + 850k exit penalty, B 1.25%/mo with no penalty. Count the pessimistic branch first.",
   },
   demo11_resilience_saas_outage: {
     title: "BCP: critical SaaS / cloud outage",

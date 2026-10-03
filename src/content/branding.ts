@@ -14,9 +14,9 @@ export const ABOUT_LEAD = "A múlt adataira épülő, valósághű szcenárió-s
 
 export const WHY_TITLE = "Miért „Szcenárió” – és miért megy ez túl a hagyományos tervezésen?";
 export const WHY_LEAD =
-  "A legtöbb üzleti szoftverben a szcenáriótervezés kimerül annyiban, hogy beírsz egy „jó” és egy „rossz” évet, aztán reménykedel, hogy a valóság valahol a kettő között lesz. Ez a valóságban édeskevés.";
+  "A legtöbb üzleti szoftverben a szcenáriótervezés kimerül annyiban, hogy beírsz egy „jó” és egy „rossz” évet, és feltételezed, hogy a valóság valahol a kettő között lesz. Ez a valóságban édeskevés.";
 export const WHY_BODY =
-  "Azért kapta az app ezt a nevet, mert a hagyományos, elkopott szcenárió-módszertant ötvöztük a Lean szemléletmóddal és a folyamatoptimalizálás eszközrendszerével. Nem elégszünk meg azzal, hogy találgatunk: a múlt adataiból kiindulva, valós statisztikai szórásokkal dolgozunk, így a modell nem egy légből kapott becslés, hanem egy strukturált, alacsonyabb hibahatárú jövőkép.";
+  "Azért kapta az app ezt a nevet, mert a hagyományos szcenárió-módszertant ötvöztük a Lean szemléletmóddal és a folyamatoptimalizálás eszközrendszerével. Nem elégszünk meg azzal, hogy találgatunk: a múlt adataiból kiindulva, valós statisztikai szórásokkal dolgozunk, így a modell nem egy légből kapott becslés, hanem egy strukturált, alacsonyabb hibahatárú jövőkép.";
 
 export const PRO_CHART_CALLOUT = "Fontos: Ez a grafikon nem a valóság – és nem is jóslat.";
 export const PRO_CHART_WHY =

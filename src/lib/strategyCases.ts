@@ -25,6 +25,35 @@ export function isStrategySegment(id: string | null | undefined): id is Strategy
   return STRATEGY_CASE_IDS.includes(id as StrategyCaseId);
 }
 
+/** Kahn-esettanulmány: konkrét inputok a döntési fához és a seedhez. */
+export const KAHN_FORK = {
+  horizonMonths: 8,
+  loanDrawHuf: 4_500_000,
+  organicMonthlyCommitHuf: 1_100_000,
+  organicCommitMonths: 3,
+  optionFeeHuf: 540_000,
+  capacityDepositHuf: 1_200_000,
+  commitPctOfRevenue: 0.12,
+  minMarginPct: 12,
+  minRunwayMonths: 4,
+  contractA: {
+    id: "cheap",
+    label: "A — olcsó + kötbéres",
+    monthlyRatePct: 0.9,
+    monthlyInterestHuf: 40_500,
+    exitPenaltyHuf: 850_000,
+    lockMonths: 6,
+  },
+  contractB: {
+    id: "flex",
+    label: "B — drága + rugalmas",
+    monthlyRatePct: 1.25,
+    monthlyInterestHuf: 56_250,
+    exitPenaltyHuf: 0,
+    lockMonths: 0,
+  },
+} as const;
+
 export const STRATEGY_SEGMENTS: Array<{
   id: StrategyCaseId;
   name: string;
@@ -70,12 +99,12 @@ export const STRATEGY_SEGMENTS: Array<{
     name: "DEMO 19 — Kahn-féle jövőkutató & stratégiai elágazás",
     title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
     blurb:
-      "What-if szálak: hitel vagy organikus, majd olcsó+kötbéres vagy drága+rugalmas. Kahn-fa a törzsből — nem jóslat, elágazás.",
+      "14 fős core üzem, 2. sor / új műszak. Először hitel vagy organikus, majd A (olcsó+kötbér) vagy B (drága+rugalmas). PRO: bővítés / tartás / tartalék — nem jóslat.",
     lead:
-      "A core üzem adott. Első fordulat: külső hitel vagy organikus növekedés. Ha hitel, A olcsóbb de kötbéres, B drágább de rugalmas. A motor élőben számolja a klímaxot.",
+      "A Master Baseline törzs adott (8,4 M Ft/hó nettó, 4,2 M cash). 6–8 hónapos kapacitásbővítés előtt döntöd el: 4,5 M külső hitel vagy 3×1,1 M organikus kötés. Ha hitel: A 0,9%/hó + 850 ezer kilépési kötbér (6 hó), B 1,25%/hó kötbér nélkül. A pesszimista ágat előbb számolod.",
     baseRevenueNetHuf: MASTER_BASELINE.monthlyRevenueNet,
-    projectAlias: "Stratégiai elágazás",
-    goalName: "Egy ág mellett döntés — vagy tartalék a pesszimista sávon",
+    projectAlias: "Kapacitás-elágazás",
+    goalName: "60 napon belül ág vagy tartalék · pess ≥4 hó runway · árrés ≥12%",
   },
 ];
 
@@ -113,12 +142,28 @@ export function strategySurface(segmentId: StrategyCaseId) {
         : segmentId === "demo19_strategy_kahn_fork"
           ? [
               {
-                id: `p:${segmentId}:desk`,
+                id: `p:${segmentId}:bank-a`,
                 kind: "supplier",
-                name: "Jövőkutató asztal",
+                name: "Bank A — olcsó + kötbéres",
                 tax_id: "25252525-2-42",
                 payment_term_days: 30,
-                note: "Eset-réteg: Kahn/RAND sablon — elágazási opciók, nem jóslat.",
+                note: `Kahn A: ${KAHN_FORK.contractA.monthlyRatePct}%/hó, ${KAHN_FORK.contractA.lockMonths} hó zár, kilépés ${KAHN_FORK.contractA.exitPenaltyHuf.toLocaleString("hu-HU")} Ft.`,
+              },
+              {
+                id: `p:${segmentId}:bank-b`,
+                kind: "supplier",
+                name: "Bank B — drága + rugalmas",
+                tax_id: "25252526-2-42",
+                payment_term_days: 30,
+                note: `Kahn B: ${KAHN_FORK.contractB.monthlyRatePct}%/hó, előtörlesztés szabad, kötbér 0.`,
+              },
+              {
+                id: `p:${segmentId}:capacity`,
+                kind: "supplier",
+                name: "Gépsor / 2. műszak (copacker)",
+                tax_id: "25252527-2-42",
+                payment_term_days: 14,
+                note: `Előszerződés / foglaló ${KAHN_FORK.capacityDepositHuf.toLocaleString("hu-HU")} Ft — opt ág commit.`,
               },
             ]
         : [
@@ -161,34 +206,89 @@ export type KahnBranch = {
   outcome: string;
 };
 
+export type KahnForkNode = {
+  id: string;
+  label: string;
+  tone: StrategyTone;
+  detail: string;
+  amountHint: string;
+};
+
 export type KahnDecisionTree = {
   root: string;
+  caseLead: string;
+  financingQuestion: string;
+  financing: KahnForkNode[];
+  contractQuestion: string;
+  contracts: KahnForkNode[];
+  outcomeQuestion: string;
+  /** @deprecated use outcomeQuestion — kept for older callers */
   question: string;
   branches: KahnBranch[];
 };
 
 export function kahnDecisionTree(): KahnDecisionTree {
+  const a = KAHN_FORK.contractA;
+  const b = KAHN_FORK.contractB;
+  const outcomeQuestion = "PRO kimenet — melyik sávon olvasod a döntést?";
   return {
     root: MASTER_BASELINE.businessAlias,
-    question: "Melyik jövőágra kötsz készpénzt?",
+    caseLead:
+      "Kapacitásbővítés (2. sor / új műszak) a törzsből. Először a finanszírozás, aztán a szerződés — csak utána a PRO sáv.",
+    financingQuestion: "1. fordulat: külső hitel vagy organikus növekedés?",
+    financing: [
+      {
+        id: "loan",
+        label: "Külső hitel",
+        tone: "opt",
+        detail: "Gyorsabb kapacitás. A 2. fordulat az A/B konstrukciót választja.",
+        amountHint: `${formatHuf(KAHN_FORK.loanDrawHuf)} lehívás`,
+      },
+      {
+        id: "organic",
+        label: "Organikus",
+        tone: "real",
+        detail: "Nincs kamat, nincs kötbér. A core tartja a házat lassabb ütemben.",
+        amountHint: `${KAHN_FORK.organicCommitMonths}× ${formatHuf(KAHN_FORK.organicMonthlyCommitHuf)}/hó`,
+      },
+    ],
+    contractQuestion: "2. fordulat (ha hitel): melyik konstrukció?",
+    contracts: [
+      {
+        id: a.id,
+        label: a.label,
+        tone: "opt",
+        detail: `${a.lockMonths} hónap zárás. Kilépéskor kötbér — olcsó, ha tuti a kereslet.`,
+        amountHint: `${a.monthlyRatePct}%/hó · kötbér ${formatHuf(a.exitPenaltyHuf)}`,
+      },
+      {
+        id: b.id,
+        label: b.label,
+        tone: "real",
+        detail: "Előtörlesztés szabad. Drágább futás, olcsóbb megállás a pesszimista sávon.",
+        amountHint: `${b.monthlyRatePct}%/hó · kötbér 0`,
+      },
+    ],
+    outcomeQuestion,
+    question: outcomeQuestion,
     branches: [
       {
         tone: "opt",
         label: "Bővítés",
-        strategy: "Optimista stratégia",
-        outcome: "Kapacitást előre viszel. A felfutás hozza vissza a kötést — ha a kereslet megjön.",
+        strategy: "Hitel + kapacitás előre",
+        outcome: `~${Math.round(KAHN_FORK.commitPctOfRevenue * 100)}% havi bevétel commit + foglaló ${formatHuf(KAHN_FORK.capacityDepositHuf)}. A felfutás hozza vissza — ha a kereslet megjön.`,
       },
       {
         tone: "real",
         label: "Tartás",
-        strategy: "Realista / meglepetésmentes",
-        outcome: "A törzs ritmusa marad. Kahn referenciaága: nem meglepetés, nem ugrás.",
+        strategy: "Organikus / meglepetésmentes",
+        outcome: `Opció nyitva: ${formatHuf(KAHN_FORK.optionFeeHuf)}. Nincs ugrás; a törzs ritmusa viszi a házat.`,
       },
       {
         tone: "pess",
         label: "Tartalék",
-        strategy: "Pesszimista stratégia",
-        outcome: "Runway és stop-loss. A nehéz sávot is számolod, mielőtt elkötelezed a készpénzt.",
+        strategy: "Stop-loss a nehéz sávon",
+        outcome: `Először a pesszimista ág. A-n kilépés = +${formatHuf(a.exitPenaltyHuf)} kötbér; B-n csak kamatveszteség. Cél: ≥${KAHN_FORK.minRunwayMonths} hó runway.`,
       },
     ],
   };
@@ -260,13 +360,26 @@ export function buildStrategyWhatIf(input: {
       pi = inc0 * (1 - Math.min(0.18, i * 0.02));
       pe = exp0 * (1 + i * 0.042);
     } else if (input.caseId === "demo19_strategy_kahn_fork") {
-      const commit = Math.round(inc0 * 0.12);
+      const commit = Math.round(inc0 * KAHN_FORK.commitPctOfRevenue);
+      const optionMonthly = Math.round(KAHN_FORK.optionFeeHuf / 6);
+      const organicSlice = i < KAHN_FORK.organicCommitMonths ? Math.round(KAHN_FORK.organicMonthlyCommitHuf * 0.35) : 0;
+      // Opt = hitel A + bővítés: gyors ramp, előre kötött kapacitás, alacsonyabb kamat
       oi = inc0 * (1.06 + Math.min(0.32, i * 0.04));
-      oe = exp0 * 0.99 + (i < 2 ? commit : Math.round(inc0 * 0.02));
+      oe =
+        exp0 * 0.99 +
+        (i < 2 ? commit : Math.round(inc0 * 0.02)) +
+        KAHN_FORK.contractA.monthlyInterestHuf +
+        (i === 0 ? Math.round(KAHN_FORK.capacityDepositHuf * 0.25) : 0);
+      // Real = organikus / tartás: opciódíj amortizálva, nincs ugrás
       ri = inc0 * (0.99 + Math.min(0.08, i * 0.008));
-      re = exp0 * (1 + i * 0.004);
+      re = exp0 * (1 + i * 0.004) + organicSlice + optionMonthly;
+      // Pess = gyenge kereslet + A-kötbér a 3. hónapban (szimulált kilépés)
       pi = inc0 * (1 - Math.min(0.14, i * 0.012));
-      pe = exp0 * 0.94 + Math.round(inc0 * 0.03);
+      pe =
+        exp0 * 0.94 +
+        Math.round(inc0 * 0.03) +
+        Math.round(KAHN_FORK.contractB.monthlyInterestHuf * 0.5) +
+        (i === 2 ? KAHN_FORK.contractA.exitPenaltyHuf : 0);
     } else {
       oi = inc0 * 1.22;
       oe = exp0 * 0.97 + (i === 0 ? Math.round(inc0 * 0.05) : Math.round(inc0 * 0.01));
@@ -352,21 +465,21 @@ export function buildStrategyWhatIf(input: {
           ? [
               {
                 tone: "opt",
-                title: "Bővítési ág",
+                title: "Bővítés — hitel A + kapacitás",
                 metric: optDip < 0 ? formatHuf(optDip) : formatHuf(optCum[0] ?? 0),
-                detail: "Előre kötött kapacitás. A fa ezen az ágon a felfutást számolja — ha a kereslet megjön.",
+                detail: `Lehívás ${formatHuf(KAHN_FORK.loanDrawHuf)}, commit ~${Math.round(KAHN_FORK.commitPctOfRevenue * 100)}%×bevétel, kamat ${formatHuf(KAHN_FORK.contractA.monthlyInterestHuf)}/hó. Felfutás, ha a kereslet megjön.`,
               },
               {
                 tone: "real",
-                title: "Meglepetésmentes ág",
+                title: "Tartás — organikus / opció",
                 metric: `${formatHuf(Math.round((realCum[Math.min(5, n - 1)] ?? 0) / 6))}/hó`,
-                detail: "Kahn referenciaága: a törzs ritmusa, nincs ugrás. A core viszi a házat.",
+                detail: `Opciódíj ${formatHuf(KAHN_FORK.optionFeeHuf)} + ${KAHN_FORK.organicCommitMonths} hó belső kötés. Nincs ugrás; a törzs viszi a házat.`,
               },
               {
                 tone: "pess",
-                title: "Tartalék-ág",
-                metric: `${pessRun} hó runway`,
-                detail: "A nehéz sávot is számolod. Stop-loss, mielőtt a core-t is megenné az elköteleződés.",
+                title: "Tartalék — kötbér vs kilépés",
+                metric: `${pessRun} hó runway · A-kötbér ${formatHuf(KAHN_FORK.contractA.exitPenaltyHuf)}`,
+                detail: `Stop-loss a 3. hónapban: A konstrukción +kötbér. Cél ≥${KAHN_FORK.minRunwayMonths} hó runway, árrés ≥${KAHN_FORK.minMarginPct}%.`,
               },
             ]
         : [
