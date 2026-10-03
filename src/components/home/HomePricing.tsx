@@ -19,6 +19,7 @@ import {
 } from "@/content/pricing/tiers";
 import { billCheckoutUrl } from "@/lib/billing";
 import type { BillingInterval } from "@/lib/funnelOrder";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const CAMPUS_MONTHLY_HUF = 1_490;
@@ -30,14 +31,15 @@ function netAmount(monthly: number, interval: BillingInterval): number {
 export function HomePricing(props: { campus?: boolean }) {
   const { campus = false } = props;
   const [interval] = useBillingInterval();
-  const per = interval === "yearly" ? "/ év" : "/ hó";
-  const otherPer = interval === "yearly" ? "/ hó" : "/ év";
+  const { t } = useI18n();
+  const per = interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
+  const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
 
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Csomagok</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.packages")}</div>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">{PRICING_HERO}</p>
         </div>
         <BillingIntervalToggle />
@@ -126,8 +128,9 @@ export function HomePricing(props: { campus?: boolean }) {
 
 function CampusStrip({ interval }: { interval: BillingInterval }) {
   const href = billCheckoutUrl({ tier: "campus", interval, ref: "campus" });
-  const per = interval === "yearly" ? "/ év" : "/ hó";
-  const otherPer = interval === "yearly" ? "/ hó" : "/ év";
+  const { t } = useI18n();
+  const per = interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
+  const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
   return (
     <div className="rounded-2xl border border-dashed border-cyan-400/35 bg-cyan-500/[0.06] p-4">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Campus</div>

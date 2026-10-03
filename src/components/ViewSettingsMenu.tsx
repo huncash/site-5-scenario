@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Columns2, Moon, Palette, Settings, Sun } from "lucide-react";
 
 import { useTheme } from "@/components/ThemeProvider";
-import { PALETTE_LABELS } from "@/lib/theme";
+import { localeLabel, paletteName, useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const VIEW_MODE_KEY = "ui:viewMode";
@@ -44,6 +44,8 @@ export function ViewSettingsMenu({
   highlightSplit?: boolean;
 }) {
   const { theme, palette, a11y, cyclePalette, toggleTheme, toggleA11y } = useTheme();
+  const { locale, toggleLocale, t } = useI18n();
+  const activePalette = paletteName(locale, palette);
   const [open, setOpen] = useState(false);
   const [localViewMode, setLocalViewMode] = useState<ViewMode>("split");
   const [fan, setFan] = useState({ top: 0, left: 0 });
@@ -115,8 +117,8 @@ export function ViewSettingsMenu({
       <button
         type="button"
         className={cn("split-view-toggle-btn", viewMode === "split" && "is-active", highlightSplit && "is-tour")}
-        title="Osztott nézet"
-        aria-label="Osztott vagy teljes szélességű nézet"
+        title={t("view.split")}
+        aria-label={t("view.splitAria")}
         aria-pressed={viewMode === "split"}
         aria-hidden={!showSplit}
         tabIndex={showSplit ? 0 : -1}
@@ -132,11 +134,11 @@ export function ViewSettingsMenu({
           ref={triggerRef}
           id="settingsTrigger"
           className="settings-trigger-btn"
-          aria-label="Nézetbeállítások"
+          aria-label={t("view.settings")}
           aria-expanded={open}
           aria-haspopup="true"
           aria-controls={menuId}
-          title="Nézetbeállítások"
+          title={t("view.settings")}
           onClick={(event) => {
             event.stopPropagation();
             setOpen((value) => !value);
@@ -149,7 +151,7 @@ export function ViewSettingsMenu({
           id={menuId}
           className="semicircle-menu"
           role="menu"
-          aria-label="Nézetbeállítások"
+          aria-label={t("view.settings")}
           aria-hidden={!open}
           inert={!open ? true : undefined}
           style={{ top: fan.top, left: fan.left }}
@@ -162,8 +164,8 @@ export function ViewSettingsMenu({
             type="button"
             className="view-settings-icon-btn menu-sector sector-1"
             role="menuitem"
-            title={`Színpaletta váltás — ${PALETTE_LABELS[palette]}`}
-            aria-label={`Színpaletta váltás, aktív: ${PALETTE_LABELS[palette]}`}
+            title={`${t("view.palette")} — ${activePalette}`}
+            aria-label={t("view.paletteActive", { name: activePalette })}
             onClick={cyclePalette}
           >
             <Palette className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -173,8 +175,8 @@ export function ViewSettingsMenu({
             type="button"
             className="view-settings-icon-btn menu-sector sector-2"
             role="menuitem"
-            title="Világos / Sötét mód"
-            aria-label={isDark ? "Váltás világos módra" : "Váltás sötét módra"}
+            title={t("view.theme")}
+            aria-label={isDark ? t("view.themeToLight") : t("view.themeToDark")}
             aria-pressed={!isDark}
             onClick={toggleTheme}
           >
@@ -189,16 +191,28 @@ export function ViewSettingsMenu({
             type="button"
             className={cn("view-settings-icon-btn a11y-btn menu-sector sector-3", a11y && "is-active")}
             role="menuitemcheckbox"
-            title={a11y ? "Akadálymentes nézet kikapcsolása" : "Akadálymentesítés"}
-            aria-label={
-              a11y
-                ? "Akadálymentes nézet kikapcsolása"
-                : "Akadálymentesítés (kormányzati kontrasztmód)"
-            }
+            title={a11y ? t("view.a11yOn") : t("view.a11yOff")}
+            aria-label={a11y ? t("view.a11yOn") : t("view.a11yOffAria")}
             aria-checked={a11y}
             onClick={toggleA11y}
           >
             <img src={A11Y_ICON_SRC} alt="" width={28} height={28} draggable={false} />
+          </button>
+
+          <button
+            type="button"
+            className={cn("view-settings-icon-btn lang-btn menu-sector sector-4", locale === "en" && "is-active")}
+            role="menuitem"
+            title={t("view.lang")}
+            aria-label={t("view.langAria")}
+            aria-pressed={locale === "en"}
+            onClick={toggleLocale}
+          >
+            <span className="lang-pair" aria-hidden="true">
+              <span className={locale === "hu" ? "is-on" : undefined}>{localeLabel("hu")}</span>
+              <span className="lang-sep">/</span>
+              <span className={locale === "en" ? "is-on" : undefined}>{localeLabel("en")}</span>
+            </span>
           </button>
         </div>
       </div>

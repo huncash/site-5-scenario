@@ -1,3 +1,5 @@
+import { compactCurrency } from "@/i18n/currency";
+
 /**
  * Lean vizualizációs playbook + öntanuló preferencia.
  * Szín csak jelentéssel: semleges = bázis, kék = fókusz, piros/zöld = eltérés.
@@ -256,9 +258,5 @@ export type SankeyLink = {
 };
 
 export function compactHuf(v: number): string {
-  const abs = Math.abs(v);
-  const sign = v < 0 ? "−" : "";
-  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)} M`;
-  if (abs >= 1_000) return `${sign}${Math.round(abs / 1_000)} e`;
-  return `${sign}${Math.round(abs)}`;
+  return compactCurrency(v);
 }

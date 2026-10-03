@@ -1,3 +1,4 @@
+import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -178,6 +179,18 @@ export function ResilienceCasePanel(props: {
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             BCP · Működési reziliencia · Strategic foresight
+            <HelpIcon
+              kbId={
+                model.kind === "bcp"
+                  ? "lesson-bcp"
+                  : model.kind === "community"
+                    ? "lesson-community"
+                    : model.kind === "household"
+                      ? "lesson-household"
+                      : "lesson-demography"
+              }
+              title="Szcenárió-lecke"
+            />
           </p>
           <h3 className="mt-0.5 text-sm font-semibold text-foreground">{model.title}</h3>
           <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>

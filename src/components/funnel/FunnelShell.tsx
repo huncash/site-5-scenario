@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export function FunnelShell(props: {
@@ -13,6 +14,7 @@ export function FunnelShell(props: {
   children: ReactNode;
 }) {
   const { title, subtitle, eyebrow, rightSlot, children } = props;
+  const { t } = useI18n();
   return (
     // NOTE: the app shell disables document scroll (html/body/#root overflow hidden),
     // so funnel pages must provide their own scroll container.
@@ -21,10 +23,10 @@ export function FunnelShell(props: {
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <Link to="/" className="block min-w-0 truncate text-sm font-semibold text-foreground">
-              Szcenárió
+              {t("brand.name")}
             </Link>
-            <div className="truncate text-[11px] leading-tight text-muted-foreground" title="Jövőképek és döntési pályák • 100% lokális biztonság">
-              Jövőképek és döntési pályák • 100% lokális biztonság
+            <div className="truncate text-[11px] leading-tight text-muted-foreground" title={t("brand.tagline")}>
+              {t("brand.tagline")}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -35,7 +37,7 @@ export function FunnelShell(props: {
               size="sm"
               className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
             >
-              <Link to="/login">Belépés</Link>
+              <Link to="/login">{t("chrome.login")}</Link>
             </Button>
           </div>
         </div>
@@ -55,9 +57,9 @@ export function FunnelShell(props: {
 
       <footer className="border-t border-border bg-background">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-xs text-muted-foreground">
-          <span>Nincs regisztráció, nincs telemetria — a működés a te eszközödön fut.</span>
+          <span>{t("chrome.noTelemetry")}</span>
           <Link to="/about" className="underline-offset-4 hover:text-foreground hover:underline">
-            Rólunk
+            {t("chrome.about")}
           </Link>
         </div>
       </footer>

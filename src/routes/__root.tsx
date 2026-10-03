@@ -19,23 +19,24 @@ import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourPr
 import { SupportEmbedProvider } from "@/components/support/SupportEmbedProvider";
 import { LeanCommandPalette } from "@/components/LeanCommandPalette";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LocaleProvider, useI18n } from "@/i18n";
+import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
 function NotFoundComponent() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("error.notFoundTitle")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.notFoundBody")}</p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {t("error.goHome")}
           </Link>
         </div>
       </div>
@@ -44,6 +45,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  const { t } = useI18n();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -54,11 +56,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {t("error.loadFail")}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.loadFailBody")}</p>
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-lg border border-border/60 bg-muted/20 p-3 text-left">
             <div className="text-xs font-semibold text-foreground">
@@ -83,7 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            {t("error.tryAgain")}
           </button>
           <a
             href="/"
@@ -93,7 +93,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {t("error.goHome")}
           </a>
         </div>
       </div>
@@ -166,6 +166,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="hu" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -200,6 +201,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <LocaleProvider>
       <ThemeProvider>
         <VaultProvider>
           <FeatureComingSoonProvider>
@@ -215,6 +217,7 @@ function RootComponent() {
           </FeatureComingSoonProvider>
         </VaultProvider>
       </ThemeProvider>
+      </LocaleProvider>
     </QueryClientProvider>
   );
 }

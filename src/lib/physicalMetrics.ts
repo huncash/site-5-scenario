@@ -221,6 +221,56 @@ function defaultNodes(kind: "bcp" | "community" | "household" | "campus" | "cybe
       ],
     };
   }
+  if (kind === "hospital") {
+    const nodes: CommNode[] = [
+      { id: "hq", label: "Üzemeltetés", kind: "hq", x: 50, y: 14, up: true, links: ["analog", "mesh"] },
+      { id: "icu", label: "ICU", kind: "unit", x: 18, y: 48, up: true, links: ["analog"] },
+      { id: "or", label: "Műtő", kind: "unit", x: 50, y: 52, up: true, links: ["analog"] },
+      { id: "nicu", label: "NICU", kind: "unit", x: 82, y: 48, up: true, links: ["analog"] },
+      { id: "gen", label: "Aggregátor", kind: "depot", x: 50, y: 82, up: true, links: ["mesh"] },
+    ];
+    return {
+      nodes,
+      edges: [
+        { from: "hq", to: "icu", kind: "analog", up: true },
+        { from: "hq", to: "or", kind: "analog", up: true },
+        { from: "hq", to: "nicu", kind: "analog", up: true },
+        { from: "hq", to: "gen", kind: "mesh", up: true },
+      ],
+    };
+  }
+  if (kind === "wms") {
+    const nodes: CommNode[] = [
+      { id: "hq", label: "Diszpécser", kind: "hq", x: 50, y: 16, up: true, links: ["analog"] },
+      { id: "wms", label: "WMS szerver", kind: "depot", x: 20, y: 48, up: false, links: ["internet"] },
+      { id: "dock", label: "Dokk", kind: "unit", x: 78, y: 48, up: true, links: ["analog", "mesh"] },
+      { id: "scan", label: "Vonalkód BCP", kind: "repeater", x: 50, y: 80, up: true, links: ["mesh"] },
+    ];
+    return {
+      nodes,
+      edges: [
+        { from: "hq", to: "wms", kind: "internet", up: false },
+        { from: "hq", to: "dock", kind: "analog", up: true },
+        { from: "dock", to: "scan", kind: "mesh", up: true },
+      ],
+    };
+  }
+  if (kind === "supply") {
+    const nodes: CommNode[] = [
+      { id: "hq", label: "Sorvezető", kind: "hq", x: 50, y: 18, up: true, links: ["analog"] },
+      { id: "a", label: "Sor A", kind: "unit", x: 20, y: 62, up: true, links: ["analog"] },
+      { id: "b", label: "Sor B — kieső alkatrész", kind: "unit", x: 80, y: 62, up: false, links: ["analog"] },
+      { id: "alt", label: "Helyettesítő / SMED", kind: "depot", x: 50, y: 82, up: true, links: ["analog"] },
+    ];
+    return {
+      nodes,
+      edges: [
+        { from: "hq", to: "a", kind: "analog", up: true },
+        { from: "hq", to: "b", kind: "analog", up: false },
+        { from: "hq", to: "alt", kind: "analog", up: true },
+      ],
+    };
+  }
   if (kind === "lean") {
     const nodes: CommNode[] = [
       { id: "hq", label: "Sorvezető", kind: "hq", x: 50, y: 20, up: true, links: ["analog"] },
@@ -381,6 +431,22 @@ function forksFor(kind: string): CrisisFork[] {
 }
 
 function pokaEvents(kind: string): PokaYokeEvent[] {
+  if (kind === "hospital") {
+    return [
+      { step: 1, label: "ICU kör UPS-teszt 30 napon belül", violated: false },
+      { step: 2, label: "NICU aggregátor-prioritás", violated: false },
+      { step: 3, label: "Általános klíma a dízelkörön", violated: true },
+      { step: 4, label: "Üzemanyag-szint riasztás", violated: false },
+    ];
+  }
+  if (kind === "wms") {
+    return [
+      { step: 1, label: "Papír komissió-sablon a dokkon", violated: false },
+      { step: 2, label: "Vonalkód-olvasó töltve", violated: false },
+      { step: 3, label: "Indítás csak WMS-ből", violated: true },
+      { step: 4, label: "Dokk-sorrend tábla", violated: false },
+    ];
+  }
   if (kind === "lean") {
     return [
       { step: 1, label: "Átállás előtti checklista", violated: false },
@@ -598,6 +664,91 @@ function dashboardForEducation(id: EducationCaseId, ctx: MasterBaselineContext, 
     ttr: { hours: ttrH, targetHours: 4, process: "Izoláció + analóg vizsga", band: survivalBand(4, ttrH) },
     pokaYoke: { ...poka, events },
     forks: forksFor("cyber"),
+  };
+}
+
+function dashboardForIndustry(id: IndustryCaseId, ctx: MasterBaselineContext, head: number): PhysicalDashboard | null {
+  const kind = industryCaseById(id).kind;
+  if (kind === "fuel" || kind === "tax") return null;
+  if (kind === "hospital") {
+    const energyH = energyAutonomyHours({
+      batteryWh: (ctx.startingResources.energyKwh ?? 420) * 1000,
+      solarW: 0,
+      loadW: 48_000,
+    });
+    const fuelH = resourceRunwayHours({ stock: 380, headcount: Math.min(head, 8), perPersonPerDay: FUEL_L_PER_PERSON_DAY });
+    const topo = defaultNodes("hospital");
+    const comm = communicationRedundancy(topo.nodes);
+    const events = pokaEvents("hospital");
+    const poka = pokaYokeErrorIndex(events);
+    return {
+      gauges: [
+        gauge("energy", "UPS / aggregátor", energyH, 12, "óra", "Dízel + szünetmentes a létfontosságú körön."),
+        gauge("runway-fuel", "Dízel-runway", fuelH, 12, "óra", "Tartály / (aggregátor-fogyasztás)."),
+        gauge("comm", "Osztály-kommunikáció", comm.coveragePct, 100, "%", "ICU, műtő, NICU, üzemeltetés."),
+        gauge("ttr", "TTR — hálózati visszatérés", 18, 8, "óra", "Mikor jön vissza a külső áram."),
+        gauge("poka", "Triázs / Poka-Yoke", poka.index, 15, "%", "Létfontosságú kör vágása tilos."),
+      ],
+      ...topo,
+      comm,
+      ttr: { hours: 18, targetHours: 8, process: "Hálózati visszatérés", band: survivalBand(8, 18) },
+      pokaYoke: { ...poka, events },
+      forks: forksFor("hospital"),
+    };
+  }
+  if (kind === "wms") {
+    const topo = defaultNodes("wms");
+    const comm = communicationRedundancy(topo.nodes);
+    const events = pokaEvents("wms");
+    const poka = pokaYokeErrorIndex(events);
+    return {
+      gauges: [
+        gauge("ttr", "Lead time / TTR", 6, 3, "óra", "Manuális komissiózás vs. WMS."),
+        gauge("comm", "Dokk-kommunikáció", comm.coveragePct, 100, "%", "WMS sötét, vonalkód BCP él."),
+        gauge("runway-ops", "Dokk-runway", 10, 16, "óra", "Meddig forog a fizikai sor torlódás nélkül."),
+        gauge("poka", "Poka-Yoke hibaindex", poka.index, 20, "%", "Digitális-függő lépés a BCP-ben."),
+      ],
+      ...topo,
+      comm,
+      ttr: { hours: 6, targetHours: 3, process: "Papír / vonalkód komissiózás", band: survivalBand(3, 6) },
+      pokaYoke: { ...poka, events },
+      forks: forksFor("wms"),
+    };
+  }
+  if (kind === "supply" || kind === "quality") {
+    const topo = defaultNodes("supply");
+    const comm = communicationRedundancy(topo.nodes);
+    const events = pokaEvents("lean");
+    const poka = pokaYokeErrorIndex(events);
+    return {
+      gauges: [
+        gauge("ttr", kind === "supply" ? "SMED / átállás" : "Tétel-elhatárolás", kind === "supply" ? 6 : 4, 2, "óra", kind === "supply" ? "Helyettesítő anyag átállása." : "Hibás tétel zárása."),
+        gauge("poka", "Poka-Yoke hibaindex", poka.index, 15, "%", "Sorindítás interlock / selejtszűrő."),
+        gauge("comm", "Sor-kommunikáció", comm.coveragePct, 100, "%", "Álló sor B a kieső alkatrészen."),
+      ],
+      ...topo,
+      comm,
+      ttr: { hours: kind === "supply" ? 6 : 4, targetHours: 2, process: kind === "supply" ? "SMED helyettesítő" : "Tételzár + gyökérok", band: "yellow" },
+      pokaYoke: { ...poka, events },
+      forks: forksFor(kind === "supply" ? "supply" : "lean"),
+    };
+  }
+  const topo = defaultNodes("bcp");
+  const comm = communicationRedundancy(topo.nodes);
+  const events = pokaEvents("bcp");
+  const poka = pokaYokeErrorIndex(events);
+  return {
+    gauges: [
+      gauge("ttr", "TTR — local-first", 10, 4, "óra", "SaaS helyett saját gép."),
+      gauge("comm", "Kommunikációs redundancia", comm.coveragePct, 100, "%", "Felhő kiesett, mesh + analog él."),
+      gauge("runway-ops", "Működési runway", 28, 72, "óra", "Meddig viszi a helyi másolat."),
+      gauge("poka", "Poka-Yoke hibaindex", poka.index, 20, "%", "Felhő-függő lépés a protokollban."),
+    ],
+    ...topo,
+    comm,
+    ttr: { hours: 10, targetHours: 4, process: "Local-first élesítés", band: survivalBand(4, 10) },
+    pokaYoke: { ...poka, events },
+    forks: forksFor("bcp"),
   };
 }
 

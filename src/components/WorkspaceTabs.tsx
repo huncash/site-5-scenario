@@ -11,6 +11,7 @@ import type { WorkspaceMeta } from "@/lib/finance";
 import { formatMoney } from "@/lib/finance";
 import { computeWorkspaceTint, type WorkspaceTint } from "@/lib/workspaceTint";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
+import { useI18n } from "@/i18n";
 
 export type PdcaMode = "PD" | "DC" | "CA" | "AP";
 export type PdcaNewBucket = "DO" | "PLAN";
@@ -229,13 +230,14 @@ export function WorkspacePanels({
   const [notesDraft, setNotesDraft] = useState(checkNotes ?? "");
   useEffect(() => setNotesDraft(checkNotes ?? ""), [checkNotes, activeWorkspaceId, pdcaMode]);
   const { isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
+  const { t } = useI18n();
   const highlightPanels = tourOpen && (tourStepId === "demo" || tourStepId === "anatomy");
 
   const phaseLabel = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
-    if (p === "PLAN") return "PLAN — TERVEZÉS & CÉLKITŰZÉSEK";
-    if (p === "DO") return "DO — ÉLŐ FOLYAMATOK & MŰKÖDÉS";
-    if (p === "CHECK") return "CHECK — ELEMZÉS & KIMUTATÁSOK";
-    return "ACT — BEAVATKOZÁSI CÉLOK";
+    if (p === "PLAN") return t("pdca.plan");
+    if (p === "DO") return t("pdca.do");
+    if (p === "CHECK") return t("pdca.check");
+    return t("pdca.act");
   };
   const phaseExact = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
     if (phaseExactFor) return phaseExactFor(p);
@@ -325,7 +327,7 @@ export function WorkspacePanels({
       {pdcaMode === "CA" ? (
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-border/60 bg-background/40 p-5">
-            <div className="mb-3 text-xs font-medium text-emerald-300">CHECK — Elemzés & Észrevételek</div>
+            <div className="mb-3 text-xs font-medium text-emerald-300">{t("pdca.checkNotes")}</div>
 
             {checkSummary ? (
               <div className="grid gap-3">
@@ -452,7 +454,7 @@ export function WorkspacePanels({
           </div>
 
           <div className="rounded-lg border border-border/60 bg-background/40 p-4">
-            <div className="mb-3 text-xs font-medium text-rose-300">ACT — Fejlesztési Célok</div>
+            <div className="mb-3 text-xs font-medium text-rose-300">{t("pdca.actGoals")}</div>
             <div className="grid gap-2">
               <Button type="button" variant="outline" onClick={onPromotePlanToDo} title="Projekt élesítése (PLAN→DO)">
                 🚀 Projekt Élesítése (PLAN → DO)

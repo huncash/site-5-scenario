@@ -8,6 +8,7 @@ import {
   type DemoSegmentId,
 } from "@/lib/demoSeed";
 import { isEducationSegment } from "@/lib/educationCases";
+import { industryCaseById, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment, resilienceEntryWorkspace } from "@/lib/resilienceCases";
 import { isStrategySegment } from "@/lib/strategyCases";
 import { localdb } from "@/lib/localdb";
@@ -26,18 +27,29 @@ export function writeCaseEntryTab(wsId: string = CASE_ENTRY_DEFAULT_WS) {
   }
 }
 
-export type ScenarioDoorStep = "type" | "industry" | "hospitality" | "strategy" | "resilience" | "education";
+export type ScenarioDoorStep =
+  | "type"
+  | "industry"
+  | "hospitality"
+  | "strategy"
+  | "resilience"
+  | "education"
+  | "healthcare"
+  | "manufacturing"
+  | "logistics"
+  | "services";
 
 export function doorStepForSegment(segmentId: string | null | undefined): ScenarioDoorStep {
   if (isEducationSegment(segmentId)) return "education";
   if (isResilienceSegment(segmentId)) return "resilience";
   if (isStrategySegment(segmentId)) return "strategy";
+  if (isIndustrySegment(segmentId)) return industryCaseById(segmentId).door;
   return "hospitality";
 }
 
 export function caseEntryTabForSegment(segmentId: string | null | undefined): string {
   if (isResilienceSegment(segmentId)) return resilienceEntryWorkspace(segmentId);
-  if (isEducationSegment(segmentId) || isStrategySegment(segmentId)) return "Projekt1";
+  if (isEducationSegment(segmentId) || isStrategySegment(segmentId) || isIndustrySegment(segmentId)) return "Projekt1";
   return CASE_ENTRY_DEFAULT_WS;
 }
 
@@ -66,6 +78,10 @@ export function readScenarioDoorStep(): ScenarioDoorStep {
     if (raw === "education" || raw === "training") return "education";
     if (raw === "resilience" || raw === "crisis" || raw === "disaster") return "resilience";
     if (raw === "industry") return "industry";
+    if (raw === "healthcare") return "healthcare";
+    if (raw === "manufacturing") return "manufacturing";
+    if (raw === "logistics") return "logistics";
+    if (raw === "services") return "services";
     return "type";
   } catch {
     return "type";

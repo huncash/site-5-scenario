@@ -43,6 +43,7 @@ import { doorStepForSegment, isDemoProfileName, writeScenarioDoorStep } from "@/
 import { segmentIdFromDemoName } from "@/lib/demoSeed";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export function ProfileHeader({
@@ -77,6 +78,7 @@ export function ProfileHeader({
   onRotatePdca?: () => void;
 }) {
   const { lock, state } = useVault();
+  const { t } = useI18n();
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
   const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
@@ -166,24 +168,24 @@ export function ProfileHeader({
                     variant="outline"
                     className="h-9 shrink-0 border-border bg-card/40 text-foreground hover:bg-accent"
                     onClick={back}
-                    title="Vissza a műszerfalra"
-                    aria-label="Vissza a műszerfalra"
+                    title={t("chrome.backDashboard")}
+                    aria-label={t("chrome.backDashboard")}
                   >
                     <ArrowLeft className="mr-1.5 h-4 w-4" />
-                    Vissza
+                    {t("chrome.back")}
                   </Button>
                 ) : (
                 <Link
                   to="/"
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-all duration-200 hover:bg-primary/25"
-                  aria-label="Főoldal"
-                  title="Főoldal"
+                  aria-label={t("chrome.home")}
+                  title={t("chrome.home")}
                 >
                   <Wallet className="h-5 w-5" />
                 </Link>
                 )}
                 <div className="min-w-0 leading-tight">
-                  <div className="truncate text-sm font-semibold tracking-tight text-foreground">Szcenárió</div>
+                  <div className="truncate text-sm font-semibold tracking-tight text-foreground">{t("brand.name")}</div>
                   <div className="flex min-w-0 items-center gap-2">
                     <div className="truncate text-xs text-muted-foreground" title={profileHint ?? profileName}>
                       {profileName}
@@ -210,8 +212,8 @@ export function ProfileHeader({
                       onClick={() => {
                         setProfileOpen((v) => !v);
                       }}
-                      aria-label={`PDCA ciklusok — ${pdcaSum}`}
-                      title="Profil panel (PDCA számláló)"
+                      aria-label={t("chrome.pdcaCycles", { n: String(pdcaSum) })}
+                      title={t("chrome.profilePanel")}
                     >
                       <span className="text-muted-foreground leading-none">PDCA</span>
                       <span className="leading-none">#{pdcaSum}</span>
@@ -226,10 +228,10 @@ export function ProfileHeader({
                         <div className="min-w-0">
                           <div className="truncate text-sm font-semibold">{profileName}</div>
                           {visitorShell ? (
-                            <div className="mt-0.5 text-[11px] text-muted-foreground">Gazdasági eset — ingyenes demó</div>
+                            <div className="mt-0.5 text-[11px] text-muted-foreground">{t("chrome.visitorDemo")}</div>
                           ) : (
                             <div className="mt-0.5 text-[11px] text-muted-foreground">
-                              Profil ID: <span className="font-mono">{profileId}</span>
+                              {t("chrome.profileId")} <span className="font-mono">{profileId}</span>
                             </div>
                           )}
                         </div>
@@ -246,7 +248,7 @@ export function ProfileHeader({
                           className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
                           <Link to="/stats" search={{ profile: profileId }}>
-                            Aktivitás
+                            {t("chrome.activityShort")}
                           </Link>
                         </Button>
                         <Button
@@ -256,7 +258,7 @@ export function ProfileHeader({
                           className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
                           <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
-                            Beállítások
+                            {t("chrome.settings")}
                           </Link>
                         </Button>
                       </div>
@@ -269,10 +271,10 @@ export function ProfileHeader({
                         onClick={() => {
                           void leaveVisitorCase();
                         }}
-                        title={visitorShell ? "Vissza a szcenáriókhoz" : "Profil zárolása"}
+                        title={visitorShell ? t("chrome.otherCaseTitle") : t("chrome.lockTitle")}
                       >
                         <Lock className="mr-2 h-4 w-4" />
-                        {visitorShell ? "Másik eset" : "Zárolás / Kilépés"}
+                        {visitorShell ? t("chrome.otherCase") : t("chrome.lock")}
                       </Button>
                     </div>
                   </PopoverContent>
@@ -295,8 +297,8 @@ export function ProfileHeader({
                     ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
                     : "",
                 )}
-                aria-label="Gyorsbillentyűk"
-                title="Gyorsbillentyűk"
+                aria-label={t("chrome.shortcuts")}
+                title={t("chrome.shortcuts")}
                 data-tour-anchor="shortcuts"
                 onClick={() => setShortcutsOpen(true)}
               >
@@ -314,8 +316,8 @@ export function ProfileHeader({
                         ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
                         : "",
                     )}
-                    aria-label="Főmenü"
-                    title="Főmenü"
+                    aria-label={t("chrome.menu")}
+                    title={t("chrome.menu")}
                   >
                     <Menu className="h-4 w-4" />
                   </button>
@@ -329,13 +331,13 @@ export function ProfileHeader({
                       <DropdownMenuItem asChild>
                         <Link to="/devices" search={{ profile: profileId }}>
                           <Users className="mr-2 h-4 w-4" />
-                          Eszközeim
+                          {t("chrome.devices")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/logs" search={{ profile: profileId }}>
                           <CalendarClock className="mr-2 h-4 w-4" />
-                          Napló
+                          {t("chrome.log")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -343,7 +345,7 @@ export function ProfileHeader({
                   <DropdownMenuItem asChild>
                     <Link to="/stats" search={{ profile: profileId }}>
                       <CalendarClock className="mr-2 h-4 w-4" />
-                      Aktivitás & Ciklusok
+                      {t("chrome.activity")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -352,7 +354,7 @@ export function ProfileHeader({
                     }}
                   >
                     <GraduationCap className="mr-2 h-4 w-4" />
-                    Tudásbázis / GYIK
+                    {t("chrome.knowledge")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
@@ -360,7 +362,7 @@ export function ProfileHeader({
                     }}
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Kezdő lépések / Interaktív bemutató
+                    {t("chrome.tour")}
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
@@ -374,13 +376,13 @@ export function ProfileHeader({
                       }}
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      Törzsadatok
+                      {t("chrome.master")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
                       <Settings className="mr-2 h-4 w-4" />
-                      Beállítások
+                      {t("chrome.settings")}
                     </Link>
                   </DropdownMenuItem>
                   {visitorShell ? null : (
@@ -405,15 +407,15 @@ export function ProfileHeader({
                                   ? `mesh_backup_full_${ymdDash()}.json`
                                   : `mesh_backup_${String(wsName).replaceAll(" ", "_")}_${ymdDash()}.json`;
                               downloadText(fn, txt);
-                              toast.success("Gyors mentés letöltve.");
+                              toast.success(t("chrome.quickSaved"));
                             } catch (e: any) {
-                              toast.error(e?.message || "Gyors mentés sikertelen.");
+                              toast.error(e?.message || t("chrome.quickSaveFail"));
                             }
                           })();
                         }}
                       >
                         <Download className="mr-2 h-4 w-4" />
-                        Gyors mentés (.json)
+                        {t("chrome.quickSave")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onSelect={() => {
@@ -425,7 +427,7 @@ export function ProfileHeader({
                         }}
                       >
                         <Upload className="mr-2 h-4 w-4" />
-                        Mentés betöltése…
+                        {t("chrome.loadBackup")}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -438,7 +440,7 @@ export function ProfileHeader({
                         }}
                       >
                         <QrCode className="mr-2 h-4 w-4" />
-                        Eszköz hozzáadása QR-rel
+                        {t("chrome.addDevice")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -449,7 +451,7 @@ export function ProfileHeader({
                     }}
                   >
                     <Lock className="mr-2 h-4 w-4" />
-                    {visitorShell ? "Másik eset" : "Kijelentkezés"}
+                    {visitorShell ? t("chrome.otherCase") : t("chrome.signOut")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -480,7 +482,7 @@ export function ProfileHeader({
               >
                 <p className="text-xs leading-snug text-muted-foreground">
                   <span className="font-semibold uppercase tracking-wider text-foreground">
-                    A helyzet:{" "}
+                    {t("chrome.situation")}{" "}
                   </span>
                   {situationLead}
                 </p>
@@ -509,10 +511,10 @@ export function ProfileHeader({
                     featureId: "header.pdca_rotate",
                   });
                 }}
-                aria-label="Forgasd el a váltótárcsát"
-                title="Forgasd el a váltótárcsát"
+                aria-label={t("pdca.rotate")}
+                title={t("pdca.rotate")}
               >
-                <span className="truncate">👈 Forgasd el a váltótárcsát</span>
+                <span className="truncate">👈 {t("pdca.rotate")}</span>
               </button>
               <div className="flex h-9 min-w-0 w-full items-center overflow-hidden rounded-lg border border-border bg-card/40 px-3 focus-within:border-ring">
                 <Input
@@ -524,14 +526,14 @@ export function ProfileHeader({
                       openOmniSearch();
                     }
                   }}
-                  placeholder="Globális keresés — funkciók, tételek, célok…"
+                  placeholder={t("chrome.search")}
                   className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <button
                   type="button"
                   className="cursor-pointer border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
-                  title="Keresés"
-                  aria-label="Keresés"
+                  title={t("chrome.searchBtn")}
+                  aria-label={t("chrome.searchBtn")}
                   onClick={openOmniSearch}
                 >
                   <Search className="h-4 w-4" />
@@ -558,7 +560,7 @@ export function ProfileHeader({
           <DialogContent className="max-w-xl border-border bg-card text-foreground shadow-2xl">
             <div className="space-y-3">
               <div className="pr-8">
-                <DialogTitle className="text-lg font-semibold text-foreground">Gyorsbillentyűk</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-foreground">{t("chrome.shortcuts")}</DialogTitle>
                 <DialogDescription className="mt-1 text-sm text-muted-foreground">
                   Navigáció és fókuszváltás desktopon. Ha épp beviteli mezőben gépelsz, a navigációs gyorsbillentyűk nem futnak.
                 </DialogDescription>
@@ -587,7 +589,7 @@ export function ProfileHeader({
                   <div className="mt-1 text-[11px] text-muted-foreground">Fallback: Alt+Shift+PageUp/PageDown, Ctrl+Alt+←/→</div>
                 </div>
                 <div className="rounded-xl border border-border bg-card/40 p-3 sm:col-span-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">PDCA negyed forgatás</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("chrome.pdcaQuarter")}</div>
                   <div className="mt-1 font-mono">↓</div>
                   <div className="mt-1 text-[11px] text-muted-foreground">Fallback: Alt + Shift + ↓</div>
                 </div>

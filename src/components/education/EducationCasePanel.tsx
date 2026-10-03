@@ -1,4 +1,5 @@
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
+import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -138,6 +139,9 @@ export function EducationCasePanel(props: {
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Oktatás · szimulációs tréning
+          {model.kind === "campus" || model.kind === "cyber" ? (
+            <HelpIcon kbId="lesson-campus" title="Szcenárió-lecke" />
+          ) : null}
         </p>
         <h3 className="mt-0.5 text-sm font-semibold text-foreground">{model.title}</h3>
         <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>

@@ -1,20 +1,18 @@
 import { HelpIcon } from "@/components/HelpIcon";
-import {
-  PRO_CHART_CALLOUT,
-  PRO_CHART_WHY,
-} from "@/content/branding";
+import { useI18n } from "@/i18n";
 import { PRO_LINE_CLASS, PRO_OPT, PRO_PESS, PRO_REAL, PRO_SWATCH_CLASS } from "@/lib/proChart";
 
 export function ProChartCallout(props: { compact?: boolean; className?: string }) {
   const { compact = false, className } = props;
+  const { t } = useI18n();
   return (
     <aside className={className ?? "rounded-xl border border-border/60 bg-card px-4 py-3"}>
       <div className="flex items-start gap-2">
-        <p className="min-w-0 text-sm font-semibold text-foreground">{PRO_CHART_CALLOUT}</p>
-        <HelpIcon kbId="pro-chart" title="Hogyan értelmezzük a PRO-grafikont?" />
+        <p className="min-w-0 text-sm font-semibold text-foreground">{t("brand.proCallout")}</p>
+        <HelpIcon kbId="pro-chart" title={t("brand.proSketchAria")} />
       </div>
       {compact ? null : (
-        <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{PRO_CHART_WHY}</p>
+        <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{t("brand.proWhy")}</p>
       )}
     </aside>
   );
@@ -28,13 +26,14 @@ const SKETCH = {
 
 /** Dekoratív PRO-sáv (nem adat). A feliratok a vonalak mellett, nem a vonalon. */
 export function ProChartSketch() {
+  const { t } = useI18n();
   return (
     <figure className="rounded-2xl border border-border/60 bg-card p-4">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        Pesszimista · Realista · Optimista
+        {t("brand.proSketch")}
       </div>
-      <svg viewBox="0 0 360 140" className="mt-3 h-36 w-full" role="img" aria-label="PRO-grafikon vázlat: három pálya">
-        <title>PRO-grafikon vázlat</title>
+      <svg viewBox="0 0 360 140" className="mt-3 h-36 w-full" role="img" aria-label={t("brand.proSketchAria")}>
+        <title>{t("brand.proSketchAria")}</title>
         <line x1="36" y1="12" x2="36" y2="118" stroke="currentColor" strokeOpacity="0.22" />
         <line x1="36" y1="118" x2="348" y2="118" stroke="currentColor" strokeOpacity="0.22" />
         <polyline
@@ -70,13 +69,13 @@ export function ProChartSketch() {
       </svg>
       <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
         <li className="inline-flex items-center gap-1.5">
-          <span className={PRO_SWATCH_CLASS.pess} aria-hidden /> Pesszimista
+          <span className={PRO_SWATCH_CLASS.pess} aria-hidden /> {t("brand.pess")}
         </li>
         <li className="inline-flex items-center gap-1.5">
-          <span className={PRO_SWATCH_CLASS.real} aria-hidden /> Realista
+          <span className={PRO_SWATCH_CLASS.real} aria-hidden /> {t("brand.real")}
         </li>
         <li className="inline-flex items-center gap-1.5">
-          <span className={PRO_SWATCH_CLASS.opt} aria-hidden /> Optimista
+          <span className={PRO_SWATCH_CLASS.opt} aria-hidden /> {t("brand.opt")}
         </li>
       </ul>
     </figure>

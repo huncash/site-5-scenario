@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 
 import { AppLicenseGate } from "@/components/AppLicenseGate";
 import { ScenarioDoor } from "@/components/ScenarioDoor";
+import { useI18n } from "@/i18n";
 import { hasWorkspaceAccess, isAppWorkspaceHost, isLocalDevHost } from "@/lib/license";
 import { useVault } from "@/lib/vault";
 
@@ -40,6 +41,7 @@ function Loading() {
 
 function VaultGate() {
   const { state } = useVault();
+  const { locale } = useI18n();
   const [homeMode, setHomeMode] = useState<HomeMode>("door");
   const [licenseTick, setLicenseTick] = useState(0);
   const appHost = typeof window !== "undefined" && isAppWorkspaceHost();
@@ -62,7 +64,12 @@ function VaultGate() {
   const dashboard =
     state.status === "unlocked" ? (
       <Suspense fallback={<Loading />}>
-        <FinanceDashboard vaultKey={state.key} profileId={state.profile.id} profileName={state.profile.name} />
+        <FinanceDashboard
+          key={locale}
+          vaultKey={state.key}
+          profileId={state.profile.id}
+          profileName={state.profile.name}
+        />
       </Suspense>
     ) : null;
 

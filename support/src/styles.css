@@ -22,9 +22,42 @@ html, body, #root { margin: 0; min-height: 100%; background: var(--app-bg); colo
 body { font-size: 14px; }
 a { color: var(--accent-emerald); }
 .embed { padding: 12px 14px 16px; }
-.full { max-width: 720px; margin: 0 auto; padding: 28px 16px 64px; }
+.full { max-width: 52rem; margin: 0 auto; padding: 28px 16px 64px; }
 h1 { font-size: 1.25rem; margin: 0 0 8px; }
 h2 { font-size: 1rem; margin: 16px 0 8px; }
+h3 { font-size: 0.95rem; margin: 14px 0 6px; color: var(--text-main); }
+.article h1 { font-size: 1.45rem; line-height: 1.25; margin-bottom: 12px; }
+.article h2 { font-size: 1.05rem; margin: 22px 0 8px; color: var(--text-main); }
+.article p { margin: 0 0 10px; }
+.article ul, .article ol { margin: 0 0 12px; padding-left: 1.25rem; }
+.article li { margin: 0 0 6px; }
+.article strong { color: var(--text-main); }
+.article code {
+  font-size: 12px;
+  background: var(--dropdown-hover);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 1px 5px;
+}
+.article blockquote.tip {
+  margin: 12px 0 16px;
+  border-left: 3px solid var(--accent-emerald);
+  background: var(--card-bg);
+  border-radius: 0 12px 12px 0;
+  padding: 10px 12px;
+}
+.article blockquote.tip p { margin: 0; color: var(--text-main); }
+.article .table-wrap { overflow-x: auto; margin: 12px 0 16px; }
+.article table { width: 100%; min-width: 36rem; border-collapse: collapse; font-size: 12px; }
+.article th, .article td {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  color: var(--text-muted);
+}
+.article th { color: var(--text-main); font-weight: 650; }
 p, li { color: var(--text-muted); line-height: 1.45; }
 .yt { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; margin: 10px 0 12px; }
 .yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }

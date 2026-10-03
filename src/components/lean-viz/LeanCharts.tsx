@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { HelpIcon } from "@/components/HelpIcon";
+import { currencyUnit } from "@/i18n/currency";
 import { formatMoney } from "@/lib/finance";
 import {
   compactHuf,
@@ -278,7 +279,7 @@ export function WaterfallChart({
   const zeroY = negFrac > 0 ? toY(0) : plotBottom;
   const active = laid.rows.find((r) => r.key === hover) ?? null;
   const caption = active
-    ? `${active.label}: ${compactHuf(active.shown)} Ft · állás ${compactHuf(active.end)} Ft${
+    ? `${active.label}: ${compactHuf(active.shown)} ${currencyUnit()} · állás ${compactHuf(active.end)} ${currencyUnit()}${
         laid.open > 0 && active.role === "delta"
           ? ` · a bevétel ${Math.round((Math.abs(active.shown) / laid.open) * 100)}%-a`
           : ""
@@ -301,7 +302,7 @@ export function WaterfallChart({
           </clipPath>
         </defs>
         <text x={12} y={yMid} fill={AXIS} fontSize={9} textAnchor="middle" transform={`rotate(-90 12 ${yMid})`}>
-          Ft
+          {currencyUnit()}
         </text>
         {laid.ticks.map((t) => (
           <g key={t}>
@@ -553,7 +554,7 @@ export function SmallMultiples({
   series,
   height = 148,
   xLabel = "Hónap",
-  yLabel = "Összeg (Ft)",
+  yLabel = `Összeg (${currencyUnit()})`,
 }: {
   series: SparkSeries[];
   height?: number;
@@ -670,7 +671,7 @@ export function SmallMultiples({
       </svg>
       <ChartHoverSlot>
         {hoverMonth
-          ? `${hoverMonth}: ${series.map((s) => `${s.label} ${compactHuf(s.points[xi ?? 0]?.y ?? 0)} Ft`).join(" · ")}`
+          ? `${hoverMonth}: ${series.map((s) => `${s.label} ${compactHuf(s.points[xi ?? 0]?.y ?? 0)} ${currencyUnit()}`).join(" · ")}`
           : null}
       </ChartHoverSlot>
     </div>
@@ -833,7 +834,7 @@ export function FlowSankey({
               const [from, to] = hot.split(">");
               const l = links.find((x) => x.from === from && x.to === to);
               return l
-                ? `${from} → ${to}: ${compactHuf(l.value)} Ft (${((l.value / total) * 100).toFixed(0)}%)`
+                ? `${from} → ${to}: ${compactHuf(l.value)} ${currencyUnit()} (${((l.value / total) * 100).toFixed(0)}%)`
                 : null;
             })()
           : null}

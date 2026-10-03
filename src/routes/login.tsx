@@ -29,6 +29,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { ImportQrDialog } from "@/components/ProfileTransfer";
+import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
+import { useI18n } from "@/i18n";
 import { DEMO_PASSWORD, DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
 import {
   LAST_PROFILE_KEY,
@@ -44,6 +46,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { state, unlockById, lock, beginCreate, backToPicker, createProfile } = useVault();
+  const { t } = useI18n();
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -98,7 +101,7 @@ function LoginPage() {
       }
       await navigate({ to: "/" });
     } catch (err: any) {
-      setError(err?.message || "Demo belépési hiba.");
+      setError(err?.message || t("login.demoFail"));
     } finally {
       setBusy(false);
       demoInFlightRef.current = false;
@@ -168,7 +171,7 @@ function LoginPage() {
       }
 
       if (!targetId) {
-        setError("Nincs elérhető profil az eszközön. Hozz létre újat vagy importálj QR kóddal.");
+        setError(t("login.noProfile"));
         setBusy(false);
         return;
       }
@@ -184,10 +187,10 @@ function LoginPage() {
         }
         void navigate({ to: "/" });
       } else {
-        setError("Hibás mesterjelszó. Próbáld újra.");
+        setError(t("login.badPassword"));
       }
     } catch (err: any) {
-      setError(err?.message || "Hiba történt a feloldás során.");
+      setError(err?.message || t("login.unlockFail"));
     } finally {
       setBusy(false);
     }
@@ -199,10 +202,11 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex justify-between text-[12px]">
+        <div className="flex items-center justify-between text-[12px]">
           <Link to="/" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-            ← Főoldal
+            {t("login.home")}
           </Link>
+          <ViewSettingsMenu />
         </div>
         {/* Device Status Header */}
         <div className="flex items-center justify-between rounded-xl border border-border/80 bg-card p-4 shadow-sm">
@@ -213,23 +217,21 @@ function LoginPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Eszköz állapota
+                  {t("login.deviceStatus")}
                 </span>
                 {hasProfiles ? (
                   <Badge variant="outline" className="gap-1 bg-emerald-500/10 text-[10px] text-emerald-500 border-emerald-500/30">
                     <UserCheck className="h-3 w-3" />
-                    Ismert eszköz ({profiles.length} profil)
+                    {t("login.knownDevice", { count: profiles.length })}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="gap-1 bg-amber-500/10 text-[10px] text-amber-500 border-amber-500/30">
-                    Ismeretlen / Törölt cache
+                    {t("login.unknownDevice")}
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {hasProfiles
-                  ? "Helyi titkosított profilok elérhetők ezen a készüléken"
-                  : "Nincs mentett profil vagy kiürült a helyi tároló"}
+                {hasProfiles ? t("login.profilesOk") : t("login.noProfiles")}
               </p>
             </div>
           </div>
@@ -247,10 +249,10 @@ function LoginPage() {
 
           <div className="text-center space-y-1.5">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Profil megnyitása
+              {t("login.title")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Add meg a mesterjelszót a helyi profil megnyitásához (az eseteid ezen az eszközön vannak).
+              {t("login.lead")}
             </p>
           </div>
 
@@ -259,9 +261,9 @@ function LoginPage() {
             <div className="mt-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 flex items-center justify-between">
               <div className="text-xs">
                 <p className="font-semibold text-emerald-400">
-                  Aktív belépés: {state.profile.name}
+                  {t("login.active", { name: state.profile.name })}
                 </p>
-                <p className="text-muted-foreground">A profil jelenleg meg van nyitva.</p>
+                <p className="text-muted-foreground">{t("login.openNow")}</p>
               </div>
               <div className="flex gap-1.5">
                 <Button
@@ -277,7 +279,7 @@ function LoginPage() {
                     void navigate({ to: "/" });
                   }}
                 >
-                  Vezérlőpult
+                  {t("login.dashboard")}
                   <ArrowRight className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="outline" className="h-7 text-xs text-destructive hover:bg-destructive/10" onClick={() => void lock()}>
@@ -292,11 +294,11 @@ function LoginPage() {
             {hasProfiles && (
               <div className="space-y-2">
                 <Label htmlFor="profile-select" className="text-xs font-medium">
-                  Profil kiválasztása
+                  {t("login.pickProfile")}
                 </Label>
                 <Select value={selectedId} onValueChange={setSelectedId}>
                   <SelectTrigger id="profile-select" className="w-full">
-                    <SelectValue placeholder="Válassz profilt..." />
+                    <SelectValue placeholder={t("login.pickPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {profiles.map((p) => (
@@ -311,7 +313,7 @@ function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="login-pw" className="text-xs font-medium">
-                Mesterjelszó {selectedProfile ? `— ${selectedProfile.name}` : ""}
+                {t("login.password")} {selectedProfile ? `— ${selectedProfile.name}` : ""}
               </Label>
 
               <div className="relative">
@@ -322,7 +324,7 @@ function LoginPage() {
                   id="login-pw"
                   type={showPw ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="Add meg a mesterjelszót..."
+                  placeholder={t("login.passwordPlaceholder")}
                   className="pl-9 pr-10"
                   value={pw}
                   onChange={(e) => {
@@ -356,12 +358,12 @@ function LoginPage() {
               {busy ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin" />
-                  Megnyitás...
+                  {t("chrome.unlocking")}
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Megnyitás
+                  {t("chrome.unlock")}
                 </>
               )}
             </Button>
@@ -370,7 +372,7 @@ function LoginPage() {
           {/* Additional Options */}
           <div className="mt-6 border-t border-border/60 pt-5 space-y-3">
             <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-              Egyéb lehetőségek
+              {t("login.other")}
             </p>
 
             <div className="grid grid-cols-2 gap-2">
@@ -381,7 +383,7 @@ function LoginPage() {
                 onClick={() => void beginCreate()}
               >
                 <UserPlus className="h-3.5 w-3.5" />
-                Új profil
+                {t("login.newProfile")}
               </Button>
 
               <Button
@@ -391,7 +393,7 @@ function LoginPage() {
                 onClick={() => setImportOpen(true)}
               >
                 <QrCode className="h-3.5 w-3.5" />
-                QR Import
+                {t("login.qrImport")}
               </Button>
             </div>
 
@@ -400,14 +402,13 @@ function LoginPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold tracking-wide text-foreground">
-                      Demó indító — 7 gazdasági eset
+                      {t("login.demoTitle")}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      1 kattintás: létrehoz / felold + feltölt 3 év “Vállalkozás1” adatot + “Projekt1” modellt. Jelszó:{" "}
-                      <span className="font-mono">{DEMO_PASSWORD}</span>
+                      {t("login.demoBody", { password: DEMO_PASSWORD })}
                     </p>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">Demó</Badge>
+                  <Badge variant="outline" className="text-[10px]">{t("login.demoBadge")}</Badge>
                 </div>
 
                 <div className="mt-3 grid grid-cols-1 gap-2">

@@ -14,7 +14,8 @@ export type KnowledgeBaseCategoryId =
   | "cashflow"
   | "bank-sync"
   | "settings"
-  | "scenario";
+  | "scenario"
+  | "lessons";
 
 export type KnowledgeBaseArticleId =
   | "workspaces-projects"
@@ -47,7 +48,12 @@ export type KnowledgeBaseArticleId =
   | "deals-consolidation"
   | "pro-chart"
   | "why-szcenario"
-  | "kahn-rand";
+  | "kahn-rand"
+  | "lesson-community"
+  | "lesson-household"
+  | "lesson-bcp"
+  | "lesson-demography"
+  | "lesson-campus";
 
 export type KnowledgeBaseArticle = {
   id: KnowledgeBaseArticleId;
@@ -66,6 +72,7 @@ export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }
   { id: "bank-sync", title: "5. Banki Szinkron & Hash Dedup" },
   { id: "settings", title: "6. Beállítások & Danger Zone" },
   { id: "scenario", title: "7. Szcenárió & PRO-grafikon" },
+  { id: "lessons", title: "8. Szcenárió-leckék" },
 ];
 
 export const KB_ARTICLES: KnowledgeBaseArticle[] = [
@@ -590,6 +597,88 @@ A Szcenárió ugyanezt viszi a Master Baseline törzsre. A PDCA-ban a fa három 
 💡 Pro Tip / Legjobb gyakorlat
 - Először a pesszimista ágat számold. Aki a nehéz sávot is látja, az tartja a folytonosságot — Kahn óta ez a módszer lényege.`,
     tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás"],
+  },
+  {
+    id: "lesson-community",
+    category: "lessons",
+    title: "Kisközösségi válságkezelés — víz, LoRa, melegedő",
+    summary:
+      "Lajtoskocsi literben, offline LoRa mesh, téli melegedő zóna. A motor a runway-t és a lefedettséget számolja — local-first.",
+    body: `🎯 Mire jó?
+- Hogy a civil kör 72 órán literben, órában és lefedett utcában beszéljen, ne „kitartunk”-ban.
+
+⚙️ Hogyan működik?
+Három helyzet egy vázon: szennyezett vezetékes víz + lajtoskocsi, áram- és távközlés-kiesés + LoRa, extrém tél + melegedő. A Master Baseline (létszám, készlet, energia) adott; a szcenárió a sokkot mozgatja.
+
+A teljes lecke a support tudástárban: helyzetlemez, potenciál, lépésről lépésre, kapcsolat a demo12 pályához.
+
+💡 Pro Tip / Legjobb gyakorlat
+- Először a pesszimista 72 órát számold. A kannás kör és a fűtött köbméter a muda, ha üresen megy.`,
+    tags: ["közösség", "víz", "LoRa", "melegedő", "demo12"],
+  },
+  {
+    id: "lesson-household",
+    category: "lessons",
+    title: "Háztartási tartalék — 72 óra, víz, néma hálózat",
+    summary:
+      "Power station + zóna, szűrési lánc, papírtérkép és PMR. Ugyanaz a fizikai motor, mint a céges BCP — kisebb lépték.",
+    body: `🎯 Mire jó?
+- Hogy a család Wh-ban, literben és találkozási pontban tervezzen, ne „van otthon valami”-ben.
+
+⚙️ Hogyan működik?
+Blackout, csapvíz-tilalom, mobilnet-kiesés. A demo13 ugyanezt a 72 órás ablakot viszi: Energy Autonomy, Resource Runway, TTR.
+
+💡 Pro Tip / Legjobb gyakorlat
+- A nyers, a köztes és az ivóvíz három edény. A találkozási pontot járjátok végig nappal.`,
+    tags: ["háztartás", "blackout", "ivóvíz", "PMR", "demo13"],
+  },
+  {
+    id: "lesson-bcp",
+    category: "lessons",
+    title: "Vállalati BCP — SaaS, ellátás, kulcsmunkatárs",
+    summary:
+      "Local-first élesítés, lean kvóta, keresztképzési mátrix. A TTR órában van, nem „amint lehet”.",
+    body: `🎯 Mire jó?
+- Hogy a kiesés, a blokád és a hiányzó műszak ugyanazon a PDCA-héjon fusson.
+
+⚙️ Hogyan működik?
+demo11 / demo26 a vendor-függés, demo21–24 a lánc és a dokk. A mátrix a szerephez ketőst rendel. A mentés az, amit üres gépre vissza tudsz állítani.
+
+💡 Pro Tip / Legjobb gyakorlat
+- Amit a felhőből olvasol, a kiesésben nincs. Amit a saját gépeden írsz, az a tartalék.`,
+    tags: ["BCP", "SaaS", "SMED", "keresztképzés", "demo11"],
+  },
+  {
+    id: "lesson-demography",
+    category: "lessons",
+    title: "Demográfiai implózió — TFR-mátrix",
+    summary:
+      "Korea, Kína, Olaszország, Japán, Magyarország: rés a 2,1-hez, kezelési pálya. Helyi másolat, nem élő API.",
+    body: `🎯 Mire jó?
+- Hogy a születésszámot korfával és időállandóval olvasd, ne szalagcímmel.
+
+⚙️ Hogyan működik?
+A demo14 a 2023-as helyi TFR-pillanatképet viszi. A lecke a közelmúltbeli sávot is kirakja. A robot nem TFR-eszköz; a támogatás késleltetett.
+
+💡 Pro Tip / Legjobb gyakorlat
+- Először a rést és a 65+ arányt tedd egymás mellé. Éves CHECK, nem 72 órás.`,
+    tags: ["TFR", "demográfia", "foresight", "demo14"],
+  },
+  {
+    id: "lesson-campus",
+    category: "lessons",
+    title: "Oktatási válság — kiber, hősziget, helyi kör",
+    summary:
+      "Analóg vizsga, kWh-kvóta, műanyagmentes menza. Hallgatói BCP: óra, kilowattóra, kilogramm.",
+    body: `🎯 Mire jó?
+- Hogy a campus a portál kiesése, a hőhullám és a szakadó lánc alatt is vizsgáztasson és etessen.
+
+⚙️ Hogyan működik?
+demo18 izolációs idő, demo17 kvóta, demo16 Lean a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
+
+💡 Pro Tip / Legjobb gyakorlat
+- Az izolációt órában méred a riasztástól a leválasztásig. A dobott étel selejt: elhatárolod.`,
+    tags: ["oktatás", "campus", "kiber", "hősziget", "demo17", "demo18"],
   },
 ];
 

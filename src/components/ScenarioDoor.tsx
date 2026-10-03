@@ -9,6 +9,7 @@ import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSession";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
 import { EDUCATION_SEGMENTS, isEducationSegment } from "@/lib/educationCases";
+import { industryCasesByDoor, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment, RESILIENCE_SEGMENTS } from "@/lib/resilienceCases";
 import { isStrategySegment, STRATEGY_SEGMENTS } from "@/lib/strategyCases";
 import {
@@ -21,20 +22,8 @@ import {
 import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
 import { HomePricing } from "@/components/home/HomePricing";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
-import {
-  DAILY_OPS_BODY,
-  DAILY_OPS_TITLE,
-  HERO_DEMO_PREVIEW_BODY,
-  HERO_DEMO_PREVIEW_TITLE,
-  HERO_HEADLINE,
-  HERO_LOCAL_FIRST_BODY,
-  HERO_LOCAL_FIRST_LABEL,
-  HERO_SUBHEADLINE,
-  WHY_BODY,
-  WHY_LEAD,
-  WHY_TITLE,
-} from "@/content/branding";
 import { DEMO_STARTER_BLURB } from "@/content/pricing/tiers";
+import { useI18n, type MessageKey } from "@/i18n";
 import { useVault } from "@/lib/vault";
 import { localdb } from "@/lib/localdb";
 
@@ -111,23 +100,38 @@ const ECONOMIC_INDUSTRIES: Array<{
       "Startup cash-flow, Lean VSM, campus energia, kiberincidens — pénzügyi sáv és Poka-Yoke mikro.",
   },
   {
+    id: "healthcare",
+    open: true,
+    title: "Egészségügy",
+    blurb: "Kórházi blackout: UPS, dízel, ICU / műtő / inkubátor. Lean triázs a szűkös kW-on.",
+  },
+  {
     id: "manufacturing",
-    title: "Feldolgozóipar",
-    blurb: "Később. Ugyanaz a gazdasági kérdés, más költség- és kapacitáskép.",
+    open: true,
+    title: "Termelő- és gyártóipar",
+    blurb: "Beszállítói sokk és minőségi vészhelyzet. SMED, OEE, Poka-Yoke, tétel-elhatárolás.",
+  },
+  {
+    id: "logistics",
+    open: true,
+    title: "Logisztika",
+    blurb: "WMS-kiesés a cross-dockon, üzemanyagár-sokk a flottán. Lead time és üres km.",
+  },
+  {
+    id: "services",
+    open: true,
+    title: "Szabályozás és SaaS-függés",
+    blurb: "Adósokk az árrésen, vagy a kritikus felhős szoftver megszűnése — local-first átállás.",
   },
   {
     id: "trade",
     title: "Kereskedelem",
     blurb: "Később. Készlet, árrés, csatorna — más szerkezet, ugyanaz a módszer.",
   },
-  {
-    id: "services",
-    title: "Szolgáltatás",
-    blurb: "Később. Kapacitás és megbízás hullámzása, nem áru.",
-  },
 ];
 
 export function ScenarioDoor() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { unlockById, createProfile } = useVault();
   const [step, setStep] = useState<ScenarioDoorStep>("type");
@@ -214,7 +218,11 @@ export function ScenarioDoor() {
       stored === "industry" ||
       stored === "strategy" ||
       stored === "resilience" ||
-      stored === "education"
+      stored === "education" ||
+      stored === "healthcare" ||
+      stored === "manufacturing" ||
+      stored === "logistics" ||
+      stored === "services"
         ? stored
         : "type",
     );
@@ -244,7 +252,7 @@ export function ScenarioDoor() {
       preferDashboardHome();
       await navigate({ to: "/" });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Nem sikerült megnyitni az esetet.");
+      setError(err instanceof Error ? err.message : t("door.openFail"));
     } finally {
       setBusyId(null);
       inFlight.current = false;
@@ -261,9 +269,9 @@ export function ScenarioDoor() {
       <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-foreground">Szcenárió</div>
-            <div className="truncate text-[11px] leading-tight text-muted-foreground" title="Jövőképek és döntési pályák • 100% lokális biztonság">
-              Jövőképek és döntési pályák • 100% lokális biztonság
+            <div className="truncate text-sm font-semibold text-foreground">{t("brand.name")}</div>
+            <div className="truncate text-[11px] leading-tight text-muted-foreground" title={t("brand.tagline")}>
+              {t("brand.tagline")}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -272,7 +280,7 @@ export function ScenarioDoor() {
               asChild
               className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
             >
-              <Link to="/login">Belépés</Link>
+              <Link to="/login">{t("chrome.login")}</Link>
             </Button>
           </div>
         </div>
@@ -284,16 +292,16 @@ export function ScenarioDoor() {
             szcenario.hu
           </p>
           <h1 className="mx-auto max-w-3xl text-balance text-[1.7rem] font-semibold leading-[1.18] tracking-tight text-foreground sm:text-3xl md:text-4xl">
-            {HERO_HEADLINE}
+            {t("brand.heroHeadline")}
           </h1>
           <p className="mx-auto max-w-2xl text-pretty text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-            {HERO_SUBHEADLINE}
+            {t("brand.heroSub")}
           </p>
           <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-left text-[13px] leading-relaxed text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-emerald)]" />
             <p>
-              <span className="font-semibold text-foreground">{HERO_LOCAL_FIRST_LABEL}</span>{" "}
-              {HERO_LOCAL_FIRST_BODY}
+              <span className="font-semibold text-foreground">{t("brand.localFirstLabel")}</span>{" "}
+              {t("brand.localFirstBody")}
             </p>
           </div>
         </div>
@@ -302,10 +310,10 @@ export function ScenarioDoor() {
           <div className="space-y-12">
             <section className="space-y-3">
               <h2 className="text-sm font-semibold tracking-tight text-foreground">
-                {HERO_DEMO_PREVIEW_TITLE}
+                {t("brand.demoPreviewTitle")}
               </h2>
               <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">
-                {HERO_DEMO_PREVIEW_BODY}
+                {t("brand.demoPreviewBody")}
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {branches.map((b) => (
@@ -325,10 +333,10 @@ export function ScenarioDoor() {
                           if (b.segmentId) void openCase(b.segmentId);
                         }}
                       >
-                        Demó indítása
+                        {t("door.startDemo")}
                       </Button>
                       <Button asChild variant="outline" className="h-9 border-white/35 bg-transparent px-3 text-foreground">
-                        <a href={b.infoHref}>Részletek & árak</a>
+                        <a href={b.infoHref}>{t("door.detailsPrices")}</a>
                       </Button>
                     </div>
                   </div>
@@ -341,7 +349,7 @@ export function ScenarioDoor() {
                   disabled={busyId !== null || resetBusy}
                   onClick={() => go("hospitality")}
                 >
-                  További vendéglátós mintahelyzetek
+                  {t("door.moreHospitality")}
                 </button>
               </div>
             </section>
@@ -356,65 +364,65 @@ export function ScenarioDoor() {
 
             <section className="space-y-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {DAILY_OPS_TITLE}
+                {t("brand.dailyOpsTitle")}
               </div>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{DAILY_OPS_BODY}</p>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.dailyOpsBody")}</p>
             </section>
 
             <section className="space-y-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {WHY_TITLE}
+                {t("brand.whyTitle")}
               </div>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{WHY_LEAD}</p>
-              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{WHY_BODY}</p>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.whyLead")}</p>
+              <p className="max-w-3xl text-[13px] leading-relaxed text-muted-foreground">{t("brand.whyBody")}</p>
               <Link
                 to="/about"
                 className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
               >
-                Rólunk — a teljes háttérnarratíva
+                {t("door.aboutLink")}
               </Link>
             </section>
 
             <section className="space-y-3">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Szcenárió fajták
+                  {t("door.typesTitle")}
                 </div>
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                  Most a gazdasági ág, a BCP / működési reziliencia és a stratégiai előrejelzés nyitott. A többi ugyanerre a módszerre jön később.
+                  {t("door.typesLead")}
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {SCENARIO_TYPES.map((t) =>
-                  t.open ? (
-                    t.doorStep ? (
+                {SCENARIO_TYPES.map((row) =>
+                  row.open ? (
+                    row.doorStep ? (
                       <button
-                        key={t.id}
+                        key={row.id}
                         type="button"
-                        onClick={() => go(t.doorStep!)}
+                        onClick={() => go(row.doorStep!)}
                         className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4 text-left transition-colors hover:border-cyan-300/50"
                       >
-                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
-                        <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
-                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("door.now")}</div>
+                        <div className="mt-1 text-sm font-semibold text-foreground">{t(`door.type.${row.id}.title` as MessageKey)}</div>
+                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t(`door.type.${row.id}.blurb` as MessageKey)}</p>
                       </button>
                     ) : (
-                      <div key={t.id} className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4">
-                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
-                        <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
-                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                      <div key={row.id} className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("door.now")}</div>
+                        <div className="mt-1 text-sm font-semibold text-foreground">{t(`door.type.${row.id}.title` as MessageKey)}</div>
+                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t(`door.type.${row.id}.blurb` as MessageKey)}</p>
                       </div>
                     )
                   ) : (
                     <div
-                      key={t.id}
+                      key={row.id}
                       className="rounded-2xl border border-dashed border-white/15 bg-card p-4"
                     >
                       <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Később
+                        {t("door.later")}
                       </div>
-                      <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
-                      <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{t(`door.type.${row.id}.title` as MessageKey)}</div>
+                      <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t(`door.type.${row.id}.blurb` as MessageKey)}</p>
                     </div>
                   ),
                 )}
@@ -423,18 +431,18 @@ export function ScenarioDoor() {
 
             <section className="space-y-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Hogyan működik
+                {t("door.howTitle")}
               </div>
               <dl className="grid gap-3 sm:grid-cols-2">
-                <DoorFact term="Helyben számol">
-                  Terv, tény, eltérés a böngészőben készül. Nincs felhő‑adatbázis, nincs telemetria.
+                <DoorFact term={t("door.factLocal")}>
+                  {t("door.factLocalBody")}
                 </DoorFact>
-                <DoorFact term="Egy ágazat, több fókusz">
-                  Vendéglátás, stratégia, plusz BCP és előrejelzés: TTR, energia, készlet — ugyanaz a helyi motor.
+                <DoorFact term={t("door.factFocus")}>
+                  {t("door.factFocusBody")}
                 </DoorFact>
-                <DoorFact term="Demó = minta, nem ügyfél">{DEMO_STARTER_BLURB}</DoorFact>
-                <DoorFact term="Mentés nálad">
-                  Export/import, vagy közeli eszköz↔eszköz QR‑rel. A belépés mesterjelszóval az eszközön történik.
+                <DoorFact term={t("door.factDemo")}>{DEMO_STARTER_BLURB}</DoorFact>
+                <DoorFact term={t("door.factSave")}>
+                  {t("door.factSaveBody")}
                 </DoorFact>
               </dl>
             </section>
@@ -446,11 +454,9 @@ export function ScenarioDoor() {
 
         {step === "industry" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label="Szcenárió fajtái" aside="Gazdasági szcenárió" />
+            <DoorBack onClick={() => go("type")} label={t("door.backTypes")} aside={t("door.economicAside")} />
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Először az iparágat választod. Az élelmiszeriparban és a vendéglátásban
-              már be lehet lépni egy működő helyzetbe; a többi ugyanerre a
-              módszerre jön, más ritmussal.
+              {t("door.industryLead")}
             </p>
             <div className="grid gap-3">
               {ECONOMIC_INDUSTRIES.map((ind) =>
@@ -459,15 +465,26 @@ export function ScenarioDoor() {
                     key={ind.id}
                     type="button"
                     onClick={() =>
-                      go(ind.id === "strategy" ? "strategy" : ind.id === "education" ? "education" : "hospitality")
+                      go(
+                        ind.id === "strategy"
+                          ? "strategy"
+                          : ind.id === "education"
+                            ? "education"
+                            : ind.id === "healthcare" ||
+                                ind.id === "manufacturing" ||
+                                ind.id === "logistics" ||
+                                ind.id === "services"
+                              ? ind.id
+                              : "hospitality",
+                      )
                     }
                     className="rounded-2xl border border-border/70 bg-card p-5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-card/80"
                   >
                     <div className="text-xs font-semibold uppercase tracking-wider text-primary">
-                      Elérhető
+                      {t("door.available")}
                     </div>
-                    <div className="mt-1 text-lg font-semibold text-foreground">{ind.title}</div>
-                    <p className="mt-2 text-sm text-muted-foreground">{ind.blurb}</p>
+                    <div className="mt-1 text-lg font-semibold text-foreground">{t(`door.industry.${ind.id}.title` as MessageKey)}</div>
+                    <p className="mt-2 text-sm text-muted-foreground">{t(`door.industry.${ind.id}.blurb` as MessageKey)}</p>
                   </button>
                 ) : (
                     <div
@@ -475,10 +492,10 @@ export function ScenarioDoor() {
                       className="rounded-2xl border border-dashed border-white/15 bg-card p-5 text-left"
                     >
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Később
+                      {t("door.later")}
                     </div>
-                    <div className="mt-1 text-lg font-semibold text-foreground">{ind.title}</div>
-                    <p className="mt-2 text-sm text-muted-foreground">{ind.blurb}</p>
+                    <div className="mt-1 text-lg font-semibold text-foreground">{t(`door.industry.${ind.id}.title` as MessageKey)}</div>
+                    <p className="mt-2 text-sm text-muted-foreground">{t(`door.industry.${ind.id}.blurb` as MessageKey)}</p>
                   </div>
                 ),
               )}
@@ -488,10 +505,10 @@ export function ScenarioDoor() {
 
         {step === "hospitality" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label="Vissza" aside="További demó helyzetek" />
+            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={t("door.moreDemos")} />
             <p className="text-[12px] leading-relaxed text-muted-foreground">{DEMO_STARTER_BLURB}</p>
             <div className="grid gap-2">
-              {DEMO_SEGMENTS.filter((s) => !isStrategySegment(s.id) && !isResilienceSegment(s.id) && !isEducationSegment(s.id)).map((s) => (
+              {DEMO_SEGMENTS.filter((s) => !isStrategySegment(s.id) && !isResilienceSegment(s.id) && !isEducationSegment(s.id) && !isIndustrySegment(s.id)).map((s) => (
                 <Button
                   key={s.id}
                   type="button"
@@ -507,7 +524,7 @@ export function ScenarioDoor() {
                       {s.blurb}
                     </span>
                     {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
                     ) : null}
                   </span>
                 </Button>
@@ -518,7 +535,7 @@ export function ScenarioDoor() {
 
         {step === "education" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Oktatási és szimulációs tréningek"} />
+            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.education.title")} />
             <p className="text-[12px] leading-relaxed text-muted-foreground">
               {campaign?.id === "oktatas"
                 ? campaign.chooserIntro
@@ -541,7 +558,7 @@ export function ScenarioDoor() {
                       {s.blurb}
                     </span>
                     {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
                     ) : null}
                   </span>
                 </Button>
@@ -552,7 +569,7 @@ export function ScenarioDoor() {
 
         {step === "resilience" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Működési reziliencia és BCP"} />
+            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.type.disaster.title")} />
             <p className="text-[12px] leading-relaxed text-muted-foreground">
               {campaign && (campaign.id === "bcp" || campaign.id === "kozosseg" || campaign.id === "makro")
                 ? campaign.chooserIntro
@@ -575,7 +592,7 @@ export function ScenarioDoor() {
                       {s.blurb}
                     </span>
                     {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
                     ) : null}
                   </span>
                 </Button>
@@ -586,7 +603,7 @@ export function ScenarioDoor() {
 
         {step === "strategy" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Üzleti és stratégiai tervezés"} />
+            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.strategy.title")} />
             <p className="text-[12px] leading-relaxed text-muted-foreground">
               {campaign?.id === "strategia"
                 ? campaign.chooserIntro
@@ -609,7 +626,43 @@ export function ScenarioDoor() {
                       {s.blurb}
                     </span>
                     {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
+                    ) : null}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === "healthcare" || step === "manufacturing" || step === "logistics" || step === "services" ? (
+          <div className="space-y-4">
+            <DoorBack
+              onClick={() => go("industry")}
+              label={t("door.back")}
+              aside={t(`door.industry.${step}.title` as MessageKey)}
+            />
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              {t(`door.stepLead.${step}` as MessageKey)}
+            </p>
+            <div className="grid gap-2">
+              {industryCasesByDoor(step).map((s) => (
+                <Button
+                  key={s.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
+                  disabled={busyId !== null}
+                  onClick={() => void openCase(s.id)}
+                >
+                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{s.title}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {s.blurb}
+                    </span>
+                    {busyId === s.id ? (
+                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
                     ) : null}
                   </span>
                 </Button>
@@ -622,7 +675,7 @@ export function ScenarioDoor() {
 
         <div className="border-t border-border/40 pt-6 text-center">
           <Link to="/about" className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-            Rólunk
+            {t("chrome.about")}
           </Link>
           <span className="mx-2 text-muted-foreground/50">·</span>
           <button
@@ -652,7 +705,7 @@ export function ScenarioDoor() {
               })();
             }}
           >
-            {resetBusy ? "Beállítások megnyitása…" : "Eset újraindítása az eszközön"}
+            {resetBusy ? t("chrome.unlocking") : t("door.resetCase")}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { FAQ, KAHN_BONBON, LESSONS, SUPPORT_MAIL, SUPPORT_SLA, TIPS } from "./content";
+import { FAQ, KAHN_BONBON, LESSONS, SUPPORT_MAIL, SUPPORT_SLA, THEORY_LESSONS, TIPS, lessonBySlug } from "./content";
+import { Markdown } from "./markdown";
 
 function KahnBonbon() {
   return (
@@ -107,7 +108,7 @@ export function App() {
     return path.replace(/^\//, "");
   }, [path]);
 
-  const lesson = LESSONS.find((l) => l.slug === slug);
+  const lesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
   const wrap = embed ? "embed" : "full";
 
   let body: ReactNode = null;
@@ -128,6 +129,15 @@ export function App() {
           ))}
         </div>
         <KahnBonbon />
+        <h2>Tudástár — szcenárió-leckék</h2>
+        <p className="note">Részletes elmélet és know-how. A számítás a saját gépeden fut — nincs felhő-adat.</p>
+        <div className="nav">
+          {THEORY_LESSONS.map((l) => (
+            <a key={l.slug} href={`/${l.slug}`}>
+              {l.title}
+            </a>
+          ))}
+        </div>
         <h2>Írásos jegy</h2>
         <TicketForm />
       </>
@@ -157,9 +167,9 @@ export function App() {
   } else if (lesson) {
     body = (
       <>
-        <h1>{lesson.title}</h1>
-        <YouTube id={lesson.youtubeId} title={lesson.title} />
-        <p>{lesson.body}</p>
+        {lesson.markdown ? null : <h1>{lesson.title}</h1>}
+        {lesson.youtubeId ? <YouTube id={lesson.youtubeId} title={lesson.title} /> : null}
+        {lesson.markdown ? <Markdown source={lesson.body} /> : <p>{lesson.body}</p>}
       </>
     );
   } else if (slug === "kb/kahn-rand") {

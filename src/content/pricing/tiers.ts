@@ -1,3 +1,5 @@
+import { formatCurrency } from "@/i18n/currency";
+
 export type TierId = "starter" | "pro" | "expert";
 
 export type TierCore = {
@@ -164,7 +166,7 @@ export function yearlyPriceHuf(monthlyHuf: number): number {
 }
 
 export function formatHuf(n: number): string {
-  return `${new Intl.NumberFormat("hu-HU").format(n)} Ft`;
+  return formatCurrency(n);
 }
 
 export function getTierCore(id: string | null | undefined): TierCore | null {

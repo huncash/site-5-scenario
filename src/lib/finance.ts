@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/i18n/currency";
 import type {
   HumanResource,
   RealEstateProperty,
@@ -604,16 +605,8 @@ export function categoryLabel(c: string) {
   return CATEGORY_LABEL[c] ?? c;
 }
 
-export function formatMoney(n: number, currency = "HUF") {
-  try {
-    return new Intl.NumberFormat("hu-HU", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(n);
-  } catch {
-    return `${Math.round(n).toLocaleString("hu-HU")} ${currency}`;
-  }
+export function formatMoney(n: number, _currency = "HUF") {
+  return formatCurrency(n);
 }
 
 export function monthsUntil(deadlineISO: string) {

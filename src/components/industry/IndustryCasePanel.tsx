@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { HelpIcon } from "@/components/HelpIcon";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HospitalTriageSim } from "@/components/industry/HospitalTriageSim";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
@@ -123,7 +124,11 @@ export function IndustryCasePanel(props: {
         ? "CHECK: OEE, SMED, selejt. ACT: helyettesítő vagy tételzár."
         : cse.kind === "wms"
           ? "DO: a WMS sötét. A fizikai dokk a BCP."
-          : "CHECK: cash és muda. ACT: vágás, áthárítás vagy local-first.";
+          : cse.kind === "fuel"
+            ? "CHECK: üres km és fuvardíj. ACT: útvonal, kihasználtság, frekvencia."
+            : cse.kind === "tax"
+              ? "CHECK: cash és muda. ACT: vágás a változón vagy áthárítás."
+              : "CHECK: migrációs óra és TTR. ACT: local-first, dual-run vagy fizeted.";
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
@@ -136,6 +141,9 @@ export function IndustryCasePanel(props: {
               : cse.door === "logistics"
                 ? "Logisztika · BCP"
                 : "Működés / szabályozás"}
+          {cse.kind === "saas" || cse.kind === "supply" || cse.kind === "wms" || cse.kind === "fuel" ? (
+            <HelpIcon kbId="lesson-bcp" title="Szcenárió-lecke" />
+          ) : null}
         </p>
         <h3 className="mt-0.5 text-sm font-semibold text-foreground">{cse.title}</h3>
         <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>

@@ -131,6 +131,7 @@ import {
 import { decryptJSON, encryptJSON } from "@/lib/crypto";
 import { useVault } from "@/lib/vault";
 import { localdb, type BankRawRow, type EncGoalRow, type EncTxnRow, type Profile } from "@/lib/localdb";
+import { currencyUnit } from "@/i18n/currency";
 import { cn } from "@/lib/utils";
 import { getWorkspaceTransactionsGuard } from "@/lib/workspaceGuard";
 import { sha256Hex } from "@/lib/hash";
@@ -204,11 +205,13 @@ import {
 } from "@/lib/demoSeed";
 import { denyShowcaseWrite } from "@/lib/versionPolicy";
 import { EducationCasePanel } from "@/components/education/EducationCasePanel";
+import { IndustryCasePanel } from "@/components/industry/IndustryCasePanel";
 import { ResilienceCasePanel } from "@/components/resilience/ResilienceCasePanel";
 import { StrategyCasePanel } from "@/components/strategy/StrategyCasePanel";
 import { MasterBaselineCard } from "@/components/pdca/MasterBaselineCard";
 import { MASTER_BASELINE, resolveWorkspaceBaseline } from "@/lib/masterBaseline";
 import { buildEducationWhatIf, isEducationSegment } from "@/lib/educationCases";
+import { buildIndustryWhatIf, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment } from "@/lib/resilienceCases";
 import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
 import { buildStrategyWhatIf, isStrategySegment } from "@/lib/strategyCases";
@@ -3491,9 +3494,15 @@ export function FinanceDashboard({
         ? buildEducationWhatIf({ caseId: demoSegmentId, horizonMonths })
         : null;
 
+    const industryWhatIf =
+      demoSegmentId && isIndustrySegment(demoSegmentId)
+        ? buildIndustryWhatIf({ caseId: demoSegmentId, horizonMonths })
+        : null;
+
     const chart =
       strategyWhatIf?.chart ??
       educationWhatIf?.chart ??
+      industryWhatIf?.chart ??
       realistic.rows.map((r, i) => ({
         month: r.month,
         optimistic: optimistic.rows[i]?.cum ?? 0,
@@ -5810,7 +5819,7 @@ export function FinanceDashboard({
               </>
             }
           >
-            <SmallMultiples series={whatIf.multiples} xLabel="Hónap" yLabel="Ft" />
+            <SmallMultiples series={whatIf.multiples} xLabel="Hónap" yLabel={currencyUnit()} />
           </ChartChrome>
           <ProChartCallout className="mt-2 rounded-xl border border-border/60 bg-card px-4 py-3" />
         </div>
@@ -5857,11 +5866,17 @@ export function FinanceDashboard({
       <EducationCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
     ) : null;
 
+  const industryPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
+    isIndustrySegment(demoSegmentId) ? (
+      <IndustryCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
+    ) : null;
+
   const planStack = (
     <div className="pdca-tile-grid">
       {surface.inheritMasterBaseline ? <MasterBaselineCard context={inheritedBaseline} /> : null}
       {resiliencePanel("PLAN")}
       {educationPanel("PLAN")}
+      {industryPanel("PLAN")}
       {strategyPanel("PLAN")}
       {surface.showFinanceModules ? whatIfPanel : null}
       {surface.showFinanceModules ? (
@@ -7160,6 +7175,7 @@ export function FinanceDashboard({
           <div className="pdca-tile-grid">
             {resiliencePanel("DO")}
             {educationPanel("DO")}
+            {industryPanel("DO")}
             {strategyPanel("DO")}
             {lockedDoInventory}
           </div>
@@ -7183,6 +7199,7 @@ export function FinanceDashboard({
       <CardContent className="card-scroll-body relative z-10 grid gap-2.5 text-sm text-slate-300">
         {resiliencePanel("CHECK")}
         {educationPanel("CHECK")}
+        {industryPanel("CHECK")}
         {strategyPanel("CHECK")}
         {surface.showFinanceModules ? (
         <>
@@ -7759,7 +7776,7 @@ export function FinanceDashboard({
                       { id: "sav", label: "Megtakarítás", points: series.map((s) => ({ x: s.label, y: s.saving })) },
                     ]}
                     xLabel="Hónap"
-                    yLabel="Ft"
+                    yLabel={currencyUnit()}
                   />
                 </ChartChrome>
               </div>
@@ -7842,6 +7859,7 @@ export function FinanceDashboard({
       <CardContent className="card-scroll-body relative z-10 grid gap-3">
         {resiliencePanel("ACT")}
         {educationPanel("ACT")}
+        {industryPanel("ACT")}
         {strategyPanel("ACT")}
         {surface.showFinanceModules ? (
         <>

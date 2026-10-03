@@ -12,6 +12,13 @@ import {
   type EducationCaseId,
 } from "@/lib/educationCases";
 import {
+  INDUSTRY_SEGMENTS,
+  industryCaseById,
+  industrySurface,
+  isIndustrySegment,
+  type IndustryCaseId,
+} from "@/lib/industryCases";
+import {
   isResilienceSegment,
   RESILIENCE_SEGMENTS,
   resilienceCaseById,
@@ -38,7 +45,8 @@ export type DemoSegmentId =
   | "demo7_personal_pocket_seasonal_pilot"
   | StrategyCaseId
   | ResilienceCaseId
-  | EducationCaseId;
+  | EducationCaseId
+  | IndustryCaseId;
 
 export const DEMO_PASSWORD = "demo";
 export const DEMO_GENERATED_TAG = "generated:test";
@@ -111,6 +119,7 @@ export const DEMO_SEGMENTS: Array<{
   ...STRATEGY_SEGMENTS,
   ...RESILIENCE_SEGMENTS,
   ...EDUCATION_SEGMENTS,
+  ...INDUSTRY_SEGMENTS,
 ];
 
 /** Visitor-facing names + törzsadat per economic case (not the generic Vállalkozás2/Projekt2 shells). */
@@ -125,6 +134,7 @@ export function caseSurface(segmentId: DemoSegmentId): {
   if (isStrategySegment(segmentId)) return strategySurface(segmentId);
   if (isResilienceSegment(segmentId)) return resilienceSurface(segmentId);
   if (isEducationSegment(segmentId)) return educationSurface(segmentId);
+  if (isIndustrySegment(segmentId)) return industrySurface(segmentId);
   if (segmentId === "demo1_multisite_operator") {
     return {
       businessAlias: "Lánc / multi-site",
@@ -249,6 +259,10 @@ export function isDemoSegmentId(id: string | null | undefined): id is DemoSegmen
   return DEMO_SEGMENTS.some((s) => s.id === id);
 }
 
+function isLayeredCase(id: DemoSegmentId) {
+  return isStrategySegment(id) || isResilienceSegment(id) || isEducationSegment(id) || isIndustrySegment(id);
+}
+
 export function segmentIdFromDemoName(name: string | null | undefined): DemoSegmentId | null {
   const n = String(name ?? "").trim();
   return DEMO_SEGMENTS.find((s) => s.name === n)?.id ?? null;
@@ -334,7 +348,7 @@ function seasonFactor(seg: DemoSegmentId, month: number): number {
     if ([1, 2].includes(month)) return 0.94;
     return 1.0;
   }
-  if (isResilienceSegment(seg) || isEducationSegment(seg)) return 1.0;
+  if (isResilienceSegment(seg) || isEducationSegment(seg) || isIndustrySegment(seg)) return 1.0;
   return 1.0;
 }
 
@@ -450,6 +464,8 @@ function workspaceDefaults(segmentId: DemoSegmentId): WorkspaceMeta[] {
           ? resilienceCaseById(segmentId).lead
         : isEducationSegment(segmentId)
           ? educationCaseById(segmentId).lead
+        : isIndustrySegment(segmentId)
+          ? industryCaseById(segmentId).lead
         : segmentId === "demo7_personal_pocket_seasonal_pilot"
           ? "DEMO szezonális pilot vendéglátás (magán zsebből; tagi kölcsön; belépő egység modell)"
           : "DEMO élelmiszeripari vállalkozás (Y1 Batch 01 cél-szegmens szerint)",
@@ -483,6 +499,10 @@ function workspaceDefaults(segmentId: DemoSegmentId): WorkspaceMeta[] {
             : segmentId === "demo16_edu_lean_vsm"
               ? 2_800_000
               : 720_000
+        : isIndustrySegment(segmentId)
+          ? industryCaseById(segmentId).kind === "hospital"
+            ? 2_800_000
+            : 4_200_000
         : segmentId === "demo7_personal_pocket_seasonal_pilot"
           ? 3_900_000
           : 9_900_000,
@@ -493,13 +513,15 @@ function workspaceDefaults(segmentId: DemoSegmentId): WorkspaceMeta[] {
           ? "BCP / működési reziliencia — ResourceRunway, EnergyAutonomy, TTR a PDCA-ban"
         : isEducationSegment(segmentId)
           ? "Oktatási tréning — pénzügyi sáv + Lean / Poka-Yoke a PDCA-ban"
+        : isIndustrySegment(segmentId)
+          ? "Iparági / egészségügyi eset — Lean, BCP, local-first a PDCA-ban"
         : "Projekt-szimuláció: új természetes profil (modell)",
       color_tag: null,
       bank_sync_folder: null,
       imported_file_hashes: [],
-      completion_pct: isStrategySegment(segmentId) || isResilienceSegment(segmentId) || isEducationSegment(segmentId) ? 35 : 25,
+      completion_pct: isLayeredCase(segmentId) ? 35 : 25,
       scenario: "realistic",
-      ...(isStrategySegment(segmentId) || isResilienceSegment(segmentId) || isEducationSegment(segmentId)
+      ...(isLayeredCase(segmentId)
         ? {
             parent_business_id: "Vállalkozás1",
             counts_in_business: true,
@@ -657,6 +679,8 @@ function demoTags(segmentId: DemoSegmentId, extra?: string[]) {
     ? "demo:resilience"
     : isStrategySegment(segmentId)
       ? "demo:strategy"
+      : isIndustrySegment(segmentId)
+        ? "demo:industry"
       : "demo:food";
   return [DEMO_GENERATED_TAG, `demo:${segmentId}`, family, ...(extra ?? [])];
 }
@@ -673,6 +697,7 @@ function projectUnit(segmentId: DemoSegmentId) {
   if (segmentId === "demo15_edu_startup_cashflow") return { inc: 1_150, cost: 420 };
   if (segmentId === "demo16_edu_lean_vsm") return { inc: 2_100, cost: 760 };
   if (isEducationSegment(segmentId)) return { inc: 280, cost: 160 };
+  if (isIndustrySegment(segmentId)) return { inc: 1_800, cost: 640 };
   return { inc: 2_600, cost: 700 };
 }
 
@@ -856,6 +881,37 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
       recBankFees: 2_200,
       recAccounting: 10_000,
     },
+    demo20_industry_hospital_blackout: {
+      setup: 210_000,
+      lab: 48_000,
+      permit: 0,
+      recInternet: 8_000,
+      recPhone: 6_400,
+      recBankFees: 3_200,
+      recAccounting: 18_000,
+    },
+    demo21_industry_supply_shock: { ...MASTER_BASELINE.plan },
+    demo22_industry_poka_recall: { ...MASTER_BASELINE.plan },
+    demo23_industry_wms_outage: {
+      setup: 160_000,
+      lab: 32_000,
+      permit: 18_000,
+      recInternet: 14_000,
+      recPhone: 8_000,
+      recBankFees: 4_800,
+      recAccounting: 22_000,
+    },
+    demo24_industry_fuel_crisis: { ...MASTER_BASELINE.plan },
+    demo25_industry_tax_shock: { ...MASTER_BASELINE.plan },
+    demo26_industry_saas_exit: {
+      setup: 140_000,
+      lab: 36_000,
+      permit: 0,
+      recInternet: 16_000,
+      recPhone: 7_200,
+      recBankFees: 4_200,
+      recAccounting: 20_000,
+    },
   };
   const plan = planBySeg[segmentId];
 
@@ -866,7 +922,8 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
     segmentId === "demo7_personal_pocket_seasonal_pilot" ||
     isStrategySegment(segmentId) ||
     isResilienceSegment(segmentId) ||
-    isEducationSegment(segmentId);
+    isEducationSegment(segmentId) ||
+    isIndustrySegment(segmentId);
 
   const demoAssets = [
     {
@@ -1018,6 +1075,10 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
                   : "Székhely (reziliencia / BCP)"
               : isEducationSegment(segmentId)
                 ? "Székhely (campus / tanműhely)"
+              : isIndustrySegment(segmentId)
+                ? industryCaseById(segmentId).kind === "hospital"
+                  ? "Székhely (kórház / üzemeltetés)"
+                  : "Székhely (üzem / raktár)"
               : segmentId === "demo1_multisite_operator"
                 ? "Székhely (beszerzés / központ)"
               : "Székhely (város)",
@@ -1042,6 +1103,10 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
                     : "Telephely (tartalék / mesh)"
                 : isEducationSegment(segmentId)
                   ? "Telephely (labor / kollégium)"
+                : isIndustrySegment(segmentId)
+                  ? industryCaseById(segmentId).kind === "hospital"
+                    ? "Telephely (ICU / aggregátor)"
+                    : "Telephely (sor / dokk)"
                 : segmentId === "demo1_multisite_operator"
                   ? "Telephely (központi raktár / prep)"
                   : "Telephely (raktár / előkészítő)",
@@ -1060,6 +1125,8 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
             ? resilienceCaseById(segmentId).title
           : isEducationSegment(segmentId)
             ? educationCaseById(segmentId).title
+          : isIndustrySegment(segmentId)
+            ? industryCaseById(segmentId).title
           : segmentId === "demo7_personal_pocket_seasonal_pilot"
             ? "Belépő vendéglátó pilot — standard vs prémium X‑faktor"
             : "Projekt1 — modell (profit potenciál)",
@@ -1235,6 +1302,8 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
         ? resilienceCaseById(segmentId).goalName
       : isEducationSegment(segmentId)
         ? educationCaseById(segmentId).goalName
+      : isIndustrySegment(segmentId)
+        ? industryCaseById(segmentId).goalName
       : "Projekt1 — Break-even + 60 nap puffer",
     target_amount: goalTarget,
     workspace: segmentId === "demo13_resilience_home_blackout" ? "personal" : "Projekt1",
@@ -1266,6 +1335,8 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
               ? "Reziliencia — készlet / energia puffer"
             : isEducationSegment(segmentId)
               ? "Tréning — tartalék / kvóta puffer"
+            : isIndustrySegment(segmentId)
+              ? "Iparági eset — tartalék / BCP puffer"
             : "Vállalkozás1 — Készpénz puffer",
     target_amount:
       segmentId === "demo4_fine_dining_bistro"
@@ -2907,6 +2978,41 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
         status: "actual",
         expense_type: "INVESTMENT",
         tags: demoTags(segmentId, ["education:overlay", edu.extra]),
+      } as any),
+    );
+  }
+
+  if (isIndustrySegment(segmentId)) {
+    const overlayAt = new Date(Date.UTC(end.getFullYear(), end.getMonth(), 12, 12, 0, 0)).toISOString();
+    const kind = industryCaseById(segmentId).kind;
+    const row =
+      kind === "hospital"
+        ? { amount: 186_000, title: "Blackout-gyakorlat — aggregátor + UPS", extra: "ind:hospital" }
+        : kind === "supply"
+          ? { amount: 248_000, title: "Helyettesítő anyag + SMED", extra: "ind:supply" }
+          : kind === "quality"
+            ? { amount: 312_000, title: "Tétel-elhatárolás + Poka-Yoke", extra: "ind:quality" }
+            : kind === "wms"
+              ? { amount: 164_000, title: "Papír / vonalkód BCP a dokkon", extra: "ind:wms" }
+              : kind === "fuel"
+                ? { amount: 420_000, title: "Dízelugrás — üres km muda", extra: "ind:fuel" }
+                : kind === "tax"
+                  ? { amount: 380_000, title: "Adósokk — árrés-lyuk", extra: "ind:tax" }
+                  : { amount: 210_000, title: "Local-first migráció — belső óra", extra: "ind:saas" };
+    projectBaselineTxns.push(
+      txn({
+        id: `demo:${segmentId}:overlay:industry`,
+        type: "expense",
+        amount: row.amount,
+        category: "FEJLESZTÉS: Folyamatfejlesztés",
+        title: row.title,
+        party: "Iparági gyakorlat",
+        note: withGeneratedNote("Lean / BCP / local-first mikro a PDCA-ban."),
+        occurred_at: overlayAt,
+        workspace: "Projekt1",
+        status: "actual",
+        expense_type: "INVESTMENT",
+        tags: demoTags(segmentId, ["industry:overlay", row.extra]),
       } as any),
     );
   }

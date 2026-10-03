@@ -1,3 +1,9 @@
+import communityMd from "../content/lessons/01-kozossegi-civil-valsagkezeles.md?raw";
+import householdMd from "../content/lessons/02-maganszemely-infrastruktura.md?raw";
+import bcpMd from "../content/lessons/03-vallalati-bcp.md?raw";
+import tfrMd from "../content/lessons/04-demografiai-implozio.md?raw";
+import campusMd from "../content/lessons/05-oktatasi-campus.md?raw";
+
 export const SUPPORT_MAIL = "support@szcenario.hu";
 export const SUPPORT_SLA =
   "Átlagos válaszadási idő: 24 órán belül, kizárólag írásban a pontosabb és gyorsabb ügyintézés érdekében.";
@@ -6,7 +12,10 @@ export type Lesson = {
   slug: string;
   title: string;
   body: string;
-  youtubeId: string;
+  summary?: string;
+  youtubeId?: string;
+  kbId?: string;
+  markdown?: boolean;
 };
 
 function yt(key: string, fallback = "M7lc1UVf-VE") {
@@ -52,6 +61,55 @@ export const LESSONS: Lesson[] = [
     youtubeId: yt("VITE_YT_LECKE_06"),
   },
 ];
+
+export const THEORY_LESSONS: Lesson[] = [
+  {
+    slug: "kozossegi-civil-valsagkezeles",
+    kbId: "lesson-community",
+    title: "Kisközösségi válságkezelés — víz, LoRa mesh és közösségi melegedő",
+    summary: "Lajtoskocsi, offline LoRa és téli melegedő. Liter, óra, lefedett utca — local-first.",
+    body: communityMd,
+    markdown: true,
+  },
+  {
+    slug: "maganszemely-infrastruktura-korlatozas",
+    kbId: "lesson-household",
+    title: "Magánemberként a kiesésben — 72 órás blackout, víz és mobilnet",
+    summary: "Háztartási tartalék: Wh, szűrési lánc, papírtérkép és PMR. Ugyanaz a motor, kisebb lépték.",
+    body: householdMd,
+    markdown: true,
+  },
+  {
+    slug: "vallalati-bcp-folytonossag",
+    kbId: "lesson-bcp",
+    title: "Vállalati BCP — SaaS-kiesés, ellátási lánc és kulcsmunkatárs-hiány",
+    summary: "Local-first élesítés, lean kvóta, keresztképzési mátrix. TTR órában, nem „amint lehet”.",
+    body: bcpMd,
+    markdown: true,
+  },
+  {
+    slug: "demografiai-implozio-tfr-matrix",
+    kbId: "lesson-demography",
+    title: "Demográfiai implózió — TFR-mátrix Koreától Magyarországig",
+    summary: "KR, CN, IT, JP, HU: rés a 2,1-hez, kezelési pálya. Strukturális foresight, helyi másolat.",
+    body: tfrMd,
+    markdown: true,
+  },
+  {
+    slug: "oktatasi-campus-valsaghelyzet",
+    kbId: "lesson-campus",
+    title: "Oktatási válsághelyzetek — kiber, hősziget és helyi körforgás",
+    summary: "Analóg vizsga, kWh-kvóta, műanyagmentes menza. Hallgatói BCP a saját gépen.",
+    body: campusMd,
+    markdown: true,
+  },
+];
+
+export const ALL_LESSONS: Lesson[] = [...LESSONS, ...THEORY_LESSONS];
+
+export function lessonBySlug(slug: string) {
+  return ALL_LESSONS.find((l) => l.slug === slug) ?? THEORY_LESSONS.find((l) => l.kbId === slug) ?? null;
+}
 
 export const KAHN_BONBON = {
   eyebrow: "Tudástár · Történeti sablon",
