@@ -2,19 +2,19 @@ import { MASTER_BASELINE } from "@/lib/masterBaseline";
 import type { NarrativeChoice, NarrativeClimax, NarrativeStory, NarrativeTone } from "@/lib/strategyNarrative";
 
 export type IndustryCaseId =
-  | "demo20_industry_hospital_blackout"
-  | "demo21_industry_supply_shock"
-  | "demo22_industry_poka_recall"
-  | "demo23_industry_wms_outage"
+  | "demo7_industry_hospital_blackout"
+  | "demo8_industry_supply_shock"
+  | "demo9_industry_poka_recall"
+  | "demo10_industry_wms_outage"
   | "demo24_industry_fuel_crisis"
   | "demo25_industry_tax_shock"
   | "demo26_industry_saas_exit";
 
 export const INDUSTRY_CASE_IDS: readonly IndustryCaseId[] = [
-  "demo20_industry_hospital_blackout",
-  "demo21_industry_supply_shock",
-  "demo22_industry_poka_recall",
-  "demo23_industry_wms_outage",
+  "demo7_industry_hospital_blackout",
+  "demo8_industry_supply_shock",
+  "demo9_industry_poka_recall",
+  "demo10_industry_wms_outage",
   "demo24_industry_fuel_crisis",
   "demo25_industry_tax_shock",
   "demo26_industry_saas_exit",
@@ -41,8 +41,8 @@ export const INDUSTRY_SEGMENTS: Array<{
   door: IndustryDoor;
 }> = [
   {
-    id: "demo20_industry_hospital_blackout",
-    name: "DEMO 20 — Kórházi blackout / Lean triázs",
+    id: "demo7_industry_hospital_blackout",
+    name: "DEMO 7 — Kórházi blackout / Lean triázs",
     title: "Kórházi vészhelyzeti kapacitás és energia",
     blurb: "Hálózati kiesés. UPS, dízel, ICU / műtő / inkubátor. Lean triázs a szűkös kW-on.",
     lead: "A külső hálózat kiesett. A létfontosságú osztályok a tartalék áramon osztoznak. Te osztod a kW-ot — a motor a betegtúlélést és az üzemanyag-runwayt számolja.",
@@ -54,8 +54,8 @@ export const INDUSTRY_SEGMENTS: Array<{
     door: "healthcare",
   },
   {
-    id: "demo21_industry_supply_shock",
-    name: "DEMO 21 — Kritikus beszállító kiesése",
+    id: "demo8_industry_supply_shock",
+    name: "DEMO 8 — Kritikus beszállító kiesése",
     title: "Supply chain shock — alkatrész / alapanyag",
     blurb: "Egyedi komponens lánca megszakad. Helyettesítő + SMED, vagy a sor áll. OEE lyuk.",
     lead: "A speciális alkatrész nem jön. Alternatív technológia vagy helyettesítő anyag. A kérdés: mennyi az átállás, és mennyit esik az OEE.",
@@ -67,8 +67,8 @@ export const INDUSTRY_SEGMENTS: Array<{
     door: "manufacturing",
   },
   {
-    id: "demo22_industry_poka_recall",
-    name: "DEMO 22 — Poka-Yoke audit / selejt-visszafogás",
+    id: "demo9_industry_poka_recall",
+    name: "DEMO 9 — Poka-Yoke audit / selejt-visszafogás",
     title: "Minőségbiztosítási vészhelyzet",
     blurb: "Rejtett sorozathiba, visszahívás. Tétel-elhatárolás, gyökérok, folyamatba épített poka.",
     lead: "A késztermék-soron rejtett hiba fut. Elhatárolod a tételt, feltárod a gyökérokot, vagy hajtasz tovább. A motor a selejt és a visszahívás költségét számolja.",
@@ -80,8 +80,8 @@ export const INDUSTRY_SEGMENTS: Array<{
     door: "manufacturing",
   },
   {
-    id: "demo23_industry_wms_outage",
-    name: "DEMO 23 — Cross-dock WMS kiesés",
+    id: "demo10_industry_wms_outage",
+    name: "DEMO 10 — Cross-dock WMS kiesés",
     title: "Regionális elosztóközpont — IT-kiesés",
     blurb: "WMS sötét. Papír- és vonalkód-komissiózás. Lead time és torlódás.",
     lead: "A raktárirányítás elérhetetlen. Manuális, papír- és vonalkód-alapú BCP. A kérdés: mennyit nő az átfutás, és hol torlódik a dokk.",

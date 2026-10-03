@@ -96,6 +96,6 @@ export function simulateCampus(raw: CampusAlloc, months = 12): CampusSim {
 }
 
 export function campusCapitalLabel() {
-  const cse = EDUCATION_SEGMENTS.find((s) => s.id === "demo15_edu_startup_cashflow");
+  const cse = EDUCATION_SEGMENTS.find((s) => s.id === "demo16_edu_startup_cashflow");
   return cse?.goalName ?? "Fedezeti pont 8 hónap alatt";
 }

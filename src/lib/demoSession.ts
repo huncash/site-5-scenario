@@ -42,7 +42,7 @@ export function doorStepForSegment(segmentId: string | null | undefined): Scenar
   if (isResilienceSegment(segmentId)) return "resilience";
   if (isStrategySegment(segmentId)) return "strategy";
   if (isIndustrySegment(segmentId)) return industryCaseById(segmentId).door;
-  if (segmentId === "demo7_personal_pocket_seasonal_pilot") return "inner";
+  if (segmentId === "demo18_personal_pocket_seasonal_pilot") return "inner";
   return "hospitality";
 }
 

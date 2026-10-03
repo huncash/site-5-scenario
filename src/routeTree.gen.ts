@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as BcpRouteImport } from './routes/bcp'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as KotelRouteImport } from './routes/kotel'
 import { Route as KozossegRouteImport } from './routes/kozosseg'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LogsRouteImport } from './routes/logs'
@@ -67,6 +68,11 @@ const ConnectRoute = ConnectRouteImport.update({
 const DevicesRoute = DevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KotelRoute = KotelRouteImport.update({
+  id: '/kotel',
+  path: '/kotel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KozossegRoute = KozossegRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/kotel'
     | '/kozosseg'
     | '/login'
     | '/logs'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/kotel'
     | '/kozosseg'
     | '/login'
     | '/logs'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/kotel'
     | '/kozosseg'
     | '/login'
     | '/logs'
@@ -387,6 +399,7 @@ export interface RootRouteChildren {
   BcpRoute: typeof BcpRoute
   ConnectRoute: typeof ConnectRoute
   DevicesRoute: typeof DevicesRoute
+  KotelRoute: typeof KotelRoute
   KozossegRoute: typeof KozossegRoute
   LoginRoute: typeof LoginRoute
   LogsRoute: typeof LogsRoute
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/devices'
       fullPath: '/devices'
       preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kotel': {
+      id: '/kotel'
+      path: '/kotel'
+      fullPath: '/kotel'
+      preLoaderRoute: typeof KotelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kozosseg': {
@@ -627,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   BcpRoute: BcpRoute,
   ConnectRoute: ConnectRoute,
   DevicesRoute: DevicesRoute,
+  KotelRoute: KotelRoute,
   KozossegRoute: KozossegRoute,
   LoginRoute: LoginRoute,
   LogsRoute: LogsRoute,

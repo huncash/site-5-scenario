@@ -1,14 +1,14 @@
 export type ResilienceCaseId =
-  | "demo11_resilience_saas_outage"
-  | "demo12_resilience_community_grid"
-  | "demo13_resilience_home_blackout"
-  | "demo14_resilience_demography";
+  | "demo12_resilience_saas_outage"
+  | "demo13_resilience_community_grid"
+  | "demo14_resilience_home_blackout"
+  | "demo15_resilience_demography";
 
 export const RESILIENCE_CASE_IDS: readonly ResilienceCaseId[] = [
-  "demo11_resilience_saas_outage",
-  "demo12_resilience_community_grid",
-  "demo13_resilience_home_blackout",
-  "demo14_resilience_demography",
+  "demo12_resilience_saas_outage",
+  "demo13_resilience_community_grid",
+  "demo14_resilience_home_blackout",
+  "demo15_resilience_demography",
 ] as const;
 
 export function isResilienceSegment(id: string | null | undefined): id is ResilienceCaseId {
@@ -30,8 +30,8 @@ export const RESILIENCE_SEGMENTS: Array<{
   kind: "bcp" | "community" | "household" | "macro";
 }> = [
   {
-    id: "demo11_resilience_saas_outage",
-    name: "DEMO 11 — Vállalati BCP: kritikus SaaS leállás",
+    id: "demo12_resilience_saas_outage",
+    name: "DEMO 12 — Vállalati BCP: kritikus SaaS leállás",
     title: "BCP: kritikus SaaS / felhő kiesése",
     blurb: "Operational resilience: redundáns hálózat, local-first másolat, manuális P2P. A TTR a kockázatkezelés mutatója.",
     lead: "A felhő kiesett — fekete hattyú, nem világvége. Tartalék link, helyi offline adatbázis, vagy kézi P2P. A kérdés: mennyi a helyreállási idő, és tartja-e a működés.",
@@ -42,8 +42,8 @@ export const RESILIENCE_SEGMENTS: Array<{
     kind: "bcp",
   },
   {
-    id: "demo12_resilience_community_grid",
-    name: "DEMO 12 — Kisközösség: víz- és energiahálózat",
+    id: "demo13_resilience_community_grid",
+    name: "DEMO 13 — Kisközösség: víz- és energiahálózat",
     title: "Helyi ellátás és közösségi biztonság",
     blurb: "Decentralizált önfenntartás: víz, energia, LoRa mesh. Korlátozástól 72 órás regionális szünetig.",
     lead: "A településen a víz és az áram akadozik. A lajtoskocsi üteme és a helyi mesh lefedettsége mutatja, meddig tartható a közösség. Ez helyi önfenntartás és közösségi biztonság.",
@@ -54,8 +54,8 @@ export const RESILIENCE_SEGMENTS: Array<{
     kind: "community",
   },
   {
-    id: "demo13_resilience_home_blackout",
-    name: "DEMO 13 — Háztartás: 72 órás működési tartalék",
+    id: "demo14_resilience_home_blackout",
+    name: "DEMO 14 — Háztartás: 72 órás működési tartalék",
     title: "Háztartási működési tartalék — 72 órás kiesés",
     blurb: "Akkumulátor Wh, napelem, készlet napokban. Ugyanaz a motor, mint a vállalati BCP-nél — kisebb lépték.",
     lead: "Hetvenkét órára kiesik a hálózat. Nem bunker: működési tartalék. Akkumulátor, napelem, racionális készlet — a motor ugyanazokat a fizikai korlátokat számolja, mint a céges BCP.",
@@ -66,8 +66,8 @@ export const RESILIENCE_SEGMENTS: Array<{
     kind: "household",
   },
   {
-    id: "demo14_resilience_demography",
-    name: "DEMO 14 — Strategic foresight: demográfiai pálya",
+    id: "demo15_resilience_demography",
+    name: "DEMO 15 — Strategic foresight: demográfiai pálya",
     title: "Stratégiai előrejelzés — TFR és munkaképes kor",
     blurb: "KR, CN, IT/WE, JP, HU: TFR, rés a 2,1-hez, kezelési pálya. Strukturális trendelemzés, nem riadó.",
     lead: "A születésszám a helyettesítés alatt van. Ez a következő 20 év egyik legnagyobb gazdasági kihívása — kormányzatnak és nagyvállalatnak egyaránt. Öt nemzet TFR-jét hasonlítod össze. Mátrix, nem riadó.",

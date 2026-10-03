@@ -26,10 +26,24 @@ import { cn } from "@/lib/utils";
 const CURRENCY = "HUF";
 const INK = "var(--text-main)";
 const FOCUS = "var(--accent-color)";
-const UP = "var(--accent-emerald, #10b981)";
-/** Bevétel: nem zöld skála — elkülönül a Megtakarítás accent-zöldjétől. */
-const INCOME = "#38bdf8";
-const DOWN = "#fb7185";
+/**
+ * Adatsor-színek: jelmagyarázat és görbe/oszlop ugyanebből a forrásból.
+ * Bevétel ≠ Megtakarítás (sky vs accent), Kiadás rose, Plusz emerald.
+ */
+export const SERIES_COLORS = {
+  income: "#38bdf8",
+  expense: "#fb7185",
+  saving: "var(--accent-color)",
+  plus: "#34d399",
+  minus: "#fb7185",
+  neutral: "#94a3b8",
+  source: "var(--accent-color)",
+  sink: "#94a3b8",
+} as const;
+
+const UP = SERIES_COLORS.plus;
+const INCOME = SERIES_COLORS.income;
+const DOWN = SERIES_COLORS.expense;
 const MUTED = "color-mix(in srgb, var(--card-border) 72%, transparent)";
 const AXIS = "var(--text-muted)";
 
@@ -48,12 +62,14 @@ function niceTicks(min: number, max: number, count = 5): number[] {
   return ticks;
 }
 
-function seriesStroke(id: string, active?: boolean): string {
+/** Görbe/oszlop stroke — egyezzen a ChartLegendSwatch színeivel. */
+export function seriesStroke(id: string, active?: boolean): string {
   if (id === "opt") return PRO_OPT;
   if (id === "pess") return PRO_PESS;
-  if (id === "inc") return UP;
-  if (id === "exp") return DOWN;
-  if (id === "real" || id === "sav") return id === "real" ? PRO_REAL : FOCUS;
+  if (id === "real") return PRO_REAL;
+  if (id === "inc" || id === "income") return SERIES_COLORS.income;
+  if (id === "exp" || id === "expense") return SERIES_COLORS.expense;
+  if (id === "sav" || id === "saving") return SERIES_COLORS.saving;
   return active ? FOCUS : INK;
 }
 
@@ -775,7 +791,7 @@ export function FlowSankey({
               width={bar}
               height={src.heights[i] ?? row}
               rx={2}
-              fill={FOCUS}
+              fill={SERIES_COLORS.source}
               className="a11y-pat-dots"
             />
           </g>
@@ -791,7 +807,7 @@ export function FlowSankey({
                 width={bar}
                 height={snk.heights[i] ?? row}
                 rx={2}
-                fill={MUTED}
+                fill={SERIES_COLORS.sink}
                 className="a11y-pat-h-stripe"
               />
               <text x={nameX} y={cy} fill={INK} fontSize={8}>
@@ -823,7 +839,7 @@ export function FlowSankey({
               style={{ cursor: "pointer" }}
             >
               <path d={d} fill="none" stroke="transparent" strokeWidth={Math.max(14, sw + 10)} />
-              <path d={d} fill="none" stroke={DOWN} strokeWidth={sw} opacity={on ? 0.55 : 0.1}>
+              <path d={d} fill="none" stroke={SERIES_COLORS.expense} strokeWidth={sw} opacity={on ? 0.55 : 0.1}>
                 <title>{`${l.from} → ${l.to}: ${formatMoney(Math.round(l.value), CURRENCY)} (${((l.value / total) * 100).toFixed(0)}%)`}</title>
               </path>
             </g>

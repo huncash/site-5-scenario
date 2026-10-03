@@ -1,14 +1,14 @@
 export type EducationCaseId =
-  | "demo15_edu_startup_cashflow"
-  | "demo16_edu_lean_vsm"
-  | "demo17_edu_campus_energy"
-  | "demo18_edu_cyber_incident";
+  | "demo16_edu_startup_cashflow"
+  | "demo17_edu_ops_process"
+  | "demo22_edu_campus_energy"
+  | "demo23_edu_cyber_incident";
 
 export const EDUCATION_CASE_IDS: readonly EducationCaseId[] = [
-  "demo15_edu_startup_cashflow",
-  "demo16_edu_lean_vsm",
-  "demo17_edu_campus_energy",
-  "demo18_edu_cyber_incident",
+  "demo16_edu_startup_cashflow",
+  "demo17_edu_ops_process",
+  "demo22_edu_campus_energy",
+  "demo23_edu_cyber_incident",
 ] as const;
 
 export function isEducationSegment(id: string | null | undefined): id is EducationCaseId {
@@ -31,8 +31,8 @@ export const EDUCATION_SEGMENTS: Array<{
   kind: EducationKind;
 }> = [
   {
-    id: "demo15_edu_startup_cashflow",
-    name: "DEMO 15 — Startup cash-flow (diákoknak)",
+    id: "demo16_edu_startup_cashflow",
+    name: "DEMO 16 — Startup cash-flow (diákoknak)",
     title: "Startup pénzügyi tervezés és cash-flow",
     blurb: "Fix tőke, marketing / fejlesztés / bér. Késleltetett piac, PRO sáv, Poka-Yoke tartalék.",
     lead: "Virtuális induló cég fix tőkével. Te osztod a keretet. A motor a múltbeli szórással szimulálja a piacot — a döntés késve hat.",
@@ -43,8 +43,8 @@ export const EDUCATION_SEGMENTS: Array<{
     kind: "startup",
   },
   {
-    id: "demo16_edu_lean_vsm",
-    name: "DEMO 16 — Működő folyamatok veszteségmentesítése",
+    id: "demo17_edu_ops_process",
+    name: "DEMO 17 — Működő folyamatok veszteségmentesítése",
     title: "Működő folyamatok veszteségmentesítése és kapacitásbővítése",
     blurb:
       "Meglévő sor / műhely: muda-audit, OEE és átfutás. Kis CapEx Quick Win → azonnali cash-flow és árrésjavulás.",
@@ -57,8 +57,8 @@ export const EDUCATION_SEGMENTS: Array<{
     kind: "ops",
   },
   {
-    id: "demo17_edu_campus_energy",
-    name: "DEMO 17 — Campus energia- és hőtakarékosság",
+    id: "demo22_edu_campus_energy",
+    name: "DEMO 22 — Campus energia- és hőtakarékosság",
     title: "Campus energia- és hőtakarékossági vészhelyzet",
     blurb: "Hőhullám, hálózat-túlterhelés, passzív hűtés, kollégiumi kvóta — kWh és Ft együtt.",
     lead: "Hőhullám terheli a campus hálózatát. Passzív hűtés, decentralizált kollégiumi kvóta. A mutató a kWh-kvóta és a rezsi, nem csak a komfort.",
@@ -69,8 +69,8 @@ export const EDUCATION_SEGMENTS: Array<{
     kind: "campus",
   },
   {
-    id: "demo18_edu_cyber_incident",
-    name: "DEMO 18 — Kiberincidens oktatási intézményben",
+    id: "demo23_edu_cyber_incident",
+    name: "DEMO 23 — Kiberincidens oktatási intézményben",
     title: "Kiberbiztonsági / adatszivárgási incidens",
     blurb: "Zsarolóvírus a tanszéki szerveren. Analóg vizsga, izolációs idő, helyreállás Ft-ban.",
     lead: "A tanszéki szerver titkosítva. Izolálod a hálózatot, analóg vizsgáztatásra és adminra mész, számolod az izolációs időt és a helyreállás költségét.",

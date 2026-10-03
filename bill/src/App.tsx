@@ -14,7 +14,8 @@ import {
 import { SiteFooter } from "@/components/SiteFooter";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import type { BillingInterval } from "@/lib/funnelOrder";
-import { billCopy, tierLabel } from "./copy";
+import { mainPublicOrigin } from "@/lib/siteSurface";
+import { billCopy, statusLabel, tierLabel } from "./copy";
 
 type PayMethod = "stripe" | "barion" | "hu_transfer";
 
@@ -34,20 +35,179 @@ type TransferInfo = {
   proformaNumber?: string;
 };
 
+type PortalOrder = {
+  id: string;
+  status: string;
+  amountHuf: number;
+  netHuf?: number;
+  vatRate?: number;
+  tier: string;
+  interval: string;
+  payMethod: string;
+  transferCode?: string;
+  invoiceNumber?: string;
+  proformaNumber?: string;
+  buyerEmail?: string;
+  buyerName?: string;
+  buyerCountry?: string;
+  transfer?: TransferInfo;
+};
+
+const PORTAL_KEY = "bill_portal_v1";
+
+function readPortal(): PortalOrder | null {
+  try {
+    const raw = sessionStorage.getItem(PORTAL_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PortalOrder;
+  } catch {
+    return null;
+  }
+}
+
+function writePortal(order: PortalOrder | null) {
+  try {
+    if (!order) sessionStorage.removeItem(PORTAL_KEY);
+    else sessionStorage.setItem(PORTAL_KEY, JSON.stringify(order));
+  } catch {
+    // ignore
+  }
+}
+
+function TransferSteps({
+  t,
+  transfer,
+  money,
+  locale,
+}: {
+  t: ReturnType<typeof billCopy>;
+  transfer: TransferInfo;
+  money: (n: number) => string;
+  locale: "hu" | "en";
+}) {
+  const net = transfer.netHuf ?? Math.round(transfer.amountHuf / 1.27);
+  const ratePct = Math.round(transfer.vatRate ?? (net > 0 ? ((transfer.amountHuf - net) / net) * 100 : 0));
+  return (
+    <div className="steps" style={{ marginTop: 16 }}>
+      <div className="step">
+        <b>{t.stepAmount}</b>
+        <div className="code">
+          {t.gross} {money(transfer.amountHuf)}
+        </div>
+        <div className="hint">
+          ({t.net} {money(net)} + {ratePct}% {t.vatShort})
+          {transfer.buyerCountry ? ` · ${countryLabel(transfer.buyerCountry, locale)}` : ""}
+        </div>
+      </div>
+      <div className="step">
+        <b>{t.stepPayee}</b>
+        <div className="code">{transfer.name}</div>
+        <div className="hint">{transfer.bank}</div>
+      </div>
+      <div className="step">
+        <b>{t.stepIban}</b>
+        <div className="code">{transfer.iban}</div>
+      </div>
+      <div className="step">
+        <b>{t.stepMemo}</b>
+        <div className="code">{transfer.code}</div>
+        <div className="hint">{t.stepMemoHint}</div>
+      </div>
+    </div>
+  );
+}
+
+function LoginBar({
+  t,
+  onOpened,
+}: {
+  t: ReturnType<typeof billCopy>;
+  onOpened: (order: PortalOrder) => void;
+}) {
+  const [token, setToken] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const tok = token.trim();
+    const mail = email.trim().toLowerCase();
+    if (!tok || !mail.includes("@")) {
+      setError(t.loginNeed);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: tok, email: mail }),
+      });
+      const data = (await res.json()) as { ok?: boolean; order?: PortalOrder };
+      if (!data.ok || !data.order) {
+        setError(t.loginErr);
+        return;
+      }
+      onOpened(data.order);
+      setToken("");
+    } catch {
+      setError(t.errNet);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form className="login-bar" onSubmit={(e) => void submit(e)} aria-label={t.loginTitle}>
+      <div className="login-bar-title">{t.loginTitle}</div>
+      <div className="login-bar-fields">
+        <label>
+          {t.loginToken}
+          <input
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            autoComplete="off"
+            placeholder={t.loginTokenPh}
+            required
+          />
+        </label>
+        <label>
+          {t.loginEmail}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+        </label>
+        <button type="submit" className="btn primary login-bar-btn" disabled={busy}>
+          {busy ? t.loginBusy : t.loginSubmit}
+        </button>
+      </div>
+      <p className="hint login-bar-hint">{t.loginHint}</p>
+      {error ? <p className="err">{error}</p> : null}
+    </form>
+  );
+}
+
 export function App() {
   const { locale, toggleLocale } = useSiteLocale();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);
   const q = useMemo(() => new URLSearchParams(window.location.search), []);
-  const tier = q.get("tier") ?? "pro";
+  const tierParam = q.get("tier");
+  const hasCheckoutIntent = Boolean(tierParam);
+  const tier = tierParam ?? "pro";
   const ref = q.get("ref") ?? "";
-  const referral = (q.get("referral") ?? "").trim().toUpperCase();
-  const slotPack = q.get("slotPack") ?? "";
   const thanks = q.get("thanks") === "1";
   const orderQ = q.get("order") ?? "";
+  const pricingHref = `${mainPublicOrigin()}/#csomagok`;
 
   const [interval, setInterval] = useState<BillingInterval>(
-    () => (q.get("interval") === "monthly" ? "monthly" : "yearly"),
+    () => (q.get("interval") === "yearly" ? "yearly" : "monthly"),
   );
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -62,9 +222,12 @@ export function App() {
   const [lookupOk, setLookupOk] = useState(false);
   const [transfer, setTransfer] = useState<TransferInfo | null>(null);
   const [cfg, setCfg] = useState({ stripe: false, barion: false, transfer: true });
+  const [portal, setPortal] = useState<PortalOrder | null>(() =>
+    typeof window === "undefined" ? null : readPortal(),
+  );
 
   useEffect(() => {
-    document.title = locale === "en" ? "Szcenárió — payment" : "Szcenárió — fizetés";
+    document.title = locale === "en" ? "Szcenárió — billing" : "Szcenárió — számlázás";
   }, [locale]);
 
   useEffect(() => {
@@ -93,6 +256,17 @@ export function App() {
     "{date}",
     formatRenewalDate(nextRenewalDate(interval), locale),
   );
+
+  const openPortal = (order: PortalOrder) => {
+    writePortal(order);
+    setPortal(order);
+    setTransfer(null);
+  };
+
+  const closePortal = () => {
+    writePortal(null);
+    setPortal(null);
+  };
 
   const setBillingInterval = (next: BillingInterval) => {
     setInterval(next);
@@ -166,7 +340,9 @@ export function App() {
 
   const top = (
     <div className="top">
-      <div className="brand">{t.brand}</div>
+      <a className="brand" href="/">
+        {t.brand}
+      </a>
       <div className="top-right">
         <LangSwitch locale={locale} onToggle={toggleLocale} />
       </div>
@@ -186,12 +362,73 @@ export function App() {
     );
   }
 
-  if (transfer) {
-    const net = transfer.netHuf ?? Math.round(transfer.amountHuf / 1.27);
-    const ratePct = Math.round(transfer.vatRate ?? (net > 0 ? ((transfer.amountHuf - net) / net) * 100 : 0));
+  if (portal) {
     return (
       <div className="wrap">
         {top}
+        <div className="portal-head">
+          <h1>{t.portalTitle}</h1>
+          <button type="button" className="btn" onClick={closePortal}>
+            {t.logout}
+          </button>
+        </div>
+        <div className="card" style={{ marginTop: 12 }}>
+          <div className="portal-row">
+            <span className="muted">{t.order}</span>
+            <span className="code">{portal.id}</span>
+          </div>
+          <div className="portal-row">
+            <span className="muted">{t.portalStatus}</span>
+            <span className="ok">{statusLabel(locale, portal.status)}</span>
+          </div>
+          <div className="portal-row">
+            <span className="muted">{t.portalTier}</span>
+            <span>
+              {tierLabel(locale, portal.tier)} · {portal.interval === "monthly" ? t.monthlySub : t.yearlySub}
+            </span>
+          </div>
+          <div className="portal-row">
+            <span className="muted">{t.portalAmount}</span>
+            <span>
+              {t.gross} {money(portal.amountHuf)}
+            </span>
+          </div>
+          {portal.proformaNumber ? (
+            <div className="portal-row">
+              <span className="muted">{t.portalProforma}</span>
+              <span>{portal.proformaNumber}</span>
+            </div>
+          ) : null}
+          {portal.invoiceNumber ? (
+            <div className="portal-row">
+              <span className="muted">{t.portalInvoice}</span>
+              <span>{portal.invoiceNumber}</span>
+            </div>
+          ) : null}
+          {portal.transferCode ? (
+            <div className="portal-row">
+              <span className="muted">{t.portalCode}</span>
+              <span className="code">{portal.transferCode}</span>
+            </div>
+          ) : null}
+        </div>
+        {portal.transfer ? (
+          <>
+            <h2 style={{ fontSize: 18, margin: "24px 0 0" }}>{t.transferTitle}</h2>
+            <p className="muted">{t.transferLead}</p>
+            <TransferSteps t={t} transfer={portal.transfer} money={money} locale={locale} />
+          </>
+        ) : null}
+        <SiteFooter inline />
+      </div>
+    );
+  }
+
+  if (transfer) {
+    return (
+      <div className="wrap">
+        {top}
+        <LoginBar t={t} onOpened={openPortal} />
         <h1>{t.transferTitle}</h1>
         <p className="muted">{t.transferLead}</p>
         {transfer.proformaNumber ? (
@@ -199,32 +436,24 @@ export function App() {
             {t.proforma}: {transfer.proformaNumber} {t.proformaMail}
           </p>
         ) : null}
-        <div className="steps" style={{ marginTop: 16 }}>
-          <div className="step">
-            <b>{t.stepAmount}</b>
-            <div className="code">
-              {t.gross} {money(transfer.amountHuf)}
-            </div>
-            <div className="hint">
-              ({t.net} {money(net)} + {ratePct}% {t.vatShort})
-              {transfer.buyerCountry ? ` · ${countryLabel(transfer.buyerCountry, locale)}` : ""}
-            </div>
-          </div>
-          <div className="step">
-            <b>{t.stepPayee}</b>
-            <div className="code">{transfer.name}</div>
-            <div className="hint">{transfer.bank}</div>
-          </div>
-          <div className="step">
-            <b>{t.stepIban}</b>
-            <div className="code">{transfer.iban}</div>
-          </div>
-          <div className="step">
-            <b>{t.stepMemo}</b>
-            <div className="code">{transfer.code}</div>
-            <div className="hint">{t.stepMemoHint}</div>
-          </div>
-        </div>
+        <TransferSteps t={t} transfer={transfer} money={money} locale={locale} />
+        <SiteFooter inline />
+      </div>
+    );
+  }
+
+  if (!hasCheckoutIntent) {
+    return (
+      <div className="wrap">
+        {top}
+        <h1>{t.homeTitle}</h1>
+        <p className="muted">{t.homeLead}</p>
+        <LoginBar t={t} onOpened={openPortal} />
+        <p className="muted" style={{ marginTop: 20 }}>
+          <a className="home-cta" href={pricingHref}>
+            {t.homePricingCta}
+          </a>
+        </p>
         <SiteFooter inline />
       </div>
     );
@@ -233,6 +462,7 @@ export function App() {
   return (
     <div className="wrap">
       {top}
+      <LoginBar t={t} onOpened={openPortal} />
       <h1>{t.payTitle}</h1>
       <p className="muted">
         {ref === "campus" ? `${t.campus}. ` : ""}

@@ -1,24 +1,24 @@
 import { MASTER_BASELINE, masterDuties, masterPartners } from "@/lib/masterBaseline";
 
 export type StrategyCaseId =
-  | "demo8_strategy_new_line"
-  | "demo9_strategy_input_inflation"
-  | "demo10_strategy_new_market"
-  | "demo19_strategy_kahn_fork";
+  | "demo19_strategy_new_line"
+  | "demo20_strategy_input_inflation"
+  | "demo21_strategy_new_market"
+  | "demo11_strategy_kahn_fork";
 
 export const STRATEGY_CASE_IDS: readonly StrategyCaseId[] = [
-  "demo8_strategy_new_line",
-  "demo9_strategy_input_inflation",
-  "demo10_strategy_new_market",
-  "demo19_strategy_kahn_fork",
+  "demo19_strategy_new_line",
+  "demo20_strategy_input_inflation",
+  "demo21_strategy_new_market",
+  "demo11_strategy_kahn_fork",
 ] as const;
 
-export function isKahnForkSegment(id: string | null | undefined): id is "demo19_strategy_kahn_fork" {
-  return id === "demo19_strategy_kahn_fork";
+export function isKahnForkSegment(id: string | null | undefined): id is "demo11_strategy_kahn_fork" {
+  return id === "demo11_strategy_kahn_fork";
 }
 
-export function isNewLineSegment(id: string | null | undefined): id is "demo8_strategy_new_line" {
-  return id === "demo8_strategy_new_line";
+export function isNewLineSegment(id: string | null | undefined): id is "demo19_strategy_new_line" {
+  return id === "demo19_strategy_new_line";
 }
 
 export function isStrategySegment(id: string | null | undefined): id is StrategyCaseId {
@@ -65,8 +65,8 @@ export const STRATEGY_SEGMENTS: Array<{
   goalName: string;
 }> = [
   {
-    id: "demo8_strategy_new_line",
-    name: "DEMO 8 — Új termékvonal és kapacitásbővítés",
+    id: "demo19_strategy_new_line",
+    name: "DEMO 19 — Új termékvonal és kapacitásbővítés",
     title: "Új termékvonal és kapacitásbővítés",
     blurb: "Gyors berobbanás vagy tervezett felfutás — a készlet előre viszi a pénzt. A pesszimista ág runwayt és muda-írtást számol.",
     lead: "A core üzem megvan. Új vonalat hozol be, és bővíted a kapacitást. A kérdés: a gyors piaci ugrás előre köti-e a likviditást az alapanyagban, vagy a tervezett ütem tartja a megtérülést.",
@@ -75,8 +75,8 @@ export const STRATEGY_SEGMENTS: Array<{
     goalName: "Termékvonal — megtérülés + 60 nap puffer",
   },
   {
-    id: "demo9_strategy_input_inflation",
-    name: "DEMO 9 — Alapanyag- és beszerzési árinfláció",
+    id: "demo20_strategy_input_inflation",
+    name: "DEMO 20 — Alapanyag- és beszerzési árinfláció",
     title: "Alapanyag- és beszerzési árinfláció",
     blurb: "Fixált szerződés, fokozatos áthárítás, vagy stop-loss a belső folyamaton — ugyanaz a törzs, más beszerzési pálya.",
     lead: "A core számok megmaradnak. Az alapanyag drágul. Időben rögzítetted az árat, fokozatosan viszed át az árrésbe, vagy a belső folyamatot vágod, ha a fedezet elfogy.",
@@ -85,8 +85,8 @@ export const STRATEGY_SEGMENTS: Array<{
     goalName: "Árrés — 12% alá ne essen 60 napig",
   },
   {
-    id: "demo10_strategy_new_market",
-    name: "DEMO 10 — Diverzifikáció / új piac",
+    id: "demo21_strategy_new_market",
+    name: "DEMO 21 — Diverzifikáció / új piac",
     title: "Diverzifikáció / új piacra lépés",
     blurb: "Azonnali szinergia, core által finanszírozott felfutás, vagy kilépés stop-loss-szal — a törzs nem változik.",
     lead: "A core üzem tartja a házat. Új piacra lépsz. Jön-e azonnal a szinergia, a core finanszírozza a hosszabb felfutást, vagy a stop-loss kiléptet, mielőtt a core-t is megenné.",
@@ -95,8 +95,8 @@ export const STRATEGY_SEGMENTS: Array<{
     goalName: "Új piac — 6 havi stop-loss keret",
   },
   {
-    id: "demo19_strategy_kahn_fork",
-    name: "DEMO 19 — Kahn-féle jövőkutató & stratégiai elágazás",
+    id: "demo11_strategy_kahn_fork",
+    name: "DEMO 11 — Kahn-féle jövőkutató & stratégiai elágazás",
     title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
     blurb: "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet.",
     lead:
@@ -116,7 +116,7 @@ export function strategyCaseById(id: StrategyCaseId) {
 export function strategySurface(segmentId: StrategyCaseId) {
   const cse = strategyCaseById(segmentId);
   const extra =
-    segmentId === "demo8_strategy_new_line"
+    segmentId === "demo19_strategy_new_line"
       ? [
           {
             id: `p:${segmentId}:copack`,
@@ -127,7 +127,7 @@ export function strategySurface(segmentId: StrategyCaseId) {
             note: "Eset-réteg: előszerződött kapacitás.",
           },
         ]
-      : segmentId === "demo9_strategy_input_inflation"
+      : segmentId === "demo20_strategy_input_inflation"
         ? [
             {
               id: `p:${segmentId}:hedge`,
@@ -138,7 +138,7 @@ export function strategySurface(segmentId: StrategyCaseId) {
               note: "Eset-réteg: árrögzítés / hedge.",
             },
           ]
-        : segmentId === "demo19_strategy_kahn_fork"
+        : segmentId === "demo11_strategy_kahn_fork"
           ? [
               {
                 id: `p:${segmentId}:bank-a`,
@@ -358,7 +358,7 @@ export function buildStrategyWhatIf(input: {
     let pi = inc0;
     let pe = exp0;
 
-    if (input.caseId === "demo8_strategy_new_line") {
+    if (input.caseId === "demo19_strategy_new_line") {
       const wcTrap = Math.round(inc0 * 0.55);
       oi = inc0 * (1.1 + Math.min(0.55, i * 0.07));
       oe = exp0 * 0.96 + (i < 2 ? wcTrap : Math.round(inc0 * 0.04));
@@ -366,7 +366,7 @@ export function buildStrategyWhatIf(input: {
       re = exp0 * 1.02 + Math.round(inc0 * 0.035);
       pi = inc0 * (i < 2 ? 0.94 : 0.66);
       pe = i < 3 ? exp0 * 1.1 : exp0 * 0.86;
-    } else if (input.caseId === "demo9_strategy_input_inflation") {
+    } else if (input.caseId === "demo20_strategy_input_inflation") {
       oi = inc0 * 1.04;
       oe = exp0 * 0.98;
       const infl = 1 + i * 0.016;
@@ -374,7 +374,7 @@ export function buildStrategyWhatIf(input: {
       re = exp0 * infl;
       pi = inc0 * (1 - Math.min(0.18, i * 0.02));
       pe = exp0 * (1 + i * 0.042);
-    } else if (input.caseId === "demo19_strategy_kahn_fork") {
+    } else if (input.caseId === "demo11_strategy_kahn_fork") {
       const commit = Math.round(inc0 * KAHN_FORK.commitPctOfRevenue);
       const optionMonthly = Math.round(KAHN_FORK.optionFeeHuf / 6);
       const organicSlice = i < KAHN_FORK.organicCommitMonths ? Math.round(KAHN_FORK.organicMonthlyCommitHuf * 0.35) : 0;
@@ -434,7 +434,7 @@ export function buildStrategyWhatIf(input: {
   const stopAt = pessCum.findIndex((v, i) => i >= 2 && v < -Math.max(400_000, inc0 * 0.08));
 
   const signals: StrategySignal[] =
-    input.caseId === "demo8_strategy_new_line"
+    input.caseId === "demo19_strategy_new_line"
       ? [
           {
             tone: "opt",
@@ -455,7 +455,7 @@ export function buildStrategyWhatIf(input: {
             detail: "Keresletcsökkenés után Lean vágás a változó pazarláson. A runway a core pufferrel számol.",
           },
         ]
-      : input.caseId === "demo9_strategy_input_inflation"
+      : input.caseId === "demo20_strategy_input_inflation"
         ? [
             {
               tone: "opt",
@@ -476,7 +476,7 @@ export function buildStrategyWhatIf(input: {
               detail: "Drasztikus drágulás: ha a fedezet két hónapig 8% alatt marad, a belső folyamatot leállítod.",
             },
           ]
-        : input.caseId === "demo19_strategy_kahn_fork"
+        : input.caseId === "demo11_strategy_kahn_fork"
           ? [
               {
                 tone: "opt",
@@ -519,7 +519,7 @@ export function buildStrategyWhatIf(input: {
           ];
 
   const kahnMetrics: KahnCheckMetrics | undefined =
-    input.caseId === "demo19_strategy_kahn_fork"
+    input.caseId === "demo11_strategy_kahn_fork"
       ? {
           worseRunwayMonths: pessRun,
           exitPenaltyHuf: KAHN_FORK.contractA.exitPenaltyHuf,

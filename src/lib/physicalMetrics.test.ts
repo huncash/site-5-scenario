@@ -50,7 +50,7 @@ describe("physicalMetrics", () => {
   });
 
   it("builds BCP dashboard with gauges, mesh and fork", () => {
-    const dash = buildPhysicalDashboard("demo11_resilience_saas_outage");
+    const dash = buildPhysicalDashboard("demo12_resilience_saas_outage");
     expect(dash).toBeTruthy();
     expect(dash!.gauges.some((g) => g.id === "ttr")).toBe(true);
     expect(dash!.nodes.length).toBeGreaterThan(2);
@@ -59,7 +59,7 @@ describe("physicalMetrics", () => {
   });
 
   it("applies a crisis choice to TTR without mutating the source", () => {
-    const dash = buildPhysicalDashboard("demo11_resilience_saas_outage")!;
+    const dash = buildPhysicalDashboard("demo12_resilience_saas_outage")!;
     const before = dash.ttr.hours;
     const choice = dash.forks[0]!.choices.find((c) => c.id === "p2p")!;
     const next = applyCrisisChoice(dash, choice);

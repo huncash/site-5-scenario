@@ -34,7 +34,7 @@ describe("industryCases", () => {
   });
 
   it("hospital keeps the full chrome and physical KPIs", () => {
-    expect(scenarioSurface("demo20_industry_hospital_blackout")).toMatchObject({
+    expect(scenarioSurface("demo7_industry_hospital_blackout")).toMatchObject({
       family: "industry",
       showFinanceModules: true,
       showPhysicalKpis: true,
@@ -42,7 +42,7 @@ describe("industryCases", () => {
     });
     expect(scenarioSurface("demo24_industry_fuel_crisis").showFinanceModules).toBe(true);
     expect(scenarioSurface("demo25_industry_tax_shock").showFinanceModules).toBe(true);
-    expect(baselineForSegment("demo20_industry_hospital_blackout").orgKind).toBe("hospital");
+    expect(baselineForSegment("demo7_industry_hospital_blackout").orgKind).toBe("hospital");
   });
 
   it("SaaS local-first walk is cheaper than paying the vendor shock", () => {
@@ -63,14 +63,14 @@ describe("industryCases", () => {
   });
 
   it("hospital physical dashboard has energy and fuel gauges", () => {
-    const dash = buildPhysicalDashboard("demo20_industry_hospital_blackout");
+    const dash = buildPhysicalDashboard("demo7_industry_hospital_blackout");
     expect(dash?.gauges.some((g) => g.id === "energy")).toBe(true);
     expect(dash?.gauges.some((g) => g.id === "runway-fuel")).toBe(true);
     expect(dash?.forks[0]?.id).toBe("triage");
   });
 
   it("recognizes only industry ids", () => {
-    expect(isIndustrySegment("demo21_industry_supply_shock")).toBe(true);
-    expect(isIndustrySegment("demo11_resilience_saas_outage")).toBe(false);
+    expect(isIndustrySegment("demo8_industry_supply_shock")).toBe(true);
+    expect(isIndustrySegment("demo12_resilience_saas_outage")).toBe(false);
   });
 });

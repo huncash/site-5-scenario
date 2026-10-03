@@ -27,17 +27,20 @@ describe("campaignFunnels", () => {
 
   it("filters cases to the campaign segment", () => {
     const rows = [
-      { id: "demo11_resilience_saas_outage" },
-      { id: "demo12_resilience_community_grid" },
-      { id: "demo13_resilience_home_blackout" },
-      { id: "demo14_resilience_demography" },
+      { id: "demo12_resilience_saas_outage" },
+      { id: "demo13_resilience_community_grid" },
+      { id: "demo14_resilience_home_blackout" },
+      { id: "demo15_resilience_demography" },
     ];
-    expect(filterByCampaign(rows, "bcp").map((r) => r.id)).toEqual(["demo11_resilience_saas_outage"]);
+    expect(filterByCampaign(rows, "bcp").map((r) => r.id)).toEqual(["demo12_resilience_saas_outage"]);
     expect(filterByCampaign(rows, "kozosseg")).toHaveLength(2);
-    expect(filterByCampaign(rows, "makro").map((r) => r.id)).toEqual(["demo14_resilience_demography"]);
+    expect(filterByCampaign(rows, "makro").map((r) => r.id)).toEqual(["demo15_resilience_demography"]);
     expect(filterByCampaign(rows, "strategia")).toEqual(rows);
-    expect(CAMPAIGN_SEGMENT_IDS.oktatas).toHaveLength(4);
-    expect(CAMPAIGN_SEGMENT_IDS.strategia).toHaveLength(4);
+    expect(CAMPAIGN_SEGMENT_IDS.oktatas).toEqual([
+      "demo16_edu_startup_cashflow",
+      "demo17_edu_ops_process",
+    ]);
+    expect(CAMPAIGN_SEGMENT_IDS.strategia).toEqual(["demo11_strategy_kahn_fork"]);
   });
 
   it("attaches campaign UTM to checkout URL", () => {

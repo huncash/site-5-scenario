@@ -14,12 +14,12 @@ describe("educationCases", () => {
   });
 
   it("startup break-even is earlier on the optimistic band", () => {
-    const m = buildEducationModel("demo15_edu_startup_cashflow");
+    const m = buildEducationModel("demo16_edu_startup_cashflow");
     const be = m.kpis.find((k) => k.id === "be")!;
     expect(be.opt).toBeLessThan(be.real);
     expect(be.real).toBeLessThan(be.pess);
     const w = buildEducationWhatIf({
-      caseId: "demo15_edu_startup_cashflow",
+      caseId: "demo16_edu_startup_cashflow",
       horizonMonths: 12,
       now: new Date("2026-10-01"),
     });
@@ -27,7 +27,7 @@ describe("educationCases", () => {
   });
 
   it("ops OEE/SMED and Quick Win ROI move lead time", () => {
-    const m = buildEducationModel("demo16_edu_lean_vsm");
+    const m = buildEducationModel("demo17_edu_ops_process");
     expect(m.kind).toBe("ops");
     const oee = m.kpis.find((k) => k.id === "oee")!;
     const smed = m.kpis.find((k) => k.id === "smed")!;
@@ -41,7 +41,7 @@ describe("educationCases", () => {
   });
 
   it("recognizes only education ids", () => {
-    expect(isEducationSegment("demo15_edu_startup_cashflow")).toBe(true);
-    expect(isEducationSegment("demo11_resilience_saas_outage")).toBe(false);
+    expect(isEducationSegment("demo16_edu_startup_cashflow")).toBe(true);
+    expect(isEducationSegment("demo12_resilience_saas_outage")).toBe(false);
   });
 });

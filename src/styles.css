@@ -440,13 +440,14 @@ body,
   --border: var(--card-border);
   --input: var(--card-border);
   --ring: var(--accent-color);
-  --chart-1: var(--accent-color);
+  /* Adatsor-szemantika: 1=bevétel, 2=megtakarítás/plusz, 7=kiadás — egyezzen a SERIES_COLORS-szal. */
+  --chart-1: #38bdf8;
   --chart-2: #34d399;
   --chart-3: #6ee7b7;
   --chart-4: #94a3b8;
   --chart-5: #f43f5e;
   --chart-6: #f59e0b;
-  --chart-7: #a78bfa;
+  --chart-7: #fb7185;
   --sidebar: var(--card-bg);
   --sidebar-foreground: var(--text-main);
   --sidebar-primary: var(--accent-color);
@@ -1571,8 +1572,8 @@ html[data-accessibility="active"] body {
 .site-footer-inner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2.5rem 0 2rem; /* py-10 */
+  gap: 1.25rem;
+  padding: 1.35rem 0 1rem;
 }
 .site-footer-col {
   min-width: 0;
@@ -1583,11 +1584,37 @@ html[data-accessibility="active"] body {
   align-content: start;
 }
 .site-footer-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
   text-decoration: none;
   color: inherit;
+  line-height: 0;
+  cursor: pointer;
+}
+.site-footer-rope-wrap {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+}
+.pricing-rope-hero {
+  width: 100%;
+  max-width: 52rem;
+  margin: 0.35rem auto 0.25rem;
+}
+.pricing-rope-hero .site-footer-rope-wrap {
+  width: 100%;
+}
+.site-footer-rope {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
 }
 .site-footer-logo-img {
   width: 1.75rem;
@@ -1613,14 +1640,14 @@ html[data-accessibility="active"] body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-main, var(--foreground));
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.5rem;
 }
 .site-footer-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.55rem;
+  gap: 0.3rem;
 }
 .site-footer-list a {
   font-size: 0.875rem;
@@ -1629,13 +1656,64 @@ html[data-accessibility="active"] body {
   text-decoration: none;
   text-underline-offset: 3px;
 }
+.site-footer-nest {
+  display: grid;
+  gap: 0.2rem;
+}
+.site-footer-nest-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 450;
+  color: color-mix(in srgb, var(--text-muted, #94a3b8) 92%, var(--text-main, #e2e8f0));
+  cursor: pointer;
+  text-align: left;
+}
+.site-footer-nest-toggle:hover {
+  color: var(--text-main, var(--foreground));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.site-footer-nest-chev {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  text-decoration: none;
+}
+.site-footer-nest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.1rem 0 0.15rem 0.85rem;
+  display: grid;
+  gap: 0.2rem;
+  border-left: 1px solid color-mix(in srgb, var(--card-border, var(--border)) 80%, transparent);
+}
+.site-footer-soon {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem;
+  font-size: 0.875rem;
+  font-weight: 450;
+  color: color-mix(in srgb, var(--text-muted, #94a3b8) 70%, transparent);
+  cursor: default;
+}
+.site-footer-soon-mark {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
 .site-footer-list a:hover {
   color: var(--text-main, var(--foreground));
   text-decoration: underline;
 }
 .site-footer-bottom {
   border-top: 1px solid var(--card-border, var(--border));
-  padding: 1.1rem 0 2rem;
+  padding: 0.7rem 0 1.15rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1668,8 +1746,8 @@ html[data-accessibility="active"] body {
   }
   .site-footer-inner {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 2.5rem 3rem;
-    padding: 3rem 0 2.25rem; /* py-12 */
+    gap: 1.5rem 2.25rem;
+    padding: 1.6rem 0 1.15rem;
     align-items: start;
   }
 }

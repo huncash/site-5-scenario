@@ -34,7 +34,7 @@ function UzletiStrategiaLandingPage() {
               <Badge variant="secondary" className="text-[11px]">offline</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
-              {STRATEGY_SEGMENTS.filter((s) => s.id === "demo19_strategy_kahn_fork").map((s) => (
+              {STRATEGY_SEGMENTS.filter((s) => s.id === "demo11_strategy_kahn_fork").map((s) => (
                 <li key={s.id}>{caseTitle(s.id, locale) ?? s.title}</li>
               ))}
             </ul>

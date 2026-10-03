@@ -19,12 +19,12 @@ describe("scenarioLens", () => {
   });
 
   it("renames deals/inventory on hospital and BCP without dropping cashflow", () => {
-    expect(scenarioLens("demo20_industry_hospital_blackout", "hu").tabs).toMatchObject({
+    expect(scenarioLens("demo7_industry_hospital_blackout", "hu").tabs).toMatchObject({
       cashflow: "Cashflow",
       deals: "Osztályok",
       inventory: "Energia",
     });
-    expect(scenarioLens("demo11_resilience_saas_outage", "en").tabs.deals).toBe("Nodes");
+    expect(scenarioLens("demo12_resilience_saas_outage", "en").tabs.deals).toBe("Nodes");
     expect(scenarioLens("demo1_multisite_operator", "hu").tabs.deals).toBe("Üzletek");
   });
 });

@@ -5,7 +5,7 @@ import type { CampaignId, CampaignUtm } from "@/lib/campaignFunnels";
 export type BillingInterval = "yearly" | "monthly";
 export type PayMethod = "wise" | "hu_transfer";
 
-export const DEFAULT_BILLING_INTERVAL: BillingInterval = "yearly";
+export const DEFAULT_BILLING_INTERVAL: BillingInterval = "monthly";
 const INTERVAL_KEY = "ui:billingInterval";
 export const BILLING_INTERVAL_EVENT = "szcenario:billing_interval";
 

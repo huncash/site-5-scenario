@@ -9,33 +9,43 @@ export const BASE_CASE_IDS = [
   "demo4_fine_dining_bistro",
   "demo5_pastry_gelato",
   "demo6_event_catering_popup",
-  "demo7_personal_pocket_seasonal_pilot",
+  "demo18_personal_pocket_seasonal_pilot",
 ] as const;
 
 export const LENS_CASE_IDS = [
-  "demo11_resilience_saas_outage",
-  "demo12_resilience_community_grid",
-  "demo13_resilience_home_blackout",
-  "demo14_resilience_demography",
-  "demo15_edu_startup_cashflow",
-  "demo16_edu_lean_vsm",
-  "demo19_strategy_kahn_fork",
-  "demo20_industry_hospital_blackout",
-  "demo21_industry_supply_shock",
-  "demo22_industry_poka_recall",
-  "demo23_industry_wms_outage",
+  "demo7_industry_hospital_blackout",
+  "demo8_industry_supply_shock",
+  "demo9_industry_poka_recall",
+  "demo10_industry_wms_outage",
+  "demo11_strategy_kahn_fork",
+  "demo12_resilience_saas_outage",
+  "demo13_resilience_community_grid",
+  "demo14_resilience_home_blackout",
+  "demo15_resilience_demography",
+  "demo16_edu_startup_cashflow",
+  "demo17_edu_ops_process",
 ] as const;
 
-export const CORE_CASE_IDS = [...BASE_CASE_IDS, ...LENS_CASE_IDS] as const;
-export const KAHN_SEGMENT_ID = "demo19_strategy_kahn_fork" as const;
+/** Nyilvános mag: DEMO 1…18 folytonos sorrend (base 1–6 → lens 7–17 → base személyes 18). */
+export const CORE_CASE_IDS = [
+  "demo1_multisite_operator",
+  "demo2_premium_nightlife",
+  "demo3_specialty_cafe_tea",
+  "demo4_fine_dining_bistro",
+  "demo5_pastry_gelato",
+  "demo6_event_catering_popup",
+  ...LENS_CASE_IDS,
+  "demo18_personal_pocket_seasonal_pilot",
+] as const;
+export const KAHN_SEGMENT_ID = "demo11_strategy_kahn_fork" as const;
 
 /** Seed-only leftovers from the 26-pack. Not listed on the public door. */
 export const HIDDEN_CASE_IDS = [
-  "demo8_strategy_new_line",
-  "demo9_strategy_input_inflation",
-  "demo10_strategy_new_market",
-  "demo17_edu_campus_energy",
-  "demo18_edu_cyber_incident",
+  "demo19_strategy_new_line",
+  "demo20_strategy_input_inflation",
+  "demo21_strategy_new_market",
+  "demo22_edu_campus_energy",
+  "demo23_edu_cyber_incident",
   "demo24_industry_fuel_crisis",
   "demo25_industry_tax_shock",
   "demo26_industry_saas_exit",
@@ -106,8 +116,8 @@ export const HOSPITALITY_SEGMENTS: DemoSegmentMeta[] = [
     baseRevenueNetHuf: 9_000_000,
   },
   {
-    id: "demo7_personal_pocket_seasonal_pilot",
-    name: "DEMO 7 — Magán zsebből induló szezonális pilot vendéglátás",
+    id: "demo18_personal_pocket_seasonal_pilot",
+    name: "DEMO 18 — Magán zsebből induló szezonális pilot vendéglátás",
     title: "Saját zsebből indított vendéglátás",
     blurb: "Magán jövedelem és kis plusz, tagi kölcsön. Példa a növekedésre, nem ajánlat.",
     lead: "Valaki a saját fizetéséből indít egy kis vendéglátást, és a cégnek tagi kölcsönt ad. A magánkeret és a céges működés egymást húzza. Ez példa, nem ajánlat.",
@@ -117,58 +127,40 @@ export const HOSPITALITY_SEGMENTS: DemoSegmentMeta[] = [
 
 export const PUBLIC_LENS_SEGMENTS: DemoSegmentMeta[] = [
   {
-    id: "demo11_resilience_saas_outage",
-    name: "DEMO 11 — Vállalati BCP: kritikus SaaS leállás",
-    title: "BCP: kritikus SaaS / felhő kiesése",
-    blurb: "Operational resilience: redundáns hálózat, local-first másolat, manuális P2P. A TTR a kockázatkezelés mutatója.",
-    lead: "A felhő kiesett — fekete hattyú, nem világvége. Tartalék link, helyi offline adatbázis, vagy kézi P2P. A kérdés: mennyi a helyreállási idő, és tartja-e a működés.",
-    baseRevenueNetHuf: 6_200_000,
-  },
-  {
-    id: "demo12_resilience_community_grid",
-    name: "DEMO 12 — Kisközösség: víz- és energiahálózat",
-    title: "Helyi ellátás és közösségi biztonság",
-    blurb: "Decentralizált önfenntartás: víz, energia, LoRa mesh. Korlátozástól 72 órás regionális szünetig.",
-    lead: "A településen a víz és az áram akadozik. A lajtoskocsi üteme és a helyi mesh lefedettsége mutatja, meddig tartható a közösség. Ez helyi önfenntartás és közösségi biztonság.",
-    baseRevenueNetHuf: 1_800_000,
-  },
-  {
-    id: "demo13_resilience_home_blackout",
-    name: "DEMO 13 — Háztartás: 72 órás működési tartalék",
-    title: "Háztartási működési tartalék — 72 órás kiesés",
-    blurb: "Akkumulátor Wh, napelem, készlet napokban. Ugyanaz a motor, mint a vállalati BCP-nél — kisebb lépték.",
-    lead: "Hetvenkét órára kiesik a hálózat. Nem bunker: működési tartalék. Akkumulátor, napelem, racionális készlet — a motor ugyanazokat a fizikai korlátokat számolja, mint a céges BCP.",
-    baseRevenueNetHuf: 620_000,
-  },
-  {
-    id: "demo14_resilience_demography",
-    name: "DEMO 14 — Strategic foresight: demográfiai pálya",
-    title: "Stratégiai előrejelzés — TFR és munkaképes kor",
-    blurb: "KR, CN, IT/WE, JP, HU: TFR, rés a 2,1-hez, kezelési pálya. Strukturális trendelemzés, nem riadó.",
-    lead: "A születésszám a helyettesítés alatt van. Ez a következő 20 év egyik legnagyobb gazdasági kihívása — kormányzatnak és nagyvállalatnak egyaránt. Öt nemzet TFR-jét hasonlítod össze. Mátrix, nem riadó.",
+    id: "demo7_industry_hospital_blackout",
+    name: "DEMO 7 — Kórházi blackout / Lean triázs",
+    title: "Kórházi vészhelyzeti kapacitás és energia",
+    blurb: "Hálózati kiesés. UPS, dízel, ICU / műtő / inkubátor. Lean triázs a szűkös kW-on.",
+    lead: "A külső hálózat kiesett. A létfontosságú osztályok a tartalék áramon osztoznak. Te osztod a kW-ot — a motor a betegtúlélést és az üzemanyag-runwayt számolja.",
     baseRevenueNetHuf: 0,
   },
   {
-    id: "demo15_edu_startup_cashflow",
-    name: "DEMO 15 — Startup cash-flow (diákoknak)",
-    title: "Startup pénzügyi tervezés és cash-flow",
-    blurb: "Fix tőke, marketing / fejlesztés / bér. Késleltetett piac, PRO sáv, Poka-Yoke tartalék.",
-    lead: "Virtuális induló cég fix tőkével. Te osztod a keretet. A motor a múltbeli szórással szimulálja a piacot — a döntés késve hat.",
-    baseRevenueNetHuf: 420_000,
+    id: "demo8_industry_supply_shock",
+    name: "DEMO 8 — Kritikus beszállító kiesése",
+    title: "Supply chain shock — alkatrész / alapanyag",
+    blurb: "Egyedi komponens lánca megszakad. Helyettesítő + SMED, vagy a sor áll. OEE lyuk.",
+    lead: "A speciális alkatrész nem jön. Alternatív technológia vagy helyettesítő anyag. A kérdés: mennyi az átállás, és mennyit esik az OEE.",
+    baseRevenueNetHuf: 18_400_000,
   },
   {
-    id: "demo16_edu_lean_vsm",
-    name: "DEMO 16 — Működő folyamatok veszteségmentesítése",
-    title: "Működő folyamatok veszteségmentesítése és kapacitásbővítése",
-    blurb:
-      "Meglévő sor / műhely: muda-audit, OEE és átfutás. Kis CapEx Quick Win → azonnali cash-flow és árrésjavulás.",
-    lead:
-      "Egy már futó tanműhely / kis sor. A működési audit a várakozást, selejtet és átállást vágja; SMED és Poka-Yoke pontok az átfutást és a kapacitást bővítik — a kiesés óradíja forintban is megvan.",
-    baseRevenueNetHuf: 2_400_000,
+    id: "demo9_industry_poka_recall",
+    name: "DEMO 9 — Poka-Yoke audit / selejt-visszafogás",
+    title: "Minőségbiztosítási vészhelyzet",
+    blurb: "Rejtett sorozathiba, visszahívás. Tétel-elhatárolás, gyökérok, folyamatba épített poka.",
+    lead: "A késztermék-soron rejtett hiba fut. Elhatárolod a tételt, feltárod a gyökérokot, vagy hajtasz tovább. A motor a selejt és a visszahívás költségét számolja.",
+    baseRevenueNetHuf: 14_200_000,
   },
   {
-    id: "demo19_strategy_kahn_fork",
-    name: "DEMO 19 — Kahn-féle jövőkutató & stratégiai elágazás",
+    id: "demo10_industry_wms_outage",
+    name: "DEMO 10 — Cross-dock WMS kiesés",
+    title: "Regionális elosztóközpont — IT-kiesés",
+    blurb: "WMS sötét. Papír- és vonalkód-komissiózás. Lead time és torlódás.",
+    lead: "A raktárirányítás elérhetetlen. Manuális, papír- és vonalkód-alapú BCP. A kérdés: mennyit nő az átfutás, és hol torlódik a dokk.",
+    baseRevenueNetHuf: 9_600_000,
+  },
+  {
+    id: "demo11_strategy_kahn_fork",
+    name: "DEMO 11 — Kahn-féle jövőkutató & stratégiai elágazás",
     title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
     blurb: "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet.",
     lead:
@@ -176,40 +168,68 @@ export const PUBLIC_LENS_SEGMENTS: DemoSegmentMeta[] = [
     baseRevenueNetHuf: MASTER_BASELINE.monthlyRevenueNet,
   },
   {
-    id: "demo20_industry_hospital_blackout",
-    name: "DEMO 20 — Kórházi blackout / Lean triázs",
-    title: "Kórházi vészhelyzeti kapacitás és energia",
-    blurb: "Hálózati kiesés. UPS, dízel, ICU / műtő / inkubátor. Lean triázs a szűkös kW-on.",
-    lead: "A külső hálózat kiesett. A létfontosságú osztályok a tartalék áramon osztoznak. Te osztod a kW-ot — a motor a betegtúlélést és az üzemanyag-runwayt számolja.",
+    id: "demo12_resilience_saas_outage",
+    name: "DEMO 12 — Vállalati BCP: kritikus SaaS leállás",
+    title: "BCP: kritikus SaaS / felhő kiesése",
+    blurb: "Operational resilience: redundáns hálózat, local-first másolat, manuális P2P. A TTR a kockázatkezelés mutatója.",
+    lead: "A felhő kiesett — fekete hattyú, nem világvége. Tartalék link, helyi offline adatbázis, vagy kézi P2P. A kérdés: mennyi a helyreállási idő, és tartja-e a működés.",
+    baseRevenueNetHuf: 6_200_000,
+  },
+  {
+    id: "demo13_resilience_community_grid",
+    name: "DEMO 13 — Kisközösség: víz- és energiahálózat",
+    title: "Helyi ellátás és közösségi biztonság",
+    blurb: "Decentralizált önfenntartás: víz, energia, LoRa mesh. Korlátozástól 72 órás regionális szünetig.",
+    lead: "A településen a víz és az áram akadozik. A lajtoskocsi üteme és a helyi mesh lefedettsége mutatja, meddig tartható a közösség. Ez helyi önfenntartás és közösségi biztonság.",
+    baseRevenueNetHuf: 1_800_000,
+  },
+  {
+    id: "demo14_resilience_home_blackout",
+    name: "DEMO 14 — Háztartás: 72 órás működési tartalék",
+    title: "Háztartási működési tartalék — 72 órás kiesés",
+    blurb: "Akkumulátor Wh, napelem, készlet napokban. Ugyanaz a motor, mint a vállalati BCP-nél — kisebb lépték.",
+    lead: "Hetvenkét órára kiesik a hálózat. Nem bunker: működési tartalék. Akkumulátor, napelem, racionális készlet — a motor ugyanazokat a fizikai korlátokat számolja, mint a céges BCP.",
+    baseRevenueNetHuf: 620_000,
+  },
+  {
+    id: "demo15_resilience_demography",
+    name: "DEMO 15 — Strategic foresight: demográfiai pálya",
+    title: "Stratégiai előrejelzés — TFR és munkaképes kor",
+    blurb: "KR, CN, IT/WE, JP, HU: TFR, rés a 2,1-hez, kezelési pálya. Strukturális trendelemzés, nem riadó.",
+    lead: "A születésszám a helyettesítés alatt van. Ez a következő 20 év egyik legnagyobb gazdasági kihívása — kormányzatnak és nagyvállalatnak egyaránt. Öt nemzet TFR-jét hasonlítod össze. Mátrix, nem riadó.",
     baseRevenueNetHuf: 0,
   },
   {
-    id: "demo21_industry_supply_shock",
-    name: "DEMO 21 — Kritikus beszállító kiesése",
-    title: "Supply chain shock — alkatrész / alapanyag",
-    blurb: "Egyedi komponens lánca megszakad. Helyettesítő + SMED, vagy a sor áll. OEE lyuk.",
-    lead: "A speciális alkatrész nem jön. Alternatív technológia vagy helyettesítő anyag. A kérdés: mennyi az átállás, és mennyit esik az OEE.",
-    baseRevenueNetHuf: 18_400_000,
+    id: "demo16_edu_startup_cashflow",
+    name: "DEMO 16 — Startup cash-flow (diákoknak)",
+    title: "Startup pénzügyi tervezés és cash-flow",
+    blurb: "Fix tőke, marketing / fejlesztés / bér. Késleltetett piac, PRO sáv, Poka-Yoke tartalék.",
+    lead: "Virtuális induló cég fix tőkével. Te osztod a keretet. A motor a múltbeli szórással szimulálja a piacot — a döntés késve hat.",
+    baseRevenueNetHuf: 420_000,
   },
   {
-    id: "demo22_industry_poka_recall",
-    name: "DEMO 22 — Poka-Yoke audit / selejt-visszafogás",
-    title: "Minőségbiztosítási vészhelyzet",
-    blurb: "Rejtett sorozathiba, visszahívás. Tétel-elhatárolás, gyökérok, folyamatba épített poka.",
-    lead: "A késztermék-soron rejtett hiba fut. Elhatárolod a tételt, feltárod a gyökérokot, vagy hajtasz tovább. A motor a selejt és a visszahívás költségét számolja.",
-    baseRevenueNetHuf: 14_200_000,
-  },
-  {
-    id: "demo23_industry_wms_outage",
-    name: "DEMO 23 — Cross-dock WMS kiesés",
-    title: "Regionális elosztóközpont — IT-kiesés",
-    blurb: "WMS sötét. Papír- és vonalkód-komissiózás. Lead time és torlódás.",
-    lead: "A raktárirányítás elérhetetlen. Manuális, papír- és vonalkód-alapú BCP. A kérdés: mennyit nő az átfutás, és hol torlódik a dokk.",
-    baseRevenueNetHuf: 9_600_000,
+    id: "demo17_edu_ops_process",
+    name: "DEMO 17 — Működő folyamatok veszteségmentesítése",
+    title: "Működő folyamatok veszteségmentesítése és kapacitásbővítése",
+    blurb:
+      "Meglévő sor / műhely: muda-audit, OEE és átfutás. Kis CapEx Quick Win → azonnali cash-flow és árrésjavulás.",
+    lead:
+      "Egy már futó tanműhely / kis sor. A működési audit a várakozást, selejtet és átállást vágja; SMED és Poka-Yoke pontok az átfutást és a kapacitást bővítik — a kiesés óradíja forintban is megvan.",
+    baseRevenueNetHuf: 2_400_000,
   },
 ];
 
-export const PUBLIC_DEMO_SEGMENTS: DemoSegmentMeta[] = [...HOSPITALITY_SEGMENTS, ...PUBLIC_LENS_SEGMENTS];
+/** Nyilvános 18: DEMO 1…18 folytonos sorrend (vendéglátás 1–6 → lencsék 7–17 → személyes 18). */
+export const PUBLIC_DEMO_SEGMENTS: DemoSegmentMeta[] = [
+  ...HOSPITALITY_SEGMENTS.filter((s) => s.id !== "demo18_personal_pocket_seasonal_pilot"),
+  ...PUBLIC_LENS_SEGMENTS,
+  ...HOSPITALITY_SEGMENTS.filter((s) => s.id === "demo18_personal_pocket_seasonal_pilot"),
+];
+
+export function demoSerialFromId(id: string | null | undefined): number | null {
+  const m = String(id ?? "").match(/^demo(\d+)_/);
+  return m ? Number(m[1]) : null;
+}
 
 const PUBLIC_BY_ID = new Map(PUBLIC_DEMO_SEGMENTS.map((s) => [s.id, s]));
 const CORE_SET = new Set<string>(CORE_CASE_IDS);

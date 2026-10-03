@@ -14,7 +14,7 @@ describe("resilienceCases", () => {
   });
 
   it("exposes TTR, ResourceRunway and EnergyAutonomy on operational cases", () => {
-    for (const id of ["demo11_resilience_saas_outage", "demo12_resilience_community_grid", "demo13_resilience_home_blackout"] as const) {
+    for (const id of ["demo12_resilience_saas_outage", "demo13_resilience_community_grid", "demo14_resilience_home_blackout"] as const) {
       const m = buildResilienceModel(id);
       expect(m.kpis.map((k) => k.id).sort()).toEqual(["energyAutonomy", "resourceRunway", "ttr"]);
       expect(m.hours.length).toBeGreaterThan(8);
@@ -23,7 +23,7 @@ describe("resilienceCases", () => {
   });
 
   it("keeps an offline TFR matrix under replacement fertility", () => {
-    const m = buildResilienceModel("demo14_resilience_demography");
+    const m = buildResilienceModel("demo15_resilience_demography");
     expect(m.tfrRows).toHaveLength(5);
     expect(TFR_MATRIX.every((r) => r.tfr < m.replacementTfr)).toBe(true);
     expect(TFR_MATRIX.map((r) => r.id)).toEqual(["kr", "cn", "it", "jp", "hu"]);
@@ -31,7 +31,7 @@ describe("resilienceCases", () => {
   });
 
   it("recognizes only resilience ids", () => {
-    expect(isResilienceSegment("demo11_resilience_saas_outage")).toBe(true);
-    expect(isResilienceSegment("demo8_strategy_new_line")).toBe(false);
+    expect(isResilienceSegment("demo12_resilience_saas_outage")).toBe(true);
+    expect(isResilienceSegment("demo19_strategy_new_line")).toBe(false);
   });
 });

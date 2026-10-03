@@ -8,7 +8,7 @@ import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { CAMPAIGN_FUNNELS } from "@/content/funnels/campaigns";
 import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSession";
-import { publicSegmentById, type DemoSegmentId } from "@/lib/demoCatalog";
+import { demoSerialFromId, publicSegmentById, type DemoSegmentId } from "@/lib/demoCatalog";
 import { coreCasesOnStep, KAHN_SEGMENT_ID } from "@/lib/coreCases";
 import { readScenarioDoorStep, writeScenarioDoorStep, type ScenarioDoorStep } from "@/lib/doorStep";
 import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
@@ -21,14 +21,18 @@ const HomePricing = lazy(() => import("@/components/home/HomePricing").then((m) 
 
 const LATER_TYPES = ["climate", "political"] as const;
 
-const ECONOMIC_INDUSTRIES = ["hospitality", "healthcare", "manufacturing"] as const;
+const ECONOMIC_INDUSTRIES = ["hospitality", "healthcare", "manufacturing", "strategy"] as const;
 
 export function ScenarioDoor() {
   const { t, locale } = useI18n();
-  const face = (s: { id: string; title: string; blurb: string }) => ({
-    title: caseTitle(s.id, locale) ?? s.title,
-    blurb: caseBlurb(s.id, locale) ?? s.blurb,
-  });
+  const face = (s: { id: string; title: string; blurb: string }) => {
+    const title = caseTitle(s.id, locale) ?? s.title;
+    const serial = demoSerialFromId(s.id);
+    return {
+      title: serial != null ? `DEMO ${serial} — ${title}` : title,
+      blurb: caseBlurb(s.id, locale) ?? s.blurb,
+    };
+  };
   const navigate = useNavigate();
   const { unlockById, createProfile } = useVault();
   const [step, setStep] = useState<ScenarioDoorStep>("type");
@@ -197,7 +201,7 @@ export function ScenarioDoor() {
               </Link>
             </section>
 
-            <section className="space-y-4" aria-labelledby="door-case-heading">
+            <section id="szcenariok" className="space-y-4 scroll-mt-24" aria-labelledby="door-case-heading">
               <div className="space-y-2">
                 <h2
                   id="door-case-heading"
@@ -257,7 +261,7 @@ export function ScenarioDoor() {
               </dl>
             </section>
 
-            <section className="space-y-3">
+            <section id="tipusok" className="space-y-3 scroll-mt-24">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("door.typesTitle")}
@@ -280,7 +284,7 @@ export function ScenarioDoor() {
                     onClick={() => go(row.step)}
                     className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4 text-left transition-colors hover:border-cyan-300/50"
                   >
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("door.now")}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("door.available")}</div>
                     <div className="mt-1 text-sm font-semibold text-foreground">{row.title}</div>
                     <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{row.blurb}</p>
                   </button>

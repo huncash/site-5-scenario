@@ -1,7 +1,33 @@
 import type { Locale } from "@/i18n/locale";
 
 const hu = {
-  brand: "Szcenárió · számla",
+  brand: "Szcenárió · számlázás",
+  homeTitle: "Számlázás",
+  homeLead:
+    "Meglévő rendeléshez add meg a rendelési azonosítót (vagy SZC-kódot) és a megrendelő e-mailt. Új csomaghoz a főoldal árlistája vezet ide.",
+  homePricingCta: "Csomagok a főoldalon",
+  loginTitle: "Rendelés megnyitása",
+  loginToken: "Rendelésazonosító vagy SZC-kód",
+  loginTokenPh: "pl. SZC-… vagy rendelés-UUID",
+  loginEmail: "Megrendelő e-mail",
+  loginSubmit: "Megnyitás",
+  loginBusy: "Ellenőrzés…",
+  loginHint: "Mindkét adat kell — így nem nyílik meg idegen rendelés.",
+  loginErr: "Nem egyezik, vagy a rendelés nem található.",
+  loginNeed: "Azonosító és érvényes e-mail kell.",
+  logout: "Kilépés",
+  portalTitle: "Rendelésed",
+  portalStatus: "Státusz",
+  portalTier: "Csomag",
+  portalAmount: "Összeg",
+  portalProforma: "Díjbekérő",
+  portalInvoice: "Számla",
+  portalCode: "Közlemény / token",
+  statusPending: "Függőben",
+  statusAwaiting: "Átutalásra vár",
+  statusPaid: "Fizetve",
+  statusInvoiced: "Számlázva",
+  statusFailed: "Sikertelen",
   payTitle: "Fizetés",
   thanksTitle: "Köszönjük",
   thanksBody: "Ha a fizetés sikeres, a számla a megadott e-mailre megy.",
@@ -56,7 +82,33 @@ const hu = {
 };
 
 const en: typeof hu = {
-  brand: "Szcenárió · invoice",
+  brand: "Szcenárió · billing",
+  homeTitle: "Billing",
+  homeLead:
+    "For an existing order enter the order id (or SZC code) and the buyer e-mail. New packages start from the main pricing list.",
+  homePricingCta: "Packages on the main site",
+  loginTitle: "Open order",
+  loginToken: "Order id or SZC code",
+  loginTokenPh: "e.g. SZC-… or order UUID",
+  loginEmail: "Buyer e-mail",
+  loginSubmit: "Open",
+  loginBusy: "Checking…",
+  loginHint: "Both fields are required — so someone else’s order cannot open.",
+  loginErr: "No match, or the order was not found.",
+  loginNeed: "Token and a valid e-mail are required.",
+  logout: "Sign out",
+  portalTitle: "Your order",
+  portalStatus: "Status",
+  portalTier: "Plan",
+  portalAmount: "Amount",
+  portalProforma: "Proforma",
+  portalInvoice: "Invoice",
+  portalCode: "Reference / token",
+  statusPending: "Pending",
+  statusAwaiting: "Awaiting transfer",
+  statusPaid: "Paid",
+  statusInvoiced: "Invoiced",
+  statusFailed: "Failed",
   payTitle: "Payment",
   thanksTitle: "Thank you",
   thanksBody: "If payment succeeds, the invoice goes to the e-mail you gave.",
@@ -121,4 +173,14 @@ export function tierLabel(locale: Locale, tier: string) {
   if (tier === "expert") return c.expert;
   if (tier === "campus") return c.campusTier;
   return tier;
+}
+
+export function statusLabel(locale: Locale, status: string) {
+  const c = billCopy(locale);
+  if (status === "pending") return c.statusPending;
+  if (status === "awaiting_transfer") return c.statusAwaiting;
+  if (status === "paid") return c.statusPaid;
+  if (status === "invoiced") return c.statusInvoiced;
+  if (status === "failed") return c.statusFailed;
+  return status;
 }

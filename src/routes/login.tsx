@@ -30,9 +30,15 @@ import {
 } from "lucide-react";
 import { ImportQrDialog } from "@/components/ProfileTransfer";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
-import { caseBlurb, caseTitle, useI18n } from "@/i18n";
-import { publicDemoSegments } from "@/lib/coreCases";
+import { caseBlurb, caseTitle, useI18n, type MessageKey } from "@/i18n";
+import {
+  demoSerialFromId,
+  groupPublicDemoSegments,
+  type DemoCatalogIndustry,
+  type DemoCatalogKind,
+} from "@/lib/coreCases";
 import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
+import { cn } from "@/lib/utils";
 import {
   LAST_PROFILE_KEY,
   dedupeAllDemoProfiles,
@@ -43,6 +49,34 @@ import {
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
+
+const DEMO_KIND_TITLE: Record<DemoCatalogKind, MessageKey> = {
+  economic: "login.demoKindEconomic",
+  resilience: "login.demoKindResilience",
+  education: "login.demoKindEducation",
+  inner: "login.demoKindInner",
+};
+
+const DEMO_INDUSTRY_TITLE: Record<DemoCatalogIndustry, MessageKey> = {
+  hospitality: "login.demoIndHospitality",
+  healthcare: "login.demoIndHealthcare",
+  manufacturing: "login.demoIndManufacturing",
+  logistics: "login.demoIndLogistics",
+  strategy: "login.demoIndStrategy",
+  education: "login.demoIndEducation",
+  firmBcp: "login.demoIndFirmBcp",
+  community: "login.demoIndCommunity",
+  household: "login.demoIndHousehold",
+  demography: "login.demoIndDemography",
+  personal: "login.demoIndPersonal",
+};
+
+const DEMO_KIND_ACCENT: Record<DemoCatalogKind, string> = {
+  economic: "border-l-sky-400/70",
+  resilience: "border-l-rose-400/70",
+  education: "border-l-emerald-400/70",
+  inner: "border-l-slate-400/70",
+};
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -109,30 +143,20 @@ function LoginPage() {
     }
   };
 
-  // Optional: one-click autologin via /login?demo=1..7 or /login?demo=demo1_multisite_operator
+  // Optional: one-click autologin via /login?demo=1..18 or /login?demo=demo1_multisite_operator
   useEffect(() => {
     if (typeof window === "undefined") return;
     const demo = new URLSearchParams(window.location.search).get("demo");
     if (!demo) return;
-    // Avoid autologin when already unlocked
     if (state.status === "unlocked") return;
+    const n = Number(demo);
     const byNum =
-      demo === "1"
-        ? ("demo1_multisite_operator" as const)
-        : demo === "2"
-          ? ("demo2_premium_nightlife" as const)
-          : demo === "3"
-            ? ("demo3_specialty_cafe_tea" as const)
-            : demo === "4"
-              ? ("demo4_fine_dining_bistro" as const)
-              : demo === "5"
-                ? ("demo5_pastry_gelato" as const)
-                : demo === "6"
-                  ? ("demo6_event_catering_popup" as const)
-                : demo === "7"
-                  ? ("demo7_personal_pocket_seasonal_pilot" as const)
-                  : null;
-    const segId = (byNum ?? (demo as DemoSegmentId)) as DemoSegmentId;
+      Number.isInteger(n) && n >= 1 && n <= 18
+        ? (groupPublicDemoSegments()
+            .flatMap((g) => g.industries.flatMap((b) => b.segments))
+            .find((s) => demoSerialFromId(s.id) === n)?.id ?? null)
+        : null;
+    const segId = (byNum ?? demo) as DemoSegmentId;
     if (!isDemoSegmentId(segId)) return;
     void handleDemoLogin(segId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,11 +327,17 @@ function LoginPage() {
                     <SelectValue placeholder={t("login.pickPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {profiles.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
+                    {[...profiles]
+                      .sort((a, b) => {
+                        const na = Number(String(a.name).match(/^DEMO\s+(\d+)/i)?.[1] ?? 999);
+                        const nb = Number(String(b.name).match(/^DEMO\s+(\d+)/i)?.[1] ?? 999);
+                        return na - nb || String(a.name).localeCompare(String(b.name));
+                      })
+                      .map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -413,20 +443,49 @@ function LoginPage() {
                   <Badge variant="outline" className="text-[10px]">{t("login.demoBadge")}</Badge>
                 </div>
 
-                <div className="mt-3 grid grid-cols-1 gap-2">
-                  {publicDemoSegments().map((s) => (
-                    <Button
-                      key={s.id}
-                      variant="secondary"
-                      size="sm"
-                      className="w-full justify-start gap-2 text-xs"
-                      disabled={busy}
-                      onClick={() => void handleDemoLogin(s.id)}
-                      title={caseBlurb(s.id, locale) ?? s.blurb}
+                <div className="mt-3 space-y-4">
+                  {groupPublicDemoSegments().map((group) => (
+                    <div
+                      key={group.kind}
+                      className={cn(
+                        "space-y-2 rounded-lg border border-border/50 bg-background/40 py-2.5 pl-3 pr-2 border-l-4",
+                        DEMO_KIND_ACCENT[group.kind],
+                      )}
                     >
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      <span className="font-medium">{caseTitle(s.id, locale) ?? s.title}</span>
-                    </Button>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {t(DEMO_KIND_TITLE[group.kind])}
+                      </p>
+                      <div className="space-y-3">
+                        {group.industries.map((bucket) => (
+                          <div key={bucket.industry} className="space-y-1.5">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium text-foreground/90"
+                            >
+                              {t(DEMO_INDUSTRY_TITLE[bucket.industry])}
+                            </Badge>
+                            <div className="grid grid-cols-1 gap-1.5">
+                              {bucket.segments.map((s) => (
+                                <Button
+                                  key={s.id}
+                                  variant="secondary"
+                                  size="sm"
+                                  className="w-full justify-start gap-2 text-xs"
+                                  disabled={busy}
+                                  onClick={() => void handleDemoLogin(s.id)}
+                                  title={caseBlurb(s.id, locale) ?? s.blurb}
+                                >
+                                  <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="font-medium text-left">
+                                    {caseTitle(s.id, locale) ?? s.title}
+                                  </span>
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
 

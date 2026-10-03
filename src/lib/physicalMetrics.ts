@@ -516,7 +516,7 @@ export function buildPhysicalDashboard(
 }
 
 function dashboardForResilience(id: ResilienceCaseId, ctx: MasterBaselineContext, head: number): PhysicalDashboard {
-  if (id === "demo14_resilience_demography") {
+  if (id === "demo15_resilience_demography") {
     const events = pokaEvents("bcp");
     return {
       gauges: [],
@@ -528,7 +528,7 @@ function dashboardForResilience(id: ResilienceCaseId, ctx: MasterBaselineContext
       forks: [],
     };
   }
-  if (id === "demo13_resilience_home_blackout") {
+  if (id === "demo14_resilience_home_blackout") {
     const waterL = ctx.startingResources.waterLiters ?? 48;
     const foodDays = ctx.startingResources.stockDays ?? 5;
     const batteryWh = (ctx.startingResources.energyKwh ?? 5.2) * 1000;
@@ -556,7 +556,7 @@ function dashboardForResilience(id: ResilienceCaseId, ctx: MasterBaselineContext
       forks: forksFor("household"),
     };
   }
-  if (id === "demo12_resilience_community_grid") {
+  if (id === "demo13_resilience_community_grid") {
     const waterL = ctx.startingResources.waterLiters ?? 4_800;
     const waterH = resourceRunwayHours({ stock: waterL, headcount: head, perPersonPerDay: WATER_L_PER_PERSON_DAY });
     const energyH = energyAutonomyHours({
@@ -608,8 +608,8 @@ function dashboardForResilience(id: ResilienceCaseId, ctx: MasterBaselineContext
 }
 
 function dashboardForEducation(id: EducationCaseId, ctx: MasterBaselineContext, head: number): PhysicalDashboard | null {
-  if (id === "demo15_edu_startup_cashflow") return null;
-  if (id === "demo16_edu_lean_vsm") {
+  if (id === "demo16_edu_startup_cashflow") return null;
+  if (id === "demo17_edu_ops_process") {
     const topo = defaultNodes("lean");
     const comm = communicationRedundancy(topo.nodes);
     const events = pokaEvents("lean");
@@ -627,7 +627,7 @@ function dashboardForEducation(id: EducationCaseId, ctx: MasterBaselineContext, 
       forks: forksFor("lean"),
     };
   }
-  if (id === "demo17_edu_campus_energy") {
+  if (id === "demo22_edu_campus_energy") {
     const batteryWh = (ctx.startingResources.energyKwh ?? 1_860) * 1000;
     const energyH = energyAutonomyHours({ batteryWh, solarW: 400, loadW: 6_200 });
     const topo = defaultNodes("campus");

@@ -7,6 +7,7 @@ import {
   PILLAR_OF,
   TIER_OF,
   coreCasesOnStep,
+  groupPublicDemoSegments,
   isBaseCaseId,
   isCoreCaseId,
   isLensCaseId,
@@ -24,11 +25,21 @@ describe("coreCases", () => {
     expect(new Set(Object.values(PILLAR_OF)).size).toBe(5);
     expect(isCoreCaseId(KAHN_SEGMENT_ID)).toBe(true);
     expect(isBaseCaseId("demo2_premium_nightlife")).toBe(true);
-    expect(isLensCaseId("demo21_industry_supply_shock")).toBe(true);
-    expect(isCoreCaseId("demo8_strategy_new_line")).toBe(false);
+    expect(isLensCaseId("demo8_industry_supply_shock")).toBe(true);
+    expect(isCoreCaseId("demo19_strategy_new_line")).toBe(false);
     expect(isCoreCaseId("demo26_industry_saas_exit")).toBe(false);
     expect(TIER_OF.demo1_multisite_operator).toBe("base");
     expect(TIER_OF[KAHN_SEGMENT_ID]).toBe("lens");
+  });
+
+  it("numbers public demos DEMO 1…18 with matching ids and no gaps", () => {
+    const pubs = publicDemoSegments();
+    expect(CORE_CASE_IDS).toEqual(pubs.map((s) => s.id));
+    pubs.forEach((s, i) => {
+      const n = i + 1;
+      expect(s.id.startsWith(`demo${n}_`)).toBe(true);
+      expect(s.name.startsWith(`DEMO ${n} —`)).toBe(true);
+    });
   });
 
   it("routes each public case onto one door step without overlap", () => {
@@ -44,8 +55,21 @@ describe("coreCases", () => {
       ...coreCasesOnStep("strategy"),
     ];
     expect(hospitality).toHaveLength(6);
-    expect(manufacturing).toEqual(["demo21_industry_supply_shock", "demo22_industry_poka_recall"]);
-    expect(inner).toContain("demo7_personal_pocket_seasonal_pilot");
+    expect(manufacturing).toEqual(["demo8_industry_supply_shock", "demo9_industry_poka_recall"]);
+    expect(inner).toContain("demo18_personal_pocket_seasonal_pilot");
     expect(new Set(listed).size).toBe(18);
+  });
+
+  it("groups login demos by scenario kind then industry", () => {
+    const groups = groupPublicDemoSegments();
+    expect(groups.map((g) => g.kind)).toEqual(["economic", "resilience", "education", "inner"]);
+    const flat = groups.flatMap((g) => g.industries.flatMap((b) => b.segments.map((s) => s.id)));
+    expect(flat).toHaveLength(18);
+    expect(new Set(flat).size).toBe(18);
+    const economic = groups.find((g) => g.kind === "economic")!;
+    expect(economic.industries.some((b) => b.industry === "hospitality" && b.segments.length === 6)).toBe(true);
+    expect(economic.industries.some((b) => b.industry === "strategy")).toBe(true);
+    const resilience = groups.find((g) => g.kind === "resilience")!;
+    expect(resilience.industries).toHaveLength(4);
   });
 });

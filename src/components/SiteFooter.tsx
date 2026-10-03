@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
 import { translate } from "@/i18n";
 import { LOCALE_EVENT, readClientLocale, type Locale } from "@/i18n/locale";
 import { billPublicOrigin } from "@/lib/billing";
@@ -65,20 +66,73 @@ export function useSiteFooterVisible(pathname?: string, opts?: { ignoreHomeMode?
   });
 }
 
+type FooterLink = {
+  href?: string;
+  label: string;
+  soon?: boolean;
+  /** Support → tippek/GYIK: egy sor, kattintásra nyílik. */
+  nest?: Array<{ href: string; label: string }>;
+};
+
+function FooterNest({
+  label,
+  nest,
+}: {
+  label: string;
+  nest: Array<{ href: string; label: string }>;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="site-footer-nest">
+      <button
+        type="button"
+        className="site-footer-nest-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span>{label}</span>
+        <span className="site-footer-nest-chev" aria-hidden>
+          {open ? "▾" : "▸"}
+        </span>
+      </button>
+      {open ? (
+        <ul className="site-footer-nest-list">
+          {nest.map((n) => (
+            <li key={n.href}>
+              <a href={n.href}>{n.label}</a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function FooterCol({
   title,
   links,
+  soonTitle,
 }: {
   title: string;
-  links: Array<{ href: string; label: string }>;
+  links: FooterLink[];
+  soonTitle?: string;
 }) {
   return (
     <nav className="site-footer-col" aria-label={title}>
       <div className="site-footer-heading">{title}</div>
       <ul className="site-footer-list">
         {links.map((l) => (
-          <li key={`${l.href}:${l.label}`}>
-            <a href={l.href}>{l.label}</a>
+          <li key={`${l.href ?? "soon"}:${l.label}`}>
+            {l.nest?.length ? (
+              <FooterNest label={l.label} nest={l.nest} />
+            ) : l.soon || !l.href ? (
+              <span className="site-footer-soon" title={soonTitle}>
+                {l.label}
+                <span className="site-footer-soon-mark"> · {soonTitle}</span>
+              </span>
+            ) : (
+              <a href={l.href}>{l.label}</a>
+            )}
           </li>
         ))}
       </ul>
@@ -92,40 +146,55 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const kind = resolveSiteHost(loc.hostname, loc.port);
   const home = mainPublicOrigin(loc.hostname, loc.port);
   const support = supportPublicOrigin();
-  const bill = billPublicOrigin();
-  const about = kind === "main" ? "/about" : `${home}/about`;
-  const homeHref = kind === "main" ? "/" : home;
-  const pricingHref = kind === "main" ? "/#csomagok" : `${home}/#csomagok`;
-  // Support hoston lokális /gyik; máshol a support aldomain GYIK-je
-  const faqHref = kind === "support" ? "/gyik" : `${support}/gyik`;
-  const logoSrc = "/logo.svg";
+  const billHome = kind === "bill" ? "/" : `${billPublicOrigin()}/`;
+  const mainPath = (path: string) => (kind === "main" ? path : `${home}${path}`);
+  const supportPath = (path: string) => (kind === "support" ? path : `${support}${path}`);
+  const scenariosHref = mainPath("/#szcenariok");
+  const typesHref = mainPath("/#tipusok");
+  const pricingHref = mainPath("/#csomagok");
+  const aboutHref = mainPath("/about");
+  const lessonsHref = supportPath("/tippek");
+  const faqHref = supportPath("/gyik");
+  const ticketHref = supportPath("/ticket");
   const year = new Date().getFullYear();
+  const [footerHovered, setFooterHovered] = useState(false);
 
   const productLinks = [
-    { href: homeHref, label: t("footer.catalog") },
-    { href: homeHref, label: t("footer.scenarios") },
-    { href: homeHref, label: t("footer.types") },
+    { href: scenariosHref, label: t("footer.scenarios") },
+    { href: typesHref, label: t("footer.types") },
     { href: pricingHref, label: t("footer.pricing") },
-    { href: bill, label: t("footer.bill") },
+    { href: billHome, label: t("footer.bill") },
   ];
-  const aboutLinks = [
-    { href: about, label: t("footer.aboutUs") },
-    { href: faqHref, label: t("footer.faq") },
+  const aboutLinks: FooterLink[] = [
+    {
+      label: t("footer.supportHome"),
+      nest: [
+        { href: lessonsHref, label: t("footer.lessons") },
+        { href: faqHref, label: t("footer.faq") },
+      ],
+    },
+    { href: aboutHref, label: t("footer.aboutUs") },
+    { soon: true, label: t("footer.terms") },
+    { soon: true, label: t("footer.gdpr") },
   ];
 
   return (
-    <footer className="site-footer" role="contentinfo">
+    <footer
+      className="site-footer"
+      role="contentinfo"
+      onMouseEnter={() => setFooterHovered(true)}
+      onMouseLeave={() => setFooterHovered(false)}
+    >
       <div className="site-footer-shell">
         <div className="site-footer-inner">
           <div className="site-footer-col site-footer-brand-col">
-            <a href={homeHref} className="site-footer-logo">
-              <img src={logoSrc} alt="" width={28} height={28} className="site-footer-logo-img" />
-              <span className="site-footer-name">{t("brand.name")}</span>
-            </a>
+            <button type="button" className="site-footer-logo" aria-label={t("brand.name")}>
+              <FooterRopeMark hovered={footerHovered} />
+            </button>
             <p className="site-footer-tagline">{t("footer.brandBlurb")}</p>
           </div>
           <FooterCol title={t("footer.product")} links={productLinks} />
-          <FooterCol title={t("footer.aboutCol")} links={aboutLinks} />
+          <FooterCol title={t("footer.aboutCol")} links={aboutLinks} soonTitle={t("footer.comingSoon")} />
         </div>
         <div className="site-footer-bottom">
           <p className="site-footer-copyline">
@@ -141,7 +210,7 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
             </span>
             <span>
               {t("footer.question")}{" "}
-              <a href={faqHref} className="site-footer-write">
+              <a href={ticketHref} className="site-footer-write">
                 {t("footer.writeUs")}
               </a>
             </span>

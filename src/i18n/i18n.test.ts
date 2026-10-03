@@ -70,7 +70,7 @@ describe("i18n", () => {
     expect(caseCopyIds()).toHaveLength(18);
     expect(caseTitle("demo1_multisite_operator", "hu")).toBe("Több vendéglátóhely egy kézben");
     expect(caseTitle("demo1_multisite_operator", "en")).toBe("Several hospitality sites in one hand");
-    expect(caseTitle("demo11_resilience_saas_outage", "en")).toMatch(/SaaS/);
+    expect(caseTitle("demo12_resilience_saas_outage", "en")).toMatch(/SaaS/);
     expect(caseTitle("demo26_industry_saas_exit", "en")).toBeNull();
   });
 });

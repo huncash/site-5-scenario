@@ -57,11 +57,11 @@ export const CAMPAIGN_DOOR_STEP: Record<CampaignId, ScenarioDoorStep> = {
 };
 
 export const CAMPAIGN_SEGMENT_IDS: Record<CampaignId, readonly string[]> = {
-  bcp: ["demo11_resilience_saas_outage"],
-  strategia: ["demo19_strategy_kahn_fork"],
-  kozosseg: ["demo12_resilience_community_grid", "demo13_resilience_home_blackout"],
-  oktatas: ["demo15_edu_startup_cashflow", "demo16_edu_lean_vsm"],
-  makro: ["demo14_resilience_demography"],
+  bcp: ["demo12_resilience_saas_outage"],
+  strategia: ["demo11_strategy_kahn_fork"],
+  kozosseg: ["demo13_resilience_community_grid", "demo14_resilience_home_blackout"],
+  oktatas: ["demo16_edu_startup_cashflow", "demo17_edu_ops_process"],
+  makro: ["demo15_resilience_demography"],
 };
 
 export function isCampaignId(value: unknown): value is CampaignId {

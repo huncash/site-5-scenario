@@ -172,9 +172,16 @@ async function handleApi(req: Request): Promise<Response> {
   }
 
   if (req.method === "GET" && p.startsWith("/api/billing/order/")) {
-    const id = p.slice("/api/billing/order/".length);
-    const order = await getOrder(id);
+    const id = decodeURIComponent(p.slice("/api/billing/order/".length));
+    const email = (url.searchParams.get("email") ?? "").trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      return Response.json({ ok: false, error: "email_required" }, { status: 400 });
+    }
+    const order = (await getOrder(id)) ?? (await getOrderByLicenseToken(id));
     if (!order) return Response.json({ ok: false }, { status: 404 });
+    if ((order.buyer.email ?? "").trim().toLowerCase() !== email) {
+      return Response.json({ ok: false, error: "mismatch" }, { status: 403 });
+    }
     return Response.json({
       ok: true,
       order: {
@@ -192,6 +199,47 @@ async function handleApi(req: Request): Promise<Response> {
         transferCode: order.transferCode,
         invoiceNumber: order.invoiceNumber,
         proformaNumber: order.proformaNumber,
+        buyerEmail: order.buyer.email,
+        buyerName: order.buyer.name,
+        transfer: order.payMethod === "hu_transfer" ? transferPayload(order) : undefined,
+      },
+    });
+  }
+
+  /** Poka-yoke belépő: token + megrendelő e-mail együtt kell. */
+  if (req.method === "POST" && p === "/api/billing/portal") {
+    const body = await readJson(req);
+    const token = String(body.token ?? "").trim();
+    const email = String(body.email ?? "").trim().toLowerCase();
+    if (!token || !email || !email.includes("@")) {
+      return Response.json({ ok: false, error: "token_email_required" }, { status: 400 });
+    }
+    const order = await getOrderByLicenseToken(token);
+    if (!order) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
+    if ((order.buyer.email ?? "").trim().toLowerCase() !== email) {
+      // Lean: ne áruljuk el, hogy a token létezik-e.
+      return Response.json({ ok: false, error: "mismatch" }, { status: 403 });
+    }
+    return Response.json({
+      ok: true,
+      order: {
+        id: order.id,
+        status: order.status,
+        amountHuf: order.amountHuf,
+        netHuf: order.netHuf,
+        vatRate: order.vatRate,
+        vatCode: order.vatCode,
+        vatTreatment: order.vatTreatment,
+        buyerCountry: order.buyerCountry,
+        tier: order.tier,
+        interval: order.interval,
+        payMethod: order.payMethod,
+        transferCode: order.transferCode,
+        invoiceNumber: order.invoiceNumber,
+        proformaNumber: order.proformaNumber,
+        buyerEmail: order.buyer.email,
+        buyerName: order.buyer.name,
+        transfer: order.payMethod === "hu_transfer" ? transferPayload(order) : undefined,
       },
     });
   }

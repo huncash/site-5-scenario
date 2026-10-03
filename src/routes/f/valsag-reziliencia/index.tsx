@@ -35,10 +35,10 @@ function ValsagRezilienciaLandingPage() {
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {RESILIENCE_SEGMENTS.filter((s) =>
-                s.id === "demo11_resilience_saas_outage" ||
-                s.id === "demo12_resilience_community_grid" ||
-                s.id === "demo13_resilience_home_blackout" ||
-                s.id === "demo14_resilience_demography"
+                s.id === "demo12_resilience_saas_outage" ||
+                s.id === "demo13_resilience_community_grid" ||
+                s.id === "demo14_resilience_home_blackout" ||
+                s.id === "demo15_resilience_demography"
               ).map((s) => (
                 <li key={s.id}>{caseTitle(s.id, locale) ?? s.title}</li>
               ))}

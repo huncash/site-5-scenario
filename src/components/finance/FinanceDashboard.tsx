@@ -158,6 +158,7 @@ import {
   ChartLegendSwatch,
   ExceptionHeatmap,
   FlowSankey,
+  SERIES_COLORS,
   SmallMultiples,
   WaterfallChart,
   type VizSpan,
@@ -5931,8 +5932,8 @@ export function FinanceDashboard({
             windowLabel={vizWindowLabel}
             legend={
               <>
-                <ChartLegendSwatch color="#34d399" label="Plusz" />
-                <ChartLegendSwatch color="#fb7185" label="Levonás" />
+                <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
+                <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
               </>
             }
           >
@@ -6428,8 +6429,8 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color="var(--accent-color)" label="Honnan" />
-                    <ChartLegendSwatch color="#94a3b8" label="Költséghely" />
+                    <ChartLegendSwatch color={SERIES_COLORS.source} label="Honnan" />
+                    <ChartLegendSwatch color={SERIES_COLORS.sink} label="Költséghely" />
                   </>
                 }
               >
@@ -6446,9 +6447,9 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color="#34d399" label="Plusz" />
-                    <ChartLegendSwatch color="#94a3b8" label="Semleges" />
-                    <ChartLegendSwatch color="#fb7185" label="Levonás" />
+                    <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
+                    <ChartLegendSwatch color={SERIES_COLORS.neutral} label="Semleges" />
+                    <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
                   </>
                 }
               >
@@ -7905,8 +7906,8 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color="#34d399" label="Plusz" />
-                    <ChartLegendSwatch color="#fb7185" label="Levonás" />
+                    <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
+                    <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
                   </>
                 }
               >
@@ -7922,9 +7923,9 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color="#38bdf8" label="Bevétel" line />
-                      <ChartLegendSwatch color="#fb7185" label="Kiadás" line />
-                      <ChartLegendSwatch color="var(--accent-color)" label="Megtakarítás" line />
+                      <ChartLegendSwatch color={SERIES_COLORS.income} label="Bevétel" line />
+                      <ChartLegendSwatch color={SERIES_COLORS.expense} label="Kiadás" line />
+                      <ChartLegendSwatch color={SERIES_COLORS.saving} label="Megtakarítás" line />
                     </>
                   }
                 >
@@ -7963,8 +7964,8 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color="var(--accent-color)" label="Honnan" />
-                      <ChartLegendSwatch color="#94a3b8" label="Költséghely" />
+                      <ChartLegendSwatch color={SERIES_COLORS.source} label="Honnan" />
+                      <ChartLegendSwatch color={SERIES_COLORS.sink} label="Költséghely" />
                     </>
                   }
                 >
@@ -7981,9 +7982,9 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color="#34d399" label="Plusz" />
-                      <ChartLegendSwatch color="#94a3b8" label="Semleges" />
-                      <ChartLegendSwatch color="#fb7185" label="Levonás" />
+                      <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
+                      <ChartLegendSwatch color={SERIES_COLORS.neutral} label="Semleges" />
+                      <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
                     </>
                   }
                 >
@@ -11790,9 +11791,9 @@ export function FinanceDashboard({
                             formatter={(v: number) => formatMoney(v, CURRENCY)}
                           />
                           <Legend wrapperStyle={{ fontSize: 12 }} />
-                          <Bar dataKey="income" name="Bevétel" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
-                          <Bar dataKey="expense" name="Kiadás" fill="var(--color-chart-7)" radius={[6, 6, 0, 0]} />
-                          <Bar dataKey="saving" name="Megtakarítás" fill="var(--color-chart-2)" radius={[6, 6, 0, 0]} />
+                          <Bar dataKey="income" name="Bevétel" fill={SERIES_COLORS.income} radius={[6, 6, 0, 0]} />
+                          <Bar dataKey="expense" name="Kiadás" fill={SERIES_COLORS.expense} radius={[6, 6, 0, 0]} />
+                          <Bar dataKey="saving" name="Megtakarítás" fill={SERIES_COLORS.saving} radius={[6, 6, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -11878,9 +11879,9 @@ export function FinanceDashboard({
                                 formatter={(v: number) => formatMoney(v, CURRENCY)}
                               />
                               <Legend wrapperStyle={{ fontSize: 12 }} />
-                              <Bar dataKey="income" name="Bevétel" fill="var(--color-chart-1)" radius={[6, 6, 0, 0]} />
-                              <Bar dataKey="expense" name="Kiadás" fill="var(--color-chart-7)" radius={[6, 6, 0, 0]} />
-                              <Bar dataKey="saving" name="Megtakarítás" fill="var(--color-chart-2)" radius={[6, 6, 0, 0]} />
+                              <Bar dataKey="income" name="Bevétel" fill={SERIES_COLORS.income} radius={[6, 6, 0, 0]} />
+                              <Bar dataKey="expense" name="Kiadás" fill={SERIES_COLORS.expense} radius={[6, 6, 0, 0]} />
+                              <Bar dataKey="saving" name="Megtakarítás" fill={SERIES_COLORS.saving} radius={[6, 6, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
