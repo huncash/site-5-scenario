@@ -24,8 +24,10 @@ import {
   resilienceSurface,
 } from "@/lib/resilienceCases";
 import {
+  isKahnForkSegment,
   isStrategySegment,
   KAHN_FORK,
+  kahnReserveTargetHuf,
   STRATEGY_SEGMENTS,
   strategyCaseById,
   strategySurface,
@@ -1217,8 +1219,14 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
   // Seed a demo "active goal" so the Goals panel is immediately meaningful.
   // Keep it segment-specific (and stable) to avoid identical demo planning across profiles.
   const goalId = `demo:goal:${segmentId}:project1`;
-  const goalDeadline = new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const goalTarget = Math.round((plan.setup + plan.lab + plan.permit) * 1.35);
+  const goalDeadline = new Date(
+    Date.now() + (isKahnForkSegment(segmentId) ? 60 : 120) * 24 * 60 * 60 * 1000,
+  )
+    .toISOString()
+    .slice(0, 10);
+  const goalTarget = isKahnForkSegment(segmentId)
+    ? kahnReserveTargetHuf()
+    : Math.round((plan.setup + plan.lab + plan.permit) * 1.35);
   const goalPayload = {
     name: isStrategySegment(segmentId)
       ? strategyCaseById(segmentId).goalName
@@ -1253,8 +1261,10 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
           ? "Vállalkozás1 — Hűtő kapacitás bővítés"
           : segmentId === "demo6_event_catering_popup"
             ? "Vállalkozás1 — Mobil eszközcsomag puffer"
+            : isKahnForkSegment(segmentId)
+              ? "Működő üzem — ≥4 hó tartalék a rosszabb kimeneten"
             : isStrategySegment(segmentId)
-              ? "Core üzem — Master Baseline puffer"
+              ? "Működő üzem — készpénz puffer"
             : isResilienceSegment(segmentId)
               ? "Reziliencia — készlet / energia puffer"
             : isEducationSegment(segmentId)
@@ -1267,6 +1277,8 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
         ? 1_250_000
         : segmentId === "demo1_multisite_operator"
           ? 2_400_000
+          : isKahnForkSegment(segmentId)
+            ? MASTER_BASELINE.startingCashHuf
           : 950_000,
     workspace: "Vállalkozás1",
     property_id: null,
@@ -2826,10 +2838,10 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
           category: "BESZERZÉS: Beruházás",
           title: "Gépsor / 2. műszak foglaló — bővítési ág",
           party: "Gépsor / 2. műszak (copacker)",
-          note: withGeneratedNote("Opt ág commit: előre kötött kapacitás a törzsből."),
+          note: withGeneratedNote("Bővítési út: előre kötött kapacitás — csak ha ezt az ágat viszed."),
           occurred_at: day(12),
           workspace: "Projekt1",
-          status: "actual",
+          status: "planned",
           expense_type: "INVESTMENT",
           tags: demoTags(segmentId, ["strategy:overlay", "strategy:kahn-capacity"]),
         } as any),
@@ -2845,7 +2857,7 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
           ),
           occurred_at: day(15),
           workspace: "Projekt1",
-          status: "actual",
+          status: "planned",
           expense_type: "FIXED_NEED",
           tags: demoTags(segmentId, ["strategy:overlay", "strategy:kahn-loan-a"]),
         } as any),

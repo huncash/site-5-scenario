@@ -168,10 +168,9 @@ export const PUBLIC_LENS_SEGMENTS: DemoSegmentMeta[] = [
     id: "demo19_strategy_kahn_fork",
     name: "DEMO 19 — Kahn-féle jövőkutató & stratégiai elágazás",
     title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
-    blurb:
-      "14 fős core üzem, 2. sor / új műszak. Először hitel vagy organikus, majd A (olcsó+kötbér) vagy B (drága+rugalmas). PRO: bővítés / tartás / tartalék — nem jóslat.",
+    blurb: "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet.",
     lead:
-      "A Master Baseline törzs adott (8,4 M Ft/hó nettó, 4,2 M cash). 6–8 hónapos kapacitásbővítés előtt: 4,5 M külső hitel vagy 3×1,1 M organikus kötés. Ha hitel: A 0,9%/hó + 850 ezer kötbér, B 1,25%/hó kötbér nélkül. A pesszimista ágat előbb számolod.",
+      "Egy üzem új sort vagy műszakot tervez. Felveszel hitelt, vagy a saját tartalékodból finanszírozod? Az olcsóbb hitel kilépéskor drága lehet — a rosszabb kimenetet nézd előbb.",
     baseRevenueNetHuf: MASTER_BASELINE.monthlyRevenueNet,
   },
   {

@@ -177,11 +177,11 @@ export const en: DeepString<typeof hu> = {
     typesTitle: "Scenario types",
     typesLead: "18 cases: 7 base + 11 lenses. Industry, logistics, or inner zones — one branch, one decision frame. Kahn sits above, one click.",
     kahnBridge:
-      "One step from here: the Kahn method — a multi-branch outlook from the trunk, not a forecast, but a fork before you bind the resource.",
+      "One step from here: look at several futures before you bind the cash — not a forecast, a fork.",
     kahnEyebrow: "Featured demo — 1 click",
     kahnTitle: "Kahn futures research & strategic fork",
     kahnBody:
-      "14-person core, second line: 4.5M loan or 3×1.1M organic; A 0.9%/mo+850k penalty, B 1.25%/mo no penalty. PRO expand/hold/reserve — not a forecast. Runs now.",
+      "A plant would expand. Loan or own reserve; cheap+penalty or dear+flexible. Worse outcome first — runs now.",
     kahnCta: "Try the Kahn tree",
     pillarIndustry: "Industry",
     pillarIndustryBlurb: "Hospitality, healthcare, manufacturing — operations measured in cash and capacity.",
@@ -250,7 +250,7 @@ export const en: DeepString<typeof hu> = {
       },
       strategy: {
         title: "Business and strategic planning",
-        blurb: "Kahn: loan/organic → A/B → PRO. Concrete HUF from the trunk — not a forecast.",
+        blurb: "Before expansion: loan or own reserve, penalty or flexible exit — not a forecast.",
       },
       education: {
         title: "Education / simulation training",

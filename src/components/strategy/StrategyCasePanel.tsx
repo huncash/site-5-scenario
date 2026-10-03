@@ -57,7 +57,7 @@ export function StrategyCasePanel(props: {
           <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
         </div>
         <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground">
-          {MASTER_BASELINE_LABEL} → {props.inheritedFrom}
+          {kahn ? `Működő üzem → ${props.inheritedFrom}` : `${MASTER_BASELINE_LABEL} → ${props.inheritedFrom}`}
         </span>
       </div>
       {props.phase === "PLAN" && newLine ? <StrategyBranchWalk storyId="new-line" /> : null}

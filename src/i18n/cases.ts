@@ -45,10 +45,9 @@ const EN: Record<string, CaseCopy> = {
   },
   demo19_strategy_kahn_fork: {
     title: "Kahn futures research & strategic fork",
-    blurb:
-      "14-person core plant, second line / new shift. First loan or organic, then A (cheap+penalty) or B (dear+flexible). PRO: expand / hold / reserve — not a forecast.",
+    blurb: "A plant would expand. Loan or own reserve; cheap+penalty or dear+flexible. Worse outcome first.",
     lead:
-      "Master Baseline trunk is given (8.4M HUF/mo net, 4.2M cash). Before a 6–8 month capacity build: 4.5M external loan or 3×1.1M organic commit. If loan: A 0.9%/mo + 850k exit penalty, B 1.25%/mo with no penalty. Count the pessimistic branch first.",
+      "A plant plans a new line or shift. Take a loan, or fund from your own reserve? The cheaper loan can be dear to exit — look at the worse outcome first.",
   },
   demo11_resilience_saas_outage: {
     title: "BCP: critical SaaS / cloud outage",

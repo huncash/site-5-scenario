@@ -216,7 +216,9 @@ import { buildIndustryWhatIf, isIndustrySegment } from "@/lib/industryCases";
 import { isResilienceSegment } from "@/lib/resilienceCases";
 import { scenarioLens } from "@/lib/scenarioLens";
 import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
-import { buildStrategyWhatIf, isStrategySegment } from "@/lib/strategyCases";
+import { buildStrategyWhatIf, isKahnForkSegment, isStrategySegment } from "@/lib/strategyCases";
+} from "@/lib/strategyCases";
+import { formatMoney } from "@/lib/finance";
 const CHART_COLORS = [
   "var(--color-chart-1)",
   "var(--color-chart-2)",
@@ -5730,70 +5732,140 @@ export function FinanceDashboard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="grid items-start gap-3">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="tile-lift rounded-lg p-2.5">
-            <LeanTerm
-              className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-              title="Fedezeti pont"
-              exact="Fedezeti pont — az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
-              summary="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát. Halmozott eredmény = a havi (bevétel − kiadás) összege a horizont elejétől."
-            >
-              Fedezeti pont
-            </LeanTerm>
-            <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-              {whatIf.breakEvenLabel ?? "—"}
+        {whatIf.kahnMetrics ? (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Rosszabb kimenet — tartalékidő"
+                  exact="Hány hónapig bírja a készpénz a rosszabb pályán, mielőtt elfogy."
+                  summary="A pesszimista ág runwaye. Cél: legalább 4 hónap."
+                >
+                  Tartalékidő (rossz ág)
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {whatIf.kahnMetrics.worseRunwayMonths} hó
+                </div>
+              </div>
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Kilépési ár (olcsó szerződés)"
+                  exact="Amennyit fizetsz, ha az olcsóbb hitelből idő előtt kilépsz."
+                  summary="Nem megtérülés — a visszalépés ára. A rugalmas szerződésen ez 0."
+                >
+                  Kilépési ár
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {formatMoney(whatIf.kahnMetrics.exitPenaltyHuf, "HUF")}
+                </div>
+              </div>
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Döntési ablak"
+                  exact="Ennyi időd van dönteni, amíg az opció / foglaló érvényes keretben marad."
+                  summary="60 nap: ág mellett döntés vagy tartalék."
+                >
+                  Döntési ablak
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {whatIf.kahnMetrics.decisionDays} nap
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="tile-lift rounded-lg p-2.5">
-            <LeanTerm
-              className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-              title="Megtérülés (ROI)"
-              exact="Megtérülés — (bevétel − költség) / költség a 12 hónapon. Százalék, nem kamat."
-              summary="(A horizont teljes bevétele mínusz a teljes költség) osztva a költséggel. Százalék. Nem diszkontált, nem kamat."
-            >
-              Megtérülés
-            </LeanTerm>
-            <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-              {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+              <BulletGraph
+                item={{
+                  id: "kahn-runway",
+                  label: `Tartalékidő a ${whatIf.kahnMetrics.minRunwayMonths} hónapos küszöbhöz`,
+                  actual: whatIf.kahnMetrics.worseRunwayMonths,
+                  target: whatIf.kahnMetrics.minRunwayMonths,
+                  unit: "hó",
+                  hint: "Rosszabb kimenet runwaye. A küszöb a demó célpuffer, nem jóslat.",
+                }}
+              />
+              <BulletGraph
+                item={{
+                  id: "kahn-exit",
+                  label: "Kilépési ár az opciódíjhoz képest",
+                  actual: Math.round(whatIf.kahnMetrics.exitPenaltyHuf / 1000),
+                  target: Math.round(whatIf.kahnMetrics.optionFeeHuf / 1000),
+                  unit: "eFt",
+                  hint: "Olcsó szerződés kilépése vs. az opció nyitva tartásának díja — ezer forintban.",
+                }}
+              />
             </div>
-          </div>
-          <div className="tile-lift rounded-lg p-2.5">
-            <LeanTerm
-              className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-              title="Fix arány"
-              exact="Fix arány — a havi kiadásból mennyi a kötött tétel (bérlet, előfizetés). Magas arány: kevesebb mozgástér."
-              summary="A havi kiadásból mennyi a kötött tétel (bérleti díj, előfizetés). A maradék a forgalommal mozog. Magas arány: kevesebb mozgástér, ha esik a bevétel."
-            >
-              Fix arány
-            </LeanTerm>
-            <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-              {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
+          </>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Fedezeti pont"
+                  exact="Fedezeti pont — az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
+                  summary="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát. Halmozott eredmény = a havi (bevétel − kiadás) összege a horizont elejétől."
+                >
+                  Fedezeti pont
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {whatIf.breakEvenLabel ?? "—"}
+                </div>
+              </div>
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Megtérülés (ROI)"
+                  exact="Megtérülés — (bevétel − költség) / költség a 12 hónapon. Százalék, nem kamat."
+                  summary="(A horizont teljes bevétele mínusz a teljes költség) osztva a költséggel. Százalék. Nem diszkontált, nem kamat."
+                >
+                  Megtérülés
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
+                </div>
+              </div>
+              <div className="tile-lift rounded-lg p-2.5">
+                <LeanTerm
+                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  title="Fix arány"
+                  exact="Fix arány — a havi kiadásból mennyi a kötött tétel (bérlet, előfizetés). Magas arány: kevesebb mozgástér."
+                  summary="A havi kiadásból mennyi a kötött tétel (bérleti díj, előfizetés). A maradék a forgalommal mozog. Magas arány: kevesebb mozgástér, ha esik a bevétel."
+                >
+                  Fix arány
+                </LeanTerm>
+                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                  {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
-          <BulletGraph
-            item={{
-              id: "roi",
-              label: "ROI a 20%-os küszöbhöz",
-              actual: whatIf.roi ?? 0,
-              target: 20,
-              unit: "%",
-              hint: "ROI = (bevétel − költség) / költség a 12 hónapon. A 20% összehasonlító küszöb, nem előírás.",
-            }}
-          />
-          <BulletGraph
-            item={{
-              id: "fix",
-              label: "Fix arány az 50%-os küszöbhöz",
-              actual: Math.round((whatIf.fixedRatio ?? 0) * 100),
-              target: 50,
-              unit: "%",
-              hint: "Fix arány = kötött havi kiadás / átlagos havi kiadás. Az 50% fölött a működés kevésbé enged, ha esik a forgalom.",
-            }}
-          />
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+              <BulletGraph
+                item={{
+                  id: "roi",
+                  label: "ROI a 20%-os küszöbhöz",
+                  actual: whatIf.roi ?? 0,
+                  target: 20,
+                  unit: "%",
+                  hint: "ROI = (bevétel − költség) / költség a 12 hónapon. A 20% összehasonlító küszöb, nem előírás.",
+                }}
+              />
+              <BulletGraph
+                item={{
+                  id: "fix",
+                  label: "Fix arány az 50%-os küszöbhöz",
+                  actual: Math.round((whatIf.fixedRatio ?? 0) * 100),
+                  target: 50,
+                  unit: "%",
+                  hint: "Fix arány = kötött havi kiadás / átlagos havi kiadás. Az 50% fölött a működés kevésbé enged, ha esik a forgalom.",
+                }}
+              />
+            </div>
+          </>
+        )}
         </div>
 
         <div className="viz-split">
@@ -5868,14 +5940,25 @@ export function FinanceDashboard({
     isIndustrySegment(demoSegmentId) ? (
       <IndustryCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
     ) : null;
-
+  const kahnDemo = isKahnForkSegment(demoSegmentId);
   const planStack = (
     <div className="pdca-tile-grid">
-      {surface.inheritMasterBaseline ? <MasterBaselineCard context={inheritedBaseline} /> : null}
+      {surface.inheritMasterBaseline ? (
+        <MasterBaselineCard
+          context={inheritedBaseline}
+          specificHint={
+            kahnDemo
+              ? "A működő üzem számai adottak — nem kell újra megadni. Itt csak a bővítési döntést mozgatod."
+              : undefined
+          }
+        />
+      ) : null}
       {resiliencePanel("PLAN")}
       {educationPanel("PLAN")}
       {industryPanel("PLAN")}
       {strategyPanel("PLAN")}
+      {/* Kahn PLAN: fa + cél; a KPI/grafikon CHECK-en — elkerüli a generic ROI keveredést. */}
+      {kahnDemo ? null : whatIfPanel}
       {whatIfPanel}
       <>
       <GoalCard
@@ -7184,6 +7267,7 @@ export function FinanceDashboard({
         {resiliencePanel("CHECK")}
         {educationPanel("CHECK")}
         {industryPanel("CHECK")}
+        {kahnDemo ? whatIfPanel : null}
         {strategyPanel("CHECK")}
         {surface.showFinanceModules ? (
         <>
@@ -10138,33 +10222,67 @@ export function FinanceDashboard({
                         </div>
                       </div>
 
-                      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                        <div
-                          className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                          title="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
-                        >
-                          <div className="text-[11px] text-muted-foreground">Fedezeti pont</div>
-                          <div className="mt-1 font-mono text-sm text-slate-100">
-                            {whatIf.breakEvenLabel ?? "—"}
-                          </div>
-                        </div>
-                        <div
-                          className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                          title="ROI: (bevétel − költség) / költség a 12 hónapon. Nem diszkontált."
-                        >
-                          <div className="text-[11px] text-muted-foreground">Megtérülés (ROI)</div>
-                          <div className="mt-1 font-mono text-sm text-slate-100">
-                            {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
-                          </div>
-                        </div>
-                        <div
-                          className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                          title="Kötött havi kiadás osztva az átlagos havi kiadással."
-                        >
-                          <div className="text-[11px] text-muted-foreground">Fix költség arány</div>
-                          <div className="mt-1 font-mono text-sm text-slate-100">
-                            {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
-                          </div>
+                        {whatIf.kahnMetrics ? (
+                          <>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="Hány hónapig bírja a készpénz a rosszabb pályán."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Tartalékidő (rossz ág)</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {whatIf.kahnMetrics.worseRunwayMonths} hó
+                              </div>
+                            </div>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="Olcsóbb hitel kilépési ára — nem megtérülés."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Kilépési ár</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {formatMoney(whatIf.kahnMetrics.exitPenaltyHuf, CURRENCY)}
+                              </div>
+                            </div>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="Ennyi időd van dönteni."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Döntési ablak</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {whatIf.kahnMetrics.decisionDays} nap
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Fedezeti pont</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {whatIf.breakEvenLabel ?? "—"}
+                              </div>
+                            </div>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="ROI: (bevétel − költség) / költség a 12 hónapon. Nem diszkontált."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Megtérülés (ROI)</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
+                              </div>
+                            </div>
+                            <div
+                              className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
+                              title="Kötött havi kiadás osztva az átlagos havi kiadással."
+                            >
+                              <div className="text-[11px] text-muted-foreground">Fix költség arány</div>
+                              <div className="mt-1 font-mono text-sm text-slate-100">
+                                {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
+                              </div>
+                            </div>
+                          </>
+                        )}
                         </div>
                       </div>
 

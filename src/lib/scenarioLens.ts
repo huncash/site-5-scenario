@@ -102,10 +102,10 @@ const BY_ID_HU: Record<string, Pack> = {
   demo19_strategy_kahn_fork: {
     tabs: { cashflow: "Cashflow", items: "Tételek", deals: "Ágak", inventory: "Leltár" },
     pdca: {
-      PLAN: "PLAN — 1) hitel 4,5 M vagy organikus 3×1,1 M, 2) A/B szerződés.",
-      DO: "DO — a választott ág élő cash-flowja (kamat, foglaló, opció), nem jóslat.",
-      CHECK: "CHECK — A-kötbér 850 ezer vs B-kilépés, runway ≥4 hó, árrés ≥12%.",
-      ACT: "ACT — egy ág mellett döntés, vagy tartalék a pesszimista sávon.",
+      PLAN: "PLAN — hitel 4,5 M vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas.",
+      DO: "DO — a választott út élő pénzmozgása (kamat, foglaló, opció), nem jóslat.",
+      CHECK: "CHECK — kilépési ár 850 ezer vs szabad kilépés; tartalék ≥4 hó; árrés ≥12%.",
+      ACT: "ACT — egy út mellett döntés, vagy tartalék a rosszabb kimeneten.",
     },
   },
   demo20_industry_hospital_blackout: {

@@ -174,11 +174,11 @@ export const hu = {
     typesTitle: "Szcenárió fajták",
     typesLead: "18 eset: 7 alapeset + 11 lencse. Iparág, logisztika, vagy belső zóna — egy ág, egy döntési keret. A Kahn-demó fent, egy kattintás.",
     kahnBridge:
-      "Innen egy lépés a Kahn-féle módszer: többágú jövőkép a törzsből — nem jóslat, hanem elágazás, mielőtt elkötelezed az erőforrást.",
+      "Innen egy lépés: több lehetséges jövőt nézel, mielőtt lekötöd a pénzt — nem jóslat, elágazás.",
     kahnEyebrow: "Kiemelt demó — 1 kattintás",
     kahnTitle: "Kahn-féle jövőkutató & stratégiai elágazás",
     kahnBody:
-      "14 fős core, 2. sor: 4,5 M hitel vagy 3×1,1 M organikus; A 0,9%/hó+850 ezer kötbér, B 1,25%/hó kötbér nélkül. PRO bővítés/tartás/tartalék — nem jóslat. Azonnal futhat.",
+      "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet — azonnal futhat.",
     kahnCta: "Kipróbálom a Kahn-fát",
     pillarIndustry: "Iparág",
     pillarIndustryBlurb: "Vendéglátás, egészségügy, gyártás — a működés pénzben és kapacitásban mért feltételei.",
@@ -250,7 +250,7 @@ export const hu = {
       },
       strategy: {
         title: "Üzleti és stratégiai tervezés",
-        blurb: "Kahn: hitel/organikus → A/B → PRO. Konkrét Ft-számok a törzsből — nem jóslat.",
+        blurb: "Bővítés előtt: hitel vagy saját tartalék, kötbér vagy rugalmas kilépés — nem jóslat.",
       },
       education: {
         title: "Oktatás / szimulációs tréning",

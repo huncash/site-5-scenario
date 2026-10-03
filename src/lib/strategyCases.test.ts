@@ -56,6 +56,9 @@ describe("strategyCases", () => {
     expect(w.inheritedFrom).toBeTruthy();
     expect(w.signals.map((s) => s.tone)).toEqual(["opt", "real", "pess"]);
     expect(w.signals[2]!.detail).toMatch(/850|kötbér/i);
+    expect(w.kahnMetrics?.exitPenaltyHuf).toBe(KAHN_FORK.contractA.exitPenaltyHuf);
+    expect(w.kahnMetrics?.decisionDays).toBe(60);
+    expect(w.kahnMetrics?.minRunwayMonths).toBe(4);
     // 3. hónap (i=2): A-kötbér sokk — a havi pess nettó élesen gyengébb, mint az előző hónap
     const pessNet1 = w.chart[1]!.pessimistic - w.chart[0]!.pessimistic;
     const pessNet2 = w.chart[2]!.pessimistic - w.chart[1]!.pessimistic;

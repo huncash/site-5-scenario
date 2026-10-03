@@ -98,13 +98,12 @@ export const STRATEGY_SEGMENTS: Array<{
     id: "demo19_strategy_kahn_fork",
     name: "DEMO 19 — Kahn-féle jövőkutató & stratégiai elágazás",
     title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
-    blurb:
-      "14 fős core üzem, 2. sor / új műszak. Először hitel vagy organikus, majd A (olcsó+kötbér) vagy B (drága+rugalmas). PRO: bővítés / tartás / tartalék — nem jóslat.",
+    blurb: "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet.",
     lead:
-      "A Master Baseline törzs adott (8,4 M Ft/hó nettó, 4,2 M cash). 6–8 hónapos kapacitásbővítés előtt döntöd el: 4,5 M külső hitel vagy 3×1,1 M organikus kötés. Ha hitel: A 0,9%/hó + 850 ezer kilépési kötbér (6 hó), B 1,25%/hó kötbér nélkül. A pesszimista ágat előbb számolod.",
+      "Egy üzem új sort vagy műszakot tervez. Felveszel hitelt, vagy a saját tartalékodból finanszírozod? Az olcsóbb hitel kilépéskor drága lehet — a rosszabb kimenetet nézd előbb.",
     baseRevenueNetHuf: MASTER_BASELINE.monthlyRevenueNet,
     projectAlias: "Kapacitás-elágazás",
-    goalName: "60 napon belül ág vagy tartalék · pess ≥4 hó runway · árrés ≥12%",
+    goalName: "60 napon belül döntés · rossz ágon ≥4 hó tartalék · árrés ≥12%",
   },
 ];
 
@@ -193,10 +192,26 @@ export type StrategySignal = {
   detail: string;
 };
 
+export type KahnCheckMetrics = {
+  worseRunwayMonths: number;
+  exitPenaltyHuf: number;
+  optionFeeHuf: number;
+  decisionDays: number;
+  minRunwayMonths: number;
+  minMarginPct: number;
+  /** Opció + kötbér + 1 hó saját finanszírozás — döntési tartalék cél */
+  reserveTargetHuf: number;
+};
+
+export function kahnReserveTargetHuf() {
+  return KAHN_FORK.optionFeeHuf + KAHN_FORK.contractA.exitPenaltyHuf + KAHN_FORK.organicMonthlyCommitHuf;
+}
+
 export type StrategyWhatIf = {
   chart: Array<{ month: string; optimistic: number; realistic: number; pessimistic: number }>;
   signals: StrategySignal[];
   inheritedFrom: string;
+  kahnMetrics?: KahnCheckMetrics;
 };
 
 export type KahnBranch = {
@@ -234,7 +249,7 @@ export function kahnDecisionTree(): KahnDecisionTree {
   return {
     root: MASTER_BASELINE.businessAlias,
     caseLead:
-      "Kapacitásbővítés (2. sor / új műszak) a törzsből. Először a finanszírozás, aztán a szerződés — csak utána a PRO sáv.",
+      "Bővítés előtt: először a finanszírozás (hitel vagy saját tartalék), aztán a szerződés — csak utána a három kimenet.",
     financingQuestion: "1. fordulat: külső hitel vagy organikus növekedés?",
     financing: [
       {
@@ -503,5 +518,18 @@ export function buildStrategyWhatIf(input: {
             },
           ];
 
-  return { chart, signals, inheritedFrom: MASTER_BASELINE.businessAlias };
+  const kahnMetrics: KahnCheckMetrics | undefined =
+    input.caseId === "demo19_strategy_kahn_fork"
+      ? {
+          worseRunwayMonths: pessRun,
+          exitPenaltyHuf: KAHN_FORK.contractA.exitPenaltyHuf,
+          optionFeeHuf: KAHN_FORK.optionFeeHuf,
+          decisionDays: 60,
+          minRunwayMonths: KAHN_FORK.minRunwayMonths,
+          minMarginPct: KAHN_FORK.minMarginPct,
+          reserveTargetHuf: kahnReserveTargetHuf(),
+        }
+      : undefined;
+
+  return { chart, signals, inheritedFrom: MASTER_BASELINE.businessAlias, kahnMetrics };
 }
