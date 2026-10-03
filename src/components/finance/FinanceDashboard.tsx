@@ -8040,7 +8040,10 @@ export function FinanceDashboard({
   })();
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
+    <div
+      data-site-surface="dashboard"
+      className="h-screen flex flex-col overflow-hidden bg-background text-foreground"
+    >
       <div className="shrink-0">
         <ProfileHeader
           profileId={profileId}

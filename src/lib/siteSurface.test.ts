@@ -31,6 +31,9 @@ describe("siteSurface footer visibility", () => {
   it("hides footer on app host, dashboard and workspace routes", () => {
     expect(shouldShowSiteFooter({ hostname: "app.szcenario.hu", pathname: "/" })).toBe(false);
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/", homeMode: "dashboard" })).toBe(false);
+    expect(shouldShowSiteFooter({ hostname: "localhost", port: "5100", pathname: "/", homeMode: "dashboard" })).toBe(
+      false,
+    );
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/settings" })).toBe(false);
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/login/activate" })).toBe(false);
     expect(shouldShowSiteFooter({ hostname: "support.szcenario.hu", pathname: "/embed/gyik" })).toBe(false);

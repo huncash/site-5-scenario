@@ -17,6 +17,7 @@ import {
 import { supportPublicOrigin } from "@/lib/support";
 
 const FOOTER_HOST = "[data-site-footer-host]";
+const DASH_SURFACE = '[data-site-surface="dashboard"]';
 
 function useLiveLocale(): Locale {
   const [locale, setLocale] = useState<Locale>(readClientLocale);
@@ -34,6 +35,7 @@ function useHomeMode(): HomeMode {
   );
   useEffect(() => {
     const sync = () => setMode(readHomeMode(window.localStorage));
+    sync();
     window.addEventListener("storage", sync);
     window.addEventListener(HOME_MODE_EVENT, sync);
     return () => {
@@ -42,6 +44,11 @@ function useHomeMode(): HomeMode {
     };
   }, []);
   return mode;
+}
+
+function isDashboardSurfaceMounted(): boolean {
+  if (typeof document === "undefined") return false;
+  return Boolean(document.querySelector(DASH_SURFACE));
 }
 
 export function useSiteFooterVisible(pathname?: string) {
@@ -92,11 +99,24 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
 
 export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
   const locale = useLiveLocale();
+  const homeMode = useHomeMode();
   const visible = useSiteFooterVisible(props.pathname);
   const [host, setHost] = useState<HTMLElement | null>(null);
+  const [dashMounted, setDashMounted] = useState(false);
 
   useEffect(() => {
-    if (!visible || props.inline) {
+    const syncDash = () => setDashMounted(isDashboardSurfaceMounted());
+    syncDash();
+    const id = window.requestAnimationFrame(syncDash);
+    window.addEventListener(HOME_MODE_EVENT, syncDash);
+    return () => {
+      window.cancelAnimationFrame(id);
+      window.removeEventListener(HOME_MODE_EVENT, syncDash);
+    };
+  }, [props.pathname, visible, homeMode]);
+
+  useEffect(() => {
+    if (!visible || props.inline || dashMounted || homeMode === "dashboard") {
       setHost((prev) => (prev === null ? prev : null));
       return;
     }
@@ -108,11 +128,13 @@ export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
     apply();
     const id = window.requestAnimationFrame(apply);
     return () => window.cancelAnimationFrame(id);
-  }, [visible, props.inline, props.pathname]);
+  }, [visible, props.inline, props.pathname, dashMounted, homeMode]);
 
-  if (!visible) return null;
+  const hide = !visible || dashMounted || homeMode === "dashboard";
+  if (hide) return null;
   const node = <FooterMarkup locale={locale} />;
   if (props.inline) return node;
-  if (host) return createPortal(node, host);
-  return node;
+  // Host nélkül ne kerüljön a dashboard fölé — csak marketing hostba portalozunk.
+  if (!host) return null;
+  return createPortal(node, host);
 }

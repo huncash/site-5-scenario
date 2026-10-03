@@ -1,4 +1,4 @@
-export const SITE_VERSION = "0.1.3";
+export const SITE_VERSION = "0.1.4";
 export const MAIN_ORIGIN_PROD = "https://szcenario.hu";
 export const HOME_MODE_KEY = "szcenario_home_mode";
 export const HOME_MODE_EVENT = "szcenario:home_mode";

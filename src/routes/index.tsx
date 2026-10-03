@@ -42,7 +42,7 @@ function Loading() {
 function VaultGate() {
   const { state } = useVault();
   const { locale, fxRate } = useI18n();
-  const [homeMode, setHomeMode] = useState<HomeMode>("door");
+  const [homeMode, setHomeMode] = useState<HomeMode>(() => readHomeMode());
   const [licenseTick, setLicenseTick] = useState(0);
   const appHost = typeof window !== "undefined" && isAppWorkspaceHost();
   const licensed = hasWorkspaceAccess() || isLocalDevHost();
