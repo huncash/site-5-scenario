@@ -5,11 +5,14 @@ import {
   addPurchasedPack,
   checkScenarioSlotCapacity,
   emptySlotLedger,
+  MAX_REFERRAL_GIFT_SLOTS,
   publicSlotPacksForTier,
   slotExpansionAllowed,
+  slotPackNetForInterval,
   totalScenarioSlots,
 } from "@/lib/scenarioSlots";
 import { billingFingerprint, validateReferralAward } from "@/lib/referral";
+import { yearlyPriceHuf } from "@/content/pricing/tiers";
 
 describe("scenarioSlots", () => {
   it("excludes expansion packs on campus", () => {
@@ -18,11 +21,18 @@ describe("scenarioSlots", () => {
     expect(publicSlotPacksForTier("pro")).toHaveLength(3);
   });
 
-  it("sums base + packs + permanent bonus", () => {
+  it("sums base + packs + gift bonus (capped)", () => {
     let ledger = emptySlotLedger("starter");
     ledger = addPurchasedPack(ledger, "slot_plus_3");
     ledger = addPermanentBonus(ledger, 1);
     expect(totalScenarioSlots(ledger)).toBe(3 + 3 + 1);
+    ledger = addPermanentBonus(ledger, MAX_REFERRAL_GIFT_SLOTS);
+    expect(ledger.permanentBonus).toBe(MAX_REFERRAL_GIFT_SLOTS);
+  });
+
+  it("aligns add-on net with monthly/yearly billing cycle", () => {
+    expect(slotPackNetForInterval(2_900, "monthly")).toBe(2_900);
+    expect(slotPackNetForInterval(2_900, "yearly")).toBe(yearlyPriceHuf(2_900));
   });
 
   it("signals limit_reached for chooser UI", () => {
@@ -33,7 +43,7 @@ describe("scenarioSlots", () => {
   });
 });
 
-describe("referral poka-yoke", () => {
+describe("referral gift rules", () => {
   it("rejects same billing fingerprint", () => {
     const fp = billingFingerprint({ email: "a@b.hu", taxId: "HU123" });
     expect(
@@ -41,26 +51,51 @@ describe("referral poka-yoke", () => {
         referrerFingerprint: fp,
         refereeFingerprint: fp,
         paymentOk: true,
+        bothSubscriptionsActive: true,
       }).ok,
     ).toBe(false);
   });
 
-  it("requires successful payment", () => {
+  it("requires successful payment and active pair", () => {
     expect(
       validateReferralAward({
         referrerFingerprint: "a",
         refereeFingerprint: "b",
         paymentOk: false,
+        bothSubscriptionsActive: true,
       }),
     ).toEqual({ ok: false, reason: "payment_required" });
+    expect(
+      validateReferralAward({
+        referrerFingerprint: "a",
+        refereeFingerprint: "b",
+        paymentOk: true,
+        bothSubscriptionsActive: false,
+      }),
+    ).toEqual({ ok: false, reason: "subscription_inactive" });
   });
 
-  it("awards when payment ok and fingerprints differ", () => {
+  it("enforces hard cap of 25 gift slots", () => {
+    expect(
+      validateReferralAward({
+        referrerFingerprint: "a",
+        refereeFingerprint: "b",
+        paymentOk: true,
+        bothSubscriptionsActive: true,
+        referrerActiveGifts: MAX_REFERRAL_GIFT_SLOTS,
+      }),
+    ).toEqual({ ok: false, reason: "cap_reached_referrer" });
+  });
+
+  it("awards when payment ok, pair active, under cap", () => {
     expect(
       validateReferralAward({
         referrerFingerprint: billingFingerprint({ email: "a@x.hu" }),
         refereeFingerprint: billingFingerprint({ email: "b@x.hu" }),
         paymentOk: true,
+        bothSubscriptionsActive: true,
+        referrerActiveGifts: 0,
+        refereeActiveGifts: 0,
       }),
     ).toEqual({ ok: true });
   });

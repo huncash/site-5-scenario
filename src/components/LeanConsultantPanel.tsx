@@ -15,6 +15,8 @@ import {
 import type { Transaction, WorkspaceMeta } from "@/lib/finance";
 import { formatMoney } from "@/lib/finance";
 import {
+  LEAN_METHOD_TOOLKIT,
+  LEAN_QUICK_WINS_COPY_HU,
   runLeanConsultantEngine,
   type LeanConsultantAdvice,
   type PdcaUiMode,
@@ -232,12 +234,50 @@ export function LeanConsultantPanel({
               </LeanTerm>
             </DialogTitle>
             <DialogDescription>
-              Offline szabálymotor: muda, Heijunka, 5S, és a helyzetre szabott Lean kimutatás
-              (vízesés, bullet, hőtérkép, kis többszörös, Sankey). A választott nézetet megjegyzi.
+              Beépített Lean engine: muda, Heijunka, 5S, SMED, Poka-Yoke, VSM — minden szcenárió
+              háttértudása. Offline; a választott kimutatást megjegyzi.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
+            {result?.quickWins ? (
+              <div className="rounded-md border border-emerald-500/35 bg-emerald-950/25 px-3 py-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-200/90">
+                  Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins)
+                </div>
+                <p className="mt-1.5 text-xs leading-snug text-emerald-100/90">{LEAN_QUICK_WINS_COPY_HU}</p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-emerald-100/85 sm:grid-cols-4">
+                  <div>
+                    <dt className="text-emerald-200/60">CapEx</dt>
+                    <dd className="font-medium">{formatMoney(result.quickWins.capexHuf, "HUF")}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-emerald-200/60">Megtakarítás / hó</dt>
+                    <dd className="font-medium">
+                      {formatMoney(result.quickWins.monthlySavingsHuf, "HUF")}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-emerald-200/60">Payback</dt>
+                    <dd className="font-medium">~{result.quickWins.paybackMonths} hó</dd>
+                  </div>
+                  <div>
+                    <dt className="text-emerald-200/60">ROI 12 hó</dt>
+                    <dd className="font-medium">~{result.quickWins.roiMultiple12m}×</dd>
+                  </div>
+                </dl>
+                {result.suggestedMethods.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {result.suggestedMethods.map((id) => (
+                      <Badge key={id} variant="outline" className="border-emerald-500/40 text-[10px] text-emerald-100/90">
+                        {LEAN_METHOD_TOOLKIT[id].labelHu}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <div>
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Tanácsok

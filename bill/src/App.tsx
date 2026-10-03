@@ -12,6 +12,8 @@ import {
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
 import { SiteFooter } from "@/components/SiteFooter";
+import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
+import type { BillingInterval } from "@/lib/funnelOrder";
 import { billCopy, tierLabel } from "./copy";
 
 type PayMethod = "stripe" | "barion" | "hu_transfer";
@@ -38,13 +40,15 @@ export function App() {
   const money = (n: number) => formatCurrency(n, locale);
   const q = useMemo(() => new URLSearchParams(window.location.search), []);
   const tier = q.get("tier") ?? "pro";
-  const interval = q.get("interval") === "monthly" ? "monthly" : "yearly";
   const ref = q.get("ref") ?? "";
   const referral = (q.get("referral") ?? "").trim().toUpperCase();
   const slotPack = q.get("slotPack") ?? "";
   const thanks = q.get("thanks") === "1";
   const orderQ = q.get("order") ?? "";
 
+  const [interval, setInterval] = useState<BillingInterval>(
+    () => (q.get("interval") === "monthly" ? "monthly" : "yearly"),
+  );
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [taxId, setTaxId] = useState("");
@@ -85,6 +89,21 @@ export function App() {
   const saveNet = monthlyNet * 12 - yearlyNet;
   const vatPct = Math.round(vat.rate);
   const planTitle = `${tierLabel(locale, tier)} · ${interval === "yearly" ? t.yearlySub : t.monthlySub}`;
+  const renewalLabel = t.nextRenewal.replace(
+    "{date}",
+    formatRenewalDate(nextRenewalDate(interval), locale),
+  );
+
+  const setBillingInterval = (next: BillingInterval) => {
+    setInterval(next);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("interval", next);
+      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+    } catch {
+      // ignore
+    }
+  };
 
   const lookup = async () => {
     setLookupBusy(true);
@@ -257,7 +276,25 @@ export function App() {
         </div>
 
         <div className="card summary-card" style={{ marginTop: 4 }}>
-          <div style={{ fontSize: 14, fontWeight: 650 }}>{planTitle}</div>
+          <div className="cycle-toggle" role="group" aria-label={t.cycleMonthly}>
+            <button
+              type="button"
+              className={interval === "yearly" ? "on" : ""}
+              aria-pressed={interval === "yearly"}
+              onClick={() => setBillingInterval("yearly")}
+            >
+              {t.cycleYearly.replace("{n}", String(YEARLY_DISCOUNT_PCT))}
+            </button>
+            <button
+              type="button"
+              className={interval === "monthly" ? "on" : ""}
+              aria-pressed={interval === "monthly"}
+              onClick={() => setBillingInterval("monthly")}
+            >
+              {t.cycleMonthly}
+            </button>
+          </div>
+          <div style={{ marginTop: 14, fontSize: 14, fontWeight: 650 }}>{planTitle}</div>
           <div style={{ marginTop: 10, fontSize: 22, fontWeight: 700 }}>
             {t.gross} {money(due.gross)} {interval === "yearly" ? t.perYear : t.perMonth}
           </div>
@@ -267,6 +304,7 @@ export function App() {
           {interval === "yearly" && saveNet > 0 ? (
             <div className="save-pill">{t.savePctYearly.replace("{n}", String(YEARLY_DISCOUNT_PCT))}</div>
           ) : null}
+          <div className="renewal">{renewalLabel}</div>
         </div>
 
         <div className="row">

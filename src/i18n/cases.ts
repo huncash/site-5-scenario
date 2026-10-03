@@ -75,9 +75,10 @@ const EN: Record<string, CaseCopy> = {
     lead: "A virtual start-up with fixed capital. You split the frame. The engine simulates the market from past spread — the decision hits late.",
   },
   demo16_edu_lean_vsm: {
-    title: "Lean process work and VSM",
-    blurb: "OEE, SMED, Poka-Yoke — they move lead time and downtime cash cost.",
-    lead: "A teaching shop / small line. The value stream is visible. SMED and Poka-Yoke points cut lead time and scrap; downtime hour-rate is in cash too.",
+    title: "Running-process waste cut and capacity lift",
+    blurb: "Existing line / shop: muda audit, OEE and lead time. Low-CapEx Quick Wins → immediate cash-flow and margin.",
+    lead:
+      "A running teaching shop / small line. The ops audit cuts waiting, scrap and changeover; SMED and Poka-Yoke points lift lead time and capacity — downtime hour-rate is in cash too.",
   },
   demo20_industry_hospital_blackout: {
     title: "Hospital emergency capacity and energy",

@@ -16,7 +16,7 @@ export function isEducationSegment(id: string | null | undefined): id is Educati
 }
 
 export type EducationTone = "opt" | "real" | "pess";
-export type EducationKind = "startup" | "lean" | "campus" | "cyber";
+export type EducationKind = "startup" | "ops" | "campus" | "cyber";
 
 export const EDUCATION_SEGMENTS: Array<{
   id: EducationCaseId;
@@ -44,15 +44,17 @@ export const EDUCATION_SEGMENTS: Array<{
   },
   {
     id: "demo16_edu_lean_vsm",
-    name: "DEMO 16 — Lean gyártás / Value Stream",
-    title: "Lean folyamatoptimalizálás és VSM",
-    blurb: "OEE, SMED, Poka-Yoke — az átfutási időre és a kiesés Ft-költségére hat.",
-    lead: "Egy tanműhely / kis sor. A value stream látható. SMED és Poka-Yoke pontok az átfutást és a selejtet vágják; a kiesés óradíja forintban is megvan.",
+    name: "DEMO 16 — Működő folyamatok veszteségmentesítése",
+    title: "Működő folyamatok veszteségmentesítése és kapacitásbővítése",
+    blurb:
+      "Meglévő sor / műhely: muda-audit, OEE és átfutás. Kis CapEx Quick Win → azonnali cash-flow és árrésjavulás.",
+    lead:
+      "Egy már futó tanműhely / kis sor. A működési audit a várakozást, selejtet és átállást vágja; SMED és Poka-Yoke pontok az átfutást és a kapacitást bővítik — a kiesés óradíja forintban is megvan.",
     baseRevenueNetHuf: 2_400_000,
-    projectAlias: "Value stream",
+    projectAlias: "Folyamat-audit",
     businessAlias: "Tanműhely / kis sor",
-    goalName: "OEE 75% + lead time −30%",
-    kind: "lean",
+    goalName: "OEE 75% + lead time −30% (Quick Wins)",
+    kind: "ops",
   },
   {
     id: "demo17_edu_campus_energy",
@@ -97,7 +99,7 @@ export function educationSurface(segmentId: EducationCaseId) {
           { id: p("mentor"), kind: "supplier", name: "Mentor / könyvelő", tax_id: "41414141-2-42", payment_term_days: 14, note: "Fix havi tétel." },
           { id: p("cloud"), kind: "supplier", name: "SaaS / tárhely", tax_id: null, payment_term_days: 0, note: "Változó + fix csomag." },
         ]
-      : cse.kind === "lean"
+      : cse.kind === "ops"
         ? [
             { id: p("smed"), kind: "supplier", name: "SMED / átszerszámozás", tax_id: "42424242-2-13", payment_term_days: 21, note: "Átállási idő." },
             { id: p("poka"), kind: "supplier", name: "Poka-Yoke készlet", tax_id: null, payment_term_days: 14, note: "Hibamegelőző pont." },
@@ -113,7 +115,7 @@ export function educationSurface(segmentId: EducationCaseId) {
               { id: p("exam"), kind: "authority", name: "Tanulmányi / vizsga", tax_id: null, payment_term_days: null, note: "Analóg protokoll." },
             ];
   const duties =
-    cse.kind === "lean"
+    cse.kind === "ops"
       ? [
           { id: d("smed"), name: "SMED gyakorlat", cadence: "havi", fixed_cost_huf: 0 },
           { id: d("poka"), name: "Poka-Yoke felülvizsgálat", cadence: "negyedéves", fixed_cost_huf: 0 },
@@ -185,7 +187,7 @@ export function buildEducationModel(caseId: EducationCaseId): EducationModel {
     };
   }
 
-  if (cse.kind === "lean") {
+  if (cse.kind === "ops") {
     return {
       caseId,
       kind: cse.kind,
@@ -195,13 +197,29 @@ export function buildEducationModel(caseId: EducationCaseId): EducationModel {
       kpis: [
         { id: "oee", label: "OEE", unit: "%", opt: 82, real: 68, pess: 51, hint: "Rendelkezésre állás × teljesítmény × minőség. A Poka-Yoke a minőséget emeli.", family: "lean" },
         { id: "smed", label: "SMED átszerszámozás", unit: "perc", opt: 12, real: 38, pess: 95, hint: "Belső/külső átállás szétválasztva. Rövidebb SMED = rövidebb lead time.", family: "lean" },
-        { id: "lead", label: "Lead time", unit: "nap", opt: 4.5, real: 9, pess: 16, hint: "Value stream átfutás. A kiesés óradíja a pénzügyi sávon látszik.", family: "time" },
+        { id: "lead", label: "Lead time", unit: "nap", opt: 4.5, real: 9, pess: 16, hint: "Folyamat átfutás. A kiesés óradíja a pénzügyi sávon látszik.", family: "time" },
+        {
+          id: "roi",
+          label: "Quick Win ROI (12 hó)",
+          unit: "×",
+          opt: 18,
+          real: 9,
+          pess: 2.4,
+          hint: "Éves muda-megtakarítás / fix megvalósítási CapEx. Az első fázis alacsony CapEx, magas cash-flow.",
+          family: "finance",
+        },
       ],
       series: series(8, 1, 16, 16, 16, -1.4, -0.85, -0.15, 3),
       extras: [
         { label: "Poka-Yoke pontok", opt: "8 beépített", real: "3 próba", pess: "0 — utólagos selejt" },
         { label: "Kiesés óradíja", opt: "18 e Ft/ó", real: "26 e Ft/ó", pess: "34 e Ft/ó" },
         { label: "Selejthányad", opt: "0,6%", real: "2,4%", pess: "7,1%" },
+        {
+          label: "CapEx vs. havi megtakarítás",
+          opt: "80 e Ft CapEx → ~240 e Ft/hó",
+          real: "180 e Ft CapEx → ~135 e Ft/hó",
+          pess: "420 e Ft CapEx → ~70 e Ft/hó",
+        },
       ],
     };
   }
@@ -260,7 +278,7 @@ export function buildEducationWhatIf(input: {
   const cse = educationCaseById(input.caseId);
   const now = input.now ?? new Date();
   const n = input.horizonMonths;
-  if (cse.kind !== "startup" && cse.kind !== "lean") return null;
+  if (cse.kind !== "startup" && cse.kind !== "ops") return null;
 
   const chart: Array<{ month: string; optimistic: number; realistic: number; pessimistic: number }> = [];
   let o = cse.kind === "startup" ? 1_600_000 : 0;

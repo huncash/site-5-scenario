@@ -16,11 +16,17 @@ const LABELS: Record<BillTier, string> = {
   campus: "Hallgatói / Campus",
 };
 
+/** Nettó Ft / hó — a yearly a fő csomag kedvezményével számol. */
 export const SLOT_PACK_HUF: Record<SlotPackId, number> = {
   slot_plus_1: 2_900,
   slot_plus_3: 7_900,
   slot_plus_5: 11_900,
 };
+
+export function slotPackNetForInterval(packId: SlotPackId, interval: BillInterval): number {
+  const m = SLOT_PACK_HUF[packId];
+  return interval === "yearly" ? yearlyPriceHuf(m) : m;
+}
 
 export const SLOT_PACK_SLOTS: Record<SlotPackId, number> = {
   slot_plus_1: 1,

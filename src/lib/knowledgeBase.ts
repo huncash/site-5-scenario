@@ -701,7 +701,7 @@ A demo14 a 2023-as helyi TFR-pillanatképet viszi. A lecke a közelmúltbeli sá
 - Hogy a campus a portál kiesése, a hőhullám és a szakadó lánc alatt is vizsgáztasson és etessen.
 
 ⚙️ Hogyan működik?
-demo18 izolációs idő, demo17 kvóta, demo16 Lean a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
+demo18 izolációs idő, demo17 kvóta, demo16 folyamat-audit (veszteségmentesítés) a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
 
 💡 Pro Tip / Legjobb gyakorlat
 - Az izolációt órában méred a riasztástól a leválasztásig. A dobott étel selejt: elhatárolod.`,

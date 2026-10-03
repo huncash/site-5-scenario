@@ -5,8 +5,12 @@ import {
   detectHeijunkaPeaks,
   detectIdleCashInventory,
   detectWaitingReceivables,
+  estimateLeanQuickWins,
   generateFiveSChecklist,
+  LEAN_ENGINE_CHARTER,
+  LEAN_METHOD_TOOLKIT,
   runLeanConsultantEngine,
+  suggestLeanMethods,
 } from "@/lib/leanConsultantRules";
 
 function txn(partial: Partial<Transaction> & Pick<Transaction, "type" | "amount" | "category">): Transaction {
@@ -104,5 +108,33 @@ describe("leanConsultantRules", () => {
     const actItems = generateFiveSChecklist("AP");
     expect(actItems.some((i) => i.id === "5s-shitsuke-cycle")).toBe(true);
     expect(actItems.some((i) => i.phase === "act")).toBe(true);
+  });
+
+  it("embedded Lean toolkit + Quick Wins ROI (low-hanging fruit)", () => {
+    expect(LEAN_ENGINE_CHARTER.toLowerCase()).toContain("lean");
+    expect(Object.keys(LEAN_METHOD_TOOLKIT)).toEqual(
+      expect.arrayContaining(["5s", "vsm", "kaizen", "smed", "poka_yoke", "jit"]),
+    );
+
+    const waitingTxns = [
+      txn({
+        type: "income",
+        amount: 400_000,
+        category: "ÉRTÉKESÍTÉS",
+        invoice_status: "unpaid",
+        due_date: "2026-07-01",
+        occurred_at: "2026-06-15",
+      }),
+    ];
+    const engine = runLeanConsultantEngine({ transactions: waitingTxns, now, pdcaMode: "CA" });
+    expect(engine.quickWins).not.toBeNull();
+    expect(engine.quickWins!.roiMultiple12m).toBeGreaterThan(1);
+    expect(engine.quickWins!.paybackMonths).toBeLessThan(12);
+    expect(engine.quickWins!.annualSavingsHuf).toBeGreaterThan(engine.quickWins!.capexHuf);
+    expect(engine.suggestedMethods.length).toBeGreaterThan(0);
+    expect(suggestLeanMethods(engine.advice)).toContain("kaizen");
+
+    const qw = estimateLeanQuickWins(engine.advice);
+    expect(qw?.messagingHu).toMatch(/CapEx|cash-flow/i);
   });
 });

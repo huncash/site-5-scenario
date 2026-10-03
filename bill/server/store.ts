@@ -49,6 +49,12 @@ export type Order = {
   referralCode?: string;
   /** A vásárláskor megadott ajánló kód. */
   referredBy?: string;
+  /**
+   * Ajánlói ajándék slot linkek (peer order).
+   * Aktív csak amíg mindkét fél paid/invoiced — cap 25.
+   */
+  referralGifts?: Array<{ peerOrderId: string; at: string }>;
+  /** Számított / legacy aktív ajándék slot szám (license API). */
   permanentSlots?: number;
   referralAwarded?: boolean;
   referralRejectedReason?: string;

@@ -40,7 +40,7 @@ export function scenarioSurface(segmentId: string | null | undefined): ScenarioS
         inheritMasterBaseline: true,
       };
     }
-    if (kind === "lean") {
+    if (kind === "ops") {
       return {
         family: "education",
         showFinanceModules: true,
@@ -140,14 +140,14 @@ export function baselineForSegment(segmentId: string | null | undefined): Master
     const cse = educationCaseById(segmentId);
     const kindToOrg: Record<typeof cse.kind, OrgKind> = {
       startup: "business",
-      lean: "business",
+      ops: "business",
       campus: "campus",
       cyber: "campus",
     };
     const size =
       cse.kind === "startup"
         ? { headcount: 3, sizeHint: "3 fős hallgatói csapat" }
-        : cse.kind === "lean"
+        : cse.kind === "ops"
           ? { headcount: 9, sizeHint: "9 fős tanműhely / kis sor" }
           : { headcount: 420, sizeHint: "Campus / kar lépték" };
     return {
@@ -159,7 +159,7 @@ export function baselineForSegment(segmentId: string | null | undefined): Master
           ? { energyKwh: 1_860, stockDays: 2 }
           : cse.kind === "cyber"
             ? { autonomyHours: 4, cashHuf: 0 }
-            : { cashHuf: cse.kind === "startup" ? 420_000 : 1_200_000, stockDays: cse.kind === "lean" ? 6 : 4 },
+            : { cashHuf: cse.kind === "startup" ? 420_000 : 1_200_000, stockDays: cse.kind === "ops" ? 6 : 4 },
       monthlyRevenueNet: cse.baseRevenueNetHuf || null,
     };
   }

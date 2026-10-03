@@ -1,4 +1,11 @@
-import { listOrdersByReferralCode, updateOrder, type Order } from "./store.ts";
+import { getOrder, listOrdersByReferralCode, updateOrder, type Order } from "./store.ts";
+
+export const MAX_REFERRAL_GIFT_SLOTS = 25;
+
+export type ReferralGiftLink = {
+  peerOrderId: string;
+  at: string;
+};
 
 export function billingFingerprint(input: {
   email?: string | null;
@@ -11,14 +18,42 @@ export function billingFingerprint(input: {
   return [email, tax, card].filter(Boolean).join("|");
 }
 
+export function isPaidSubscriptionActive(order: Order): boolean {
+  return order.status === "paid" || order.status === "invoiced";
+}
+
 export function validateReferralAward(input: {
   referrerFingerprint: string;
   refereeFingerprint: string;
   paymentOk: boolean;
-}): { ok: true } | { ok: false; reason: "payment_required" | "same_billing" } {
+  bothSubscriptionsActive: boolean;
+  referrerActiveGifts?: number;
+  refereeActiveGifts?: number;
+}):
+  | { ok: true }
+  | {
+      ok: false;
+      reason:
+        | "payment_required"
+        | "same_billing"
+        | "subscription_inactive"
+        | "cap_reached_referrer"
+        | "cap_reached_referee";
+    } {
   if (!input.paymentOk) return { ok: false, reason: "payment_required" };
-  if (input.referrerFingerprint && input.refereeFingerprint && input.referrerFingerprint === input.refereeFingerprint) {
+  if (!input.bothSubscriptionsActive) return { ok: false, reason: "subscription_inactive" };
+  if (
+    input.referrerFingerprint &&
+    input.refereeFingerprint &&
+    input.referrerFingerprint === input.refereeFingerprint
+  ) {
     return { ok: false, reason: "same_billing" };
+  }
+  if ((input.referrerActiveGifts ?? 0) >= MAX_REFERRAL_GIFT_SLOTS) {
+    return { ok: false, reason: "cap_reached_referrer" };
+  }
+  if ((input.refereeActiveGifts ?? 0) >= MAX_REFERRAL_GIFT_SLOTS) {
+    return { ok: false, reason: "cap_reached_referee" };
   }
   return { ok: true };
 }
@@ -33,7 +68,26 @@ export async function ensureOrderReferralCode(order: Order): Promise<Order> {
   return (await updateOrder(order.id, { referralCode: newReferralCode() })) ?? order;
 }
 
-/** Sikeres fizetés után: +1 permanent mindkét félnek, ha a fingerprint nem egyezik. */
+/** Aktív ajándék slotok: csak ha mindkét fél fizetett előfizetése él. Cap: 25. */
+export async function activeReferralGiftSlots(order: Order): Promise<number> {
+  if (!isPaidSubscriptionActive(order)) return 0;
+  const gifts = order.referralGifts ?? [];
+  if (gifts.length === 0) {
+    // Legacy mező: permanentSlots — csak saját aktív státusz mellett.
+    return Math.min(MAX_REFERRAL_GIFT_SLOTS, Math.max(0, order.permanentSlots ?? 0));
+  }
+  let n = 0;
+  for (const g of gifts) {
+    const peer = await getOrder(g.peerOrderId);
+    if (peer && isPaidSubscriptionActive(peer)) n += 1;
+  }
+  return Math.min(MAX_REFERRAL_GIFT_SLOTS, n);
+}
+
+/**
+ * Sikeres fizetés után: mindkét fél +1 ajándék slotot kap,
+ * amíg mindkettő aktív előfizetést tart (max 25 / fél).
+ */
 export async function applyReferralOnPaid(
   order: Order,
   opts?: { cardFingerprint?: string | null },
@@ -42,11 +96,11 @@ export async function applyReferralOnPaid(
   const code = (order.referredBy ?? "").trim().toUpperCase();
   if (!code) return { awarded: false, reason: "no_referral" };
 
-  const paymentOk = order.status === "paid" || order.status === "invoiced";
+  const paymentOk = isPaidSubscriptionActive(order);
   if (!paymentOk) return { awarded: false, reason: "payment_required" };
 
   const referrers = await listOrdersByReferralCode(code);
-  const referrer = referrers.find((o) => o.id !== order.id && (o.status === "paid" || o.status === "invoiced"));
+  const referrer = referrers.find((o) => o.id !== order.id && isPaidSubscriptionActive(o));
   if (!referrer) return { awarded: false, reason: "referrer_not_found" };
 
   const refFp = billingFingerprint({
@@ -59,21 +113,37 @@ export async function applyReferralOnPaid(
     taxId: order.buyer.taxId,
     cardFingerprint: opts?.cardFingerprint ?? order.cardFingerprint,
   });
+
+  const referrerActive = await activeReferralGiftSlots(referrer);
+  const refereeActive = await activeReferralGiftSlots(order);
+
   const check = validateReferralAward({
     referrerFingerprint: refFp,
     refereeFingerprint: newFp,
     paymentOk: true,
+    bothSubscriptionsActive: isPaidSubscriptionActive(referrer) && isPaidSubscriptionActive(order),
+    referrerActiveGifts: referrerActive,
+    refereeActiveGifts: refereeActive,
   });
   if (!check.ok) {
     await updateOrder(order.id, { referralRejectedReason: check.reason });
     return { awarded: false, reason: check.reason };
   }
 
-  const referrerSlots = (referrer.permanentSlots ?? 0) + 1;
-  const refereeSlots = (order.permanentSlots ?? 0) + 1;
-  await updateOrder(referrer.id, { permanentSlots: referrerSlots });
+  const at = new Date().toISOString();
+  const referrerGifts = [...(referrer.referralGifts ?? []), { peerOrderId: order.id, at }];
+  const refereeGifts = [...(order.referralGifts ?? []), { peerOrderId: referrer.id, at }];
+
+  const referrerNext = Math.min(MAX_REFERRAL_GIFT_SLOTS, referrerActive + 1);
+  const refereeNext = Math.min(MAX_REFERRAL_GIFT_SLOTS, refereeActive + 1);
+
+  await updateOrder(referrer.id, {
+    referralGifts: referrerGifts,
+    permanentSlots: referrerNext,
+  });
   await updateOrder(order.id, {
-    permanentSlots: refereeSlots,
+    referralGifts: refereeGifts,
+    permanentSlots: refereeNext,
     referralAwarded: true,
     cardFingerprint: opts?.cardFingerprint ?? order.cardFingerprint,
   });

@@ -1,4 +1,7 @@
-/** Szcenárió-slot kapacitás: alapcsomag + bővítő mátrix + ajánlói permanent. */
+/** Szcenárió-slot kapacitás: alapcsomag + bővítő mátrix + ajánlói ajándék slot. */
+
+import { yearlyPriceHuf } from "@/content/pricing/tiers";
+import type { BillingInterval } from "@/lib/funnelOrder";
 
 export type PublicTierId = "starter" | "pro" | "expert";
 export type SlotTierId = PublicTierId | "campus" | "local";
@@ -8,11 +11,14 @@ export type SlotPackId = "slot_plus_1" | "slot_plus_3" | "slot_plus_5";
 export type SlotPack = {
   id: SlotPackId;
   slots: 1 | 3 | 5;
-  /** Nettó Ft / egyszeri bővítés (placeholder listaár). */
+  /** Nettó Ft / hó (a yearly a fő csomag 15%-os kedvezményével számol). */
   priceHuf: number;
   labelHu: string;
   labelEn: string;
 };
+
+/** Ajánlói ajándék slot hard cap (aktív párokra). */
+export const MAX_REFERRAL_GIFT_SLOTS = 25;
 
 /** Alap szcenárió-helyek csomagonként (marketing + engine). */
 export const BASE_SCENARIO_SLOTS: Record<SlotTierId, number> = {
@@ -37,6 +43,15 @@ export function slotPackById(id: SlotPackId): SlotPack {
   return SLOT_PACKS.find((p) => p.id === id) ?? SLOT_PACKS[0];
 }
 
+export function slotPackLabel(pack: SlotPack, locale: "hu" | "en"): string {
+  return locale === "en" ? pack.labelEn : pack.labelHu;
+}
+
+/** Add-on nettó a fő előfizetés billing cycle-jével szinkronban. */
+export function slotPackNetForInterval(monthlyNetHuf: number, interval: BillingInterval): number {
+  return interval === "yearly" ? yearlyPriceHuf(monthlyNetHuf) : monthlyNetHuf;
+}
+
 /** Campus / zárt oktatási keret: bővítő mátrix ki van zárva. */
 export function slotExpansionAllowed(tier: SlotTierId): boolean {
   return tier !== "campus";
@@ -50,7 +65,10 @@ export type SlotLedger = {
   tier: SlotTierId;
   /** Vásárolt bővítő pack-ek darabszáma id szerint. */
   purchasedPacks: Partial<Record<SlotPackId, number>>;
-  /** Ajánlói / fizetéshez kötött permanent slotok. */
+  /**
+   * Ajánlói ajándék slotok (aktív páros előfizetés alatt).
+   * Hard cap: {@link MAX_REFERRAL_GIFT_SLOTS}.
+   */
   permanentBonus: number;
 };
 
@@ -70,7 +88,8 @@ export function purchasedAddonSlots(ledger: SlotLedger): number {
 export function totalScenarioSlots(ledger: SlotLedger): number {
   const base = BASE_SCENARIO_SLOTS[ledger.tier] ?? BASE_SCENARIO_SLOTS.local;
   const addons = slotExpansionAllowed(ledger.tier) ? purchasedAddonSlots(ledger) : 0;
-  return base + addons + Math.max(0, ledger.permanentBonus);
+  const gifts = Math.min(MAX_REFERRAL_GIFT_SLOTS, Math.max(0, ledger.permanentBonus));
+  return base + addons + gifts;
 }
 
 export type SlotCapacityResult =
@@ -94,7 +113,13 @@ export function addPurchasedPack(ledger: SlotLedger, packId: SlotPackId, qty = 1
 }
 
 export function addPermanentBonus(ledger: SlotLedger, n = 1): SlotLedger {
-  return { ...ledger, permanentBonus: Math.max(0, ledger.permanentBonus) + Math.max(0, n) };
+  const next = Math.max(0, ledger.permanentBonus) + Math.max(0, n);
+  return { ...ledger, permanentBonus: Math.min(MAX_REFERRAL_GIFT_SLOTS, next) };
+}
+
+/** Ajándék slotok beállítása (cap-elve); pl. license sync / revoke után. */
+export function setGiftBonusSlots(ledger: SlotLedger, n: number): SlotLedger {
+  return { ...ledger, permanentBonus: Math.min(MAX_REFERRAL_GIFT_SLOTS, Math.max(0, Math.floor(n))) };
 }
 
 export function normalizeTierId(tier: string | null | undefined): SlotTierId {

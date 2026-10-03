@@ -287,7 +287,7 @@ export const hu = {
       },
       education: {
         title: "Oktatás / szimulációs tréning",
-        blurb: "Startup cash-flow és Lean VSM — pénzügyi sáv és Poka-Yoke mikro.",
+        blurb: "Startup cash-flow és folyamat-audit — pénzügyi sáv, Quick Wins, Poka-Yoke mikro.",
       },
       healthcare: {
         title: "Egészségügy",
@@ -378,6 +378,21 @@ export const hu = {
       "A csomagválasztás nem „magán vs. cég” címke: ugyanaz a kockázati mozgástér-modellezés fut háztartási és vállalkozási helyzeteken. A különbözet a kapacitás (szcenárió-helyek, szerkesztői fiókok, adatszervezés), nem a célok rangja.",
     seatDef:
       "Szerkesztői fiók (Seat): Önálló adatbeviteli és módosítási joggal rendelkező felhasználó. A díjmentes Olvasó/Vendég hozzáférések nem fogyasztanak szerkesztői fiókot.",
+    slotExpandTitle: "Szcenárió-slot bővítés (+1 / +3 / +5)",
+    slotExpandBody:
+      "Valamennyi nyilvános csomagban (Alap, Pro, Enterprise) elérhető. A Campus / oktatási keretből a mátrix ki van zárva.",
+    slotReferralBonus:
+      "Ajánlói bónusz: Sikeres ajánlással mindkét fél +1 ajándék slotot kap, amely mindkét fél aktív előfizetésének időtartama alatt érvényes (legfeljebb 25 aktív ajándék slotig).",
+    slotLimitTitle: "Szcenárió-hely keret elérve",
+    slotLimitBody:
+      "Jelenleg {used} / {limit} slot van használatban. Válassz konstrukciót a bővítéshez — nem általános hiba, hanem kapacitásdöntés.",
+    slotReferralTitle: "Ajánld a rendszert egy partnernek/ismerősnek a +1 ajándék slotért",
+    slotReferralBody:
+      "Sikeres fizetés után te és az új előfizető is +1 ajándék slotot kap — amíg mindkettőtöknek aktív előfizetése van (max. 25). Kód: {code} — kattints a link másolásához.",
+    slotExpandCta: "Bővítsd a kapacitást (+1, +3 vagy +5 slot csomaggal)",
+    slotCampusLocked:
+      "A Campus / oktatási keretben a slot-bővítő mátrix nem elérhető — a keret fix.",
+    close: "Bezár",
     iotTitle: "Ipari IoT Integráció",
     iotBody:
       "A szoftver architektúrája fel van készítve valós idejű gyártósori és üzemviteli adatok (Modbus, MQTT, OPC-UA) fogadására, amely egyedi projektkeretben illeszthető az infrastruktúrához.",
@@ -482,6 +497,9 @@ export const hu = {
     monthlySub: "Havi előfizetés",
     vatShort: "ÁFA",
     savePctYearly: "−{n}% megtakarítás az éves díjjal",
+    cycleYearly: "Éves számlázás (−{n}%)",
+    cycleMonthly: "Havi számlázás",
+    nextRenewal: "Következő fordulónap: {date}",
   },
   panel: {
     lesson: "Szcenárió-lecke",

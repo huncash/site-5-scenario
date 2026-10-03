@@ -158,10 +158,12 @@ export const PUBLIC_LENS_SEGMENTS: DemoSegmentMeta[] = [
   },
   {
     id: "demo16_edu_lean_vsm",
-    name: "DEMO 16 — Lean gyártás / Value Stream",
-    title: "Lean folyamatoptimalizálás és VSM",
-    blurb: "OEE, SMED, Poka-Yoke — az átfutási időre és a kiesés Ft-költségére hat.",
-    lead: "Egy tanműhely / kis sor. A value stream látható. SMED és Poka-Yoke pontok az átfutást és a selejtet vágják; a kiesés óradíja forintban is megvan.",
+    name: "DEMO 16 — Működő folyamatok veszteségmentesítése",
+    title: "Működő folyamatok veszteségmentesítése és kapacitásbővítése",
+    blurb:
+      "Meglévő sor / műhely: muda-audit, OEE és átfutás. Kis CapEx Quick Win → azonnali cash-flow és árrésjavulás.",
+    lead:
+      "Egy már futó tanműhely / kis sor. A működési audit a várakozást, selejtet és átállást vágja; SMED és Poka-Yoke pontok az átfutást és a kapacitást bővítik — a kiesés óradíja forintban is megvan.",
     baseRevenueNetHuf: 2_400_000,
   },
   {

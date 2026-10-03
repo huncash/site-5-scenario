@@ -128,6 +128,7 @@ export function EducationCasePanel(props: {
   const model = props.model ?? buildEducationModel(props.segmentId as EducationCaseId);
   const physical = buildPhysicalDashboard(props.segmentId, props.baseline);
   const startup = model.kind === "startup";
+  const ops = model.kind === "ops";
   const phaseHint = startup
     ? props.phase === "PLAN"
       ? t("panel.eduStartupPlan")
@@ -155,6 +156,16 @@ export function EducationCasePanel(props: {
         </p>
         <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</h3>
         <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
+        {ops ? (
+          <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-2 text-[11px] leading-snug text-emerald-100/90">
+            <span className="font-semibold text-emerald-200/95">
+              Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins):{" "}
+            </span>
+            A folyamatbeli veszteségek (várakozási idők, selejt, felesleges mozgatás) megszüntetése az
+            első fázisban minimális beruházási igénnyel (CapEx) nagyságrendekkel több eredményt és
+            szabad cash-flow-t termel, mint a fix megvalósítási költségek.
+          </div>
+        ) : null}
       </div>
       <div className="mt-3 grid gap-3">
         {physical ? (

@@ -147,6 +147,101 @@ export const MUDA_KNOWLEDGE_BASE: Readonly<
   },
 };
 
+/**
+ * Beágyazott Lean módszertani tárház — nem önálló termék, hanem az AI konzulens
+ * alapértelmezett domain tudása minden iparági / folyamat szcenárióban.
+ * Referencia: MPDV Smart Factory Glossar — Lean Methoden.
+ */
+export type LeanMethodId =
+  | "5s"
+  | "vsm"
+  | "kaizen"
+  | "kanban"
+  | "smed"
+  | "poka_yoke"
+  | "jit"
+  | "heijunka"
+  | "tpm";
+
+export const LEAN_METHOD_TOOLKIT: Readonly<
+  Record<
+    LeanMethodId,
+    {
+      labelHu: string;
+      whenHu: string;
+      mudaHints: ReadonlyArray<MudaKind | "heijunka">;
+    }
+  >
+> = {
+  "5s": {
+    labelHu: "5S (Seiri–Shitsuke)",
+    whenHu: "Munkahely / admin rend: kevesebb keresés, kevesebb manuális muda.",
+    mudaHints: ["motion", "overprocessing", "unused_talent"],
+  },
+  vsm: {
+    labelHu: "Értékáram-térkép (VSM)",
+    whenHu: "Lead time és szűk keresztmetszet feltárása meglévő folyamat auditnál — nem önálló termék.",
+    mudaHints: ["waiting", "transport", "inventory", "overproduction"],
+  },
+  kaizen: {
+    labelHu: "Kaizen",
+    whenHu: "Iteratív PDCA: minden körben 1–3 muda-ellenintézkedés, nem egyszeri project.",
+    mudaHints: ["unused_talent", "overprocessing", "defects"],
+  },
+  kanban: {
+    labelHu: "Kanban",
+    whenHu: "Húzórendszer: kevesebb várakozás és túltermelés a sor / admin átadásnál.",
+    mudaHints: ["waiting", "overproduction", "inventory"],
+  },
+  smed: {
+    labelHu: "SMED",
+    whenHu: "Átállási idő vágása — kapacitásbővítés nagy CapEx nélkül.",
+    mudaHints: ["waiting", "motion", "overprocessing"],
+  },
+  poka_yoke: {
+    labelHu: "Poka-Yoke",
+    whenHu: "Hibamegelőzés a folyamatba építve — selejt és utómunka cash-költsége csökken.",
+    mudaHints: ["defects"],
+  },
+  jit: {
+    labelHu: "JIT",
+    whenHu: "Csak a szükséges mennyiség a szükséges időben — tőke és készlet muda ellen.",
+    mudaHints: ["inventory", "overproduction", "waiting"],
+  },
+  heijunka: {
+    labelHu: "Heijunka",
+    whenHu: "Terheléskiegyenlítés: kötelezettség- és cashflow-csúcsok simítása.",
+    mudaHints: ["heijunka", "waiting", "overproduction"],
+  },
+  tpm: {
+    labelHu: "TPM",
+    whenHu: "Berendezés / folyamat rendelkezésre állás — OEE lyuk és kiesés óradíja.",
+    mudaHints: ["waiting", "defects", "motion"],
+  },
+};
+
+/** AI konzulens alap charter — offline szabálymotor „system prompt” rétege. */
+export const LEAN_ENGINE_CHARTER = [
+  "A Lean (5S, VSM, Kaizen, Kanban, SMED, Poka-Yoke, JIT, Heijunka, TPM) beépített domain tudás, nem külön termék.",
+  "Minden szcenárió inputjánál keresd a szűk keresztmetszetet, a 7+1 muda-t (túltermelés, várakozás, szállítás, túlfeldolgozás, készlet, mozgás, hibák, kihasználatlan tudás) és a nem értékadó lépéseket.",
+  "Iteratív építésnél kontextuálisan ajánlj eszközt: SMED átállásra, 5S munkahelyre, VSM lead time-ra, Poka-Yoke selejtre, Kanban/JIT húzásra, Heijunka csúcsokra.",
+  "Low-hanging fruit: az első muda-eliminálás minimális CapEx mellett azonnali, összetett cash-flow és árrésjavulást ad — ezt mindig emeld ki a megtérülésnél (ROI / payback).",
+].join(" ");
+
+export const LEAN_QUICK_WINS_COPY_HU =
+  "A folyamatbeli veszteségek (várakozási idők, selejt, felesleges mozgatás) megszüntetése az első fázisban minimális beruházási igénnyel (CapEx) nagyságrendekkel több eredményt és szabad cash-flow-t termel, mint a fix megvalósítási költségek.";
+
+export type LeanQuickWinsEstimate = {
+  capexHuf: number;
+  monthlySavingsHuf: number;
+  annualSavingsHuf: number;
+  paybackMonths: number;
+  /** Éves megtakarítás / CapEx */
+  roiMultiple12m: number;
+  messagingHu: string;
+  methodIds: LeanMethodId[];
+};
+
 export type LeanConsultantInput = {
   transactions: Transaction[];
   workspaces?: WorkspaceMeta[];
@@ -168,6 +263,11 @@ export type LeanConsultantResult = {
   thresholds: LeanConsultantThresholds;
   evaluatedAt: string;
   vizAdvice: LeanVizAdvice[];
+  /** Low-hanging fruit: CapEx vs. folyamatos muda-megtakarítás */
+  quickWins: LeanQuickWinsEstimate | null;
+  /** Kontextuálisan releváns Lean eszközök az aktuális tanácsokhoz */
+  suggestedMethods: LeanMethodId[];
+  engineCharter: string;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -593,6 +693,95 @@ export function generateDailyRoutineSteps(pdcaMode: PdcaUiMode | null | undefine
   return generateFiveSChecklist(pdcaMode).slice(0, 3);
 }
 
+// ─── Quick Wins / módszer-javaslat ───────────────────────────────────────────
+
+function mudaHintsFromAdvice(a: LeanConsultantAdvice): Array<MudaKind | "heijunka"> {
+  if (a.ruleId.startsWith("heijunka.")) return ["heijunka"];
+  if (a.muda) return [a.muda];
+  return [];
+}
+
+/** Releváns Lean eszközök a felismert muda / heijunka jelekhez. */
+export function suggestLeanMethods(advice: LeanConsultantAdvice[]): LeanMethodId[] {
+  const hints = new Set<MudaKind | "heijunka">();
+  for (const a of advice) {
+    for (const h of mudaHintsFromAdvice(a)) hints.add(h);
+  }
+  if (hints.size === 0) return ["kaizen", "5s"];
+
+  const scored: Array<{ id: LeanMethodId; n: number }> = [];
+  for (const id of Object.keys(LEAN_METHOD_TOOLKIT) as LeanMethodId[]) {
+    const n = LEAN_METHOD_TOOLKIT[id].mudaHints.filter((h) => hints.has(h)).length;
+    if (n > 0) scored.push({ id, n });
+  }
+  scored.sort((a, b) => b.n - a.n);
+  const out = scored.map((s) => s.id).filter((id) => id !== "kaizen");
+  // Kaizen mindig jelen van: iteratív PDCA az engine alapeleme.
+  return ["kaizen", ...out].slice(0, 5);
+}
+
+/**
+ * Low-hanging fruit: fix CapEx vs. folyamatos muda-megtakarítás (ROI / payback).
+ * Offline heurisztika a tanácsok metrikáiból — nem felhőbecslés.
+ */
+export function estimateLeanQuickWins(
+  advice: LeanConsultantAdvice[],
+  currency = "HUF",
+): LeanQuickWinsEstimate | null {
+  if (advice.length === 0) return null;
+
+  let critical = 0;
+  let warning = 0;
+  let monthlySavings = 0;
+
+  for (const a of advice) {
+    if (a.severity === "critical") critical += 1;
+    else if (a.severity === "warning") warning += 1;
+
+    const m = a.metrics ?? {};
+    if (a.ruleId === "muda.waiting.receivables") {
+      const overdue = Number(m.overdueSumHuf ?? m.overdueHuf ?? m.sumHuf ?? 0);
+      if (overdue > 0) monthlySavings += overdue * 0.12;
+    } else if (a.ruleId === "muda.inventory.idle_cash") {
+      const idle = Number(m.freeCashHuf ?? 0);
+      if (idle > 0) monthlySavings += idle * 0.015;
+    } else if (a.ruleId === "heijunka.payment_peak") {
+      const total = Number(m.totalHuf ?? 0);
+      const avg = Number(m.avgMonthlyHuf ?? 0);
+      const excess = Math.max(0, total - avg);
+      monthlySavings += excess * 0.08;
+    } else if (a.ruleId === "muda.motion.manual_entry") {
+      const ratio = Number(m.manualRatio ?? 0);
+      const count = Number(m.manualCount ?? m.count ?? 8);
+      monthlySavings += Math.max(12_000, count * 4_500 * Math.max(ratio, 0.35));
+    } else if (a.severity === "critical") {
+      monthlySavings += 45_000;
+    } else if (a.severity === "warning") {
+      monthlySavings += 22_000;
+    } else {
+      monthlySavings += 8_000;
+    }
+  }
+
+  // Minimális folyamat-beavatkozás CapEx (tréning / standard / poka-próba) — nem gépberuházás.
+  const capex = Math.round(50_000 + critical * 35_000 + warning * 20_000 + Math.min(advice.length, 4) * 8_000);
+  monthlySavings = Math.round(Math.max(monthlySavings, capex * 0.55));
+  const annualSavings = monthlySavings * 12;
+  const paybackMonths = Math.max(0.2, Math.round((capex / monthlySavings) * 10) / 10);
+  const roiMultiple12m = Math.round((annualSavings / capex) * 10) / 10;
+  const methodIds = suggestLeanMethods(advice);
+
+  return {
+    capexHuf: capex,
+    monthlySavingsHuf: monthlySavings,
+    annualSavingsHuf: annualSavings,
+    paybackMonths,
+    roiMultiple12m,
+    messagingHu: `${LEAN_QUICK_WINS_COPY_HU} Becslés: CapEx ${formatMoney(capex, currency)} vs. ~${formatMoney(monthlySavings, currency)}/hó megtakarítás → payback ~${paybackMonths} hó, 12 havi ROI ~${roiMultiple12m}×.`,
+    methodIds,
+  };
+}
+
 // ─── Engine ──────────────────────────────────────────────────────────────────
 
 export function evaluateLeanConsultantRules(input: LeanConsultantInput): LeanConsultantAdvice[] {
@@ -615,13 +804,16 @@ export function evaluateLeanConsultantRules(input: LeanConsultantInput): LeanCon
   return advice;
 }
 
-/** Teljes motor: tanácsok + heijunka + 5S checklist */
+/** Teljes motor: tanácsok + heijunka + 5S checklist + Quick Wins */
 export function runLeanConsultantEngine(input: LeanConsultantInput): LeanConsultantResult {
   const thresholds = resolveThresholds(input.thresholds);
   const now = input.now ?? new Date();
+  const currency = input.currency ?? "HUF";
   const heijunkaPeaks = detectHeijunkaPeaks(input);
   const advice = evaluateLeanConsultantRules(input);
   const checklist = generateFiveSChecklist(input.pdcaMode);
+  const quickWins = estimateLeanQuickWins(advice, currency);
+  const suggestedMethods = suggestLeanMethods(advice);
 
   const cats = new Set<string>();
   let hasIncome = false;
@@ -650,5 +842,8 @@ export function runLeanConsultantEngine(input: LeanConsultantInput): LeanConsult
     thresholds,
     evaluatedAt: now.toISOString(),
     vizAdvice,
+    quickWins,
+    suggestedMethods,
+    engineCharter: LEAN_ENGINE_CHARTER,
   };
 }

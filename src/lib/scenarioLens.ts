@@ -93,10 +93,10 @@ const BY_ID_HU: Record<string, Pack> = {
   demo16_edu_lean_vsm: {
     tabs: { cashflow: "Cashflow", items: "Tételek", deals: "Sorok", inventory: "Készlet" },
     pdca: {
-      PLAN: "PLAN — VSM, OEE-cél, SMED-ablak, Poka-Yoke pont.",
-      DO: "DO — átállás, selejt, kiesés Ft-óradíja.",
-      CHECK: "CHECK — OEE-lyuk, átfutás, muda a soron.",
-      ACT: "ACT — SMED / Poka-Yoke protokoll, a következő kör standardja.",
+      PLAN: "PLAN — működési audit: muda, OEE-cél, SMED-ablak, Poka-Yoke pont.",
+      DO: "DO — átállás, selejt, kiesés Ft-óradíja; Quick Win lépések.",
+      CHECK: "CHECK — OEE-lyuk, átfutás, CapEx vs. havi megtakarítás.",
+      ACT: "ACT — veszteségmentesítés + kapacitás; következő kör standardja.",
     },
   },
   demo19_strategy_kahn_fork: {
@@ -190,10 +190,10 @@ const BY_ID_EN: Record<string, Pack> = {
   demo16_edu_lean_vsm: {
     tabs: { cashflow: "Cashflow", items: "Items", deals: "Lines", inventory: "Stock" },
     pdca: {
-      PLAN: "PLAN — VSM, OEE target, SMED window, Poka-Yoke point.",
-      DO: "DO — changeover, scrap, downtime cash rate.",
-      CHECK: "CHECK — OEE hole, lead time, muda on the line.",
-      ACT: "ACT — SMED / Poka-Yoke protocol, next-cycle standard.",
+      PLAN: "PLAN — ops audit: muda, OEE target, SMED window, Poka-Yoke point.",
+      DO: "DO — changeover, scrap, downtime cash rate; Quick Wins.",
+      CHECK: "CHECK — OEE hole, lead time, CapEx vs monthly savings.",
+      ACT: "ACT — waste cut + capacity; next-cycle standard.",
     },
   },
   demo19_strategy_kahn_fork: {

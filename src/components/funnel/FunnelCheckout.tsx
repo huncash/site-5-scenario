@@ -20,8 +20,6 @@ import {
   writeActivationTicket,
   type PayMethod,
 } from "@/lib/funnelOrder";
-import { cn } from "@/lib/utils";
-
 export function FunnelCheckout(props: {
   eyebrow: string;
   funnelName: string;
@@ -150,31 +148,9 @@ export function FunnelCheckout(props: {
 
         <form className="grid gap-4" onSubmit={submit}>
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.intervalLegend")}</legend>
+            <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.buyerCountry")}</legend>
             <div className="mt-2">
               <CountryVatPicker country={country} onChange={(c) => setCountry(c.toUpperCase())} />
-            </div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <button
-                type="button"
-                className={cn(
-                  "rounded-lg border px-3 py-2.5 text-left text-sm font-semibold",
-                  interval === "yearly" ? "border-cyan-400/50 bg-cyan-500/10 text-slate-100" : "border-border/60 bg-background/20 text-slate-300",
-                )}
-                onClick={() => setInterval("yearly")}
-              >
-                {t("pricing.yearlyDefault")}
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "rounded-lg border px-3 py-2.5 text-left text-sm font-semibold",
-                  interval === "monthly" ? "border-cyan-400/50 bg-cyan-500/10 text-slate-100" : "border-border/60 bg-background/20 text-slate-300",
-                )}
-                onClick={() => setInterval("monthly")}
-              >
-                {t("pricing.monthly")}
-              </button>
             </div>
           </fieldset>
 
@@ -227,7 +203,13 @@ export function FunnelCheckout(props: {
 
           {tier ? (
             <div className="rounded-xl border border-border/60 bg-background/30 p-4">
-              <PriceBreakdown planLabel={tier.label} netMonthly={monthly} interval={interval} vat={vat} />
+              <PriceBreakdown
+                planLabel={tier.label}
+                netMonthly={monthly}
+                interval={interval}
+                vat={vat}
+                onIntervalChange={setInterval}
+              />
             </div>
           ) : null}
 

@@ -19,7 +19,7 @@ import {
 } from "./catalog.ts";
 import { billEnv } from "./env.ts";
 import { quotePackage } from "./quote.ts";
-import { ensureOrderReferralCode } from "./referral.ts";
+import { activeReferralGiftSlots, ensureOrderReferralCode } from "./referral.ts";
 import { createStripeCheckout, stripeConfigured } from "./stripe.ts";
 import { createOrder, getOrder, getOrderByLicenseToken, newTransferCode, updateOrder, type Buyer, type InvoiceLine, type Order, type PayMethod } from "./store.ts";
 import { grossFromLines, issueSzamlazzProforma } from "./szamlazz.ts";
@@ -337,6 +337,7 @@ async function handleApi(req: Request): Promise<Response> {
     order = await ensureOrderReferralCode(order);
     const packs: string[] = [];
     if (order.slotPack && isSlotPackId(order.slotPack)) packs.push(order.slotPack);
+    const giftSlots = await activeReferralGiftSlots(order);
     return Response.json({
       ok: true,
       token: order.transferCode || order.id,
@@ -344,7 +345,8 @@ async function handleApi(req: Request): Promise<Response> {
       interval: order.interval,
       status: order.status,
       referralCode: order.referralCode,
-      permanentSlots: order.permanentSlots ?? 0,
+      permanentSlots: giftSlots,
+      giftSlots,
       slotPacks: packs,
       referralAwarded: Boolean(order.referralAwarded),
     });

@@ -284,7 +284,7 @@ export const en: DeepString<typeof hu> = {
       },
       education: {
         title: "Education / simulation training",
-        blurb: "Startup cash-flow and Lean VSM — finance band and Poka-Yoke micro.",
+        blurb: "Startup cash-flow and process audit — finance band, Quick Wins, Poka-Yoke micro.",
       },
       healthcare: {
         title: "Healthcare",
@@ -375,6 +375,21 @@ export const en: DeepString<typeof hu> = {
       "Choosing a plan is not a “private vs company” label: the same risk room-to-move modelling runs on household and business cases. The difference is capacity (scenario slots, editor seats, data organisation), not the rank of the goals.",
     seatDef:
       "Editor seat (Seat): a user with independent data entry and edit rights. Free Reader/Guest access does not consume an editor seat.",
+    slotExpandTitle: "Scenario slot expansion (+1 / +3 / +5)",
+    slotExpandBody:
+      "Available on every public plan (Alap, Pro, Enterprise). The Campus / education frame excludes the matrix.",
+    slotReferralBonus:
+      "Referral bonus: A successful referral gives both parties +1 gift slot, valid while both keep an active paid subscription (up to 25 active gift slots).",
+    slotLimitTitle: "Scenario slot limit reached",
+    slotLimitBody:
+      "You are using {used} / {limit} slots. Pick how to expand — this is a capacity choice, not a generic error.",
+    slotReferralTitle: "Refer a partner or friend for +1 gift slot",
+    slotReferralBody:
+      "After a successful payment you and the new subscriber each get +1 gift slot — while both keep an active subscription (max. 25). Code: {code} — click to copy the link.",
+    slotExpandCta: "Expand capacity (+1, +3 or +5 slot packs)",
+    slotCampusLocked:
+      "In the Campus / education frame the slot-expansion matrix is not available — the frame is fixed.",
+    close: "Close",
     iotTitle: "Industrial IoT integration",
     iotBody:
       "The software architecture is prepared to receive real-time production-line and operations data (Modbus, MQTT, OPC-UA), which can be fitted to the infrastructure in a custom project frame.",
@@ -479,6 +494,9 @@ export const en: DeepString<typeof hu> = {
     monthlySub: "Monthly subscription",
     vatShort: "VAT",
     savePctYearly: "−{n}% savings with yearly billing",
+    cycleYearly: "Yearly billing (−{n}%)",
+    cycleMonthly: "Monthly billing",
+    nextRenewal: "Next renewal: {date}",
   },
   panel: {
     lesson: "Scenario lesson",

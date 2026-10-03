@@ -1,10 +1,18 @@
 import { billPublicOrigin } from "@/lib/billing";
-import { ensureReferralCode, permanentSlotsFromCredits, writeReferralCode } from "@/lib/referral";
+import {
+  activeGiftSlotsFromCredits,
+  ensureReferralCode,
+  permanentSlotsFromCredits,
+  revokeAllReferralCredits,
+  writeReferralCode,
+} from "@/lib/referral";
 import {
   addPurchasedPack,
   emptySlotLedger,
   isSlotPackId,
+  MAX_REFERRAL_GIFT_SLOTS,
   normalizeTierId,
+  setGiftBonusSlots,
   type SlotLedger,
   type SlotPackId,
   type SlotTierId,
@@ -20,7 +28,7 @@ export type LicenseEntitlement = {
   verifiedAt: string;
   /** Saját ajánlói kód (bill / helyi). */
   referralCode?: string;
-  /** Permanent slotok a bill szerint. */
+  /** Aktív ajánlói ajándék slotok a bill szerint (páros előfizetés + max 25). */
   permanentSlots?: number;
   /** Megvásárolt bővítő pack id-k ismétléssel. */
   slotPacks?: SlotPackId[];
@@ -92,14 +100,27 @@ export function writeSlotLedger(ledger: SlotLedger): void {
   window.dispatchEvent(new Event("szcenario:slot_ledger"));
 }
 
+function giftSlotsActiveForLicense(e: LicenseEntitlement): boolean {
+  return e.status === "paid" || e.status === "invoiced" || e.status === "local";
+}
+
 function syncLedgerFromLicense(e: LicenseEntitlement): void {
   const tier = normalizeTierId(e.tier) as SlotTierId;
   let ledger = emptySlotLedger(tier);
   for (const pack of e.slotPacks ?? []) {
     if (isSlotPackId(pack)) ledger = addPurchasedPack(ledger, pack, 1);
   }
-  const bonus = Math.max(e.permanentSlots ?? 0, permanentSlotsFromCredits());
-  ledger = { ...ledger, permanentBonus: bonus };
+  if (!giftSlotsActiveForLicense(e)) {
+    revokeAllReferralCredits();
+    ledger = setGiftBonusSlots(ledger, 0);
+    writeSlotLedger(ledger);
+    return;
+  }
+  const bonus = Math.min(
+    MAX_REFERRAL_GIFT_SLOTS,
+    Math.max(e.permanentSlots ?? 0, activeGiftSlotsFromCredits(), permanentSlotsFromCredits()),
+  );
+  ledger = setGiftBonusSlots(ledger, bonus);
   writeSlotLedger(ledger);
 }
 
