@@ -39,7 +39,8 @@ import { localdb } from "@/lib/localdb";
 import { getPdcaCycleSum } from "@/lib/pdcaCycle";
 import { useVault } from "@/lib/vault";
 import { toast } from "sonner";
-import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
+import { doorStepForSegment, isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
+import { segmentIdFromDemoName } from "@/lib/demoSeed";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -142,7 +143,7 @@ export function ProfileHeader({
 
   const leaveVisitorCase = useCallback(async () => {
     setProfileOpen(false);
-    if (visitorShell) writeScenarioDoorStep("hospitality");
+    if (visitorShell) writeScenarioDoorStep(doorStepForSegment(segmentIdFromDemoName(profileName)));
     await lock();
     if (visitorShell) await router.navigate({ to: "/" });
   }, [lock, router, visitorShell]);

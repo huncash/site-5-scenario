@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { FAQ, LESSONS, SUPPORT_MAIL, SUPPORT_SLA, TIPS } from "./content";
+import { FAQ, KAHN_BONBON, LESSONS, SUPPORT_MAIL, SUPPORT_SLA, TIPS } from "./content";
+
+function KahnBonbon() {
+  return (
+    <article className="bonbon">
+      <div className="eyebrow">{KAHN_BONBON.eyebrow}</div>
+      <h2>{KAHN_BONBON.title}</h2>
+      <p>{KAHN_BONBON.p1}</p>
+      <p>{KAHN_BONBON.p2}</p>
+      <span className="chip">{KAHN_BONBON.foot}</span>
+    </article>
+  );
+}
 
 function pathOf() {
   return window.location.pathname.replace(/\/+$/, "") || "/";
@@ -115,6 +127,7 @@ export function App() {
             </a>
           ))}
         </div>
+        <KahnBonbon />
         <h2>Írásos jegy</h2>
         <TicketForm />
       </>
@@ -130,6 +143,7 @@ export function App() {
     body = (
       <>
         <h1>GYIK</h1>
+        <KahnBonbon />
         <Items items={FAQ} />
       </>
     );
@@ -146,6 +160,13 @@ export function App() {
         <h1>{lesson.title}</h1>
         <YouTube id={lesson.youtubeId} title={lesson.title} />
         <p>{lesson.body}</p>
+      </>
+    );
+  } else if (slug === "kb/kahn-rand") {
+    body = (
+      <>
+        <h1>{KAHN_BONBON.title}</h1>
+        <KahnBonbon />
       </>
     );
   } else if (slug.startsWith("kb/")) {

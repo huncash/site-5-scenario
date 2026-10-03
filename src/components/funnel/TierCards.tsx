@@ -2,8 +2,29 @@ import type { TierId, TierOffer } from "@/content/pricing/tiers";
 import { formatHuf, PRICING_NET_NOTE, TIER_COMPARE_ROWS, TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { billCheckoutUrl } from "@/lib/billing";
+import type { BillingInterval } from "@/lib/funnelOrder";
 import { cn } from "@/lib/utils";
+
+function PriceLines(props: { monthly: number; interval: BillingInterval }) {
+  const { monthly, interval } = props;
+  const yearly = yearlyPriceHuf(monthly);
+  const primary = interval === "yearly" ? yearly : monthly;
+  const secondary = interval === "yearly" ? monthly : yearly;
+  const primaryPer = interval === "yearly" ? "/ év" : "/ hó";
+  const secondaryPer = interval === "yearly" ? "/ hó" : "/ év";
+  return (
+    <div className="mt-2">
+      <div className="text-[15px] font-semibold text-slate-100">
+        {formatHuf(primary)} {primaryPer}
+      </div>
+      <div className="mt-0.5 inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-slate-200">
+        {formatHuf(secondary)} {secondaryPer}
+      </div>
+    </div>
+  );
+}
 
 export function TierCards(props: {
   offers: TierOffer[];
@@ -12,10 +33,15 @@ export function TierCards(props: {
   checkoutHref: string;
 }) {
   const { offers, selected, ctaLabel = "Kiválasztom" } = props;
+  void props.checkoutHref;
+  const [interval] = useBillingInterval();
 
   return (
     <div className="space-y-3">
-      <p className="text-[13px] italic leading-relaxed text-slate-300">„{PRICING_NET_NOTE}”</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13px] italic leading-relaxed text-slate-300">„{PRICING_NET_NOTE}”</p>
+        <BillingIntervalToggle />
+      </div>
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
@@ -26,7 +52,7 @@ export function TierCards(props: {
             {offers.map((t) => {
               const isSelected = selected === t.id;
               const isRecommended = t.badge === "Ajánlott";
-              const href = billCheckoutUrl({ tier: t.id, interval: "yearly" });
+              const href = billCheckoutUrl({ tier: t.id, interval });
               return (
                 <th
                   key={t.id}
@@ -45,9 +71,7 @@ export function TierCards(props: {
                     ) : null}
                   </div>
                   <div className="mt-1 text-[11px] font-normal leading-snug text-slate-300">{t.tagline}</div>
-                  <div className="mt-2 text-[15px] font-semibold text-slate-100">
-                    {formatHuf(yearlyPriceHuf(TIER_MONTHLY_HUF[t.id]))} / év
-                  </div>
+                  <PriceLines monthly={TIER_MONTHLY_HUF[t.id]} interval={interval} />
                   <Button
                     asChild
                     size="sm"
@@ -59,7 +83,15 @@ export function TierCards(props: {
                     )}
                     variant={isRecommended ? "default" : "outline"}
                   >
-                    <a href={href}>{ctaLabel}</a>
+                    <a
+                      href={href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.assign(billCheckoutUrl({ tier: t.id, interval }));
+                      }}
+                    >
+                      {ctaLabel}
+                    </a>
                   </Button>
                 </th>
               );

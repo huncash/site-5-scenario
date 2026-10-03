@@ -1,8 +1,37 @@
 import type { TierId } from "@/content/pricing/tiers";
 import { TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
+import type { CampaignId, CampaignUtm } from "@/lib/campaignFunnels";
 
 export type BillingInterval = "yearly" | "monthly";
 export type PayMethod = "wise" | "hu_transfer";
+
+export const DEFAULT_BILLING_INTERVAL: BillingInterval = "yearly";
+const INTERVAL_KEY = "ui:billingInterval";
+export const BILLING_INTERVAL_EVENT = "szcenario:billing_interval";
+
+export function isBillingInterval(value: unknown): value is BillingInterval {
+  return value === "yearly" || value === "monthly";
+}
+
+export function readBillingInterval(): BillingInterval {
+  if (typeof window === "undefined") return DEFAULT_BILLING_INTERVAL;
+  try {
+    const raw = sessionStorage.getItem(INTERVAL_KEY);
+    return isBillingInterval(raw) ? raw : DEFAULT_BILLING_INTERVAL;
+  } catch {
+    return DEFAULT_BILLING_INTERVAL;
+  }
+}
+
+export function writeBillingInterval(interval: BillingInterval) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(INTERVAL_KEY, interval);
+    window.dispatchEvent(new Event(BILLING_INTERVAL_EVENT));
+  } catch {
+    /* ignore */
+  }
+}
 
 const KEY = "szcenario_funnel_activation";
 
@@ -18,6 +47,8 @@ export type ActivationTicket = {
   emailHint: string;
   profileLabel: string;
   used: boolean;
+  campaignId?: CampaignId;
+  utm?: CampaignUtm;
 };
 
 export function chargeHuf(tierId: TierId, interval: BillingInterval): number {

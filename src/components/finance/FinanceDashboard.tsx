@@ -203,6 +203,15 @@ import {
   segmentIdFromDemoName,
 } from "@/lib/demoSeed";
 import { denyShowcaseWrite } from "@/lib/versionPolicy";
+import { EducationCasePanel } from "@/components/education/EducationCasePanel";
+import { ResilienceCasePanel } from "@/components/resilience/ResilienceCasePanel";
+import { StrategyCasePanel } from "@/components/strategy/StrategyCasePanel";
+import { MasterBaselineCard } from "@/components/pdca/MasterBaselineCard";
+import { MASTER_BASELINE, resolveWorkspaceBaseline } from "@/lib/masterBaseline";
+import { buildEducationWhatIf, isEducationSegment } from "@/lib/educationCases";
+import { isResilienceSegment } from "@/lib/resilienceCases";
+import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
+import { buildStrategyWhatIf, isStrategySegment } from "@/lib/strategyCases";
 const CHART_COLORS = [
   "var(--color-chart-1)",
   "var(--color-chart-2)",
@@ -691,20 +700,26 @@ export function FinanceDashboard({
       wanted = null;
     }
     if (!wanted) return;
+    if (wanted === "personal") {
+      caseEntryAppliedRef.current = true;
+      try {
+        sessionStorage.removeItem(CASE_ENTRY_TAB_KEY);
+      } catch {
+        /* ignore */
+      }
+      setActiveWs("magan");
+      return;
+    }
     const options = wsOptions.filter(Boolean);
     if (!options.length) return;
+    if (!options.includes(wanted)) return;
     caseEntryAppliedRef.current = true;
     try {
       sessionStorage.removeItem(CASE_ENTRY_TAB_KEY);
     } catch {
       /* ignore */
     }
-    const pick = options.includes(wanted)
-      ? wanted
-      : options.includes(CASE_ENTRY_DEFAULT_WS)
-        ? CASE_ENTRY_DEFAULT_WS
-        : options[0]!;
-    setMiddleWs(pick);
+    setMiddleWs(wanted);
     setActiveWs("middle");
   }, [wsOptions]);
 
@@ -1045,6 +1060,7 @@ export function FinanceDashboard({
     if (trimmed && isDemoSegmentId(trimmed)) return trimmed;
     return segmentIdFromDemoName(profileName);
   }, [profileName, settings]);
+  const surface = useMemo(() => scenarioSurface(demoSegmentId), [demoSegmentId]);
   const isVisitorDemo = Boolean(demoSegmentId) || isDemoProfileName(profileName);
   const visitorCaseTitle = visitorTitleForSegment(demoSegmentId);
   const visitorCaseLead = visitorLeadForSegment(demoSegmentId);
@@ -1330,6 +1346,25 @@ export function FinanceDashboard({
   const defaultVat = businessMode ? 27 : 0;
   const vatMode: VatMode = businessMode ? "net" : "gross";
   const activeWorkspaceMeta = useMemo(() => workspaceMetaById.get(activeWorkspace) ?? null, [activeWorkspace, workspaceMetaById]);
+  const inheritedBaseline = useMemo(() => {
+    const parentId = activeWorkspaceMeta?.parent_business_id ?? null;
+    const parent =
+      (parentId ? workspaceMetas.find((w) => w.id === parentId) : null) ??
+      workspaceMetas.find((w) => w.type === "business") ??
+      null;
+    return resolveWorkspaceBaseline({
+      workspace: activeWorkspaceMeta,
+      parent,
+      profile: (settings as { master_baseline?: unknown }).master_baseline as never,
+      fallback: baselineForSegment(demoSegmentId),
+    });
+  }, [activeWorkspaceMeta, demoSegmentId, settings, workspaceMetas]);
+
+  useEffect(() => {
+    if (!surface.showFinanceModules && (activeSubTab === "cashflow" || activeSubTab === "ledger" || activeSubTab === "deals")) {
+      setActiveSubTab("inventory");
+    }
+  }, [activeSubTab, surface.showFinanceModules]);
 
   const activeFolderTint = useMemo(() => {
     const byId = new Map(workspaceMetas.map((w) => [w.id, w] as const));
@@ -3441,12 +3476,30 @@ export function FinanceDashboard({
 
     const fixedRatio = avgExpense > 0 ? fixedMonthlyGross / avgExpense : null;
 
-    const chart = realistic.rows.map((r, i) => ({
-      month: r.month,
-      optimistic: optimistic.rows[i]?.cum ?? 0,
-      realistic: realistic.rows[i]?.cum ?? 0,
-      pessimistic: pessimistic.rows[i]?.cum ?? 0,
-    }));
+    const strategyWhatIf =
+      demoSegmentId && isStrategySegment(demoSegmentId)
+        ? buildStrategyWhatIf({
+            caseId: demoSegmentId,
+            baseIncome: MASTER_BASELINE.monthlyRevenueNet,
+            baseExpense: Math.round(MASTER_BASELINE.monthlyRevenueNet * 0.78),
+            horizonMonths,
+          })
+        : null;
+
+    const educationWhatIf =
+      demoSegmentId && isEducationSegment(demoSegmentId)
+        ? buildEducationWhatIf({ caseId: demoSegmentId, horizonMonths })
+        : null;
+
+    const chart =
+      strategyWhatIf?.chart ??
+      educationWhatIf?.chart ??
+      realistic.rows.map((r, i) => ({
+        month: r.month,
+        optimistic: optimistic.rows[i]?.cum ?? 0,
+        realistic: realistic.rows[i]?.cum ?? 0,
+        pessimistic: pessimistic.rows[i]?.cum ?? 0,
+      }));
 
     const pickMonth = pick.rows[0] ?? { inc: baseIncome, exp: baseExpense, net: 0 };
     const inRecent = (iso: string) => {
@@ -3481,8 +3534,10 @@ export function FinanceDashboard({
         { id: "real", label: "Reális", points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: whatIfScenario === "realistic" },
         { id: "pess", label: "Pesszimista", points: chart.map((c) => ({ x: c.month, y: c.pessimistic })), active: whatIfScenario === "pessimistic" },
       ],
+      strategySignals: strategyWhatIf?.signals ?? [],
+      strategyInheritedFrom: strategyWhatIf?.inheritedFrom ?? "",
     };
-  }, [activeLoans, activeWorkspace, businessMode, defaultVat, settings.recurring, txns, txnGrossHuf, vizSpan, whatIfScenario]);
+  }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, settings.recurring, txns, txnGrossHuf, vizSpan, whatIfScenario]);
 
   const leanInsights = useMemo(() => {
     if (!businessMode || activeWorkspace === "__all") return null;
@@ -5782,9 +5837,35 @@ export function FinanceDashboard({
     </Card>
   ) : null;
 
+  const strategyPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
+    whatIf?.strategySignals?.length ? (
+      <StrategyCasePanel
+        segmentId={demoSegmentId}
+        signals={whatIf.strategySignals}
+        inheritedFrom={whatIf.strategyInheritedFrom}
+        phase={phase}
+      />
+    ) : null;
+
+  const resiliencePanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
+    isResilienceSegment(demoSegmentId) ? (
+      <ResilienceCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
+    ) : null;
+
+  const educationPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
+    isEducationSegment(demoSegmentId) ? (
+      <EducationCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
+    ) : null;
+
   const planStack = (
     <div className="pdca-tile-grid">
-      {whatIfPanel}
+      {surface.inheritMasterBaseline ? <MasterBaselineCard context={inheritedBaseline} /> : null}
+      {resiliencePanel("PLAN")}
+      {educationPanel("PLAN")}
+      {strategyPanel("PLAN")}
+      {surface.showFinanceModules ? whatIfPanel : null}
+      {surface.showFinanceModules ? (
+        <>
       <GoalCard
         goal={activeGoal}
         goals={goals}
@@ -5802,6 +5883,8 @@ export function FinanceDashboard({
       />
       {savingsBucketsPanel}
       {plannedSimPanel}
+        </>
+      ) : null}
     </div>
   );
 
@@ -7066,10 +7149,21 @@ export function FinanceDashboard({
       )}
     >
       <div className="relative z-10 min-w-0 p-1.5">
-        {activeSubTab === "cashflow" ? lockedDoCashflow : null}
-        {activeSubTab === "ledger" ? lockedDoLedger : null}
-        {activeSubTab === "deals" ? lockedDoDeals : null}
-        {activeSubTab === "inventory" ? lockedDoInventory : null}
+        {surface.showFinanceModules ? (
+          <>
+            {activeSubTab === "cashflow" ? lockedDoCashflow : null}
+            {activeSubTab === "ledger" ? lockedDoLedger : null}
+            {activeSubTab === "deals" ? lockedDoDeals : null}
+            {activeSubTab === "inventory" ? lockedDoInventory : null}
+          </>
+        ) : (
+          <div className="pdca-tile-grid">
+            {resiliencePanel("DO")}
+            {educationPanel("DO")}
+            {strategyPanel("DO")}
+            {lockedDoInventory}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -7079,14 +7173,19 @@ export function FinanceDashboard({
       <CardHeader className="relative z-10 shrink-0 pb-1.5">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           <LeanTerm
-            title="CHECK — Lean összegzés"
-            exact="ellenőrzés — a számok valósága: mire megy el a pénz, hol a veszteség, hogyan áll a hónap."
+            title="CHECK — összegzés"
+            exact={pdcaPhaseExact("CHECK", surface)}
           >
-            CHECK — Lean összegzés
+            CHECK — összegzés
           </LeanTerm>
         </CardTitle>
       </CardHeader>
       <CardContent className="card-scroll-body relative z-10 grid gap-2.5 text-sm text-slate-300">
+        {resiliencePanel("CHECK")}
+        {educationPanel("CHECK")}
+        {strategyPanel("CHECK")}
+        {surface.showFinanceModules ? (
+        <>
         {activeWorkspace === "personal" ? (
           <div className="rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3">
             {(() => {
@@ -7722,6 +7821,8 @@ export function FinanceDashboard({
             </CardContent>
           </Card>
         </div>
+        </>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -7739,6 +7840,11 @@ export function FinanceDashboard({
         </CardTitle>
       </CardHeader>
       <CardContent className="card-scroll-body relative z-10 grid gap-3">
+        {resiliencePanel("ACT")}
+        {educationPanel("ACT")}
+        {strategyPanel("ACT")}
+        {surface.showFinanceModules ? (
+        <>
         {personalLoans.length > 0 ? (
           <div className="rounded-lg border border-rose-400/20 bg-rose-950/10 p-3">
             <div className="flex items-center justify-between gap-3">
@@ -7870,11 +7976,15 @@ export function FinanceDashboard({
             </Button>
           </div>
         </div>
+        </>
+        ) : null}
 
+        {surface.showLean || surface.showFinanceModules ? (
         <ActRecommendations
           recommendations={leanRecommendations}
           onExecute={executeLeanRecommendation}
         />
+        ) : null}
 
         <LeanConsultantPanel
           transactions={allTxns}
@@ -7961,7 +8071,7 @@ export function FinanceDashboard({
         />
       </div>
 
-      {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
+      {settings.showKpiQuickBar && surface.showFinanceModules ? <KpiQuickBar /> : null}
 
       <ExportQrDialog open={exportOpen} onOpenChange={setExportOpen} />
 
@@ -9254,6 +9364,7 @@ export function FinanceDashboard({
             onStartNewPlanningCycle={startNewPlanningCycle}
             onNewImprovementGoal={newImprovementGoal}
             useMasterGrid
+            phaseExactFor={(phase) => pdcaPhaseExact(phase, surface)}
             leftContent={lockedLeftContent}
             rightContent={lockedRightContent}
           />
@@ -12712,10 +12823,17 @@ export function FinanceDashboard({
       <BottomNav
         activeSubTab={activeSubTab}
         onChangeSubTab={setActiveSubTab}
-        inventoryLabel={activeWorkspace === "personal" || activeWorkspace === "__all" ? "Vagyon" : "Leltár"}
+        inventoryLabel={
+          surface.showFinanceModules
+            ? activeWorkspace === "personal" || activeWorkspace === "__all"
+              ? "Vagyon"
+              : "Leltár"
+            : "Készlet / tartalék"
+        }
         isSzummaActive={activeWs === "szumma"}
         onToggleSzumma={toggleSzumma}
         onOpenCreate={() => setPdcaNewOpen(true)}
+        hideFinanceTabs={!surface.showFinanceModules}
       />
     </div>
   );

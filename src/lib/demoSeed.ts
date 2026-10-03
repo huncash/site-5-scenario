@@ -2,6 +2,29 @@ import { decryptJSON, encryptJSON, importRawKey } from "@/lib/crypto";
 import { localdb } from "@/lib/localdb";
 import type { CustomSettings, Transaction, WorkspaceMeta } from "@/lib/finance";
 import { EMPTY_SETTINGS } from "@/lib/finance";
+import { inheritMasterBaseline, MASTER_BASELINE } from "@/lib/masterBaseline";
+import { baselineForSegment } from "@/lib/scenarioSurface";
+import {
+  EDUCATION_SEGMENTS,
+  educationCaseById,
+  educationSurface,
+  isEducationSegment,
+  type EducationCaseId,
+} from "@/lib/educationCases";
+import {
+  isResilienceSegment,
+  RESILIENCE_SEGMENTS,
+  resilienceCaseById,
+  resilienceSurface,
+  type ResilienceCaseId,
+} from "@/lib/resilienceCases";
+import {
+  isStrategySegment,
+  STRATEGY_SEGMENTS,
+  strategyCaseById,
+  strategySurface,
+  type StrategyCaseId,
+} from "@/lib/strategyCases";
 
 const VAULT_SESSION_KEY = "vault:key:v2";
 
@@ -12,7 +35,10 @@ export type DemoSegmentId =
   | "demo4_fine_dining_bistro"
   | "demo5_pastry_gelato"
   | "demo6_event_catering_popup"
-  | "demo7_personal_pocket_seasonal_pilot";
+  | "demo7_personal_pocket_seasonal_pilot"
+  | StrategyCaseId
+  | ResilienceCaseId
+  | EducationCaseId;
 
 export const DEMO_PASSWORD = "demo";
 export const DEMO_GENERATED_TAG = "generated:test";
@@ -82,6 +108,9 @@ export const DEMO_SEGMENTS: Array<{
     lead: "Valaki a saját fizetéséből indít egy kis vendéglátást, és a cégnek tagi kölcsönt ad. A magánkeret és a céges működés egymást húzza. Ez példa, nem ajánlat.",
     baseRevenueNetHuf: 2_900_000,
   },
+  ...STRATEGY_SEGMENTS,
+  ...RESILIENCE_SEGMENTS,
+  ...EDUCATION_SEGMENTS,
 ];
 
 /** Visitor-facing names + törzsadat per economic case (not the generic Vállalkozás2/Projekt2 shells). */
@@ -93,6 +122,9 @@ export function caseSurface(segmentId: DemoSegmentId): {
 } {
   const p = (key: string) => `p:${segmentId}:${key}`;
   const d = (key: string) => `d:${segmentId}:${key}`;
+  if (isStrategySegment(segmentId)) return strategySurface(segmentId);
+  if (isResilienceSegment(segmentId)) return resilienceSurface(segmentId);
+  if (isEducationSegment(segmentId)) return educationSurface(segmentId);
   if (segmentId === "demo1_multisite_operator") {
     return {
       businessAlias: "Lánc / multi-site",
@@ -297,6 +329,12 @@ function seasonFactor(seg: DemoSegmentId, month: number): number {
     if (month === 12) return 1.05;
     return 0.85;
   }
+  if (isStrategySegment(seg)) {
+    if ([11, 12].includes(month)) return 1.06;
+    if ([1, 2].includes(month)) return 0.94;
+    return 1.0;
+  }
+  if (isResilienceSegment(seg) || isEducationSegment(seg)) return 1.0;
   return 1.0;
 }
 
@@ -406,8 +444,13 @@ function workspaceDefaults(segmentId: DemoSegmentId): WorkspaceMeta[] {
       id: "Vállalkozás1",
       type: "business",
       alias: surface.businessAlias,
-      description:
-        segmentId === "demo7_personal_pocket_seasonal_pilot"
+      description: isStrategySegment(segmentId)
+        ? MASTER_BASELINE.description
+        : isResilienceSegment(segmentId)
+          ? resilienceCaseById(segmentId).lead
+        : isEducationSegment(segmentId)
+          ? educationCaseById(segmentId).lead
+        : segmentId === "demo7_personal_pocket_seasonal_pilot"
           ? "DEMO szezonális pilot vendéglátás (magán zsebből; tagi kölcsön; belépő egység modell)"
           : "DEMO élelmiszeripari vállalkozás (Y1 Batch 01 cél-szegmens szerint)",
       color_tag: null,
@@ -417,30 +460,70 @@ function workspaceDefaults(segmentId: DemoSegmentId): WorkspaceMeta[] {
       vehicles,
       partners,
       duties,
+      master_baseline: baselineForSegment(segmentId),
+      inherits_baseline: false,
     } as any,
     {
       id: "Projekt1",
       type: "project",
-      project_mode: "simulation",
-      project_budget_huf: segmentId === "demo7_personal_pocket_seasonal_pilot" ? 3_900_000 : 9_900_000,
+      project_mode: isStrategySegment(segmentId) ? "pilot" : "simulation",
+      project_budget_huf: isStrategySegment(segmentId)
+        ? 6_400_000
+        : isResilienceSegment(segmentId)
+          ? segmentId === "demo13_resilience_home_blackout"
+            ? 480_000
+            : segmentId === "demo12_resilience_community_grid"
+              ? 1_200_000
+              : segmentId === "demo14_resilience_demography"
+                ? 180_000
+                : 2_400_000
+        : isEducationSegment(segmentId)
+          ? segmentId === "demo15_edu_startup_cashflow"
+            ? 1_600_000
+            : segmentId === "demo16_edu_lean_vsm"
+              ? 2_800_000
+              : 720_000
+        : segmentId === "demo7_personal_pocket_seasonal_pilot"
+          ? 3_900_000
+          : 9_900_000,
       alias: surface.projectAlias,
-      description: "Projekt-szimuláció: új természetes profil (modell)",
+      description: isStrategySegment(segmentId)
+        ? "Stratégiai eset — Master Baseline öröklés, PRO pályák a PDCA-ban"
+        : isResilienceSegment(segmentId)
+          ? "BCP / működési reziliencia — ResourceRunway, EnergyAutonomy, TTR a PDCA-ban"
+        : isEducationSegment(segmentId)
+          ? "Oktatási tréning — pénzügyi sáv + Lean / Poka-Yoke a PDCA-ban"
+        : "Projekt-szimuláció: új természetes profil (modell)",
       color_tag: null,
       bank_sync_folder: null,
       imported_file_hashes: [],
-      completion_pct: 25,
+      completion_pct: isStrategySegment(segmentId) || isResilienceSegment(segmentId) || isEducationSegment(segmentId) ? 35 : 25,
       scenario: "realistic",
-      ...(segmentId === "demo7_personal_pocket_seasonal_pilot"
+      ...(isStrategySegment(segmentId) || isResilienceSegment(segmentId) || isEducationSegment(segmentId)
         ? {
+            parent_business_id: "Vállalkozás1",
+            counts_in_business: true,
+            inherits_baseline: true,
+            master_baseline: inheritMasterBaseline(baselineForSegment(segmentId), surface.projectAlias),
             pdca_cycle_count: 0,
             pdca_milestones: {
-              plan_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-              do_at: null,
+              plan_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+              do_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
               check_at: null,
               act_at: null,
             },
           }
-        : {}),
+        : segmentId === "demo7_personal_pocket_seasonal_pilot"
+          ? {
+              pdca_cycle_count: 0,
+              pdca_milestones: {
+                plan_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
+                do_at: null,
+                check_at: null,
+                act_at: null,
+              },
+            }
+          : {}),
     } as any,
   ] as any;
 }
@@ -464,16 +547,25 @@ export function sanitizeVisitorWorkspaces(
       continue;
     }
     if (def.id === "Vállalkozás1") {
+      const baseline = baselineForSegment(segmentId);
       out.push({
         ...cur,
         alias: surface.businessAlias,
         partners: surface.partners as any,
         duties: surface.duties as any,
+        master_baseline: baseline,
+        inherits_baseline: false,
       });
       continue;
     }
     if (def.id === "Projekt1") {
-      out.push({ ...cur, alias: surface.projectAlias });
+      const baseline = inheritMasterBaseline(baselineForSegment(segmentId), surface.projectAlias);
+      out.push({
+        ...cur,
+        alias: surface.projectAlias,
+        inherits_baseline: true,
+        master_baseline: baseline,
+      });
       continue;
     }
     out.push(cur);
@@ -559,13 +651,28 @@ function withGeneratedNote(note: string | null | undefined) {
 }
 
 function demoTags(segmentId: DemoSegmentId, extra?: string[]) {
-  return [DEMO_GENERATED_TAG, `demo:${segmentId}`, "demo:food", ...(extra ?? [])];
+  const family = isEducationSegment(segmentId)
+    ? "demo:education"
+    : isResilienceSegment(segmentId)
+    ? "demo:resilience"
+    : isStrategySegment(segmentId)
+      ? "demo:strategy"
+      : "demo:food";
+  return [DEMO_GENERATED_TAG, `demo:${segmentId}`, family, ...(extra ?? [])];
 }
 
 function projectUnit(segmentId: DemoSegmentId) {
   if (segmentId === "demo1_multisite_operator") return { inc: 2_200, cost: 650 };
   if (segmentId === "demo5_pastry_gelato") return { inc: 2_400, cost: 700 };
   if (segmentId === "demo7_personal_pocket_seasonal_pilot") return { inc: 2_050, cost: 680 }; // standard baseline (premium uplift comes via extra templates)
+  if (segmentId === "demo8_strategy_new_line") return { inc: 2_850, cost: 980 };
+  if (segmentId === "demo9_strategy_input_inflation") return { inc: 2_600, cost: 1_120 };
+  if (segmentId === "demo10_strategy_new_market") return { inc: 2_400, cost: 890 };
+  if (segmentId === "demo19_strategy_kahn_fork") return { inc: 2_550, cost: 860 };
+  if (isResilienceSegment(segmentId)) return { inc: 400, cost: 180 };
+  if (segmentId === "demo15_edu_startup_cashflow") return { inc: 1_150, cost: 420 };
+  if (segmentId === "demo16_edu_lean_vsm") return { inc: 2_100, cost: 760 };
+  if (isEducationSegment(segmentId)) return { inc: 280, cost: 160 };
   return { inc: 2_600, cost: 700 };
 }
 
@@ -673,6 +780,82 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
       recBankFees: 8_900,
       recAccounting: 42_000,
     },
+    demo8_strategy_new_line: { ...MASTER_BASELINE.plan },
+    demo9_strategy_input_inflation: { ...MASTER_BASELINE.plan },
+    demo10_strategy_new_market: { ...MASTER_BASELINE.plan },
+    demo19_strategy_kahn_fork: { ...MASTER_BASELINE.plan },
+    demo11_resilience_saas_outage: {
+      setup: 180_000,
+      lab: 40_000,
+      permit: 30_000,
+      recInternet: 12_000,
+      recPhone: 8_000,
+      recBankFees: 4_500,
+      recAccounting: 18_000,
+    },
+    demo12_resilience_community_grid: {
+      setup: 140_000,
+      lab: 28_000,
+      permit: 22_000,
+      recInternet: 8_000,
+      recPhone: 6_000,
+      recBankFees: 3_200,
+      recAccounting: 12_000,
+    },
+    demo13_resilience_home_blackout: {
+      setup: 86_000,
+      lab: 12_000,
+      permit: 0,
+      recInternet: 4_500,
+      recPhone: 3_200,
+      recBankFees: 1_800,
+      recAccounting: 0,
+    },
+    demo14_resilience_demography: {
+      setup: 48_000,
+      lab: 16_000,
+      permit: 0,
+      recInternet: 3_200,
+      recPhone: 2_400,
+      recBankFees: 1_200,
+      recAccounting: 8_000,
+    },
+    demo15_edu_startup_cashflow: {
+      setup: 120_000,
+      lab: 24_000,
+      permit: 18_000,
+      recInternet: 6_400,
+      recPhone: 4_200,
+      recBankFees: 2_400,
+      recAccounting: 12_000,
+    },
+    demo16_edu_lean_vsm: {
+      setup: 210_000,
+      lab: 48_000,
+      permit: 22_000,
+      recInternet: 9_000,
+      recPhone: 6_000,
+      recBankFees: 3_600,
+      recAccounting: 22_000,
+    },
+    demo17_edu_campus_energy: {
+      setup: 86_000,
+      lab: 18_000,
+      permit: 0,
+      recInternet: 5_200,
+      recPhone: 3_600,
+      recBankFees: 1_800,
+      recAccounting: 8_000,
+    },
+    demo18_edu_cyber_incident: {
+      setup: 96_000,
+      lab: 28_000,
+      permit: 0,
+      recInternet: 7_200,
+      recPhone: 4_800,
+      recBankFees: 2_200,
+      recAccounting: 10_000,
+    },
   };
   const plan = planBySeg[segmentId];
 
@@ -680,7 +863,10 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
     segmentId === "demo3_specialty_cafe_tea" ||
     segmentId === "demo5_pastry_gelato" ||
     segmentId === "demo6_event_catering_popup" ||
-    segmentId === "demo7_personal_pocket_seasonal_pilot";
+    segmentId === "demo7_personal_pocket_seasonal_pilot" ||
+    isStrategySegment(segmentId) ||
+    isResilienceSegment(segmentId) ||
+    isEducationSegment(segmentId);
 
   const demoAssets = [
     {
@@ -824,6 +1010,14 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
               ? "Székhely (logisztikai bázis)"
               : segmentId === "demo7_personal_pocket_seasonal_pilot"
                 ? "Székhely (magán iroda)"
+              : isStrategySegment(segmentId)
+                ? "Székhely (core üzem)"
+              : isResilienceSegment(segmentId)
+                ? segmentId === "demo13_resilience_home_blackout"
+                  ? "Lakás (háztartás)"
+                  : "Székhely (reziliencia / BCP)"
+              : isEducationSegment(segmentId)
+                ? "Székhely (campus / tanműhely)"
               : segmentId === "demo1_multisite_operator"
                 ? "Székhely (beszerzés / központ)"
               : "Székhely (város)",
@@ -840,6 +1034,14 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
                 ? "Telephely (konyha + raktár + kiszállítás)"
                 : segmentId === "demo7_personal_pocket_seasonal_pilot"
                   ? "Pilot egység (szezonális pult)"
+                : isStrategySegment(segmentId)
+                  ? "Telephely (gyártás / raktár)"
+                : isResilienceSegment(segmentId)
+                  ? segmentId === "demo13_resilience_home_blackout"
+                    ? "Tartalék (pince / napelem)"
+                    : "Telephely (tartalék / mesh)"
+                : isEducationSegment(segmentId)
+                  ? "Telephely (labor / kollégium)"
                 : segmentId === "demo1_multisite_operator"
                   ? "Telephely (központi raktár / prep)"
                   : "Telephely (raktár / előkészítő)",
@@ -852,8 +1054,13 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
     projects: [
       {
         id: "proj_demo_1",
-        name:
-          segmentId === "demo7_personal_pocket_seasonal_pilot"
+        name: isStrategySegment(segmentId)
+          ? strategyCaseById(segmentId).title
+          : isResilienceSegment(segmentId)
+            ? resilienceCaseById(segmentId).title
+          : isEducationSegment(segmentId)
+            ? educationCaseById(segmentId).title
+          : segmentId === "demo7_personal_pocket_seasonal_pilot"
             ? "Belépő vendéglátó pilot — standard vs prémium X‑faktor"
             : "Projekt1 — modell (profit potenciál)",
       },
@@ -994,6 +1201,12 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
         amount:
           segmentId === "demo1_multisite_operator"
             ? 72_000
+            : isStrategySegment(segmentId)
+              ? MASTER_BASELINE.plan.recInsurance
+            : isResilienceSegment(segmentId)
+              ? 12_000
+            : isEducationSegment(segmentId)
+              ? 8_000
             : segmentId === "demo6_event_catering_popup"
               ? 44_000
               : segmentId === "demo3_specialty_cafe_tea"
@@ -1004,6 +1217,7 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
       } as any,
     ] as any,
   } as any;
+  (nextSettings as any).master_baseline = baselineForSegment(segmentId);
   (nextSettings as any).__demo = seedMarker;
 
   const settingsEnc = await encryptJSON(vaultKey, nextSettings);
@@ -1015,9 +1229,15 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
   const goalDeadline = new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const goalTarget = Math.round((plan.setup + plan.lab + plan.permit) * 1.35);
   const goalPayload = {
-    name: "Projekt1 — Break-even + 60 nap puffer",
+    name: isStrategySegment(segmentId)
+      ? strategyCaseById(segmentId).goalName
+      : isResilienceSegment(segmentId)
+        ? resilienceCaseById(segmentId).goalName
+      : isEducationSegment(segmentId)
+        ? educationCaseById(segmentId).goalName
+      : "Projekt1 — Break-even + 60 nap puffer",
     target_amount: goalTarget,
-    workspace: "Projekt1",
+    workspace: segmentId === "demo13_resilience_home_blackout" ? "personal" : "Projekt1",
     property_id: null,
   };
   const goalEnc = await encryptJSON(vaultKey, goalPayload);
@@ -1040,6 +1260,12 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
           ? "Vállalkozás1 — Hűtő kapacitás bővítés"
           : segmentId === "demo6_event_catering_popup"
             ? "Vállalkozás1 — Mobil eszközcsomag puffer"
+            : isStrategySegment(segmentId)
+              ? "Core üzem — Master Baseline puffer"
+            : isResilienceSegment(segmentId)
+              ? "Reziliencia — készlet / energia puffer"
+            : isEducationSegment(segmentId)
+              ? "Tréning — tartalék / kvóta puffer"
             : "Vállalkozás1 — Készpénz puffer",
     target_amount:
       segmentId === "demo4_fine_dining_bistro"
@@ -2543,6 +2769,148 @@ export async function seedDemoDataForSegment(segmentId: DemoSegmentId): Promise<
     );
   }
 
+  if (isStrategySegment(segmentId)) {
+    const overlayAt = new Date(Date.UTC(end.getFullYear(), end.getMonth(), 12, 12, 0, 0)).toISOString();
+    if (segmentId === "demo8_strategy_new_line") {
+      projectBaselineTxns.push(
+        txn({
+          id: `demo:${segmentId}:overlay:wc`,
+          type: "expense",
+          amount: 1_850_000,
+          category: "BESZERZÉS: Alapanyag",
+          title: "Előszerződött alapanyag — likviditási kötés",
+          party: "Keretszerződéses nagyker",
+          note: withGeneratedNote("Optimista ág csapdája: a készlet előre viszi a pénzt."),
+          occurred_at: overlayAt,
+          workspace: "Projekt1",
+          status: "actual",
+          expense_type: "VARIABLE_NEED",
+          muda_type: "NONE",
+          tags: demoTags(segmentId, ["strategy:overlay", "strategy:liquidity-trap"]),
+        } as any),
+      );
+    } else if (segmentId === "demo9_strategy_input_inflation") {
+      projectBaselineTxns.push(
+        txn({
+          id: `demo:${segmentId}:overlay:infl`,
+          type: "expense",
+          amount: 980_000,
+          category: "BESZERZÉS: Alapanyag",
+          title: "Árinflációs felár — beszerzés",
+          party: "Keretszerződéses nagyker",
+          note: withGeneratedNote("Realista ág: fokozatos drágulás, árrés-nyomás."),
+          occurred_at: overlayAt,
+          workspace: "Projekt1",
+          status: "actual",
+          expense_type: "VARIABLE_NEED",
+          tags: demoTags(segmentId, ["strategy:overlay", "strategy:inflation"]),
+        } as any),
+      );
+    } else if (segmentId === "demo19_strategy_kahn_fork") {
+      projectBaselineTxns.push(
+        txn({
+          id: `demo:${segmentId}:overlay:fork`,
+          type: "expense",
+          amount: 540_000,
+          category: "FEJLESZTÉS: Folyamatfejlesztés",
+          title: "Elágazási tartalék — döntési fa",
+          party: "Jövőkutató asztal",
+          note: withGeneratedNote("Kahn-sablon: az opciók nyitva tartásának költsége, mielőtt egy ágat viszel."),
+          occurred_at: overlayAt,
+          workspace: "Projekt1",
+          status: "actual",
+          expense_type: "INVESTMENT",
+          tags: demoTags(segmentId, ["strategy:overlay", "strategy:kahn-fork"]),
+        } as any),
+      );
+    } else {
+      projectBaselineTxns.push(
+        txn({
+          id: `demo:${segmentId}:overlay:entry`,
+          type: "expense",
+          amount: 720_000,
+          category: "FEJLESZTÉS: Folyamatfejlesztés",
+          title: "Új piaci belépés — core finanszírozás",
+          party: "Új piaci disztribútor",
+          note: withGeneratedNote("A Master Baseline üzem tartja a belépést."),
+          occurred_at: overlayAt,
+          workspace: "Projekt1",
+          status: "actual",
+          expense_type: "INVESTMENT",
+          tags: demoTags(segmentId, ["strategy:overlay", "strategy:new-market"]),
+        } as any),
+        txn({
+          id: `demo:${segmentId}:overlay:muda`,
+          type: "expense",
+          amount: 210_000,
+          category: "EGYEBEK: Program költség",
+          title: "Pazarlás a belépésen — muda",
+          party: "Vegyes költség",
+          note: withGeneratedNote("Pesszimista ág: stop-loss előtt vágandó tétel."),
+          occurred_at: overlayAt,
+          workspace: "Projekt1",
+          status: "actual",
+          expense_type: "WANT",
+          muda_type: "WASTE",
+          tags: demoTags(segmentId, ["strategy:overlay", "strategy:muda"]),
+        } as any),
+      );
+    }
+  }
+
+  if (isResilienceSegment(segmentId) && segmentId !== "demo14_resilience_demography") {
+    const overlayAt = new Date(Date.UTC(end.getFullYear(), end.getMonth(), 12, 12, 0, 0)).toISOString();
+    projectBaselineTxns.push(
+      txn({
+        id: `demo:${segmentId}:overlay:drill`,
+        type: "expense",
+        amount: segmentId === "demo13_resilience_home_blackout" ? 42_000 : 96_000,
+        category: "FEJLESZTÉS: Folyamatfejlesztés",
+        title:
+          segmentId === "demo11_resilience_saas_outage"
+            ? "BCP gyakorlat — local-first élesítés"
+            : segmentId === "demo12_resilience_community_grid"
+              ? "Lajtoskocsi + LoRa mesh gyakorlat"
+              : "Háztartási működési tartalék feltöltés",
+        party: "Reziliencia-gyakorlat",
+        note: withGeneratedNote("Fizikai mutatók a PDCA-ban; ez csak a gyakorlat rögzített költsége."),
+        occurred_at: overlayAt,
+        workspace: segmentId === "demo13_resilience_home_blackout" ? "personal" : "Projekt1",
+        status: "actual",
+        expense_type: "INVESTMENT",
+        tags: demoTags(segmentId, ["resilience:overlay", "resilience:drill"]),
+      } as any),
+    );
+  }
+
+  if (isEducationSegment(segmentId)) {
+    const overlayAt = new Date(Date.UTC(end.getFullYear(), end.getMonth(), 12, 12, 0, 0)).toISOString();
+    const edu =
+      segmentId === "demo15_edu_startup_cashflow"
+        ? { amount: 86_000, title: "Inkubátor-díj + muda a változón", extra: "edu:burn" }
+        : segmentId === "demo16_edu_lean_vsm"
+          ? { amount: 124_000, title: "SMED + Poka-Yoke bevezetés", extra: "edu:smed" }
+          : segmentId === "demo17_edu_campus_energy"
+            ? { amount: 78_000, title: "Hőhullám-csúcs — kvóta-túllépés", extra: "edu:quota" }
+            : { amount: 156_000, title: "Izoláció + analóg vizsga-protokoll", extra: "edu:iso" };
+    projectBaselineTxns.push(
+      txn({
+        id: `demo:${segmentId}:overlay:edu`,
+        type: "expense",
+        amount: edu.amount,
+        category: "FEJLESZTÉS: Folyamatfejlesztés",
+        title: edu.title,
+        party: "Oktatási tréning",
+        note: withGeneratedNote("Pénzügyi sáv + Lean / Poka-Yoke mikro a PDCA-ban."),
+        occurred_at: overlayAt,
+        workspace: "Projekt1",
+        status: "actual",
+        expense_type: "INVESTMENT",
+        tags: demoTags(segmentId, ["education:overlay", edu.extra]),
+      } as any),
+    );
+  }
+
   // Seed next 36 months for Project1 simulation (so users can "simulate 3 years")
   const projectTxns: Transaction[] = [];
   const projStart = new Date(end.getFullYear(), end.getMonth() + 1, 1); // next month
@@ -2794,16 +3162,9 @@ export async function purgeDemoGeneratedDataForActiveProfile(): Promise<void> {
   }
 
   const seg = String(cur?.__demo?.segmentId ?? "").trim() as any;
-  const baseWorkspaces =
-    seg === "demo1_multisite_operator" ||
-    seg === "demo2_premium_nightlife" ||
-    seg === "demo3_specialty_cafe_tea" ||
-    seg === "demo4_fine_dining_bistro" ||
-    seg === "demo5_pastry_gelato" ||
-    seg === "demo6_event_catering_popup" ||
-    seg === "demo7_personal_pocket_seasonal_pilot"
-      ? workspaceDefaults(seg)
-      : (cur?.workspaces ?? workspaceDefaults(DEMO_SEGMENTS[0]!.id));
+  const baseWorkspaces = isDemoSegmentId(seg)
+    ? workspaceDefaults(seg)
+    : (cur?.workspaces ?? workspaceDefaults(DEMO_SEGMENTS[0]!.id));
 
   const clean: any = {
     ...EMPTY_SETTINGS,

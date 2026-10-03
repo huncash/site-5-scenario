@@ -180,6 +180,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    void import("@/lib/campaignSession").then((m) => m.captureCampaignFromLocation({ doorStep: false }));
     if (!("serviceWorker" in navigator)) return;
     if (import.meta.env.DEV) {
       navigator.serviceWorker

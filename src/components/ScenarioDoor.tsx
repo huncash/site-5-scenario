@@ -4,7 +4,13 @@ import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
+import { CAMPAIGN_FUNNELS } from "@/content/funnels/campaigns";
+import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
+import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSession";
 import { DEMO_SEGMENTS, type DemoSegmentId } from "@/lib/demoSeed";
+import { EDUCATION_SEGMENTS, isEducationSegment } from "@/lib/educationCases";
+import { isResilienceSegment, RESILIENCE_SEGMENTS } from "@/lib/resilienceCases";
+import { isStrategySegment, STRATEGY_SEGMENTS } from "@/lib/strategyCases";
 import {
   enterDemoSegment,
   enterRememberedOrFirstDemo,
@@ -35,12 +41,14 @@ import { localdb } from "@/lib/localdb";
 const SCENARIO_TYPES: Array<{
   id: string;
   open?: boolean;
+  doorStep?: ScenarioDoorStep;
   title: string;
   blurb: string;
 }> = [
   {
     id: "economic",
     open: true,
+    doorStep: "industry",
     title: "Gazdasági szcenárió",
     blurb:
       "A működés pénzben mért feltételeit és kötöttségeit vizsgálja: mi történik, ha ezek megváltoznak.",
@@ -59,15 +67,19 @@ const SCENARIO_TYPES: Array<{
   },
   {
     id: "disaster",
-    title: "Katasztrófaelhárítási szcenárió",
+    open: true,
+    doorStep: "resilience",
+    title: "Működési reziliencia (BCP)",
     blurb:
-      "Város földrengésre vagy árvízre rak össze szcenáriót, hogy legyen mire készülni.",
+      "Fekete hattyú, felhőleállás, logisztikai sokk. ResourceRunway, EnergyAutonomy, TTR — a kockázatkezelés csúcsa, nem riadó.",
   },
   {
     id: "crisis",
-    title: "Válságkezelési szcenárió",
+    open: true,
+    doorStep: "resilience",
+    title: "Előrelátás és válságállóság",
     blurb:
-      "Belső válság — például kereslet-visszaesés — hogyan hatna az ügyfelekre és a működésre.",
+      "Operational resilience és strategic foresight: helyi tartalék, TTR, demográfiai pálya. Aki a nehéz sávot is számolja, az érett.",
   },
 ];
 
@@ -83,6 +95,20 @@ const ECONOMIC_INDUSTRIES: Array<{
     title: "Élelmiszeripar / vendéglátás",
     blurb:
       "Lánc, étterem, kávézó, cukrászda, rendezvényes vendéglátás — beléphetsz egy-egy már futó helyzetbe, és továbbviszed.",
+  },
+  {
+    id: "strategy",
+    open: true,
+    title: "Üzleti és stratégiai tervezés",
+      blurb:
+      "Termékvonal, beszerzési infláció, új piac, Kahn-féle elágazás — ugyanaz a Master Baseline törzs, PRO pályákkal.",
+  },
+  {
+    id: "education",
+    open: true,
+    title: "Oktatás / szimulációs tréning",
+    blurb:
+      "Startup cash-flow, Lean VSM, campus energia, kiberincidens — pénzügyi sáv és Poka-Yoke mikro.",
   },
   {
     id: "manufacturing",
@@ -109,8 +135,13 @@ export function ScenarioDoor() {
   const [resetBusy, setResetBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [campus, setCampus] = useState(false);
+  const [campaignId, setCampaignId] = useState<CampaignId | null>(null);
   const inFlight = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const campaign = campaignId ? CAMPAIGN_FUNNELS[campaignId] : null;
+  const educationCases = useMemo(() => filterByCampaign(EDUCATION_SEGMENTS, campaignId), [campaignId]);
+  const resilienceCases = useMemo(() => filterByCampaign(RESILIENCE_SEGMENTS, campaignId), [campaignId]);
+  const strategyCases = useMemo(() => filterByCampaign(STRATEGY_SEGMENTS, campaignId), [campaignId]);
 
   const preferDashboardHome = () => {
     try {
@@ -149,13 +180,44 @@ export function ScenarioDoor() {
         segmentId: "demo1_multisite_operator" as const,
         infoHref: "/f/multi-site/",
       },
+      {
+        title: "Üzleti és stratégiai tervezés",
+        body: "Master Baseline öröklés. Termékvonal, árinfláció, új piac, plusz Kahn-féle stratégiai elágazás — PRO pályákkal, döntési fával.",
+        segmentId: null,
+        infoHref: "/f/uzleti-strategia/",
+        doorStep: "strategy" as const,
+      },
+      {
+        title: "Működési reziliencia és BCP",
+        body: "Fekete hattyú, felhőleállás, logisztikai sokk — és a következő 20 év demográfiai pályája. Aki a pesszimista sávot is számolja, az érett. ResourceRunway, EnergyAutonomy, TTR.",
+        segmentId: null,
+        infoHref: "/f/valsag-reziliencia/",
+        doorStep: "resilience" as const,
+      },
+      {
+        title: "Oktatási és szimulációs tréningek",
+        body: "Startup cash-flow, Lean VSM, campus energia, kiberincidens. Pénzügyi sáv és Lean / Poka-Yoke mikro együtt.",
+        segmentId: null,
+        infoHref: "/f/oktatas-szimulacio/",
+        doorStep: "education" as const,
+      },
     ],
     [],
   );
 
   useEffect(() => {
+    captureCampaignFromLocation({ doorStep: true });
+    setCampaignId(readCampaignId());
     const stored = readScenarioDoorStep();
-    setStep(stored === "hospitality" || stored === "industry" ? stored : "type");
+    setStep(
+      stored === "hospitality" ||
+      stored === "industry" ||
+      stored === "strategy" ||
+      stored === "resilience" ||
+      stored === "education"
+        ? stored
+        : "type",
+    );
     try {
       setCampus(new URLSearchParams(window.location.search).get("ref") === "campus");
     } catch {
@@ -255,7 +317,13 @@ export function ScenarioDoor() {
                         type="button"
                         className="btn-demo h-9 bg-cyan-500 px-3 text-slate-950 hover:bg-cyan-400"
                         disabled={busyId !== null || resetBusy}
-                        onClick={() => void openCase(b.segmentId)}
+                        onClick={() => {
+                          if (b.doorStep) {
+                            go(b.doorStep);
+                            return;
+                          }
+                          if (b.segmentId) void openCase(b.segmentId);
+                        }}
                       >
                         Demó indítása
                       </Button>
@@ -313,17 +381,30 @@ export function ScenarioDoor() {
                   Szcenárió fajták
                 </div>
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                  Most a gazdasági ág nyitott. A többi ugyanerre a módszerre jön később — más kérdés, ugyanaz a helyi számítás.
+                  Most a gazdasági ág, a BCP / működési reziliencia és a stratégiai előrejelzés nyitott. A többi ugyanerre a módszerre jön később.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {SCENARIO_TYPES.map((t) =>
                   t.open ? (
-                    <div key={t.id} className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4">
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
-                      <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
-                      <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
-                    </div>
+                    t.doorStep ? (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => go(t.doorStep!)}
+                        className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4 text-left transition-colors hover:border-cyan-300/50"
+                      >
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
+                        <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
+                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                      </button>
+                    ) : (
+                      <div key={t.id} className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Most</div>
+                        <div className="mt-1 text-sm font-semibold text-foreground">{t.title}</div>
+                        <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t.blurb}</p>
+                      </div>
+                    )
                   ) : (
                     <div
                       key={t.id}
@@ -349,7 +430,7 @@ export function ScenarioDoor() {
                   Terv, tény, eltérés a böngészőben készül. Nincs felhő‑adatbázis, nincs telemetria.
                 </DoorFact>
                 <DoorFact term="Egy ágazat, több fókusz">
-                  Vendéglátás és gazdasági helyzetek: projekt, adósság, lean, több telephely. A többi ágazat később.
+                  Vendéglátás, stratégia, plusz BCP és előrejelzés: TTR, energia, készlet — ugyanaz a helyi motor.
                 </DoorFact>
                 <DoorFact term="Demó = minta, nem ügyfél">{DEMO_STARTER_BLURB}</DoorFact>
                 <DoorFact term="Mentés nálad">
@@ -377,7 +458,9 @@ export function ScenarioDoor() {
                   <button
                     key={ind.id}
                     type="button"
-                    onClick={() => go("hospitality")}
+                    onClick={() =>
+                      go(ind.id === "strategy" ? "strategy" : ind.id === "education" ? "education" : "hospitality")
+                    }
                     className="rounded-2xl border border-border/70 bg-card p-5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-card/80"
                   >
                     <div className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -408,7 +491,109 @@ export function ScenarioDoor() {
             <DoorBack onClick={() => go("type")} label="Vissza" aside="További demó helyzetek" />
             <p className="text-[12px] leading-relaxed text-muted-foreground">{DEMO_STARTER_BLURB}</p>
             <div className="grid gap-2">
-              {DEMO_SEGMENTS.map((s) => (
+              {DEMO_SEGMENTS.filter((s) => !isStrategySegment(s.id) && !isResilienceSegment(s.id) && !isEducationSegment(s.id)).map((s) => (
+                <Button
+                  key={s.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
+                  disabled={busyId !== null}
+                  onClick={() => void openCase(s.id)}
+                >
+                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{s.title}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {s.blurb}
+                    </span>
+                    {busyId === s.id ? (
+                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                    ) : null}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === "education" ? (
+          <div className="space-y-4">
+            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Oktatási és szimulációs tréningek"} />
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              {campaign?.id === "oktatas"
+                ? campaign.chooserIntro
+                : "Fix PDCA. A pénzügyi sáv (burn, rezsi, helyreállás) és a Lean / Poka-Yoke mikro (OEE, SMED, kvóta, izoláció) ugyanazon a moszaikon van. Diák- és campus-lépték."}
+            </p>
+            <div className="grid gap-2">
+              {educationCases.map((s) => (
+                <Button
+                  key={s.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
+                  disabled={busyId !== null}
+                  onClick={() => void openCase(s.id)}
+                >
+                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{s.title}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {s.blurb}
+                    </span>
+                    {busyId === s.id ? (
+                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                    ) : null}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === "resilience" ? (
+          <div className="space-y-4">
+            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Működési reziliencia és BCP"} />
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              {campaign && (campaign.id === "bcp" || campaign.id === "kozosseg" || campaign.id === "makro")
+                ? campaign.chooserIntro
+                : "Nem világvége-szimulátor. Vállalatnál BCP és működési reziliencia; makróban stratégiai előrejelzés; közösségben helyi önfenntartás. A motor fizikai korlátot is visz — ResourceRunway, EnergyAutonomy, TTR. A TFR 2023-as helyi másolat, nem élő API."}
+            </p>
+            <div className="grid gap-2">
+              {resilienceCases.map((s) => (
+                <Button
+                  key={s.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
+                  disabled={busyId !== null}
+                  onClick={() => void openCase(s.id)}
+                >
+                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{s.title}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {s.blurb}
+                    </span>
+                    {busyId === s.id ? (
+                      <span className="mt-1 block text-[11px] text-primary">Helyzet megnyitása…</span>
+                    ) : null}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === "strategy" ? (
+          <div className="space-y-4">
+            <DoorBack onClick={() => go("type")} label="Vissza" aside={campaign?.hero.eyebrow ?? "Üzleti és stratégiai tervezés"} />
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              {campaign?.id === "strategia"
+                ? campaign.chooserIntro
+                : "A cég törzse a Master Baseline. A stratégiai esetek ezt öröklik — a partnereket, a fix költséget és a core cash-flow-t nem kell újra megadni. A projekt csak a döntés rétegét viszi, PRO pályákkal."}
+            </p>
+            <div className="grid gap-2">
+              {strategyCases.map((s) => (
                 <Button
                   key={s.id}
                   type="button"

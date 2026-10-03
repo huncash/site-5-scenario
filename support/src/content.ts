@@ -53,6 +53,14 @@ export const LESSONS: Lesson[] = [
   },
 ];
 
+export const KAHN_BONBON = {
+  eyebrow: "Tudástár · Történeti sablon",
+  title: "Herman Kahn és a RAND Corporation",
+  p1: "A szcenárió-alapú tervezés nem két találgatott év. Kahn a RAND-nál a hidegháborúban többágú jövőképet rajzolt: elágazás, mielőtt elkötelezed az erőforrást.",
+  p2: "Ugyanez a módszer viszi ma a Master Baseline törzset: optimista bővítés, realista tartás, pesszimista tartalék. A fa a te eszközödön fut — local-first, nulla telemetria.",
+  foot: "Local-first · nincs felhő-adat · nincs használatküldés",
+} as const;
+
 export const TIPS = [
   { q: "Hol vannak az adataim?", a: "A saját eszközödön, IndexedDB-ben. A VPS nem tárol szcenáriót." },
   { q: "Van telefonos support?", a: "Nincs. Kizárólag írásban, jeggyel." },

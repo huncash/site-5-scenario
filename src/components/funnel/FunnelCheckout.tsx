@@ -11,11 +11,12 @@ import { PriceBreakdown } from "@/components/home/PriceBreakdown";
 import type { TierCopy, TierCore, TierId } from "@/content/pricing/tiers";
 import { formatHuf, TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
 import { countryFromTaxId, resolveVat, SELLER_COUNTRY, splitVat } from "@/content/pricing/vat";
+import { readCampaignAttribution } from "@/lib/campaignSession";
+import { useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import {
   chargeHuf,
   newToken,
   writeActivationTicket,
-  type BillingInterval,
   type PayMethod,
 } from "@/lib/funnelOrder";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,7 @@ export function FunnelCheckout(props: {
 }) {
   const { eyebrow, funnelName, tier, copy } = props;
   const navigate = useNavigate();
-  const [interval, setInterval] = useState<BillingInterval>("yearly");
+  const [interval, setInterval] = useBillingInterval();
   const [country, setCountry] = useState(SELLER_COUNTRY);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
   const [name, setName] = useState("");
@@ -74,6 +75,7 @@ export function FunnelCheckout(props: {
     }
     setError(null);
     const token = newToken();
+    const campaign = readCampaignAttribution();
     writeActivationTicket({
       token,
       createdAt: new Date().toISOString(),
@@ -86,6 +88,8 @@ export function FunnelCheckout(props: {
       emailHint: m.replace(/(^.).*(@.*$)/, "$1***$2"),
       profileLabel: n.slice(0, 48),
       used: false,
+      campaignId: campaign?.id,
+      utm: campaign?.utm,
     });
     const url = `${window.location.origin}/login/activate?k=${encodeURIComponent(token)}`;
     setThanks({ url, email: m, qr: "", token });

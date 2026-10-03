@@ -7,6 +7,9 @@ import {
   segmentIdFromDemoName,
   type DemoSegmentId,
 } from "@/lib/demoSeed";
+import { isEducationSegment } from "@/lib/educationCases";
+import { isResilienceSegment, resilienceEntryWorkspace } from "@/lib/resilienceCases";
+import { isStrategySegment } from "@/lib/strategyCases";
 import { localdb } from "@/lib/localdb";
 
 export const LAST_PROFILE_KEY = "vault:lastProfile";
@@ -23,7 +26,20 @@ export function writeCaseEntryTab(wsId: string = CASE_ENTRY_DEFAULT_WS) {
   }
 }
 
-export type ScenarioDoorStep = "type" | "industry" | "hospitality";
+export type ScenarioDoorStep = "type" | "industry" | "hospitality" | "strategy" | "resilience" | "education";
+
+export function doorStepForSegment(segmentId: string | null | undefined): ScenarioDoorStep {
+  if (isEducationSegment(segmentId)) return "education";
+  if (isResilienceSegment(segmentId)) return "resilience";
+  if (isStrategySegment(segmentId)) return "strategy";
+  return "hospitality";
+}
+
+export function caseEntryTabForSegment(segmentId: string | null | undefined): string {
+  if (isResilienceSegment(segmentId)) return resilienceEntryWorkspace(segmentId);
+  if (isEducationSegment(segmentId) || isStrategySegment(segmentId)) return "Projekt1";
+  return CASE_ENTRY_DEFAULT_WS;
+}
 
 export function isDemoProfileName(name: unknown): boolean {
   return String(name ?? "")
@@ -46,6 +62,9 @@ export function readScenarioDoorStep(): ScenarioDoorStep {
   try {
     const raw = sessionStorage.getItem(SCENARIO_DOOR_STEP_KEY);
     if (raw === "hospitality" || raw === "economic") return "hospitality";
+    if (raw === "strategy") return "strategy";
+    if (raw === "education" || raw === "training") return "education";
+    if (raw === "resilience" || raw === "crisis" || raw === "disaster") return "resilience";
     if (raw === "industry") return "industry";
     return "type";
   } catch {
@@ -160,8 +179,8 @@ export async function enterDemoSegment(
       await purgeDemoGeneratedDataForActiveProfile();
       await seedDemoDataForSegment(segmentId);
     }
-    writeScenarioDoorStep("hospitality");
-    writeCaseEntryTab(CASE_ENTRY_DEFAULT_WS);
+    writeScenarioDoorStep(doorStepForSegment(segmentId));
+    writeCaseEntryTab(caseEntryTabForSegment(segmentId));
     return;
   }
 
@@ -172,6 +191,6 @@ export async function enterDemoSegment(
   if (created && typeof window !== "undefined") localStorage.setItem(LAST_PROFILE_KEY, created.id);
   await purgeDemoGeneratedDataForActiveProfile();
   await seedDemoDataForSegment(segmentId);
-  writeScenarioDoorStep("hospitality");
-  writeCaseEntryTab(CASE_ENTRY_DEFAULT_WS);
+  writeScenarioDoorStep(doorStepForSegment(segmentId));
+  writeCaseEntryTab(caseEntryTabForSegment(segmentId));
 }

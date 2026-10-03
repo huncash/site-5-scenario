@@ -1,3 +1,5 @@
+import { applyAttributionSearchParams, type CampaignUtm } from "@/lib/campaignFunnels";
+import { readCampaignAttribution } from "@/lib/campaignSession";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
 export const BILL_CHECKOUT_ORIGIN = "https://bill.szcenario.hu";
@@ -14,11 +16,17 @@ export function billCheckoutUrl(opts: {
   interval?: BillingInterval;
   ref?: string;
   country?: string;
+  utm?: CampaignUtm;
 }): string {
   const url = new URL("/", billPublicOrigin());
   url.searchParams.set("tier", opts.tier);
   if (opts.interval) url.searchParams.set("interval", opts.interval);
-  if (opts.ref) url.searchParams.set("ref", opts.ref);
   if (opts.country) url.searchParams.set("country", opts.country);
+  const stored = typeof window !== "undefined" ? readCampaignAttribution() : null;
+  applyAttributionSearchParams(
+    url,
+    { id: stored?.id, utm: opts.utm ?? stored?.utm },
+    opts.ref ? { ref: opts.ref } : undefined,
+  );
   return url.toString();
 }

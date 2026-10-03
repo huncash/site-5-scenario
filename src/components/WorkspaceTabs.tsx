@@ -185,6 +185,7 @@ export function WorkspacePanels({
   leftContent,
   rightContent,
   useMasterGrid,
+  phaseExactFor,
 }: {
   activeWs: WsKey;
   setActiveWs: (k: WsKey) => void;
@@ -223,6 +224,7 @@ export function WorkspacePanels({
   leftContent?: ReactNode;
   rightContent?: ReactNode;
   useMasterGrid?: boolean;
+  phaseExactFor?: (phase: "PLAN" | "DO" | "CHECK" | "ACT") => string;
 }) {
   const [notesDraft, setNotesDraft] = useState(checkNotes ?? "");
   useEffect(() => setNotesDraft(checkNotes ?? ""), [checkNotes, activeWorkspaceId, pdcaMode]);
@@ -236,10 +238,11 @@ export function WorkspacePanels({
     return "ACT — BEAVATKOZÁSI CÉLOK";
   };
   const phaseExact = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
-    if (p === "PLAN") return "tervezés — célok, szimuláció, perselyek. Itt tervezel, mielőtt élesítesz.";
-    if (p === "DO") return "végrehajtás — élő pénzáramlás, tételek, tartozások. Ami most történik.";
-    if (p === "CHECK") return "ellenőrzés — szükséglet, vágy, befektetés, muda és a havi hőtérkép.";
-    return "beavatkozás — árazás, keret, átütemezés.";
+    if (phaseExactFor) return phaseExactFor(p);
+    if (p === "PLAN") return "tervezés — célok, szimuláció, örökölt törzs. Itt tervezel, mielőtt élesítesz.";
+    if (p === "DO") return "végrehajtás — élő folyamat. Ami most történik.";
+    if (p === "CHECK") return "ellenőrzés — a számok és a mutatók valósága.";
+    return "beavatkozás — protokoll vagy keret.";
   };
   const phaseCls = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
     if (p === "PLAN") return "text-amber-400 font-bold";

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SupportEmbedFrame } from "@/components/support/SupportEmbedModal";
 import { SupportTicketForm } from "@/components/support/SupportTicketForm";
+import { KahnInfobonbon } from "@/components/support/KahnInfobonbon";
 import { SUPPORT_LAYER_SLUG, SUPPORT_SLA, type SupportLayer } from "@/lib/support";
 
 const LAYERS: Array<{ id: SupportLayer; label: string; title: string }> = [
@@ -84,17 +85,20 @@ export function KnowledgeBaseModal({
               </div>
             </div>
           ) : (
-            <SupportEmbedFrame
-              slug={SUPPORT_LAYER_SLUG[layer]}
-              title={active.title}
-              fallback={
-                <p className="text-sm text-slate-300">
-                  {layer === "tippek"
-                    ? "A tippek a support oldalon nyílnak. Offline a helyi súgóikonok továbbra is működnek."
-                    : "A GYIK a support oldalon nyílik. A helyi tudásbázis cikkek a súgóikonokból elérhetők."}
-                </p>
-              }
-            />
+            <div className="grid max-h-[min(70vh,36rem)] gap-3 overflow-y-auto">
+              {layer === "gyik" ? <KahnInfobonbon compact /> : null}
+              <SupportEmbedFrame
+                slug={SUPPORT_LAYER_SLUG[layer]}
+                title={active.title}
+                fallback={
+                  <p className="text-sm text-muted-foreground">
+                    {layer === "tippek"
+                      ? "A tippek a support oldalon nyílnak. Offline a helyi súgóikonok továbbra is működnek."
+                      : "A GYIK a support oldalon nyílik. A helyi tudásbázis cikkek a súgóikonokból elérhetők."}
+                  </p>
+                }
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>

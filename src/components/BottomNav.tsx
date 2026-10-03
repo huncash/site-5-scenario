@@ -7,6 +7,7 @@ export function BottomNav({
   isSzummaActive,
   onToggleSzumma,
   onOpenCreate,
+  hideFinanceTabs,
 }: {
   activeSubTab: "cashflow" | "ledger" | "deals" | "inventory";
   onChangeSubTab: (t: "cashflow" | "ledger" | "deals" | "inventory") => void;
@@ -14,6 +15,7 @@ export function BottomNav({
   isSzummaActive: boolean;
   onToggleSzumma: () => void;
   onOpenCreate: () => void;
+  hideFinanceTabs?: boolean;
 }) {
   const tabCls = (on: boolean) =>
     cn(
@@ -39,6 +41,8 @@ export function BottomNav({
       style={{ background: "var(--ws-canvas-bg, var(--app-bg))" }}
     >
       <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
+        {hideFinanceTabs ? null : (
+          <>
         <button
           type="button"
           className={tabCls(activeSubTab === "cashflow")}
@@ -63,6 +67,8 @@ export function BottomNav({
         >
           Üzletek
         </button>
+          </>
+        )}
         <button
           type="button"
           className={tabCls(activeSubTab === "inventory")}

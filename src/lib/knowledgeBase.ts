@@ -46,7 +46,8 @@ export type KnowledgeBaseArticleId =
   | "deals-promote"
   | "deals-consolidation"
   | "pro-chart"
-  | "why-szcenario";
+  | "why-szcenario"
+  | "kahn-rand";
 
 export type KnowledgeBaseArticle = {
   id: KnowledgeBaseArticleId;
@@ -571,6 +572,24 @@ ${PRO_ARTICLE_BODY}
 💡 Pro Tip / Legjobb gyakorlat
 - A grafikont a saját múltad és a beállított paraméterek frissítésével olvasd. Ha egy szoftver „pontos negyedéves bevételt” ígér, az téved.`,
     tags: ["PRO", "pesszimista", "realista", "optimista", "szórás"],
+  },
+  {
+    id: "kahn-rand",
+    category: "scenario",
+    title: "Herman Kahn és a RAND — a szcenárió eredete",
+    summary:
+      "A többágú jövőkép-tervezés Kahn és a RAND hidegháborús munkájából jön. Itt ugyanez a fa fut local-first: bővítés, tartás, tartalék.",
+    body: `🎯 Mire jó?
+- Hogy a döntés előtt több lehetséges jövőt láss, ne egyetlen jóslatot.
+
+⚙️ Hogyan működik?
+Herman Kahn a RAND Corporationnél a hidegháborúban dolgozta ki a szcenárió-módszert: alternatív jövőket rajzolsz, mielőtt elkötelezed az erőforrást. Nem riadó és nem jóslat — elágazás.
+
+A Szcenárió ugyanezt viszi a Master Baseline törzsre. A PDCA-ban a fa három ága a klasszikus PRO sáv: optimista bővítés, realista / meglepetésmentes tartás, pesszimista tartalék. A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
+
+💡 Pro Tip / Legjobb gyakorlat
+- Először a pesszimista ágat számold. Aki a nehéz sávot is látja, az tartja a folytonosságot — Kahn óta ez a módszer lényege.`,
+    tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás"],
   },
 ];
 

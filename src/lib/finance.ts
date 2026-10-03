@@ -520,6 +520,7 @@ export type CustomSettings = {
   projects: BusinessProject[];
   assets: BusinessAsset[];
   workspaces: WorkspaceMeta[];
+  master_baseline?: import("@/lib/masterBaseline").MasterBaselineContext | null;
 };
 
 export const EMPTY_SETTINGS: CustomSettings = {
@@ -584,6 +585,8 @@ export type WorkspaceMeta = {
   scenario?: WorkspaceScenario | null;
   parent_business_id?: string | null; // if attached under a business
   counts_in_business?: boolean | null;
+  master_baseline?: import("@/lib/masterBaseline").MasterBaselineContext | null;
+  inherits_baseline?: boolean | null;
 };
 
 export type Goal = {

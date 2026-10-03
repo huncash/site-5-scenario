@@ -1,9 +1,8 @@
-import { useState } from "react";
-
 import { PricingCompareTable } from "@/components/home/PricingCompareTable";
 import { PRICING_ALIGN_GRID } from "@/components/home/pricingLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 import {
   formatHuf,
@@ -30,8 +29,9 @@ function netAmount(monthly: number, interval: BillingInterval): number {
 
 export function HomePricing(props: { campus?: boolean }) {
   const { campus = false } = props;
-  const [interval, setInterval] = useState<BillingInterval>("yearly");
+  const [interval] = useBillingInterval();
   const per = interval === "yearly" ? "/ év" : "/ hó";
+  const otherPer = interval === "yearly" ? "/ hó" : "/ év";
 
   return (
     <section className="space-y-4">
@@ -40,28 +40,7 @@ export function HomePricing(props: { campus?: boolean }) {
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Csomagok</div>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">{PRICING_HERO}</p>
         </div>
-        <div className="inline-flex rounded-lg border border-white/15 bg-card p-1">
-          <button
-            type="button"
-            className={cn(
-              "rounded-md px-3 py-1.5 text-[12px] font-medium",
-              interval === "yearly" ? "bg-cyan-500 text-slate-950" : "text-muted-foreground",
-            )}
-            onClick={() => setInterval("yearly")}
-          >
-            Évente
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "rounded-md px-3 py-1.5 text-[12px] font-medium",
-              interval === "monthly" ? "bg-cyan-500 text-slate-950" : "text-muted-foreground",
-            )}
-            onClick={() => setInterval("monthly")}
-          >
-            Havonta
-          </button>
-        </div>
+        <BillingIntervalToggle />
       </div>
 
       <p className="max-w-2xl text-[13px] italic leading-relaxed text-muted-foreground">
@@ -97,8 +76,13 @@ export function HomePricing(props: { campus?: boolean }) {
                   </li>
                 ))}
               </ul>
-              <div className="mt-auto pt-4 text-lg font-semibold text-foreground">
-                {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval))} {per}
+              <div className="mt-auto pt-4">
+                <div className="text-lg font-semibold text-foreground">
+                  {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval))} {per}
+                </div>
+                <div className="mt-1 inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                  {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval === "yearly" ? "monthly" : "yearly"))} {otherPer}
+                </div>
               </div>
               <Button
                 asChild
@@ -108,7 +92,15 @@ export function HomePricing(props: { campus?: boolean }) {
                 )}
                 variant={recommended ? "default" : "outline"}
               >
-                <a href={href}>Megrendelem</a>
+                <a
+                  href={href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.assign(billCheckoutUrl({ tier: p.id, interval }));
+                  }}
+                >
+                  Megrendelem
+                </a>
               </Button>
             </article>
           );
@@ -135,6 +127,7 @@ export function HomePricing(props: { campus?: boolean }) {
 function CampusStrip({ interval }: { interval: BillingInterval }) {
   const href = billCheckoutUrl({ tier: "campus", interval, ref: "campus" });
   const per = interval === "yearly" ? "/ év" : "/ hó";
+  const otherPer = interval === "yearly" ? "/ hó" : "/ év";
   return (
     <div className="rounded-2xl border border-dashed border-cyan-400/35 bg-cyan-500/[0.06] p-4">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">Campus</div>
@@ -142,11 +135,24 @@ function CampusStrip({ interval }: { interval: BillingInterval }) {
       <p className="mt-1 text-[13px] text-muted-foreground">
         Oktatási keret. Nem része a nyilvános táblázatnak. A motor ugyanaz; a díj szimbolikus.
       </p>
-      <div className="mt-2 text-lg font-semibold text-foreground">
-        {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval))} {per}
+      <div className="mt-2">
+        <div className="text-lg font-semibold text-foreground">
+          {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval))} {per}
+        </div>
+        <div className="mt-1 inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground">
+          {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval === "yearly" ? "monthly" : "yearly"))} {otherPer}
+        </div>
       </div>
       <Button asChild className="mt-3 h-9" variant="outline">
-        <a href={href}>Hallgatói megrendelés</a>
+        <a
+          href={href}
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.assign(billCheckoutUrl({ tier: "campus", interval, ref: "campus" }));
+          }}
+        >
+          Hallgatói megrendelés
+        </a>
       </Button>
     </div>
   );

@@ -47,3 +47,28 @@ button:hover, .btn:hover { background: var(--accent-hover); }
 .nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
 .nav a { font-size: 12px; }
 .note { font-size: 12px; }
+.bonbon {
+  margin: 12px 0 16px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.bonbon .eyebrow {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.bonbon h2 { margin: 6px 0 8px; font-size: 1rem; color: var(--text-main); }
+.bonbon p { margin: 0 0 8px; }
+.bonbon .chip {
+  display: inline-flex;
+  border: 1px solid var(--card-border);
+  background: var(--app-bg);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+}
