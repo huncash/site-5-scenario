@@ -143,7 +143,7 @@ export const TIPS = [
 export const FAQ = [
   { q: "Regisztráció kell?", a: "Nem. A helyi profil a készülékeden marad." },
   { q: "Miért nincs telefonszám?", a: "A pontosabb ügyintézéshez írásos jegy kell — nincs telefonos sor." },
-  { q: "Hol kérek segítséget?", a: "A 3. réteg: írásos jegyűrlap, e-mailben." },
+  { q: "Hol kérek segítséget?", a: "Először a GYIK és a tudásbázis. Ha nincs válasz, a „Nem találtam választ” gombbal nyílik a jegy — előtte egy ellenőrző lépés." },
   { q: "Működik offline?", a: "Az app igen. A support iframe hálózatot kér; offline a helyi súgó marad." },
   {
     q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",

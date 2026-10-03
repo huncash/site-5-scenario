@@ -79,13 +79,12 @@ export function App() {
 
   const monthlyNet = MONTHLY_HUF[tier as keyof typeof MONTHLY_HUF] ?? MONTHLY_HUF.pro;
   const vat = resolveVat({ country, taxId });
-  const vatLabel = locale === "en" ? vat.labelEn : vat.labelHu;
   const yearlyNet = yearlyPriceHuf(monthlyNet);
   const dueNet = interval === "yearly" ? yearlyNet : monthlyNet;
   const due = splitVat(dueNet, vat.rate);
-  const yearly = splitVat(yearlyNet, vat.rate);
-  const monthly12 = splitVat(monthlyNet * 12, vat.rate);
   const saveNet = monthlyNet * 12 - yearlyNet;
+  const vatPct = Math.round(vat.rate);
+  const planTitle = `${tierLabel(locale, tier)} · ${interval === "yearly" ? t.yearlySub : t.monthlySub}`;
 
   const lookup = async () => {
     setLookupBusy(true);
@@ -170,7 +169,7 @@ export function App() {
 
   if (transfer) {
     const net = transfer.netHuf ?? Math.round(transfer.amountHuf / 1.27);
-    const vatAmt = transfer.amountHuf - net;
+    const ratePct = Math.round(transfer.vatRate ?? (net > 0 ? ((transfer.amountHuf - net) / net) * 100 : 0));
     return (
       <div className="wrap">
         {top}
@@ -184,10 +183,11 @@ export function App() {
         <div className="steps" style={{ marginTop: 16 }}>
           <div className="step">
             <b>{t.stepAmount}</b>
-            <div className="code">{money(transfer.amountHuf)}</div>
+            <div className="code">
+              {t.gross} {money(transfer.amountHuf)}
+            </div>
             <div className="hint">
-              {money(net)} {t.net} + {vatLabel}
-              {vatAmt > 0 ? ` = ${money(vatAmt)}` : ""}
+              ({t.net} {money(net)} + {ratePct}% {t.vatShort})
               {transfer.buyerCountry ? ` · ${countryLabel(transfer.buyerCountry, locale)}` : ""}
             </div>
           </div>
@@ -216,31 +216,9 @@ export function App() {
       {top}
       <h1>{t.payTitle}</h1>
       <p className="muted">
-        {tierLabel(locale, tier)} · {interval === "yearly" ? t.intervalYear : t.intervalMonth}
-        {ref === "campus" ? ` · ${t.campus}` : ""}. {t.cardNote}
+        {ref === "campus" ? `${t.campus}. ` : ""}
+        {t.cardNote}
       </p>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <div className="muted">{t.listNet}</div>
-        <div style={{ marginTop: 10, fontSize: 22, fontWeight: 650 }}>
-          {money(due.gross)} {t.gross} {interval === "yearly" ? t.perYear : t.perMonth}
-        </div>
-        <div className="muted" style={{ marginTop: 6 }}>
-          {money(due.net)} {t.net} · +{vatLabel}
-          {due.vat > 0 ? ` = ${money(due.vat)}` : ""}
-        </div>
-        <div className="hint" style={{ marginTop: 8 }}>
-          {t.yearlyPack}: {money(yearly.net)} {t.net} / {money(yearly.gross)} {t.gross} · −{YEARLY_DISCOUNT_PCT}%
-        </div>
-        <div className="hint">
-          {t.monthly12}: {money(monthly12.net)} {t.net} / {money(monthly12.gross)} {t.gross}
-        </div>
-        {saveNet > 0 ? (
-          <div className="ok" style={{ marginTop: 6 }}>
-            {t.yearlySave.replace("{n}", money(saveNet))}
-          </div>
-        ) : null}
-      </div>
 
       <form className="card" style={{ marginTop: 16 }} onSubmit={(e) => void submit(e)}>
         <div className="grid2">
@@ -256,7 +234,7 @@ export function App() {
         <div className="row">
           <label>
             {t.country}
-            <select value={country} onChange={(e) => setCountry(e.target.value)}>
+            <select value={country} onChange={(e) => setCountry(e.target.value.toUpperCase())}>
               {VAT_COUNTRIES.map((c) => (
                 <option key={c} value={c}>
                   {countryLabel(c, locale)} ({c})
@@ -278,6 +256,19 @@ export function App() {
           {lookupNote ? <div className={lookupOk ? "ok" : "hint"}>{lookupNote}</div> : null}
         </div>
 
+        <div className="card summary-card" style={{ marginTop: 4 }}>
+          <div style={{ fontSize: 14, fontWeight: 650 }}>{planTitle}</div>
+          <div style={{ marginTop: 10, fontSize: 22, fontWeight: 700 }}>
+            {t.gross} {money(due.gross)} {interval === "yearly" ? t.perYear : t.perMonth}
+          </div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            ({t.net} {money(due.net)} + {vatPct}% {t.vatShort})
+          </div>
+          {interval === "yearly" && saveNet > 0 ? (
+            <div className="save-pill">{t.savePctYearly.replace("{n}", String(YEARLY_DISCOUNT_PCT))}</div>
+          ) : null}
+        </div>
+
         <div className="row">
           <div className="muted">{t.payMethod}</div>
           <div className="pay">
@@ -295,7 +286,7 @@ export function App() {
 
         {error ? <p className="err">{error}</p> : null}
         <button className="btn primary" style={{ marginTop: 16, width: "100%" }} disabled={busy} type="submit">
-          {busy ? t.busy : t.submit.replace("{n}", money(due.gross))}
+          {busy ? t.busy : t.submit.replace("{n}", `${t.gross} ${money(due.gross)}`)}
         </button>
       </form>
       <SiteFooter inline />

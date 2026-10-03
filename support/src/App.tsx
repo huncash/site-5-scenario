@@ -30,6 +30,16 @@ function pathOf() {
   return window.location.pathname.replace(/\/+$/, "") || "/";
 }
 
+function navigateTo(path: string) {
+  const url = new URL(path, window.location.origin);
+  if (window.location.search) {
+    const lang = new URLSearchParams(window.location.search).get("lang");
+    if (lang && !url.searchParams.has("lang")) url.searchParams.set("lang", lang);
+  }
+  window.history.pushState({}, "", `${url.pathname}${url.search}`);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
 function YouTube({ id, title, empty }: { id: string; title: string; empty: string }) {
   if (!id) {
     return (
@@ -104,51 +114,103 @@ function Items({ items }: { items: Array<{ q: string; a: string }> }) {
   );
 }
 
-export function App() {
-  const { locale, toggleLocale } = useSiteLocale();
+function FaqSearch({ locale }: { locale: Locale }) {
   const t = supportCopy(locale);
-  const [path, setPath] = useState(pathOf);
+  const faq = supportFaq(locale);
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return faq;
+    return faq.filter((x) => `${x.q} ${x.a}`.toLowerCase().includes(needle));
+  }, [faq, q]);
 
-  useEffect(() => {
-    document.title = locale === "en" ? "Szcenárió — support" : "Szcenárió — támogatás";
-  }, [locale]);
+  return (
+    <div className="section-block">
+      <h2>{t.faqTitle}</h2>
+      <div className="search-wrap">
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t.searchPlaceholder}
+          aria-label={t.searchPlaceholder}
+        />
+      </div>
+      {filtered.length ? <Items items={filtered} /> : <p className="note">{t.searchEmpty}</p>}
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const onPop = () => setPath(pathOf());
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
-  }, []);
+function TicketGuard({
+  locale,
+  embed,
+  onUnlock,
+}: {
+  locale: Locale;
+  embed: boolean;
+  onUnlock: () => void;
+}) {
+  const t = supportCopy(locale);
+  const prefix = embed ? "/embed" : "";
+  return (
+    <div className="guard" role="dialog" aria-labelledby="ticket-guard-title">
+      <h2 id="ticket-guard-title">{t.guardTitle}</h2>
+      <p>{t.guardLead}</p>
+      <div className="guard-tiles">
+        <a className="guard-tile" href={`${prefix}/gyik?lang=${locale}`}>
+          {t.guardFaq}
+          <span>{t.guardFaqHint}</span>
+        </a>
+        <a className="guard-tile" href={embed ? `${prefix}/lecke-01?lang=${locale}` : `/?lang=${locale}#leckek`}>
+          {t.guardLessons}
+          <span>{t.guardLessonsHint}</span>
+        </a>
+        <a className="guard-tile" href={`${prefix}/lecke-01?lang=${locale}`}>
+          {t.guardVideos}
+          <span>{t.guardVideosHint}</span>
+        </a>
+        <a className="guard-tile" href={`${prefix}/tippek?lang=${locale}`}>
+          {t.guardCommunity}
+          <span>{t.guardCommunityHint}</span>
+        </a>
+      </div>
+      <div className="guard-actions">
+        <button type="button" className="ticket-cta secondary" onClick={() => navigateTo(embed ? `/embed/gyik?lang=${locale}` : `/gyik?lang=${locale}`)}>
+          {t.guardFound}
+        </button>
+        <button type="button" className="ticket-cta" onClick={onUnlock}>
+          {t.guardProceed}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-  const embed = path.startsWith("/embed");
-  const slug = useMemo(() => {
-    if (path === "/embed" || path === "/embed/") return "tippek";
-    if (path.startsWith("/embed/")) return path.slice("/embed/".length);
-    if (path === "/") return "";
-    return path.replace(/^\//, "");
-  }, [path]);
+function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
+  const t = supportCopy(locale);
+  const prefix = embed ? "/embed" : "";
+  const videoLessons = supportLessons(locale).filter((l) => Boolean(l.youtubeId));
 
-  const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
-  const lesson = rawLesson ? localizeLesson(locale, rawLesson) : null;
-  const wrap = embed ? "embed" : "full";
+  return (
+    <>
+      <h1>{t.homeTitle}</h1>
+      <p>{t.homeLead}</p>
+      <p className="sla">{t.sla}</p>
 
-  let body: ReactNode = null;
-  if (slug === "" || slug === "home") {
-    body = (
-      <>
-        <h1>{t.homeTitle}</h1>
-        <p>{t.homeLead}</p>
-        <p className="sla">{t.sla}</p>
-        <div className="nav">
-          <a href={`/embed/tippek?lang=${locale}`}>{t.tips}</a>
-          <a href={`/embed/gyik?lang=${locale}`}>{t.faq}</a>
-          <a href={`/embed/ticket?lang=${locale}`}>{t.ticket}</a>
-          {supportLessons(locale).map((l) => (
-            <a key={l.slug} href={`/embed/${l.slug}?lang=${locale}`}>
-              {l.title}
-            </a>
-          ))}
-        </div>
-        <KahnBonbon locale={locale} />
+      <div className="nav">
+        <a href={`${prefix}/tippek?lang=${locale}`}>{t.tips}</a>
+        <a href={`${prefix}/gyik?lang=${locale}`}>{t.faq}</a>
+        {supportLessons(locale).map((l) => (
+          <a key={l.slug} href={`${prefix}/${l.slug}?lang=${locale}`}>
+            {l.title}
+          </a>
+        ))}
+      </div>
+
+      <KahnBonbon locale={locale} />
+      <FaqSearch locale={locale} />
+
+      <div className="section-block" id="leckek">
         <h2>{t.lessons}</h2>
         <p className="note">{t.lessonsNote}</p>
         <div className="nav">
@@ -158,15 +220,76 @@ export function App() {
             </a>
           ))}
         </div>
-        <h2>{t.ticketHome}</h2>
-        <TicketForm locale={locale} />
-      </>
-    );
+      </div>
+
+      {videoLessons.length ? (
+        <div className="section-block">
+          <h2>{t.videos}</h2>
+          <div className="nav">
+            {videoLessons.map((l) => (
+              <a key={l.slug} href={`${prefix}/${l.slug}?lang=${locale}`}>
+                {l.title}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        className="ticket-cta"
+        onClick={() => navigateTo(`${prefix}/ticket?lang=${locale}`)}
+      >
+        {t.noTicketCta}
+      </button>
+    </>
+  );
+}
+
+export function App() {
+  const { locale, toggleLocale } = useSiteLocale();
+  const t = supportCopy(locale);
+  const [path, setPath] = useState(pathOf);
+  const [ticketUnlocked, setTicketUnlocked] = useState(false);
+
+  useEffect(() => {
+    document.title = locale === "en" ? "Szcenárió — support" : "Szcenárió — támogatás";
+  }, [locale]);
+
+  useEffect(() => {
+    const onPop = () => {
+      setPath(pathOf());
+      setTicketUnlocked(false);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const embed = path.startsWith("/embed");
+  const slug = useMemo(() => {
+    if (path === "/embed" || path === "/embed/") return "home";
+    if (path.startsWith("/embed/")) return path.slice("/embed/".length);
+    if (path === "/") return "home";
+    return path.replace(/^\//, "");
+  }, [path]);
+
+  const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
+  const lesson = rawLesson ? localizeLesson(locale, rawLesson) : null;
+  const wrap = embed ? "embed" : "full";
+
+  let body: ReactNode = null;
+  if (slug === "home") {
+    body = <SelfServeHome locale={locale} embed={embed} />;
   } else if (slug === "tippek") {
     body = (
       <>
         <h1>{t.tips}</h1>
         <Items items={supportTips(locale)} />
+        {!embed ? (
+          <p className="note" style={{ marginTop: 16 }}>
+            <a href={`/?lang=${locale}`}>{t.backHome}</a>
+          </p>
+        ) : null}
       </>
     );
   } else if (slug === "gyik") {
@@ -174,14 +297,25 @@ export function App() {
       <>
         <h1>{t.faqTitle}</h1>
         <KahnBonbon locale={locale} />
-        <Items items={supportFaq(locale)} />
+        <FaqSearch locale={locale} />
+        <button
+          type="button"
+          className="ticket-cta"
+          onClick={() => navigateTo(`${embed ? "/embed" : ""}/ticket?lang=${locale}`)}
+        >
+          {t.noTicketCta}
+        </button>
       </>
     );
   } else if (slug === "ticket") {
     body = (
       <>
         <h1>{t.ticketTitle}</h1>
-        <TicketForm locale={locale} />
+        {ticketUnlocked ? (
+          <TicketForm locale={locale} />
+        ) : (
+          <TicketGuard locale={locale} embed={embed} onUnlock={() => setTicketUnlocked(true)} />
+        )}
       </>
     );
   } else if (lesson) {

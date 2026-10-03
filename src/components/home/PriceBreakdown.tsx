@@ -1,49 +1,46 @@
 import { YEARLY_DISCOUNT_PCT, yearlyPriceHuf } from "@/content/pricing/tiers";
-import { countryLabel, splitVat, type VatDecision } from "@/content/pricing/vat";
+import { splitVat, type VatDecision } from "@/content/pricing/vat";
 import { useI18n } from "@/i18n";
 
 export function PriceBreakdown(props: {
   netMonthly: number;
   interval: "yearly" | "monthly";
   vat: VatDecision;
+  /** Pl. „Üzleti / Pro” — ha megadod, a fejléc: {label} · Éves/Havi előfizetés */
+  planLabel?: string;
   compact?: boolean;
 }) {
-  const { netMonthly, interval, vat, compact } = props;
-  const { t, money, locale } = useI18n();
+  const { netMonthly, interval, vat, planLabel, compact } = props;
+  const { t, money } = useI18n();
   const yearlyNet = yearlyPriceHuf(netMonthly);
-  const monthlyYearNet = netMonthly * 12;
-  const saveNet = monthlyYearNet - yearlyNet;
-  const y = splitVat(yearlyNet, vat.rate);
-  const m = splitVat(netMonthly, vat.rate);
-  const m12 = splitVat(monthlyYearNet, vat.rate);
-  const headline = interval === "yearly" ? y : m;
+  const saveNet = netMonthly * 12 - yearlyNet;
+  const dueNet = interval === "yearly" ? yearlyNet : netMonthly;
+  const headline = splitVat(dueNet, vat.rate);
   const per = interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
-  const vatLabel = locale === "en" ? vat.labelEn : vat.labelHu;
+  const intervalLabel = interval === "yearly" ? t("pricing.yearlySub") : t("pricing.monthlySub");
+  const vatPct = Math.round(vat.rate);
 
   return (
-    <div className={compact ? "space-y-1" : "space-y-2"}>
-      <div className="text-lg font-semibold text-foreground">
-        {money(headline.gross)} {t("pricing.gross")} {per}
-      </div>
-      <div className="text-[12px] leading-snug text-muted-foreground">
-        {money(headline.net)} {t("pricing.net")} {per}
-        {" · "}
-        +{vatLabel}
-        {headline.vat > 0 ? ` = ${money(headline.vat)}` : ""}
-      </div>
-      <div className="space-y-0.5 text-[11px] leading-snug text-muted-foreground">
-        <div>
-          {t("pricing.yearlyPack")}: {money(y.net)} {t("pricing.net")} / {money(y.gross)} {t("pricing.gross")}
-          {` · −${YEARLY_DISCOUNT_PCT}%`}
+    <div className={compact ? "space-y-2" : "space-y-2.5"}>
+      {planLabel ? (
+        <div className="text-sm font-semibold text-foreground">
+          {planLabel}
+          <span className="text-muted-foreground"> · {intervalLabel}</span>
         </div>
-        <div>
-          {t("pricing.monthly12")}: {money(m12.net)} {t("pricing.net")} / {money(m12.gross)} {t("pricing.gross")}
+      ) : null}
+      <div>
+        <div className={`font-semibold tabular-nums text-foreground ${compact ? "text-lg" : "text-2xl"}`}>
+          {t("pricing.gross")} {money(headline.gross)} {per}
         </div>
-        {saveNet > 0 ? (
-          <div className="text-cyan-300">{t("pricing.yearlySave", { n: money(saveNet) })}</div>
-        ) : null}
-        <div>{t("pricing.vatByCountry", { country: countryLabel(vat.country, locale) })}</div>
+        <div className="mt-1 text-[12px] leading-snug text-muted-foreground">
+          ({t("pricing.net")} {money(headline.net)} + {vatPct}% {t("pricing.vatShort")})
+        </div>
       </div>
+      {interval === "yearly" && saveNet > 0 ? (
+        <div className="inline-flex items-center rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">
+          {t("pricing.savePctYearly", { n: YEARLY_DISCOUNT_PCT })}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -30,7 +30,7 @@ export function FunnelCheckout(props: {
 }) {
   const { eyebrow, funnelName, tier, copy } = props;
   const navigate = useNavigate();
-  const { t, money, locale } = useI18n();
+  const { t } = useI18n();
   const [interval, setInterval] = useBillingInterval();
   const [country, setCountry] = useState(SELLER_COUNTRY);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
@@ -53,7 +53,6 @@ export function FunnelCheckout(props: {
   const vat = resolveVat({ country, taxId });
   const dueNet = tier ? chargeHuf(tier.id, interval) : 0;
   const due = splitVat(dueNet, vat.rate).gross;
-  const vatLabel = locale === "en" ? vat.labelEn : vat.labelHu;
 
   const goBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
@@ -153,41 +152,29 @@ export function FunnelCheckout(props: {
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
             <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.intervalLegend")}</legend>
             <div className="mt-2">
-              <CountryVatPicker country={country} onChange={setCountry} />
+              <CountryVatPicker country={country} onChange={(c) => setCountry(c.toUpperCase())} />
             </div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <button
                 type="button"
                 className={cn(
-                  "rounded-lg border px-3 py-3 text-left",
-                  interval === "yearly" ? "border-cyan-400/50 bg-cyan-500/10" : "border-border/60 bg-background/20",
+                  "rounded-lg border px-3 py-2.5 text-left text-sm font-semibold",
+                  interval === "yearly" ? "border-cyan-400/50 bg-cyan-500/10 text-slate-100" : "border-border/60 bg-background/20 text-slate-300",
                 )}
                 onClick={() => setInterval("yearly")}
               >
-                <div className="text-sm font-semibold text-slate-100">{t("pricing.yearlyDefault")}</div>
-                <div className="mt-2">
-                  <PriceBreakdown netMonthly={monthly} interval="yearly" vat={vat} compact />
-                </div>
+                {t("pricing.yearlyDefault")}
               </button>
               <button
                 type="button"
                 className={cn(
-                  "rounded-lg border px-3 py-3 text-left",
-                  interval === "monthly" ? "border-cyan-400/50 bg-cyan-500/10" : "border-border/60 bg-background/20",
+                  "rounded-lg border px-3 py-2.5 text-left text-sm font-semibold",
+                  interval === "monthly" ? "border-cyan-400/50 bg-cyan-500/10 text-slate-100" : "border-border/60 bg-background/20 text-slate-300",
                 )}
                 onClick={() => setInterval("monthly")}
               >
-                <div className="text-sm font-semibold text-slate-100">{t("pricing.monthly")}</div>
-                <div className="mt-2">
-                  <PriceBreakdown netMonthly={monthly} interval="monthly" vat={vat} compact />
-                </div>
+                {t("pricing.monthly")}
               </button>
-            </div>
-            <div className="mt-3 text-sm text-slate-200">
-              {t("pricing.dueNow")}: <span className="font-semibold text-slate-50">{money(due)} {t("pricing.gross")}</span>
-              {" · "}
-              {money(dueNet)} {t("pricing.net")} + {vatLabel}
-              {interval === "yearly" ? ` ${t("pricing.forYear")}` : ` ${t("pricing.forMonth")}`}
             </div>
           </fieldset>
 
@@ -237,6 +224,12 @@ export function FunnelCheckout(props: {
               </label>
             </div>
           </fieldset>
+
+          {tier ? (
+            <div className="rounded-xl border border-border/60 bg-background/30 p-4">
+              <PriceBreakdown planLabel={tier.label} netMonthly={monthly} interval={interval} vat={vat} />
+            </div>
+          ) : null}
 
           {error ? <p className="text-[12px] text-rose-300">{error}</p> : null}
           <div className="flex flex-wrap gap-2">

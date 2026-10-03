@@ -11,13 +11,13 @@ import {
   readHomeMode,
   resolveSiteHost,
   shouldShowSiteFooter,
-  SITE_VERSION,
   type HomeMode,
 } from "@/lib/siteSurface";
 import { supportPublicOrigin } from "@/lib/support";
 
 const FOOTER_HOST = "[data-site-footer-host]";
 const DASH_SURFACE = '[data-site-surface="dashboard"]';
+const COPYRIGHT_FROM = 2006;
 
 function useLiveLocale(): Locale {
   const [locale, setLocale] = useState<Locale>(readClientLocale);
@@ -60,10 +60,30 @@ export function useSiteFooterVisible(pathname?: string, opts?: { ignoreHomeMode?
     hostname: loc.hostname,
     port: loc.port,
     pathname: path,
-    // inline marketing surfaces (door/bill/support): homeMode ne nyomja el
     homeMode: opts?.ignoreHomeMode ? "door" : homeMode,
     embed,
   });
+}
+
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: Array<{ href: string; label: string }>;
+}) {
+  return (
+    <nav className="site-footer-col" aria-label={title}>
+      <div className="site-footer-heading">{title}</div>
+      <ul className="site-footer-list">
+        {links.map((l) => (
+          <li key={`${l.href}:${l.label}`}>
+            <a href={l.href}>{l.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
 }
 
 const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) {
@@ -75,24 +95,58 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const bill = billPublicOrigin();
   const about = kind === "main" ? "/about" : `${home}/about`;
   const homeHref = kind === "main" ? "/" : home;
+  const pricingHref = kind === "main" ? "/#csomagok" : `${home}/#csomagok`;
+  // Support hoston lokális /gyik; máshol a support aldomain GYIK-je
+  const faqHref = kind === "support" ? "/gyik" : `${support}/gyik`;
+  const logoSrc = "/logo.svg";
+  const year = new Date().getFullYear();
+
+  const productLinks = [
+    { href: homeHref, label: t("footer.catalog") },
+    { href: homeHref, label: t("footer.scenarios") },
+    { href: homeHref, label: t("footer.types") },
+    { href: pricingHref, label: t("footer.pricing") },
+    { href: bill, label: t("footer.bill") },
+  ];
+  const aboutLinks = [
+    { href: about, label: t("footer.aboutUs") },
+    { href: faqHref, label: t("footer.faq") },
+  ];
 
   return (
     <footer className="site-footer" role="contentinfo">
-      <div className="site-footer-inner">
-        <div className="site-footer-brand">
-          <span className="site-footer-name">{t("brand.name")}</span>
-          <span className="site-footer-copy">
-            © {new Date().getFullYear()} {t("footer.rights")}
-          </span>
-          <span className="site-footer-ver">v{SITE_VERSION}</span>
+      <div className="site-footer-shell">
+        <div className="site-footer-inner">
+          <div className="site-footer-col site-footer-brand-col">
+            <a href={homeHref} className="site-footer-logo">
+              <img src={logoSrc} alt="" width={28} height={28} className="site-footer-logo-img" />
+              <span className="site-footer-name">{t("brand.name")}</span>
+            </a>
+            <p className="site-footer-tagline">{t("footer.brandBlurb")}</p>
+          </div>
+          <FooterCol title={t("footer.product")} links={productLinks} />
+          <FooterCol title={t("footer.aboutCol")} links={aboutLinks} />
         </div>
-        <nav className="site-footer-nav" aria-label={t("footer.nav")}>
-          <a href={homeHref}>{t("footer.home")}</a>
-          <a href={support}>{t("footer.support")}</a>
-          <a href={bill}>{t("footer.bill")}</a>
-          <a href={about}>{t("footer.imprint")}</a>
-        </nav>
-        <p className="site-footer-note">{t("chrome.noTelemetry")}</p>
+        <div className="site-footer-bottom">
+          <p className="site-footer-copyline">
+            <span>
+              © Copyright {COPYRIGHT_FROM} – {year}
+            </span>
+            <span className="site-footer-sep" aria-hidden>
+              |
+            </span>
+            <span>{t("footer.rightsShort")}</span>
+            <span className="site-footer-sep" aria-hidden>
+              |
+            </span>
+            <span>
+              {t("footer.question")}{" "}
+              <a href={faqHref} className="site-footer-write">
+                {t("footer.writeUs")}
+              </a>
+            </span>
+          </p>
+        </div>
       </div>
     </footer>
   );
@@ -117,7 +171,6 @@ export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
   }, [props.pathname, visible, homeMode]);
 
   useEffect(() => {
-    // inline: bill / support / door saját markup — nincs portal-host kellék
     if (!visible || props.inline || dashMounted || homeMode === "dashboard") {
       setHost((prev) => (prev === null ? prev : null));
       return;
@@ -140,13 +193,11 @@ export function SiteFooter(props: { pathname?: string; inline?: boolean }) {
     };
   }, [visible, props.inline, props.pathname, dashMounted, homeMode]);
 
-  // inline (bill/support/door): csak a marketing-láthatóság számít — ne nyomja el a homeMode
   const hide =
     !visible || (!props.inline && (dashMounted || homeMode === "dashboard"));
   if (hide) return null;
   const node = <FooterMarkup locale={locale} />;
   if (props.inline) return node;
-  // Host nélkül ne kerüljön a dashboard fölé — csak marketing hostba portalozunk.
   if (!host) return null;
   return createPortal(node, host);
 }

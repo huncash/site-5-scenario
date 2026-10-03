@@ -45,7 +45,7 @@ export function HomePricing(props: { campus?: boolean }) {
   const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
 
   return (
-    <section className="space-y-4">
+    <section id="csomagok" className="space-y-4 scroll-mt-24">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.packages")}</div>
