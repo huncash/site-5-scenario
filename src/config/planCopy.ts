@@ -36,23 +36,39 @@ function slotsLabel(slotsPerCase: number, locale: Locale): string {
 
 function bankHighlight(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
-    if (mode === "api") return "Automated bank / accounting API integration";
-    if (mode === "multi") return "Multiple bank branches & statement import / Slot**";
+    if (mode === "api") {
+      return "Automated accounting/bank-statement import + Sensor / Edge data feed";
+    }
+    if (mode === "multi") {
+      return "Automated bank statement & transaction import (CAMT.053, CSV, XML)";
+    }
     return "Bank statement import for any period / Slot**";
   }
-  if (mode === "api") return "Automatizált banki / könyvelési API integráció";
-  if (mode === "multi") return "Több bankfiók & kivonat import / Slot**";
+  if (mode === "api") {
+    return "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés";
+  }
+  if (mode === "multi") {
+    return "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)";
+  }
   return "Tetszőleges időszaki bankkivonat import / Slot**";
 }
 
 function bankCompare(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
-    if (mode === "api") return "✓ Automated bank / accounting API";
-    if (mode === "multi") return "✓ Multiple bank branches & statements per Slot**";
+    if (mode === "api") {
+      return "✓ Accounting/bank import + Sensor / Edge feed";
+    }
+    if (mode === "multi") {
+      return "✓ CAMT.053 / CSV / XML statement import";
+    }
     return "✓ Statement import / Slot** (any period)";
   }
-  if (mode === "api") return "✓ Automatizált banki / könyvelési API";
-  if (mode === "multi") return "✓ Több bankfiók & kivonat Slot**-onként";
+  if (mode === "api") {
+    return "✓ Könyvelési/bankkivonat import + Szenzoros / Edge";
+  }
+  if (mode === "multi") {
+    return "✓ CAMT.053 / CSV / XML bankkivonat import";
+  }
   return "✓ Kivonat import / Slot** (bármilyen időszakra)";
 }
 
@@ -94,13 +110,13 @@ export function planSlogan(plan: PlanConfig, locale: Locale = "hu"): string {
 export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
   if (plan.id === "expert") {
     return locale === "en"
-      ? "Automated bank/accounting API integration, multi-portfolio and organisational BCP audit."
-      : "Automatikus banki/könyvelési API integráció, multi-portfólió és szervezeti BCP audit.";
+      ? "Automated accounting/bank-statement import + Sensor / Edge data feed, multi-portfolio and organisational BCP audit."
+      : "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés, multi-portfólió és szervezeti BCP audit.";
   }
   if (plan.id === "pro") {
     return locale === "en"
-      ? "Advanced capacity and risk simulation across multiple active projects. Need more than 2 concurrent Cases? Extra active Case module (+€49 perpetual)."
-      : "Haladó kapacitás- és kockázatszimuláció több aktív projekten. 2-nél több párhuzamos Case-hez: Extra aktív Case modul (+49 000 Ft / örökös).";
+      ? "Automated bank statement & transaction import (CAMT.053, CSV, XML). Need more than 2 concurrent projects? Extra active Case module (+€49 perpetual)."
+      : "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML). 2-nél több párhuzamos projekthez: Extra aktív Case modul (+49 000 Ft / örökös).";
   }
   return locale === "en"
     ? "1 active project, 3 active scenario slots (P-R-O base paths)."
@@ -113,54 +129,54 @@ export function planHighlights(plan: PlanConfig, locale: Locale = "hu"): string[
 }
 
 /**
- * Árazási kártya: max. 4–5 tiszta pont, ismétlés / hűséglétra nélkül.
- * (A 2–4. évi modell egyetlen láblécsávban él a kártyák alatt.)
+ * Árazási kártya: max. 3–4 tiszta pont — nincs hűséglétra, nincs ismétlés.
+ * A részletek a support /pricing oldalon élnek.
  */
 export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string[] {
   const L = locale === "en";
   if (plan.id === "starter") {
     return L
       ? [
-          "1 Active Case (main project)",
-          "3 Active Scenario Slots / Case (Pessimistic, Realistic, Optimistic)",
-          "1 editor Seat",
-          "Unlimited data import & overwrite",
+          "1 active project",
+          "3 active scenario slots",
+          "1 editor seat",
+          "Unlimited import & overwrite",
         ]
       : [
-          "1 Aktív Case (fő projekt)",
-          "3 Aktív Szcenárió Slot / Case (Pesszimista, Realista, Optimista)",
-          "1 szerkesztői licenc",
-          "Korlátlan adatimport és felülírás",
+          "1 aktív projekt",
+          "3 aktív szcenárió slot",
+          "1 szerkesztői hely",
+          "Korlátlan import és felülírás",
         ];
   }
   if (plan.id === "pro") {
     return L
       ? [
-          "2 Active Cases (parallel projects)",
-          "3 Active Scenario Slots / Case (expandable)",
-          "1 editor + 5 guest access",
-          "Advanced capacity & risk simulation",
+          "2 parallel active projects",
+          "3 active scenario slots each",
+          "1 editor + 5 guests",
+          "Automated bank statement & transaction import (CAMT.053, CSV, XML)",
         ]
       : [
-          "2 Aktív Case (párhuzamos projektek)",
-          "3 Aktív Szcenárió Slot / Case (bővíthető)",
-          "1 szerkesztő + 5 vendég hozzáférés",
-          "Haladó kapacitás- és kockázatszimuláció",
+          "2 párhuzamos aktív projekt",
+          "3 aktív szcenárió slot projektenként",
+          "1 szerkesztő + 5 vendég",
+          "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)",
         ];
   }
   if (plan.id === "expert") {
     return L
       ? [
-          "5 Active Cases (group level)",
-          "4 Active Scenario Slots / Case",
-          "3 editors + 20 guest access",
-          "Bank / accounting API integrations",
+          "5 active projects",
+          "4 active scenario slots each",
+          "3 editors + 20 guests",
+          "Automated accounting/bank-statement import + Sensor / Edge data feed",
         ]
       : [
-          "5 Aktív Case (cégcsoport szint)",
-          "4 Aktív Szcenárió Slot / Case",
-          "3 szerkesztő + 20 vendég hozzáférés",
-          "Banki/könyvelési API integrációk",
+          "5 aktív projekt",
+          "4 aktív szcenárió slot projektenként",
+          "3 szerkesztő + 20 vendég",
+          "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",
         ];
   }
   return [

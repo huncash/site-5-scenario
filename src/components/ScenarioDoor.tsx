@@ -186,7 +186,7 @@ export function ScenarioDoor() {
                   className="btn-cta h-11 px-5 text-[14px] font-semibold"
                   onClick={() => {
                     const root = scrollerRef.current;
-                    const el = document.getElementById("csomagok");
+                    const el = document.getElementById("pricing") ?? document.getElementById("csomagok");
                     if (!root || !el) return;
                     const top =
                       el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop - 12;

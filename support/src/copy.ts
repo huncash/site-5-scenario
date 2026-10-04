@@ -54,6 +54,23 @@ const hu = {
   helpBody: "A fogalom a helyi appban is ott van. Részletes lecke a YouTube-on, nem a VPS-en.",
   noVideo: "A lecke videója YouTube-on jelenik meg. A saját szerver nem tárol és nem szolgál ki videófájlt.",
   sla: SUPPORT_SLA,
+  pricingNav: "Árazás",
+  pricingTitle: "Csomagok, licenc és helyi adatkezelés",
+  pricingLead:
+    "Ez az oldal a hivatalos, részletes forrás (Single Source of Truth). A főoldalon csak rövid összefoglaló van; a pontos szabályok ide tartoznak.",
+  pricingTocPlans: "Csomagok",
+  pricingTocLoyalty: "Hűségmodell",
+  pricingTocActive: "Aktív munkaterületek",
+  pricingTocLocal: "Lokális import & Edge",
+  pricingLoyaltyTitle: "3 éves lépcsőzetes hűség (#tiered-loyalty)",
+  pricingLoyaltyBody:
+    "1. év: a belépő listaár 100%-a (egyszeri vásárlás) — a megvásárolt verzió véglegesen a tiéd marad. 2. év: frissítési díj −25%. 3. év: frissítési díj −40%. A 4. évtől minden jövőbeli frissítés díjmentes. Ha nem újítasz, a megvásárolt verzió továbbra is használható; csak az újabb motorverziókhoz kell a lépcső szerinti frissítés.",
+  pricingActiveTitle: "Aktív Case & Aktív Slot — etikus keret (#active-workspaces)",
+  pricingActiveBody:
+    "A licenc az egyidejűleg éles (párhuzamosan futó) munkaterületek számát köti — nem a felhalmozott, archív adatok mennyiségét. Inaktív vagy régi Case/Slot szabadon törölhető, felülírható és újratölthető díj nélkül. Fizetni csak akkor kell, ha újabb párhuzamos éles munkaterületet nyitsz (bővítő modul: Extra Aktív Case / Slot / Seat).",
+  pricingLocalTitle: "Lokális bankkivonat-import & Edge (#local-import)",
+  pricingLocalBody:
+    "A bankkivonat- és tranzakcióimport (CAMT.053, CSV, XML) 100%-ban a saját eszközödön fut: az adat nem kötelezően felhőbe kerül, a számítás adat-szuverén. A Szenzoros / Edge adatgyűjtő modul helyi / edge források bekötésére való — szintén off-grid fókusszal, nem központi telemetriával. A megvásárolt verzió hardverhez kötött helyi licenc: örökös fallback jog a megvásárolt motorverzióra.",
 };
 
 const en: typeof hu = {
@@ -98,6 +115,23 @@ const en: typeof hu = {
   helpBody: "The term is also in the local app. The full lesson is on YouTube, not on the VPS.",
   noVideo: "The lesson video appears on YouTube. This server does not store or serve video files.",
   sla: "Average reply within 24 hours, in writing only — faster and more precise than a phone queue.",
+  pricingNav: "Pricing",
+  pricingTitle: "Plans, license & local data handling",
+  pricingLead:
+    "This page is the official detailed source (Single Source of Truth). The homepage stays brief; exact rules live here.",
+  pricingTocPlans: "Plans",
+  pricingTocLoyalty: "Loyalty model",
+  pricingTocActive: "Active workspaces",
+  pricingTocLocal: "Local import & Edge",
+  pricingLoyaltyTitle: "3-year tiered loyalty (#tiered-loyalty)",
+  pricingLoyaltyBody:
+    "Year 1: 100% of the entry list price (one-time purchase) — the purchased version stays yours permanently. Year 2: update fee −25%. Year 3: update fee −40%. From year 4, every future update is free. If you do not renew, the purchased version remains usable; only newer engine versions require the ladder update fee.",
+  pricingActiveTitle: "Active Case & Active Slot — ethical capacity (#active-workspaces)",
+  pricingActiveBody:
+    "The license limits concurrently live (parallel) workspaces — not accumulated archive data. Inactive or old Cases/Slots can be deleted, overwritten and reloaded at no charge. You pay only when you open an additional parallel live workspace (add-on: Extra Active Case / Slot / Seat).",
+  pricingLocalTitle: "Local bank-statement import & Edge (#local-import)",
+  pricingLocalBody:
+    "Bank-statement and transaction import (CAMT.053, CSV, XML) runs 100% on your device: data is not required to leave for a cloud, computation stays data-sovereign. The Sensor / Edge collector module connects local/edge sources — off-grid focused, not central telemetry. The purchased version is a device-bound local license with a perpetual fallback right to that engine version.",
 };
 
 const TIPS_EN = [
@@ -235,4 +269,101 @@ export function localizeLesson(locale: Locale, lesson: Lesson): Lesson {
   const theory = THEORY_EN[lesson.slug];
   if (theory) return { ...lesson, title: theory.title, summary: theory.summary };
   return lesson;
+}
+
+export type SupportPricingTier = {
+  id: "basic" | "pro" | "enterprise";
+  title: string;
+  priceLine: string;
+  ladder: string;
+  /** Részletes, horgonyhoz tartozó leírás (SSOT). */
+  detail: string;
+  bullets: string[];
+};
+
+export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
+  if (locale === "en") {
+    return [
+      {
+        id: "basic",
+        title: "Solo (Basic)",
+        priceLine: "€199 year 1 — one-time entry (net list)",
+        ladder: "See #tiered-loyalty · Y2 €149 (−25%) · Y3 €119 (−40%) · Y4+ free updates for life",
+        detail:
+          "Solo is for one decision-maker: one concurrently active project (Active Case), three active scenario slots, one editor seat and one guest. Inactive data can be overwritten freely. Computation stays on your device.",
+        bullets: [
+          "1 Active Case · 3 Active Slots · 1 Seat + 1 Guest",
+          "Unlimited overwrite of inactive slots — no archive fee",
+          "Three outcome paths (pessimistic / realistic / optimistic) locally",
+        ],
+      },
+      {
+        id: "pro",
+        title: "Pro (Recommended)",
+        priceLine: "€399 year 1 — one-time entry (net list)",
+        ladder: "See #tiered-loyalty · Y2 €299 (−25%) · Y3 €239 (−40%) · Y4+ free updates for life",
+        detail:
+          "Pro adds a second parallel Active Case and automated local bank-statement import (CAMT.053, CSV, XML) — see #local-import. Capacity is still concurrent-active only; extras are perpetual add-ons.",
+        bullets: [
+          "2 Active Cases · 3 Active Slots each · 1 Seat + 5 Guests",
+          "Automated bank statement & transaction import (CAMT.053, CSV, XML)",
+          "Extra Active Case add-on: +€49 perpetual",
+        ],
+      },
+      {
+        id: "enterprise",
+        title: "Enterprise & Teams",
+        priceLine: "€799 year 1 — one-time entry (net list)",
+        ladder: "See #tiered-loyalty · Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ free updates for life",
+        detail:
+          "Enterprise covers team seats, multi-project capacity, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control.",
+        bullets: [
+          "5 Active Cases · 4 Active Slots each · 3 Seats + 20 Guests",
+          "Automated accounting/bank-statement import + Sensor / Edge data feed",
+          "Add-ons: Case · Slot · Seat · Edge (perpetual modules)",
+        ],
+      },
+    ];
+  }
+  return [
+    {
+      id: "basic",
+      title: "Solo (Basic)",
+      priceLine: "199 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
+      ladder: "Lásd #tiered-loyalty · 2. év 149 000 Ft (−25%) · 3. év 119 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      detail:
+        "Solo egy döntéshozónak: egyidejűleg egy aktív projekt (Aktív Case), három aktív szcenárió slot, egy szerkesztő és egy vendég. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad.",
+      bullets: [
+        "1 Aktív Case · 3 Aktív Slot · 1 Seat + 1 Guest",
+        "Inaktív slot korlátlan felülírása — nincs archív díj",
+        "Három kimeneti pálya (pesszimista / realista / optimista) helyben",
+      ],
+    },
+    {
+      id: "pro",
+      title: "Pro (Ajánlott)",
+      priceLine: "399 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
+      ladder: "Lásd #tiered-loyalty · 2. év 299 000 Ft (−25%) · 3. év 239 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      detail:
+        "A Pro második párhuzamos Aktív Case-t és automatizált, helyi bankkivonat-importot ad (CAMT.053, CSV, XML) — lásd #local-import. A keret továbbra is az egyidejűleg aktív munkaterületekre vonatkozik; a bővítők örökös modulok.",
+      bullets: [
+        "2 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 5 Guest",
+        "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)",
+        "Extra Aktív Case modul: +49 000 Ft örökös",
+      ],
+    },
+    {
+      id: "enterprise",
+      title: "Enterprise & Csapatok",
+      priceLine: "799 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
+      ladder: "Lásd #tiered-loyalty · 2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      detail:
+        "Az Enterprise csapat-seateket, több párhuzamos projektet, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad.",
+      bullets: [
+        "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
+        "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",
+        "Bővítők: Case · Slot · Seat · Edge (örökös modulok)",
+      ],
+    },
+  ];
 }

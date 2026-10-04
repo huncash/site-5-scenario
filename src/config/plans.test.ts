@@ -57,9 +57,12 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(TIER_CAPACITY.starter.slotsPerCase).toBe(3);
     expect(TIER_CAPACITY.pro.slotsPerCase).toBe(3);
     expect(TIER_CAPACITY.expert.slotsPerCase).toBe(4);
-    expect(TIER_MONTHLY_HUF.starter).toBe(199_000);
-    expect(TIER_MONTHLY_HUF.pro).toBe(399_000);
-    expect(TIER_MONTHLY_HUF.expert).toBe(799_000);
+    expect(PLANS_CONFIG.starter.priceHuf).toBe(199_000);
+    expect(PLANS_CONFIG.pro.priceHuf).toBe(399_000);
+    expect(PLANS_CONFIG.expert.priceHuf).toBe(799_000);
+    expect(TIER_MONTHLY_HUF.starter).toBe(0);
+    expect(TIER_MONTHLY_HUF.pro).toBe(0);
+    expect(TIER_MONTHLY_HUF.expert).toBe(0);
     expect(BASE_SCENARIO_SLOTS.starter).toBe(3);
     expect(BASE_SCENARIO_SLOTS.pro).toBe(6);
     expect(BASE_SCENARIO_SLOTS.expert).toBe(20);
@@ -74,8 +77,8 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(pro).toHaveLength(4);
     expect(ent).toHaveLength(4);
     expect(starter.some((h) => /−25%|hűség|örökélet/i.test(h))).toBe(false);
-    expect(pro.some((h) => h.includes("2 Aktív Case"))).toBe(true);
-    expect(ent.some((h) => /API/i.test(h))).toBe(true);
+    expect(pro.some((h) => /CAMT\.053|bankkivonat/i.test(h))).toBe(true);
+    expect(ent.some((h) => /Edge|Szenzoros/i.test(h))).toBe(true);
     const slogan = planSlogan(PLANS_CONFIG.starter, "hu");
     expect(slogan).toContain("1");
     expect(slogan).toContain("3");

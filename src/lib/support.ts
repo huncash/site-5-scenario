@@ -14,6 +14,19 @@ export function supportPublicOrigin(): string {
   return SUPPORT_ORIGIN_PROD;
 }
 
+/** Support /pricing SSOT horgonyok — részletes árazás / licenc / helyi import. */
+export type SupportPricingAnchor =
+  | "basic"
+  | "pro"
+  | "enterprise"
+  | "tiered-loyalty"
+  | "active-workspaces"
+  | "local-import";
+
+export function supportPricingHref(anchor: SupportPricingAnchor): string {
+  return `${supportPublicOrigin()}/pricing#${anchor}`;
+}
+
 export function supportEmbedUrl(slug: string): string {
   const clean = slug.replace(/^\/+/, "");
   const path = clean.startsWith("embed/") ? `/${clean}` : `/embed/${clean}`;

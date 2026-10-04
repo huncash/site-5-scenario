@@ -8,12 +8,13 @@ import { useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
 import { RopeSlogan } from "@/components/rope/RopeSlogan";
 import { planCardBullets } from "@/config/planCopy";
-import { PLANS_CONFIG, type PlanConfig } from "@/config/plans";
+import { PLANS_CONFIG, type PlanConfig, type PublicPlanId } from "@/config/plans";
 import { PUBLIC_JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
 import { CAMPUS_MONTHLY_HUF, formatHuf, TIER_CORE, type TierId } from "@/content/pricing/tiers";
 import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
 import type { BillingInterval } from "@/lib/funnelOrder";
+import { supportPricingHref, type SupportPricingAnchor } from "@/lib/support";
 import { useI18n, type MessageKey } from "@/i18n";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,14 @@ const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
   expert: "pricing.expert",
 };
 
-/** Csak az 1. évi belépőár — hűséglétra a kártyák alatti sávban. */
+/** Support SSOT horgony: starter → basic, pro → pro, expert → enterprise. */
+const SUPPORT_PRICING_ANCHOR: Record<PublicPlanId, SupportPricingAnchor> = {
+  starter: "basic",
+  pro: "pro",
+  expert: "enterprise",
+};
+
+/** Csak az 1. évi belépőár — Egyszeri díj. */
 function EntryPrice(props: { plan: PlanConfig }) {
   const { t, locale } = useI18n();
   const { plan } = props;
@@ -59,7 +67,9 @@ export function HomePricing(props: { campus?: boolean }) {
   const checkoutInterval: BillingInterval = "yearly";
 
   return (
-    <section id="csomagok" className="scroll-mt-24">
+    <section id="pricing" className="scroll-mt-24">
+      {/* Legacy horgony — footer / kampány linkek */}
+      <div id="csomagok" className="scroll-mt-24" aria-hidden />
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {t("pricing.packages")}
@@ -88,7 +98,9 @@ export function HomePricing(props: { campus?: boolean }) {
               key={p.id}
               className={cn(
                 "flex h-full min-w-0 flex-col rounded-xl border p-4",
-                recommended ? "border-amber-300/50 bg-card shadow-[0_0_0_1px_rgba(252,211,77,0.12)]" : "border-white/12 bg-card",
+                recommended
+                  ? "border-amber-300/50 bg-card shadow-[0_0_0_1px_rgba(252,211,77,0.12)]"
+                  : "border-white/12 bg-card",
               )}
             >
               <div className="flex flex-wrap items-center gap-2">
@@ -127,17 +139,17 @@ export function HomePricing(props: { campus?: boolean }) {
                   {t("pricing.order")}
                 </a>
               </Button>
+
+              <a
+                href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                className="mt-2 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                {t("pricing.moreInfo")}
+              </a>
             </article>
           );
         })}
       </div>
-
-      <aside className="mt-4 rounded-xl border border-border/60 bg-card/60 px-4 py-3.5">
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
-          <span className="font-medium text-foreground/90">{t("pricing.loyaltyFooterTitle")} </span>
-          {t("pricing.loyaltyFooterBody")}
-        </p>
-      </aside>
 
       <details className="mt-4 rounded-xl border border-border/50 bg-card/40 px-4 py-3">
         <summary className="cursor-pointer text-[13px] font-medium text-foreground">
@@ -180,7 +192,7 @@ export function HomePricing(props: { campus?: boolean }) {
               <AddonPriceLine
                 monthlyNetHuf={a.priceHuf}
                 interval="once"
-                vat={marketingVat}
+                vatRate={marketingVat.rate}
                 className="mt-0.5"
               />
             </a>

@@ -1,37 +1,40 @@
 import { useI18n } from "@/i18n";
-import { supportPublicOrigin } from "@/lib/support";
+import { supportPricingHref } from "@/lib/support";
 
-/** Árazás / mátrix alatti fogalom-lábjegyzetek — sorrend: Case → Slot → P-R-O → Seat / Guest. */
+/**
+ * Főoldali lábjegyzet: tömör + hivatkozás a Support SSOT horgonyokra.
+ * Részletes szöveg NEM itt él — lásd support /pricing.
+ */
 export function PricingFootnotes(props: { className?: string }) {
   const { t } = useI18n();
-  const faqHref = `${supportPublicOrigin()}/gyik#faq-slot`;
   return (
     <div
       id="pricing-footnotes"
       className={
         props.className ??
-        "mt-8 space-y-1 border-t border-slate-800 pt-4 text-xs text-slate-400"
+        "mt-8 space-y-1.5 border-t border-slate-800 pt-4 text-xs text-slate-400"
       }
     >
-      <p className="font-medium text-foreground/90">{t("pricing.activeWorkspaceTitle")}</p>
-      <p className="text-slate-300">{t("pricing.activeWorkspaceNote")}</p>
       <p>
-        <span className="font-medium text-emerald-400">* {t("pricing.fnCaseLabel")}:</span>{" "}
-        {t("pricing.fnCase")}
-      </p>
-      <p>
-        <span className="font-medium text-emerald-400">** {t("pricing.fnSlotLabel")}:</span>{" "}
-        {t("pricing.fnSlot")}{" "}
-        <a href={faqHref} className="underline hover:text-emerald-300">
-          {t("pricing.fnConceptsLink")}
+        <a href={supportPricingHref("active-workspaces")} className="underline hover:text-emerald-300">
+          {t("pricing.fnActiveLink")}
         </a>
-        .
+        {" — "}
+        {t("pricing.fnActiveShort")}
       </p>
       <p>
-        <span className="font-medium text-emerald-400">*** P-R-O:</span> {t("pricing.fnPro")}
+        <a href={supportPricingHref("tiered-loyalty")} className="underline hover:text-emerald-300">
+          {t("pricing.fnLoyaltyLink")}
+        </a>
+        {" — "}
+        {t("pricing.fnLoyaltyShort")}
       </p>
       <p>
-        <span className="font-medium text-emerald-400">**** Seat / Guest:</span> {t("pricing.fnSeat")}
+        <a href={supportPricingHref("local-import")} className="underline hover:text-emerald-300">
+          {t("pricing.fnLocalLink")}
+        </a>
+        {" — "}
+        {t("pricing.fnLocalShort")}
       </p>
     </div>
   );

@@ -88,7 +88,12 @@ export type PlanConfig = {
   features: PlanFeatures;
 };
 
-export type JitAddonId = "case_plus_1" | "slot_plus_1" | "seat_plus_1" | "guest_plus_1";
+export type JitAddonId =
+  | "case_plus_1"
+  | "slot_plus_1"
+  | "seat_plus_1"
+  | "guest_plus_1"
+  | "edge_sensor";
 
 /** Aktuális motor / engine verzió (licenc kompatibilitás). */
 export const ENGINE_VERSION = "0.1.4";
@@ -109,6 +114,7 @@ export const JIT_ADDON_PRICES: Record<JitAddonId, number> = {
   slot_plus_1: 49_000,
   seat_plus_1: 79_000,
   guest_plus_1: 19_000,
+  edge_sensor: 99_000,
 };
 
 /** Enterprise önkiszolgáló Case modul (eltér a Pro Case upsell-től). */

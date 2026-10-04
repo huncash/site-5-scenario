@@ -20,7 +20,7 @@ export function billCheckoutUrl(opts: {
   referral?: string;
   /** Slot bővítő pack (campus kizárva a bill oldalon). */
   slotPack?: string;
-  /** JIT egység-modul: case_plus_1 | slot_plus_1 | seat_plus_1 | guest_plus_1 */
+  /** JIT egység-modul: case_plus_1 | slot_plus_1 | seat_plus_1 | guest_plus_1 | edge_sensor */
   addon?: string;
   country?: string;
   utm?: CampaignUtm;

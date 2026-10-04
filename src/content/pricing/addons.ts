@@ -23,17 +23,31 @@ export type JitAddon = {
 
 export const JIT_ADDONS: JitAddon[] = [
   {
+    id: "case_plus_1",
+    priceHuf: JIT_ADDON_PRICES.case_plus_1,
+    labelHu: "+1 Extra Aktív Case",
+    labelEn: "+1 Extra Active Case",
+    public: true,
+  },
+  {
     id: "slot_plus_1",
     priceHuf: JIT_ADDON_PRICES.slot_plus_1,
-    labelHu: "+1 Extra aktív Slot (örökös modul)",
-    labelEn: "+1 Extra active Slot (perpetual module)",
+    labelHu: "+1 Extra Aktív Slot",
+    labelEn: "+1 Extra Active Slot",
     public: true,
   },
   {
     id: "seat_plus_1",
     priceHuf: JIT_ADDON_PRICES.seat_plus_1,
-    labelHu: "+1 Extra Seat / szerkesztő (örökös modul)",
-    labelEn: "+1 Extra Seat / editor (perpetual module)",
+    labelHu: "+1 Extra Szerkesztő Seat",
+    labelEn: "+1 Extra Editor Seat",
+    public: true,
+  },
+  {
+    id: "edge_sensor",
+    priceHuf: JIT_ADDON_PRICES.edge_sensor,
+    labelHu: "Szenzoros / Edge adatgyűjtő modul",
+    labelEn: "Sensor / Edge data collector module",
     public: true,
   },
   {
@@ -42,13 +56,6 @@ export const JIT_ADDONS: JitAddon[] = [
     labelHu: "+1 Extra Guest",
     labelEn: "+1 Extra Guest",
     public: false,
-  },
-  {
-    id: "case_plus_1",
-    priceHuf: JIT_ADDON_PRICES.case_plus_1,
-    labelHu: "+1 Extra aktív Case (örökös modul)",
-    labelEn: "+1 Extra active Case (perpetual module)",
-    public: true,
   },
 ];
 
@@ -59,7 +66,13 @@ export const JIT_ADDON_BY_ID: Record<JitAddonId, JitAddon> = Object.fromEntries(
 ) as Record<JitAddonId, JitAddon>;
 
 export function isJitAddonId(v: unknown): v is JitAddonId {
-  return v === "case_plus_1" || v === "slot_plus_1" || v === "seat_plus_1" || v === "guest_plus_1";
+  return (
+    v === "case_plus_1" ||
+    v === "slot_plus_1" ||
+    v === "seat_plus_1" ||
+    v === "guest_plus_1" ||
+    v === "edge_sensor"
+  );
 }
 
 export function jitAddonLabel(addon: JitAddon, locale: "hu" | "en"): string {

@@ -154,7 +154,7 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const supportPath = (path: string) => (kind === "support" ? path : `${support}${path}`);
   const scenariosHref = mainPath("/#szcenariok");
   const typesHref = mainPath("/#tipusok");
-  const pricingHref = mainPath("/#csomagok");
+  const pricingHref = mainPath("/#pricing");
   const aboutHref = mainPath("/about");
   const gdprHref = mainPath("/gdpr");
   const aszfHref = mainPath("/aszf");

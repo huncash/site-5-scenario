@@ -15,3 +15,8 @@
 ## TanStack Start integráció
 - A TanStack Start-ot csak UI-ra és útvonalakra használjuk.
 - Tilos a server-functions használata adatkezelésre. A react-query queryFn mindig a MeshRepository-t hívja.
+
+## Support SSOT (árazás / licenc / helyi import)
+- A részletes működési, árazási, licencelési és technikai specifikáció hivatalos forrása a Support `/pricing` oldal (`support/src/copy.ts` + `supportPricingHref`).
+- Horgonyok: `#basic` `#pro` `#enterprise` `#tiered-loyalty` `#active-workspaces` `#local-import`.
+- A főoldal és az app felületei csak tömör szöveget mutatnak; részletezéshez a fenti horgonyokra kell linkelni (`src/lib/support.ts` → `supportPricingHref`).
