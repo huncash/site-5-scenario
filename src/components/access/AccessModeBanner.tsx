@@ -1,10 +1,13 @@
 import { Eye } from "lucide-react";
 
 import { isViewerReadonly } from "@/lib/accessRole";
+import { guestWatermarkLabel, readActiveGuestSession } from "@/lib/auth/guestSlots";
 
-/** Olvasói mód jelzése — nem zárja a böngésző kaput, csak a mutációt. */
+/** Guest mód jelzése — nem zárja a böngésző kaput, csak a mutációt. */
 export function AccessModeBanner() {
   if (!isViewerReadonly()) return null;
+  const claim = typeof window !== "undefined" ? readActiveGuestSession() : null;
+  const slotLabel = claim ? guestWatermarkLabel(claim) : null;
   return (
     <div
       role="status"
@@ -12,9 +15,9 @@ export function AccessModeBanner() {
     >
       <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0" />
       <p>
-        <span className="font-semibold">Olvasói mód (VIEWER_READONLY):</span> szcenáriók és elemzések
-        elérhetők; adatbevitel, törlés, nyers export és szerkezeti beállítás tiltva. A tulajdonos
-        visszavonhatja a kulcsot.
+        <span className="font-semibold">Guest mód{slotLabel ? ` · ${slotLabel}` : ""}:</span>{" "}
+        Esetek, Slotok és P-R-O Szcenárió elérhetők; adatbevitel, törlés, nyers export és szerkezeti
+        beállítás tiltva. A Seat egyedileg visszavonhatja a kódot.
       </p>
     </div>
   );

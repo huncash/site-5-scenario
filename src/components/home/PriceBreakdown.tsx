@@ -39,7 +39,7 @@ export function PriceBreakdown(props: {
             className={cn(
               "rounded-md px-2 py-2 text-center text-[12px] font-semibold leading-snug transition-colors",
               interval === "yearly"
-                ? "bg-cyan-500 text-slate-950"
+                ? "btn-cta shadow-none"
                 : "text-muted-foreground hover:text-foreground",
             )}
             aria-pressed={interval === "yearly"}
@@ -52,7 +52,7 @@ export function PriceBreakdown(props: {
             className={cn(
               "rounded-md px-2 py-2 text-center text-[12px] font-semibold leading-snug transition-colors",
               interval === "monthly"
-                ? "bg-cyan-500 text-slate-950"
+                ? "btn-cta shadow-none"
                 : "text-muted-foreground hover:text-foreground",
             )}
             aria-pressed={interval === "monthly"}
@@ -78,7 +78,7 @@ export function PriceBreakdown(props: {
         </div>
       </div>
       {interval === "yearly" && saveNet > 0 ? (
-        <div className="inline-flex items-center rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">
+        <div className="inline-flex items-center rounded-full border border-emerald-700/40 bg-emerald-950/40 px-2.5 py-1 text-[11px] font-semibold text-emerald-100/90">
           {t("pricing.savePctYearly", { n: YEARLY_DISCOUNT_PCT })}
         </div>
       ) : null}

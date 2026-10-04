@@ -150,8 +150,8 @@ export function WorkspaceTabs({
             type="button"
             className="btn-new-item"
             onClick={onOpenCreate}
-            title="Új munkaterület"
-            aria-label="Új munkaterület"
+            title="Új Slot"
+            aria-label="Új Slot"
           >
             <span aria-hidden="true">+</span>
             <span className="btn-new-item-label">Új</span>
@@ -364,7 +364,7 @@ export function WorkspacePanels({
               </div>
             ) : (
               <div className="text-xs text-muted-foreground">
-                Válassz egy vállalkozás/projekt munkaterületet a Check összegzéshez.
+                Válassz egy vállalkozás/projekt munkateret a Check összegzéshez.
               </div>
             )}
 

@@ -1,5 +1,5 @@
 import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
-import { PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
+import { CONCEPT_FAQ_ITEMS, PRO_CHART_FAQ, WHY_FAQ } from "@/content/branding";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -29,6 +29,7 @@ export const UZLETI_STRATEGIA_FUNNEL = {
   packages,
   tierOffers: buildTierOffers(packages),
   faq: [
+    ...CONCEPT_FAQ_ITEMS,
     {
       q: "Mi a Master Baseline?",
       a: "A cég működő törzse: partnerek, fix költség, core cash-flow. A stratégiai esetek ezt öröklik. A projekt csak a döntés rétegét viszi.",

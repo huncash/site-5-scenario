@@ -206,6 +206,8 @@ import {
   segmentIdFromDemoName,
 } from "@/lib/demoSeed";
 import { AccessModeBanner } from "@/components/access/AccessModeBanner";
+import { GuestSessionGuard } from "@/components/access/GuestSessionGuard";
+import { GuestWatermark } from "@/components/access/GuestWatermark";
 import { SlotCapacityChooser } from "@/components/access/SlotCapacityChooser";
 import { denyMutateIfViewer } from "@/lib/accessRole";
 import { readSlotLedger } from "@/lib/license";
@@ -617,7 +619,7 @@ export function FinanceDashboard({
     [meshRepo, profileId],
   );
 
-  // Munkaterület fülek (vizuális; adat-szeparáció még nem implementált).
+  // Slot / Munkatér fülek (vizuális; adat-szeparáció még nem implementált).
   const DEFAULT_WS_OPTIONS = ["Vállalkozás1", "Projekt1"];
   const [wsOptions, setWsOptions] = useState<string[]>(DEFAULT_WS_OPTIONS);
   const [middleWs, setMiddleWs] = useState<string>("Vállalkozás1");
@@ -1228,7 +1230,7 @@ export function FinanceDashboard({
 
   const denyWorkspaceCreate = () => {
     if (denyMutateIfViewer()) {
-      toast.warning("Olvasói módban nem hozható létre munkaterület.");
+      toast.warning("Guest módban nem hozható létre Slot.");
       return;
     }
     const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -1546,7 +1548,7 @@ export function FinanceDashboard({
           }
 
           if (activeWorkspace === "__all") {
-            setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkaterületre.");
+            setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
             return;
           }
 
@@ -1562,8 +1564,8 @@ export function FinanceDashboard({
           }
           const mapped = maps.some((m) => m.bank_account_id === detected.id && m.workspace_id === activeWorkspace);
           if (!mapped) {
-            setBankImportStatus("A bankszámla nincs ehhez a munkaterülethez rendelve. Állítsd be a Beállításokban.");
-            toast.error("Bankszámla nincs ehhez a munkaterülethez rendelve.");
+            setBankImportStatus("A bankszámla nincs ehhez a munkatérhez rendelve. Állítsd be a Beállításokban.");
+            toast.error("Bankszámla nincs ehhez a munkatérhez rendelve.");
             return;
           }
 
@@ -1712,7 +1714,7 @@ export function FinanceDashboard({
           activeWorkspace,
         });
         toast.message(`XML feldolgozás: ${input.fileName}`, {
-          description: `Munkaterület: ${activeWorkspace} · méret: ${input.fileSize ?? input.text.length} byte`,
+          description: `Munkatér: ${activeWorkspace} · méret: ${input.fileSize ?? input.text.length} byte`,
         });
 
         const [accounts, maps] = await Promise.all([localdb.listBankAccounts(), localdb.listBankAccountWorkspaces()]);
@@ -1754,7 +1756,7 @@ export function FinanceDashboard({
         }
 
         if (activeWorkspace === "__all") {
-          setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkaterületre.");
+          setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
           return;
         }
 
@@ -1768,8 +1770,8 @@ export function FinanceDashboard({
         }
         const mapped = maps.some((m) => m.bank_account_id === detected.id && m.workspace_id === activeWorkspaceId);
         if (!mapped) {
-          setBankImportStatus("A bankszámla nincs ehhez a munkaterülethez rendelve. Állítsd be a Beállításokban.");
-          toast.error("Bankszámla nincs ehhez a munkaterülethez rendelve.");
+          setBankImportStatus("A bankszámla nincs ehhez a munkatérhez rendelve. Állítsd be a Beállításokban.");
+          toast.error("Bankszámla nincs ehhez a munkatérhez rendelve.");
           return;
         }
 
@@ -2072,7 +2074,7 @@ export function FinanceDashboard({
   const syncPersonalBankFromLatestFileInFolder = useCallback(async () => {
     if (denyShowcaseWrite(isVisitorDemo)) return;
     if (activeWorkspace === "__all") {
-      setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkaterületre.");
+      setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
       return;
     }
     try {
@@ -5607,7 +5609,7 @@ export function FinanceDashboard({
       </CardHeader>
       <CardContent className="space-y-3 text-xs">
         {(!businessMode || activeWorkspace === "__all") && (
-          <div className="text-muted-foreground">Tervezett tételek a vállalkozás/projekt munkaterületen aktívak.</div>
+          <div className="text-muted-foreground">Tervezett tételek a vállalkozás/projekt munkatéren aktívak.</div>
         )}
 
         {businessMode && activeWorkspace !== "__all" && (
@@ -6219,7 +6221,7 @@ export function FinanceDashboard({
           </div>
         </div>
         {activeLoans.length === 0 ? (
-          <div className="text-xs text-muted-foreground">Nincs aktív tartozás ezen a munkaterületen.</div>
+          <div className="text-xs text-muted-foreground">Nincs aktív tartozás ezen a munkatéren.</div>
         ) : (
           <ul className="grid gap-2">
             {activeLoans.slice(0, 8).map((l) => {
@@ -6271,7 +6273,7 @@ export function FinanceDashboard({
             <>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-emerald-500/60 bg-muted/25 p-2.5"
-                data-exact="Likviditás — azonnal elérhető pénz az összesített munkaterületeken."
+                data-exact="Likviditás — azonnal elérhető pénz az összesített munkatereken."
               >
                 <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Összesített likviditás">Likviditás</div>
                 <div
@@ -8249,7 +8251,7 @@ export function FinanceDashboard({
               colorFor={workspaceColorCls}
               onOpenCreate={() => {
                 if (denyMutateIfViewer()) {
-                  toast.warning("Olvasói módban nem hozható létre munkaterület.");
+                  toast.warning("Guest módban nem hozható létre Slot.");
                   return;
                 }
                 const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -8266,6 +8268,8 @@ export function FinanceDashboard({
         />
       </div>
 
+      <GuestSessionGuard />
+      <GuestWatermark />
       <AccessModeBanner />
 
       {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
@@ -8293,13 +8297,13 @@ export function FinanceDashboard({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Új munkaterület</DialogTitle>
+            <DialogTitle>Új Slot</DialogTitle>
           </DialogHeader>
           {wsCreateDenied ? (
             <p className="text-sm text-slate-200">Ez a funkció a jelenlegi verzióban nem engedélyezett.</p>
           ) : (
             <div className="grid gap-3">
-              <div className="text-sm text-muted-foreground">Új Munkaterület Típusa:</div>
+              <div className="text-sm text-muted-foreground">Új Slot típusa:</div>
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
@@ -8341,7 +8345,7 @@ export function FinanceDashboard({
               kategóriát/partnert.
             </div>
             <div className="grid gap-2">
-              <Label>Munkaterület</Label>
+              <Label>Slot</Label>
               <div className="rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm">
                 {workspaceDisplayName(autoRuleWsId)}
               </div>
@@ -8522,7 +8526,7 @@ export function FinanceDashboard({
               Ez <span className="font-medium">nem áthelyezés</span>, hanem másolat: az eredeti tételek megmaradnak.
             </div>
             <div className="grid gap-2">
-              <Label>Projekt munkaterület</Label>
+              <Label>Projekt munkatér</Label>
               <Select value={bulkProjectId || "__none"} onValueChange={(v) => setBulkProjectId(v === "__none" ? "" : v)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -9362,7 +9366,7 @@ export function FinanceDashboard({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Új munkaterület</DialogTitle>
+            <DialogTitle>Új Slot</DialogTitle>
           </DialogHeader>
 
           {wsCreateDenied ? (
@@ -9386,7 +9390,7 @@ export function FinanceDashboard({
               >
                 <div className="text-sm font-medium">🧪 Új Projekt</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
-                  Szimuláció / tervezés (forgatókönyvek, készültség).
+                  Szimuláció / tervezés (P-R-O forgatókönyvek, készültség).
                 </div>
               </button>
               <button
@@ -9600,7 +9604,7 @@ export function FinanceDashboard({
                   } else if (t.bank_raw_id) {
                     await patchTxnWorkspace(txnId, { bank_raw_id: null }, "Banki vonatkoztatás törölve");
                   } else {
-                    await patchTxnWorkspace(txnId, { workspace: "personal" }, "Munkaterület-kötés personal-re állítva");
+                    await patchTxnWorkspace(txnId, { workspace: "personal" }, "Munkatér-kötés personal-re állítva");
                   }
                 }}
                 onMoveTransaction={async (txnId, toWorkspace) => {
@@ -9641,7 +9645,7 @@ export function FinanceDashboard({
                       <div className="mt-1 text-xs text-muted-foreground">
                         Készültség: <span className="font-mono">{Math.round(Number(activeWorkspaceMeta.completion_pct ?? 25))}%</span>
                         {" · "}
-                        Forgatókönyv: <span className="font-mono">{String(activeWorkspaceMeta.scenario ?? "realistic")}</span>
+                        P-R-O forgatókönyv: <span className="font-mono">{String(activeWorkspaceMeta.scenario ?? "realistic")}</span>
                         {" · "}
                         Tételek státusz: tervezett / lekötött / tényleges
                       </div>
@@ -9650,15 +9654,15 @@ export function FinanceDashboard({
                       <Select
                         value={String(activeWorkspaceMeta.scenario ?? "realistic")}
                         onValueChange={(v) =>
-                          updateWorkspaceMeta(activeWorkspace, { scenario: v }, "Projekt forgatókönyv")
+                          updateWorkspaceMeta(activeWorkspace, { scenario: v }, "P-R-O forgatókönyv")
                         }
                       >
-                        <SelectTrigger className="h-9 w-[160px]" title="Forgatókönyv">
+                        <SelectTrigger className="h-9 w-[160px]" title="P-R-O forgatókönyv">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="conservative">Konzervatív</SelectItem>
-                          <SelectItem value="realistic">Reális</SelectItem>
+                          <SelectItem value="conservative">Pesszimista</SelectItem>
+                          <SelectItem value="realistic">Realista</SelectItem>
                           <SelectItem value="optimistic">Optimista</SelectItem>
                         </SelectContent>
                       </Select>
@@ -10302,7 +10306,7 @@ export function FinanceDashboard({
                     <div className="mb-4 rounded-lg border border-border/60 bg-background/40 p-4">
                       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold">What‑If szimulátor (forgatókönyvek)</div>
+                          <div className="text-sm font-semibold">What‑If szimulátor (P-R-O forgatókönyvek)</div>
                           <div className="mt-1 text-xs text-muted-foreground">
                             🎯 Mire jó? Gyorsan látod, mikor érkezhet el a fedezeti pont és milyen tartalék kell a
                             biztonságos működéshez.
@@ -10325,9 +10329,9 @@ export function FinanceDashboard({
                             variant={whatIfScenario === "realistic" ? "secondary" : "outline"}
                             className="h-8"
                             onClick={() => setWhatIfScenario("realistic")}
-                            title="Reális (Base-case)"
+                            title="Realista (Base-case)"
                           >
-                            🔵 Reális
+                            🔵 Realista
                           </Button>
                           <Button
                             type="button"
@@ -10445,7 +10449,7 @@ export function FinanceDashboard({
                               content={() => (
                                 <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-1">
                                   <ChartLegendSwatch tone="opt" label="Optimista" line />
-                                  <ChartLegendSwatch tone="real" label="Reális" line />
+                                  <ChartLegendSwatch tone="real" label="Realista" line />
                                   <ChartLegendSwatch tone="pess" label="Pesszimista" line />
                                 </div>
                               )}
@@ -10464,7 +10468,7 @@ export function FinanceDashboard({
                             <Line
                               type="monotone"
                               dataKey="realistic"
-                              name="Reális"
+                              name="Realista"
                               className={PRO_LINE_CLASS.real}
                               stroke={PRO_REAL}
                               strokeWidth={whatIfScenario === "realistic" ? 3 : 2.2}
@@ -12196,7 +12200,7 @@ export function FinanceDashboard({
                             : "—"}
                         </div>
                         <div className="mt-1 text-[11px] text-muted-foreground">
-                          A helyszínek globálisan a Beállításokban kezelhetők, itt a munkaterülethez rendelés látszik.
+                          A helyszínek globálisan a Beállításokban kezelhetők, itt a munkatérhez rendelés látszik.
                         </div>
                       </div>
                       <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
@@ -13080,7 +13084,7 @@ export function FinanceDashboard({
         onToggleSzumma={toggleSzumma}
         onOpenCreate={() => {
           if (denyMutateIfViewer()) {
-            toast.warning("Olvasói módban nem hozható létre munkaterület.");
+            toast.warning("Guest módban nem hozható létre Slot.");
             return;
           }
           const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -15066,7 +15070,7 @@ function TxnDialog({
               <Label>Ingatlan költséghely (opcionális)</Label>
               {personalRealEstateProperties.length === 0 ? (
                 <div className="rounded-md border border-border/60 bg-muted/20 p-2 text-xs text-muted-foreground">
-                  Nincs felvett ingatlan. Add hozzá: Beállítások → Munkaterületek → Magán → 🧩 Erőforrások → 🏠 Ingatlanok.
+                  Nincs felvett ingatlan. Add hozzá: Beállítások → Slot / Munkaterek → Magán → 🧩 Erőforrások → 🏠 Ingatlanok.
                 </div>
               ) : (
                 <Select value={propertyId || "__none"} onValueChange={(v) => setPropertyId(v === "__none" ? "" : v)}>
@@ -16119,8 +16123,8 @@ function WorkspaceTabsLegacy({
             type="button"
             onClick={onCustom}
             className="btn-new-item"
-            title="Új munkaterület hozzáadása"
-            aria-label="Új munkaterület hozzáadása"
+            title="Új Slot hozzáadása"
+            aria-label="Új Slot hozzáadása"
           >
             <Plus className="h-3.5 w-3.5" />
             <span className="btn-new-item-label">Új</span>
@@ -16136,7 +16140,7 @@ function WorkspaceTabsLegacy({
           activeWs === "szumma" ? "border-t-slate-400/80" : "border-t-transparent"
         }`}
         aria-pressed={activeWs === "szumma"}
-        title="Szumma nézet (összes munkaterület)"
+        title="Szumma nézet (összes munkatér)"
       >
         <Sigma className="h-3.5 w-3.5" />
         Szumma

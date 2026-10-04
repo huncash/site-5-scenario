@@ -34,7 +34,7 @@ export const LESSONS: Lesson[] = [
   {
     slug: "lecke-02",
     title: "Három sáv",
-    body: "Felső vezérlés, középen a munka, alul a modulok. A fülek a munkateret cserélik.",
+    body: "Felső vezérlés, középen a munka, alul a modulok. A fülek a Slot / Munkateret cserélik.",
     youtubeId: yt("VITE_YT_LECKE_02"),
   },
   {
@@ -51,8 +51,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     slug: "lecke-05",
-    title: "Munkaterek",
-    body: "Magán, vállalkozás és projekt külön könyvelési tér. A felső fülek ezeket cserélik.",
+    title: "Slot / Munkaterek",
+    body: "Egy Eseten belül a Magán, Vállalkozás és Projekt külön Slot. A felső fülek ezeket cserélik; mindegyikben fut a P-R-O Szcenárió.",
     youtubeId: yt("VITE_YT_LECKE_05"),
   },
   {
@@ -107,9 +107,9 @@ export const THEORY_LESSONS: Lesson[] = [
   {
     slug: "kahn-strategiai-elagazas",
     kbId: "lesson-kahn",
-    title: "Kahn-féle stratégiai elágazás — Core üzem, projekt és magán biztonság",
+    title: "Herman Kahn döntési elágazás & szórásmodell (P-R-O)",
     summary:
-      "Három fül egy történetben: törzs, bővítési döntés, személyes kockázat. Hitel vagy saját tartalék — a rosszabb kimenetet előbb.",
+      "Nem jóslat — tartomány. Elágazási pontok, P–R–O sávok és Stop-Loss a cégtörzs védelmére. DEMO 11, local-first.",
     body: kahnMd,
     markdown: true,
   },
@@ -122,10 +122,10 @@ export function lessonBySlug(slug: string) {
 }
 
 export const KAHN_BONBON = {
-  eyebrow: "Tudástár · Történeti sablon",
-  title: "Herman Kahn és a RAND Corporation",
-  p1: "A szcenárió-alapú tervezés nem két találgatott év. Kahn a RAND-nál a hidegháborúban többágú jövőképet rajzolt: elágazás, mielőtt elkötelezed az erőforrást.",
-  p2: "Ma ugyanez a módszer: Core üzem (törzs) → Kapacitás-projekt (döntési fa) → Magán (személyes kockázat). A teljes lecke a tudástárban: Kahn-féle stratégiai elágazás.",
+  eyebrow: "Tudástár · P-R-O szórásmodell",
+  title: "Herman Kahn döntési elágazás & szórásmodell",
+  p1: "Nem jóslat, hanem tartomány: kritikus elágazási pontok (1–2. forduló) és három párhuzamos kimenet — Pesszimista, Realista, Optimista.",
+  p2: "Stop-Loss a pesszimista sávon védi a Core üzemet. Teljes lecke: döntési fa, finanszírozási konstrukció, Cash Runway. DEMO 11, local-first.",
   foot: "Local-first · nincs felhő-adat · nincs használatküldés",
 } as const;
 
@@ -140,7 +140,11 @@ export const TIPS = [
   },
 ];
 
-export const FAQ = [
+export type FaqItem = { q: string; a: string; id?: string };
+export type FaqSection = { category: string; items: FaqItem[] };
+
+/** Általános GYIK (a fogalom-szekció a `conceptFaq` forrásból jön a copy rétegben). */
+export const FAQ_GENERAL: FaqItem[] = [
   { q: "Regisztráció kell?", a: "Nem. A helyi profil a készülékeden marad." },
   { q: "Miért nincs telefonszám?", a: "A pontosabb ügyintézéshez írásos jegy kell — nincs telefonos sor." },
   { q: "Hol kérek segítséget?", a: "Először a GYIK és a tudásbázis. Ha nincs válasz, a „Nem találtam választ” gombbal nyílik a jegy — előtte egy ellenőrző lépés." },
@@ -154,3 +158,6 @@ export const FAQ = [
     a: "Nem a valóságot és nem jóslatot látsz. A modell a múltbeli adataidból, szezonális mintákból és a beállított paraméterekből rajzol mozgásteret: szórási hibát csökkent, és megmutatja a pesszimista tartalékot vs. az optimista kapacitásigényt.",
   },
 ];
+
+/** @deprecated használjuk a `supportFaqSections` / `FAQ_GENERAL` párost */
+export const FAQ = FAQ_GENERAL;

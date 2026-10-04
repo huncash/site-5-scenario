@@ -7,6 +7,8 @@ import type { BillInterval, BillTier } from "./catalog.ts";
 export type PayMethod = "stripe" | "barion" | "hu_transfer";
 export type OrderStatus = "pending" | "awaiting_transfer" | "paid" | "invoiced" | "failed";
 
+export type PartnerKind = "b2c" | "b2b";
+
 export type Buyer = {
   name: string;
   address: string;
@@ -15,6 +17,8 @@ export type Buyer = {
   country?: string;
   taxId: string;
   email: string;
+  /** Fogyasztó (b2c) vs vállalkozás (b2b) — elállási jog besorolás. */
+  partnerKind?: PartnerKind;
 };
 
 export type InvoiceLine = {

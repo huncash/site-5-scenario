@@ -53,7 +53,7 @@ function AppWorkspacePage() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <div className="w-full max-w-md space-y-3 rounded-2xl border border-border/60 bg-card p-8">
-          <h1 className="text-xl font-semibold">Munkaterület zárolva</h1>
+          <h1 className="text-xl font-semibold">Slot zárolva</h1>
           <p className="text-sm text-muted-foreground">
             A token rendben. Oldd fel a helyi profilt — a számítás a böngészőben marad.
           </p>
@@ -67,7 +67,7 @@ function AppWorkspacePage() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center text-sm text-muted-foreground">
-      Munkaterület megnyitása…
+      Slot megnyitása…
     </div>
   );
 }

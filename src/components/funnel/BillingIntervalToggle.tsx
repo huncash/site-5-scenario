@@ -41,7 +41,7 @@ export function BillingIntervalToggle(props: { className?: string }) {
         type="button"
         className={cn(
           "rounded-md px-3 py-1.5 text-[12px] font-medium",
-          interval === "yearly" ? "bg-cyan-500 text-slate-950" : "text-muted-foreground",
+          interval === "yearly" ? "btn-cta shadow-none" : "text-muted-foreground",
         )}
         onClick={() => setInterval("yearly")}
       >
@@ -51,7 +51,7 @@ export function BillingIntervalToggle(props: { className?: string }) {
         type="button"
         className={cn(
           "rounded-md px-3 py-1.5 text-[12px] font-medium",
-          interval === "monthly" ? "bg-cyan-500 text-slate-950" : "text-muted-foreground",
+          interval === "monthly" ? "btn-cta shadow-none" : "text-muted-foreground",
         )}
         onClick={() => setInterval("monthly")}
       >

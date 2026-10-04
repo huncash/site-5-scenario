@@ -166,7 +166,7 @@ export function LoanDialog({
             {editing ? "Tartozás / kötelezettség szerkesztése" : "Új tartozás / kötelezettség"}
           </DialogTitle>
           <div className="text-[11px] text-muted-foreground">
-            Munkaterület: <span className="font-mono text-foreground">{workspaceName}</span> — a tartozás csak ide
+            Slot: <span className="font-mono text-foreground">{workspaceName}</span> — a tartozás csak ide
             kötődik (workspace izoláció).
           </div>
         </DialogHeader>

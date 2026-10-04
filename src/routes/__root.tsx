@@ -20,6 +20,7 @@ import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourPr
 import { SupportEmbedProvider } from "@/components/support/SupportEmbedProvider";
 import { LeanCommandPalette } from "@/components/LeanCommandPalette";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PrivacyBanner } from "@/components/legal/PrivacyBanner";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LocaleProvider, useI18n } from "@/i18n";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
@@ -140,9 +141,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/svg+xml", href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'%3E%3Crect width='32' height='32' rx='6' fill='%23071511'/%3E%3Cpath d='M16 6L8 22H24L16 6Z' fill='%2310b981' fill-opacity='0.25'/%3E%3Cpath d='M16 10L10 22H22L16 10Z' fill='%2310b981'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ecfdf5'/%3E%3C/svg%3E" },
+      { rel: "icon", type: "image/svg+xml", href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'%3E%3Crect width='32' height='32' rx='6' fill='%23071511'/%3E%3Cpath d='M16 6L8 22H24L16 6Z' fill='%232d6a4f' fill-opacity='0.35'/%3E%3Cpath d='M16 10L10 22H22L16 10Z' fill='%232d6a4f'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23f1f5f9'/%3E%3C/svg%3E" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "mask-icon", href: "/logo.svg", color: "#10b981" },
+      { rel: "mask-icon", href: "/logo.svg", color: "#2d6a4f" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
@@ -217,6 +218,7 @@ function RootComponent() {
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
                 <RootFooter />
+                <PrivacyBanner />
                 <LeanCommandPalette />
                 <HoverCoachTooltip />
                 <Toaster richColors closeButton position="top-center" />

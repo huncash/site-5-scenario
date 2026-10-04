@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AszfRouteImport } from './routes/aszf'
 import { Route as BcpRouteImport } from './routes/bcp'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as GdprRouteImport } from './routes/gdpr'
 import { Route as KotelRouteImport } from './routes/kotel'
 import { Route as KozossegRouteImport } from './routes/kozosseg'
 import { Route as LoginRouteImport } from './routes/login'
@@ -55,6 +57,11 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AszfRoute = AszfRouteImport.update({
+  id: '/aszf',
+  path: '/aszf',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BcpRoute = BcpRouteImport.update({
   id: '/bcp',
   path: '/bcp',
@@ -68,6 +75,11 @@ const ConnectRoute = ConnectRouteImport.update({
 const DevicesRoute = DevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GdprRoute = GdprRouteImport.update({
+  id: '/gdpr',
+  path: '/gdpr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KotelRoute = KotelRouteImport.update({
@@ -200,9 +212,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/app': typeof AppRoute
+  '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/gdpr': typeof GdprRoute
   '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
@@ -232,9 +246,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/app': typeof AppRoute
+  '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/gdpr': typeof GdprRoute
   '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
@@ -265,9 +281,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/app': typeof AppRoute
+  '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
+  '/gdpr': typeof GdprRoute
   '/kotel': typeof KotelRoute
   '/kozosseg': typeof KozossegRoute
   '/login': typeof LoginRoute
@@ -299,9 +317,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/app'
+    | '/aszf'
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/gdpr'
     | '/kotel'
     | '/kozosseg'
     | '/login'
@@ -331,9 +351,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/app'
+    | '/aszf'
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/gdpr'
     | '/kotel'
     | '/kozosseg'
     | '/login'
@@ -363,9 +385,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/app'
+    | '/aszf'
     | '/bcp'
     | '/connect'
     | '/devices'
+    | '/gdpr'
     | '/kotel'
     | '/kozosseg'
     | '/login'
@@ -396,9 +420,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AppRoute: typeof AppRoute
+  AszfRoute: typeof AszfRoute
   BcpRoute: typeof BcpRoute
   ConnectRoute: typeof ConnectRoute
   DevicesRoute: typeof DevicesRoute
+  GdprRoute: typeof GdprRoute
   KotelRoute: typeof KotelRoute
   KozossegRoute: typeof KozossegRoute
   LoginRoute: typeof LoginRoute
@@ -448,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aszf': {
+      id: '/aszf'
+      path: '/aszf'
+      fullPath: '/aszf'
+      preLoaderRoute: typeof AszfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bcp': {
       id: '/bcp'
       path: '/bcp'
@@ -467,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/devices'
       fullPath: '/devices'
       preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gdpr': {
+      id: '/gdpr'
+      path: '/gdpr'
+      fullPath: '/gdpr'
+      preLoaderRoute: typeof GdprRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kotel': {
@@ -644,9 +684,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AppRoute: AppRoute,
+  AszfRoute: AszfRoute,
   BcpRoute: BcpRoute,
   ConnectRoute: ConnectRoute,
   DevicesRoute: DevicesRoute,
+  GdprRoute: GdprRoute,
   KotelRoute: KotelRoute,
   KozossegRoute: KozossegRoute,
   LoginRoute: LoginRoute,

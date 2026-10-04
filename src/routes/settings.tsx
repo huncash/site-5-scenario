@@ -36,11 +36,12 @@ import {
   type WorkspaceType,
 } from "@/lib/finance";
 import { sha256Hex } from "@/lib/hash";
+import { bankCapacityToast, checkBankAccountsForSlot } from "@/lib/bankCapacity";
 
 type SettingsTabId = "accounts" | "workspaces" | "categories" | "rules" | "backup" | "danger" | "all";
 const SETTINGS_TABS: Array<{ id: SettingsTabId; label: string }> = [
   { id: "accounts", label: "💳 Bankszámlák & Profilok" },
-  { id: "workspaces", label: "📁 Munkaterületek & Projektek" },
+  { id: "workspaces", label: "📁 Slotok & Projektek" },
   { id: "categories", label: "🏷️ Kategóriák" },
   { id: "rules", label: "⚡ Besorolási Szabályok" },
   { id: "backup", label: "💾 Mentés & Helyreállítás" },
@@ -971,7 +972,7 @@ function SettingsPage() {
 
         await clearImportHashes(workspaceId);
         await qc.invalidateQueries();
-        toast.success(`Munkaterület nullázva: ${workspaceName(workspaceId)}`);
+        toast.success(`Munkatér nullázva: ${workspaceName(workspaceId)}`);
       } finally {
         setDangerBusy(false);
       }
@@ -980,7 +981,7 @@ function SettingsPage() {
   );
   const removeWorkspacePermanently = useCallback(
     async (workspaceId: string) => {
-      if (workspaceId === "personal") return toast.error("A Magán munkaterület nem törölhető.");
+      if (workspaceId === "personal") return toast.error("A Magán munkatér nem törölhető.");
       if (!vaultKey) return toast.error("Nincs feloldott profil.");
       setDangerBusy(true);
       try {
@@ -1000,12 +1001,11 @@ function SettingsPage() {
         } catch {
           /* best-effort */
         }
-        await persistWorkspaces(workspaces.filter((w) => w.id !== workspaceId), "Munkaterület végleg törölve.");
+        await persistWorkspaces(workspaces.filter((w) => w.id !== workspaceId), "Munkatér végleg törölve.");
         setDangerConfirm("");
         setRemoveOpen(false);
         await qc.invalidateQueries();
-        toast.success("Munkaterület eltávolítva.");
-        navigate({ to: "/" });
+        toast.success("Munkatér eltávolítva.");        navigate({ to: "/" });
       } finally {
         setDangerBusy(false);
       }
@@ -1042,7 +1042,7 @@ function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="text-sm text-muted-foreground">
-                Munkaterületek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
+                Slot / Munkaterek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
               </div>
               <div className="text-sm text-muted-foreground">Előbb lépj be egy profilba.</div>
             </CardContent>
@@ -1079,7 +1079,7 @@ function SettingsPage() {
           <div className="space-y-1">
             <div className="text-2xl font-semibold text-white">⚙️ Beállítások</div>
             <div className="text-sm text-muted-foreground">
-              Munkaterületek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
+              Slot / Munkaterek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
             </div>
           </div>
 
@@ -1217,10 +1217,20 @@ function SettingsPage() {
                                     type="checkbox"
                                     checked={checked}
                                     onChange={async (e) => {
+                                      const enable = e.currentTarget.checked;
+                                      if (enable) {
+                                        const used = (mappingsQ.data ?? []).filter((m) => m.workspace_id === w).length;
+                                        const cap = checkBankAccountsForSlot(used);
+                                        if (!cap.ok) {
+                                          toast.warning(bankCapacityToast());
+                                          e.currentTarget.checked = false;
+                                          return;
+                                        }
+                                      }
                                       await localdb.setBankAccountWorkspaceMapping({
                                         bank_account_id: a.id,
                                         workspace_id: w,
-                                        enabled: e.currentTarget.checked,
+                                        enabled: enable,
                                       });
                                       await qc.invalidateQueries({ queryKey: ["bank_account_workspaces"] });
                                     }}
@@ -1260,7 +1270,7 @@ function SettingsPage() {
           {show("workspaces") && (
             <Card>
               <CardHeader>
-                <CardTitle>📁 Munkaterületek & Projektek kezelése</CardTitle>
+                <CardTitle>📁 Slot / Munkaterek & Projektek kezelése</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
               <div className="rounded-lg border border-border/60 bg-background/40 p-3">
@@ -1284,7 +1294,7 @@ function SettingsPage() {
               </div>
 
               <div className="text-sm text-muted-foreground">
-                Itt tudsz munkaterület-meta adatokat megadni (becenév, leírás, banki kivonatok mappája), valamint projekteknél
+                Itt tudsz munkatér-meta adatokat megadni (becenév, leírás, banki kivonatok mappája), valamint projekteknél
                 tervezői beállításokat (készültség, forgatókönyv) és élesítést.
               </div>
 
@@ -1471,8 +1481,8 @@ function SettingsPage() {
                             </div>
                           </div>
                           <div className="grid gap-1.5">
-                            <Label>Forgatókönyv</Label>
-                            <Select
+                            <Label>P-R-O forgatókönyv</Label>
+                              <Select
                               value={(d.scenario ?? "realistic") as WorkspaceScenario}
                               onValueChange={(v) => patchWsDraft(w.id, { scenario: v as any } as any)}
                             >
@@ -1480,8 +1490,8 @@ function SettingsPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="conservative">Konzervatív</SelectItem>
-                                <SelectItem value="realistic">Reális</SelectItem>
+                                <SelectItem value="conservative">Pesszimista</SelectItem>
+                                <SelectItem value="realistic">Realista</SelectItem>
                                 <SelectItem value="optimistic">Optimista</SelectItem>
                               </SelectContent>
                             </Select>
@@ -1489,7 +1499,7 @@ function SettingsPage() {
                           <div className="grid gap-1.5">
                             <Label>Projekt státusz</Label>
                             <div className="rounded-md border border-border/60 bg-muted/20 p-2 text-xs text-muted-foreground">
-                              Tervező / szimulációs munkaterület (élesítés után üzletmenetbe kerülhet).
+                              Tervező / szimulációs munkatér (élesítés után üzletmenetbe kerülhet).
                             </div>
                           </div>
                         </div>
@@ -1506,14 +1516,14 @@ function SettingsPage() {
                       🧩 Erőforrások —{" "}
                       {workspaces.find((x) => x.id === wsResId)?.alias?.trim() ||
                         workspaces.find((x) => x.id === wsResId)?.id ||
-                        "Munkaterület"}
+                        "Munkatér"}
                     </DialogTitle>
                   </DialogHeader>
 
                   {(() => {
                     const base = workspaces.find((x) => x.id === wsResId) ?? null;
                     const d = (wsDrafts as any)[wsResId] ?? base;
-                    if (!base || !d) return <div className="text-sm text-muted-foreground">Válassz munkaterületet.</div>;
+                    if (!base || !d) return <div className="text-sm text-muted-foreground">Válassz munkateret.</div>;
 
                     const accounts = bankAccountsQ.data ?? [];
                     const maps = mappingsQ.data ?? [];
@@ -1600,13 +1610,22 @@ function SettingsPage() {
                                         className={on ? "h-8 bg-emerald-950/40 border-emerald-500/30 text-emerald-200" : "h-8"}
                                         onClick={() => {
                                           void (async () => {
+                                            const enable = !on;
+                                            if (enable) {
+                                              const used = enabledIds.size;
+                                              const cap = checkBankAccountsForSlot(used);
+                                              if (!cap.ok) {
+                                                toast.warning(bankCapacityToast());
+                                                return;
+                                              }
+                                            }
                                             await localdb.setBankAccountWorkspaceMapping({
                                               bank_account_id: a.id,
                                               workspace_id: wsResId,
-                                              enabled: !on,
+                                              enabled: enable,
                                             });
                                             await qc.invalidateQueries({ queryKey: ["bank_account_workspaces"] });
-                                            const next = !on
+                                            const next = enable
                                               ? Array.from(new Set([...bankIdsDraft, a.id]))
                                               : bankIdsDraft.filter((x) => x !== a.id);
                                             patchWsDraft(wsResId, { bankAccountIds: next } as any);
@@ -2412,7 +2431,7 @@ function SettingsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ALL">🌐 Teljes rendszer (minden munkaterület)</SelectItem>
+                        <SelectItem value="ALL">🌐 Teljes rendszer (minden munkatér)</SelectItem>
                         {allWorkspaceIds.map((id) => (
                           <SelectItem key={id} value={id}>
                             📁 {workspaceName(id)}
@@ -2421,7 +2440,7 @@ function SettingsPage() {
                       </SelectContent>
                     </Select>
                     <div className="text-[11px] text-muted-foreground">
-                      Teljes export: a profil összes adatát viszi. Workspace export: csak az adott munkaterület rekordjait.
+                      Teljes export: a profil összes adatát viszi. Workspace export: csak az adott munkatér rekordjait.
                     </div>
                   </div>
                   <div className="grid gap-2">
@@ -2594,7 +2613,7 @@ function SettingsPage() {
               <div className="rounded-lg border border-border/60 bg-background/40 p-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="grid gap-2">
-                    <Label>Munkaterület</Label>
+                    <Label>Munkatér</Label>
                     <Select value={ruleWs} onValueChange={setRuleWs}>
                       <SelectTrigger>
                         <span className="truncate">{workspaceName(ruleWs)}</span>
@@ -3352,7 +3371,7 @@ function SettingsPage() {
                 </SelectContent>
               </Select>
 
-              <Label>Cél munkaterület</Label>
+              <Label>Cél munkatér</Label>
               <Select value={targetWs} onValueChange={setTargetWs}>
                 <SelectTrigger className="max-w-sm">
                   <SelectValue />
@@ -3424,7 +3443,7 @@ function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="text-sm text-muted-foreground">
-              Ezek a műveletek adatvesztéssel járnak. Import előzmények törlése biztonságosabb; a munkaterület nullázás visszavonhatatlan.
+              Ezek a műveletek adatvesztéssel járnak. Import előzmények törlése biztonságosabb; a munkatér nullázás visszavonhatatlan.
             </div>
 
             {isDemoProfile && (
@@ -3534,13 +3553,13 @@ function SettingsPage() {
             )}
 
             <div className="grid gap-2">
-              <Label>Érintett munkaterület</Label>
+              <Label>Érintett munkatér</Label>
               <Select value={dangerWsId} onValueChange={setDangerWsId}>
                 <SelectTrigger className="max-w-sm">
-                  <SelectValue placeholder="-- Válassz munkaterületet a művelethez --" />
+                  <SelectValue placeholder="-- Válassz munkateret a művelethez --" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Válassz munkaterületet a művelethez --</SelectItem>
+                  <SelectItem value="">-- Válassz munkateret a művelethez --</SelectItem>
                   {allWorkspaceIds
                     .filter((id) => id !== "__all")
                     .map((id) => (
@@ -3576,9 +3595,9 @@ function SettingsPage() {
                   setDangerConfirm("");
                   setPurgeOpen(true);
                 }}
-                title="Munkaterület adatainak és import előzményeinek nullázása"
+                title="Munkatér adatainak és import előzményeinek nullázása"
               >
-                🗑️ Munkaterület adatainak és import előzményeinek nullázása
+                🗑️ Munkatér adatainak és import előzményeinek nullázása
               </Button>
 
               <Button
@@ -3590,9 +3609,9 @@ function SettingsPage() {
                   setDangerConfirm("");
                   setRemoveOpen(true);
                 }}
-                title="Munkaterület végleges eltávolítása (visszavonhatatlan)"
+                title="Munkatér végleges eltávolítása (visszavonhatatlan)"
               >
-                💥 Munkaterület végleges törlése a magból
+                💥 Munkatér végleges törlése a magból
               </Button>
             </div>
 
@@ -3604,7 +3623,7 @@ function SettingsPage() {
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground">
                     🎯 Mire jó? Ha tesztelsz importot vagy újra szeretnél beolvasni korábban látott fájlokat, itt tudod
-                    „kinullázni” a deduplikációs memóriát a kiválasztott munkaterülethez.
+                    „kinullázni” a deduplikációs memóriát a kiválasztott munkatérhez.
                   </div>
                   <div className="grid gap-1.5">
                     <Label>Biztonsági kód (másolható)</Label>
@@ -3624,7 +3643,7 @@ function SettingsPage() {
                       disabled={!dangerWsId}
                     />
                     <div className="text-[11px] text-muted-foreground">
-                      3 lépés: munkaterület választás → kód kijelölés/másolás → beillesztés és megerősítés.
+                      3 lépés: munkatér választás → kód kijelölés/másolás → beillesztés és megerősítés.
                     </div>
                   </div>
                 </div>
@@ -3702,12 +3721,12 @@ function SettingsPage() {
             <Dialog open={removeOpen} onOpenChange={setRemoveOpen}>
               <DialogContent className="w-full max-w-4xl max-h-[85vh] overflow-y-auto p-8 custom-scrollbar">
                 <DialogHeader>
-                  <DialogTitle>Munkaterület végleges eltávolítása</DialogTitle>
+                  <DialogTitle>Munkatér végleges eltávolítása</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground">
                     Ez a művelet visszavonhatatlan! A(z){" "}
-                    <span className="font-medium">{dangerWsId ? workspaceName(dangerWsId) : "—"}</span> munkaterület és
+                    <span className="font-medium">{dangerWsId ? workspaceName(dangerWsId) : "—"}</span> munkatér és
                     annak minden adata végleg törlődik a rendszerből.
                   </div>
                   <div className="grid gap-1.5">
@@ -3742,7 +3761,7 @@ function SettingsPage() {
                     disabled={dangerBusy || !dangerWsId || dangerWsId === "personal" || dangerConfirm !== dangerToken}
                     onClick={() => void removeWorkspacePermanently(dangerWsId)}
                   >
-                    OK / Munkaterület végleges törlése
+                    OK / Munkatér végleges törlése
                   </Button>
                 </DialogFooter>
               </DialogContent>

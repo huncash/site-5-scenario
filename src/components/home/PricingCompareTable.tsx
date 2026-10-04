@@ -73,14 +73,8 @@ export function PricingCompareTable() {
                 "border-t border-white/10 px-1 py-2.5 text-[12px] font-medium text-foreground lg:px-0",
                 rowIndex === 0 && "font-semibold",
               )}
-              title={row.feature === "pricing.cf8" ? t("pricing.seatDef") : undefined}
             >
               {t(row.feature)}
-              {row.feature === "pricing.cf8" ? (
-                <span className="mt-1 block text-[10px] font-normal leading-snug text-muted-foreground">
-                  {t("pricing.seatDef")}
-                </span>
-              ) : null}
             </div>
             {(["starter", "pro", "expert"] as const).map((id) => (
               <div

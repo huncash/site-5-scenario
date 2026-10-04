@@ -21,6 +21,8 @@ describe("siteSurface footer visibility", () => {
   it("shows footer on the main door, about, funnels, bill and support", () => {
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/", homeMode: "door" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/about" })).toBe(true);
+    expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/gdpr" })).toBe(true);
+    expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/aszf" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/f/oktatas-szimulacio" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/bcp" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "bill.szcenario.hu", pathname: "/" })).toBe(true);

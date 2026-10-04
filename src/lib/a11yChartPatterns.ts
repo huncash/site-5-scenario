@@ -46,7 +46,16 @@ export function a11yPatternClassForColor(color: string): string {
   ) {
     return A11Y_PATTERN_CLASS["pattern-dots"];
   }
-  if (c.includes("34d399") || c.includes("10b981") || c.includes("chart-2") || c.includes("emerald") || c.includes("green")) {
+  if (
+    c.includes("34d399") ||
+    c.includes("10b981") ||
+    c.includes("40916c") ||
+    c.includes("2d6a4f") ||
+    c.includes("1b4332") ||
+    c.includes("chart-2") ||
+    c.includes("emerald") ||
+    c.includes("green")
+  ) {
     return A11Y_PATTERN_CLASS["pattern-diagonal-stripe"];
   }
   return A11Y_PATTERN_CLASS["pattern-v-stripe"];

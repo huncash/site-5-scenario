@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import QRCode from "qrcode";
 
+import { BuyerKindFields } from "@/components/checkout/BuyerKindFields";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import type { TierCopy, TierCore, TierId } from "@/content/pricing/tiers";
 import { TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
 import { countryFromTaxId, resolveVat, SELLER_COUNTRY, splitVat } from "@/content/pricing/vat";
 import { useI18n } from "@/i18n";
+import { resolveBuyerKind, type BuyerKind } from "@/lib/buyerKind";
 import { readCampaignAttribution } from "@/lib/campaignSession";
 import { useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import {
@@ -32,6 +34,9 @@ export function FunnelCheckout(props: {
   const [interval, setInterval] = useBillingInterval();
   const [country, setCountry] = useState(SELLER_COUNTRY);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
+  const [buyerKind, setBuyerKind] = useState<BuyerKind>("b2c");
+  const [immediateConsent, setImmediateConsent] = useState(false);
+  const [aszfAccepted, setAszfAccepted] = useState(false);
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [taxId, setTaxId] = useState("");
@@ -39,6 +44,7 @@ export function FunnelCheckout(props: {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ url: string; email: string; qr: string; token: string } | null>(null);
+  const effectiveKind = resolveBuyerKind(buyerKind, taxId);
 
   useEffect(() => {
     const raw = taxId.replace(/[\s./-]/g, "").toUpperCase();
@@ -73,6 +79,15 @@ export function FunnelCheckout(props: {
       setError(t("pricing.badEmail"));
       return;
     }
+    const kind = resolveBuyerKind(buyerKind, taxId);
+    if (kind === "b2b" && taxId.trim().length < 8) {
+      setError(t("pricing.needTaxIdB2b"));
+      return;
+    }
+    if (!aszfAccepted || (kind === "b2c" && !immediateConsent)) {
+      setError(t("pricing.needBuyerConsent"));
+      return;
+    }
     setError(null);
     const token = newToken();
     const campaign = readCampaignAttribution();
@@ -88,6 +103,7 @@ export function FunnelCheckout(props: {
       emailHint: m.replace(/(^.).*(@.*$)/, "$1***$2"),
       profileLabel: n.slice(0, 48),
       used: false,
+      partnerKind: kind,
       campaignId: campaign?.id,
       utm: campaign?.utm,
     });
@@ -174,6 +190,21 @@ export function FunnelCheckout(props: {
             </div>
           </fieldset>
 
+          <BuyerKindFields
+            kind={effectiveKind}
+            onKindChange={(k) => {
+              setBuyerKind(k);
+              if (k === "b2c") {
+                setImmediateConsent(false);
+                setTaxId("");
+              }
+            }}
+            immediateConsent={immediateConsent}
+            onImmediateConsentChange={setImmediateConsent}
+            aszfAccepted={aszfAccepted}
+            onAszfAcceptedChange={setAszfAccepted}
+          />
+
           <fieldset className="rounded-xl border border-border/60 bg-background/30 p-4">
             <legend className="px-1 text-sm font-semibold text-slate-100">{t("pricing.billingContact")}</legend>
             <p className="text-[12px] text-slate-400">{t("pricing.billingNote")}</p>
@@ -187,8 +218,13 @@ export function FunnelCheckout(props: {
                 <Input value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
-                {t("pricing.taxId")}
-                <Input value={taxId} onChange={(e) => setTaxId(e.target.value)} autoComplete="off" />
+                {effectiveKind === "b2b" ? t("pricing.taxIdRequired") : t("pricing.taxId")}
+                <Input
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  autoComplete="off"
+                  required={effectiveKind === "b2b"}
+                />
               </label>
               <label className="grid gap-1 text-[12px] text-slate-300">
                 {t("pricing.address")}

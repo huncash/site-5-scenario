@@ -1,9 +1,9 @@
 import { yearlyPriceHuf } from "@/content/pricing/tiers";
-import { splitVat } from "@/content/pricing/vat";
+import { publicGrossFromNet } from "@/content/pricing/vat";
 import { useI18n } from "@/i18n";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
-/** Add-on (slot/seat) ár: bruttó {összeg} / hó|év + (nettó + ÁFA%) — a fő billing cycle-lel szinkronban. */
+/** Add-on ár: kerekített bruttó + nettó alcím (ÁFA % nélkül a publikus sorban). */
 export function AddonPriceLine(props: {
   monthlyNetHuf: number;
   interval: BillingInterval;
@@ -13,9 +13,8 @@ export function AddonPriceLine(props: {
   const { t, money } = useI18n();
   const dueNet =
     props.interval === "yearly" ? yearlyPriceHuf(props.monthlyNetHuf) : props.monthlyNetHuf;
-  const { net, gross } = splitVat(dueNet, props.vatRate);
+  const gross = publicGrossFromNet(dueNet, props.vatRate);
   const per = props.interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
-  const vatPct = Math.round(props.vatRate);
 
   return (
     <div className={props.className}>
@@ -23,7 +22,7 @@ export function AddonPriceLine(props: {
         {t("pricing.gross")} {money(gross)} {per}
       </div>
       <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-        ({t("pricing.net")} {money(net)} + {vatPct}% {t("pricing.vatShort")})
+        {t("pricing.net")} {money(dueNet)} + {t("pricing.vatShort")}
       </div>
     </div>
   );

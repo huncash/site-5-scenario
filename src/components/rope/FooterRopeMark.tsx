@@ -9,14 +9,14 @@ const RESET_WAIT_MS = 30_000;
 
 type FooterRopeMarkProps = {
   className?: string;
-  /** Footer hover: rising edge → lejátszás (ha nincs zárolva). */
+  /** Footer/pricing hover: rising edge → lejátszás (ha nincs zárolva). */
   hovered?: boolean;
 };
 
 /**
- * Footer márka: alapból 1. képkocka.
- * Footer hover → lejátsza a lépéseket → 30 mp vár → vissza az 1. képkockára.
- * Kattintás → azonnal újraindítja (oldalbetöltés nélkül).
+ * Footer/pricing kötél: alapból 1. képkocka.
+ * Hover → lejátsza a lépéseket → 30 mp vár → vissza az 1. képkockára.
+ * Kattintás → azonnal újraindítja.
  */
 export function FooterRopeMark({ className, hovered = false }: FooterRopeMarkProps) {
   const [progress, setProgress] = useState(0);

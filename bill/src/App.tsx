@@ -214,6 +214,9 @@ export function App() {
   const [taxId, setTaxId] = useState("");
   const [country, setCountry] = useState((q.get("country") || SELLER_COUNTRY).toUpperCase());
   const [email, setEmail] = useState("");
+  const [buyerKind, setBuyerKind] = useState<"b2c" | "b2b">("b2c");
+  const [immediateConsent, setImmediateConsent] = useState(false);
+  const [aszfAccepted, setAszfAccepted] = useState(false);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
   const [busy, setBusy] = useState(false);
   const [lookupBusy, setLookupBusy] = useState(false);
@@ -256,6 +259,11 @@ export function App() {
     "{date}",
     formatRenewalDate(nextRenewalDate(interval), locale),
   );
+  const effectiveKind: "b2c" | "b2b" =
+    taxId.replace(/[\s./-]/g, "").length >= 8 ? "b2b" : buyerKind;
+  const mainOrigin = mainPublicOrigin();
+  const aszfHref = `${mainOrigin}/aszf`;
+  const gdprHref = `${mainOrigin}/gdpr`;
 
   const openPortal = (order: PortalOrder) => {
     writePortal(order);
@@ -308,13 +316,34 @@ export function App() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    setBusy(true);
     setError(null);
+    if (effectiveKind === "b2b" && taxId.replace(/[\s./-]/g, "").length < 8) {
+      setError(t.needTaxIdB2b);
+      return;
+    }
+    if (!aszfAccepted || (effectiveKind === "b2c" && !immediateConsent)) {
+      setError(t.needBuyerConsent);
+      return;
+    }
+    setBusy(true);
     try {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, address, taxId, country, email, tier, interval, ref: ref || undefined, payMethod }),
+        body: JSON.stringify({
+          name,
+          address,
+          taxId,
+          country,
+          email,
+          tier,
+          interval,
+          ref: ref || undefined,
+          payMethod,
+          partnerKind: effectiveKind,
+          immediateConsent: effectiveKind === "b2c" ? immediateConsent : undefined,
+          aszfAccepted,
+        }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -470,6 +499,69 @@ export function App() {
       </p>
 
       <form className="card" style={{ marginTop: 16 }} onSubmit={(e) => void submit(e)}>
+        <div className="row" style={{ marginBottom: 12 }}>
+          <div className="muted">{t.buyerKindTitle}</div>
+          <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
+            <input
+              type="radio"
+              name="buyerKind"
+              checked={buyerKind === "b2c"}
+              onChange={() => {
+                setBuyerKind("b2c");
+                setImmediateConsent(false);
+              }}
+            />
+            <span>
+              <b>{t.buyerB2c}</b>
+              <div className="hint">{t.buyerB2cHint}</div>
+            </span>
+          </label>
+          <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
+            <input
+              type="radio"
+              name="buyerKind"
+              checked={buyerKind === "b2b"}
+              onChange={() => setBuyerKind("b2b")}
+            />
+            <span>
+              <b>{t.buyerB2b}</b>
+              <div className="hint">{t.buyerB2bHint}</div>
+            </span>
+          </label>
+          {effectiveKind === "b2c" ? (
+            <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 12 }}>
+              <input
+                type="checkbox"
+                checked={immediateConsent}
+                onChange={(e) => setImmediateConsent(e.target.checked)}
+                required
+              />
+              <span className="hint">{t.b2cImmediateConsent}</span>
+            </label>
+          ) : (
+            <p className="hint" style={{ marginTop: 12 }}>
+              {t.b2bNoWithdrawal}
+            </p>
+          )}
+          <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10 }}>
+            <input
+              type="checkbox"
+              checked={aszfAccepted}
+              onChange={(e) => setAszfAccepted(e.target.checked)}
+              required
+            />
+            <span className="hint">
+              {t.acceptAszf}{" "}
+              <a href={aszfHref} target="_blank" rel="noreferrer">
+                ÁSZF
+              </a>
+              {" · "}
+              <a href={gdprHref} target="_blank" rel="noreferrer">
+                GDPR
+              </a>
+            </span>
+          </label>
+        </div>
         <div className="grid2">
           <label>
             {t.name}
@@ -496,8 +588,14 @@ export function App() {
             <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" required />
           </label>
           <label>
-            {t.taxId}
-            <input value={taxId} onChange={(e) => setTaxId(e.target.value)} autoComplete="off" placeholder={t.taxPh} />
+            {effectiveKind === "b2b" ? t.taxIdRequired : t.taxId}
+            <input
+              value={taxId}
+              onChange={(e) => setTaxId(e.target.value)}
+              autoComplete="off"
+              placeholder={t.taxPh}
+              required={effectiveKind === "b2b"}
+            />
           </label>
           <button type="button" className="btn" disabled={lookupBusy || taxId.trim().length < 8} onClick={() => void lookup()}>
             {lookupBusy ? t.lookupBusy : t.lookup}

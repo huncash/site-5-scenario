@@ -81,7 +81,7 @@ export function PairingGateway({
       .then(() =>
         setStatus(
           viewer
-            ? `Olvasói session: ${clean} (VIEWER_READONLY)`
+            ? `Vendég session: ${clean} (Guest / VIEWER_READONLY)`
             : `Session mentve: ${clean}`,
         ),
       )
@@ -142,8 +142,8 @@ export function PairingGateway({
       <h1 className="text-lg font-semibold tracking-tight">Párosítás</h1>
       {viewer ? (
         <div className="rounded border border-amber-400/40 bg-amber-500/10 p-3 text-[12px] text-amber-100">
-          Olvasói mód (VIEWER_READONLY): szcenáriók és elemzés engedélyezett; adatbevitel, törlés, nyers export
-          tiltva. A tulajdonos egyoldalúan visszavonhatja a kulcsot.
+          Vendég mód (Guest / VIEWER_READONLY): Esetek, Slot / Munkaterek és P-R-O elemzés engedélyezett;
+          adatbevitel, törlés, nyers export tiltva. A tulajdonos (Seat) egyoldalúan visszavonhatja a kulcsot.
         </div>
       ) : null}
       <div className="rounded border p-3 text-sm">{status || "Inicializálás…"}</div>

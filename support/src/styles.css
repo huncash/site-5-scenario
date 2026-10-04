@@ -5,8 +5,10 @@
   --card-border: #16382c;
   --text-main: #ecfdf5;
   --text-muted: #94a3b8;
-  --accent-emerald: #10b981;
-  --accent-hover: #059669;
+  --accent-emerald: #2d6a4f;
+  --accent-hover: #2d6a4f;
+  --accent-color: #1b4332;
+  --btn-text: #f1f5f9;
   --dropdown-bg: #0d221b;
   --dropdown-hover: #16382c;
   --bg: var(--app-bg);
@@ -75,6 +77,16 @@ p, li { color: var(--text-muted); line-height: 1.45; }
 .list { display: grid; gap: 8px; }
 .item { border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 12px; padding: 10px 12px; }
 .item b { display: block; color: var(--text-main); margin-bottom: 4px; }
+.item strong { color: var(--text-main); font-weight: 650; }
+.faq-category { margin-top: 14px; }
+.faq-category h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-emerald);
+}
 form { display: grid; gap: 10px; }
 label { display: grid; gap: 5px; font-size: 12px; color: var(--text-muted); }
 input, textarea {
@@ -82,10 +94,21 @@ input, textarea {
   padding: 10px 12px; font: inherit;
 }
 button, .btn {
-  border: 0; border-radius: 10px; background: var(--accent-emerald); color: #ffffff;
-  font-weight: 650; padding: 10px 12px; cursor: pointer; text-align: center;
+  border: 1px solid color-mix(in srgb, #2d6a4f 45%, transparent);
+  border-radius: 10px;
+  background: var(--accent-color, #1b4332);
+  color: var(--btn-text, #f1f5f9);
+  font-weight: 650;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 1px 3px rgb(8 28 21 / 0.45);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
-button:hover, .btn:hover { background: var(--accent-hover); }
+button:hover, .btn:hover {
+  background: var(--accent-hover, #2d6a4f);
+  border-color: color-mix(in srgb, #2d6a4f 65%, transparent);
+}
 button.lang-btn, .lang-btn {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 36px; height: 32px; padding: 0 10px;

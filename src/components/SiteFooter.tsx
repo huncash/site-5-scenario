@@ -1,7 +1,9 @@
 import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { EuAiActNotice } from "@/components/legal/EuAiActNotice";
 import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
+import { RopeSlogan } from "@/components/rope/RopeSlogan";
 import { translate } from "@/i18n";
 import { LOCALE_EVENT, readClientLocale, type Locale } from "@/i18n/locale";
 import { billPublicOrigin } from "@/lib/billing";
@@ -153,6 +155,8 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const typesHref = mainPath("/#tipusok");
   const pricingHref = mainPath("/#csomagok");
   const aboutHref = mainPath("/about");
+  const gdprHref = mainPath("/gdpr");
+  const aszfHref = mainPath("/aszf");
   const lessonsHref = supportPath("/tippek");
   const faqHref = supportPath("/gyik");
   const ticketHref = supportPath("/ticket");
@@ -174,8 +178,8 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
       ],
     },
     { href: aboutHref, label: t("footer.aboutUs") },
-    { soon: true, label: t("footer.terms") },
-    { soon: true, label: t("footer.gdpr") },
+    { href: aszfHref, label: t("footer.terms") },
+    { href: gdprHref, label: t("footer.gdpr") },
   ];
 
   return (
@@ -191,11 +195,12 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
             <button type="button" className="site-footer-logo" aria-label={t("brand.name")}>
               <FooterRopeMark hovered={footerHovered} />
             </button>
-            <p className="site-footer-tagline">{t("footer.brandBlurb")}</p>
+            <RopeSlogan variant="footer" className="site-footer-tagline" />
           </div>
           <FooterCol title={t("footer.product")} links={productLinks} />
           <FooterCol title={t("footer.aboutCol")} links={aboutLinks} soonTitle={t("footer.comingSoon")} />
         </div>
+        <EuAiActNotice locale={locale} />
         <div className="site-footer-bottom">
           <p className="site-footer-copyline">
             <span>

@@ -1,5 +1,16 @@
 import type { Locale } from "@/i18n/locale";
-import { FAQ, KAHN_BONBON, LESSONS, SUPPORT_SLA, THEORY_LESSONS, TIPS, type Lesson } from "./content";
+import { conceptFaq } from "@/content/concepts";
+import {
+  FAQ_GENERAL,
+  KAHN_BONBON,
+  LESSONS,
+  SUPPORT_SLA,
+  THEORY_LESSONS,
+  TIPS,
+  type FaqItem,
+  type FaqSection,
+  type Lesson,
+} from "./content";
 
 const hu = {
   brand: "Szcenárió · support",
@@ -100,7 +111,7 @@ const TIPS_EN = [
   },
 ];
 
-const FAQ_EN = [
+const FAQ_GENERAL_EN: FaqItem[] = [
   { q: "Do I need to register?", a: "No. The local profile stays on this device." },
   { q: "Why is there no phone number?", a: "Written tickets are more precise — there is no phone queue." },
   { q: "Where do I ask for help?", a: "Start with the FAQ and knowledge base. If that fails, use “I didn’t find an answer” — a short check runs before the ticket form." },
@@ -115,11 +126,26 @@ const FAQ_EN = [
   },
 ];
 
+function toFaqSection(locale: Locale): FaqSection[] {
+  const concepts = conceptFaq(locale);
+  const general: FaqSection = {
+    category: locale === "en" ? "General" : "Általános",
+    items: locale === "en" ? FAQ_GENERAL_EN : FAQ_GENERAL,
+  };
+  return [
+    {
+      category: concepts.category,
+      items: concepts.items.map((x) => ({ id: x.id, q: x.question, a: x.answer })),
+    },
+    general,
+  ];
+}
+
 const KAHN_EN = {
-  eyebrow: "Knowledge · historical template",
-  title: "Herman Kahn and the RAND Corporation",
-  p1: "Scenario planning is not two guessed years. At RAND in the Cold War, Kahn drew a multi-branch outlook: a fork before you bind the resource.",
-  p2: "Same method today: Core plant (trunk) → Capacity project (decision tree) → Personal (private risk). Full lesson in the knowledge base: Kahn strategic fork.",
+  eyebrow: "Knowledge · P-R-O spread model",
+  title: "Herman Kahn decision fork & spread model",
+  p1: "Not a forecast — a range: critical decision nodes (rounds 1–2) and three parallel outcomes — Pessimistic, Realistic, Optimistic.",
+  p2: "Stop-Loss on the pessimistic band protects the core plant. Full lesson: decision tree, financing structure, Cash Runway. DEMO 11, local-first.",
   foot: "Local-first · no cloud data · no usage send",
 } as const;
 
@@ -130,13 +156,13 @@ const LESSON_EN: Record<string, { title: string; body: string }> = {
   },
   "lecke-02": {
     title: "Three bands",
-    body: "Controls on top, work in the middle, modules below. The tabs swap the workspace.",
+    body: "Controls on top, work in the middle, modules below. The tabs swap the Slot / workspace.",
   },
   "lecke-03": { title: "PDCA", body: "PLAN → DO → CHECK → ACT. The dial turns to the next phase pair." },
   "lecke-04": { title: "Shortcuts", body: "The keyboard icon opens the list. Save: Ctrl/Cmd+S." },
   "lecke-05": {
-    title: "Workspaces",
-    body: "Personal, business and project are separate ledgers. The top tabs swap them.",
+    title: "Slots",
+    body: "Inside one Case (Eset), Personal, Business and Project are separate Slots. The top tabs swap them; each runs the P-R-O Scenario.",
   },
   "lecke-06": { title: "Main menu", body: "Save, FAQ and sign-out sit behind the three lines. No phone desk." },
 };
@@ -163,9 +189,9 @@ const THEORY_EN: Record<string, { title: string; summary: string }> = {
     summary: "Analog exam, kWh quota, plastic-free canteen. Student BCP on your own machine.",
   },
   "kahn-strategiai-elagazas": {
-    title: "Kahn strategic fork — core plant, project and personal safety",
+    title: "Herman Kahn decision fork & P-R-O spread model",
     summary:
-      "Three tabs, one story: trunk, expansion decision, personal risk. Loan or own reserve — worse outcome first.",
+      "Not a forecast — a range. Decision nodes, P–R–O bands and Stop-Loss to protect the core plant. DEMO 11, local-first.",
   },
 };
 
@@ -177,10 +203,14 @@ export function supportTips(locale: Locale) {
   return locale === "en" ? TIPS_EN : TIPS;
 }
 
-export function supportFaq(locale: Locale) {
-  return locale === "en" ? FAQ_EN : FAQ;
+export function supportFaqSections(locale: Locale): FaqSection[] {
+  return toFaqSection(locale);
 }
 
+/** Lapos lista kereséshez / visszamenőleges használathoz. */
+export function supportFaq(locale: Locale): FaqItem[] {
+  return supportFaqSections(locale).flatMap((s) => s.items);
+}
 export function supportKahn(locale: Locale) {
   return locale === "en" ? KAHN_EN : KAHN_BONBON;
 }

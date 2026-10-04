@@ -44,10 +44,11 @@ const EN: Record<string, CaseCopy> = {
     lead: "Someone starts a small hospitality site from their own pay and lends the firm a member loan. The private frame and the company pull each other. Example, not an offer.",
   },
   demo11_strategy_kahn_fork: {
-    title: "Kahn futures research & strategic fork",
-    blurb: "A plant would expand. Loan or own reserve; cheap+penalty or dear+flexible. Worse outcome first.",
+    title: "Bistro expansion & private-wealth risk simulation",
+    blurb:
+      "Hospitality capacity fork, loans, private property collateral and debt handling in one integrated model.",
     lead:
-      "A plant plans a new line or shift. Take a loan, or fund from your own reserve? The cheaper loan can be dear to exit — look at the worse outcome first.",
+      "A working hot-kitchen bistro hit its capacity ceiling. The owner’s home carries a mortgage/credit line. Option A: terrace and kitchen gear on external loan. Option B: private debt cleanup and modest organic growth. Read the pessimistic (Stop-Loss) branch first.",
   },
   demo12_resilience_saas_outage: {
     title: "BCP: critical SaaS / cloud outage",

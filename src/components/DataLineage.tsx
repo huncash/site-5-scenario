@@ -60,7 +60,7 @@ export function DataLineage({
 
   const lampCls =
     report.level === "green"
-      ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.55)]"
+      ? "bg-emerald-800 shadow-md shadow-emerald-950/50"
       : report.level === "yellow"
         ? "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.55)]"
         : "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.55)]";
@@ -252,7 +252,7 @@ export function DataLineage({
                           className="h-8"
                           onClick={() =>
                             setConfirm({
-                              title: "Áthelyezés Magán munkaterületre?",
+                              title: "Áthelyezés Magán munkatérre?",
                               detail: "Az árva tétel a Magán (personal) workspace-hez lesz rendelve.",
                               run: () => onMoveTransaction(issue.entityId, "personal"),
                             })

@@ -94,7 +94,7 @@ export function publicDemoSegments() {
   return PUBLIC_DEMO_SEGMENTS;
 }
 
-/** Szcenárió fajta (ajtó „type” réteg) a login demó indító csoportosításához. */
+/** Eset / Szituáció fajta (ajtó „type” réteg) a login demó indító csoportosításához. */
 export type DemoCatalogKind = "economic" | "resilience" | "education" | "inner";
 
 /** Iparági / altípus jelölés a fajta-halmazon belül. */
@@ -184,52 +184,32 @@ export function groupPublicDemoSegments(): DemoCatalogKindGroup[] {
 }
 
 export function coreCasesOnStep(step: ScenarioDoorStep): DemoSegmentId[] {
-  if (step === "hospitality") {
-    return [
-      "demo1_multisite_operator",
-      "demo2_premium_nightlife",
-      "demo3_specialty_cafe_tea",
-      "demo4_fine_dining_bistro",
-      "demo5_pastry_gelato",
-      "demo6_event_catering_popup",
-    ];
-  }
-  if (step === "healthcare") return ["demo7_industry_hospital_blackout"];
-  if (step === "manufacturing") return ["demo8_industry_supply_shock", "demo9_industry_poka_recall"];
-  if (step === "logistics") return ["demo10_industry_wms_outage"];
-  if (step === "strategy") return [KAHN_SEGMENT_ID];
-  if (step === "education") return ["demo16_edu_startup_cashflow", "demo17_edu_ops_process"];
-  if (step === "resilience") {
-    return [
-      "demo12_resilience_saas_outage",
-      "demo13_resilience_community_grid",
-      "demo14_resilience_home_blackout",
-      "demo15_resilience_demography",
-    ];
-  }
+  if (step === "hospitality") return segmentsOfIndustry("hospitality");
+  if (step === "healthcare") return segmentsOfIndustry("healthcare");
+  if (step === "manufacturing") return segmentsOfIndustry("manufacturing");
+  if (step === "logistics") return segmentsOfIndustry("logistics");
+  if (step === "strategy") return segmentsOfIndustry("strategy");
+  if (step === "education") return segmentsOfKind("education");
+  if (step === "resilience") return segmentsOfKind("resilience");
   if (step === "inner") {
-    return [
-      "demo18_personal_pocket_seasonal_pilot",
-      "demo12_resilience_saas_outage",
-      "demo13_resilience_community_grid",
-      "demo14_resilience_home_blackout",
-      "demo15_resilience_demography",
-      "demo16_edu_startup_cashflow",
-      "demo17_edu_ops_process",
-    ];
+    return segmentsOfIndustry("personal");
   }
-  if (step === "industry") {
-    return [
-      "demo1_multisite_operator",
-      "demo2_premium_nightlife",
-      "demo3_specialty_cafe_tea",
-      "demo4_fine_dining_bistro",
-      "demo5_pastry_gelato",
-      "demo6_event_catering_popup",
-      "demo7_industry_hospital_blackout",
-      "demo8_industry_supply_shock",
-      "demo9_industry_poka_recall",
-    ];
+  if (step === "economic" || step === "industry") {
+    return segmentsOfKind("economic");
   }
   return [...CORE_CASE_IDS];
+}
+
+function segmentsOfIndustry(industry: DemoCatalogIndustry): DemoSegmentId[] {
+  for (const g of groupPublicDemoSegments()) {
+    const bucket = g.industries.find((b) => b.industry === industry);
+    if (bucket) return bucket.segments.map((s) => s.id);
+  }
+  return [];
+}
+
+function segmentsOfKind(kind: DemoCatalogKind): DemoSegmentId[] {
+  const g = groupPublicDemoSegments().find((x) => x.kind === kind);
+  if (!g) return [];
+  return g.industries.flatMap((b) => b.segments.map((s) => s.id));
 }

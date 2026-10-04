@@ -2,17 +2,19 @@ import { useState } from "react";
 
 import { AddonPriceLine } from "@/components/home/AddonPriceLine";
 import { PricingCompareTable } from "@/components/home/PricingCompareTable";
+import { PricingFootnotes } from "@/components/home/PricingFootnotes";
 import { PRICING_CARDS_GRID } from "@/components/home/pricingLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
+import { RopeSlogan } from "@/components/rope/RopeSlogan";
+import { JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
 import { formatHuf, TIER_CORE, TIER_MONTHLY_HUF, yearlyPriceHuf, type TierId } from "@/content/pricing/tiers";
 import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { useI18n, type MessageKey } from "@/i18n";
-import { SLOT_PACKS, slotPackLabel } from "@/lib/scenarioSlots";
 import { cn } from "@/lib/utils";
 
 function PricingRopeHero() {
@@ -24,6 +26,7 @@ function PricingRopeHero() {
       onMouseLeave={() => setHovered(false)}
     >
       <FooterRopeMark hovered={hovered} />
+      <RopeSlogan variant="pricing" />
     </div>
   );
 }
@@ -51,16 +54,36 @@ const TIER_HIGHLIGHTS: Record<TierId, MessageKey[]> = {
 
 const CAMPUS_MONTHLY_HUF = 1_490;
 
-function netAmount(monthly: number, interval: BillingInterval): number {
-  return interval === "yearly" ? yearlyPriceHuf(monthly) : monthly;
+/** Havi nézet: csak havi díj. Éves: kedvezményes havi átlag + éves egyösszegű. */
+function TierPriceBlock(props: { monthlyHuf: number; interval: BillingInterval; size?: "md" | "lg" }) {
+  const { t } = useI18n();
+  const { monthlyHuf, interval } = props;
+  const primaryCls = props.size === "lg" ? "text-lg font-semibold text-foreground" : "text-base font-semibold text-foreground";
+  if (interval === "monthly") {
+    return (
+      <div className={primaryCls}>
+        {formatHuf(monthlyHuf)} {t("pricing.perMonth")}
+      </div>
+    );
+  }
+  const yearlyTotal = yearlyPriceHuf(monthlyHuf);
+  const monthlyAvg = Math.round(yearlyTotal / 12);
+  return (
+    <div>
+      <div className={primaryCls}>
+        {formatHuf(monthlyAvg)} {t("pricing.perMonth")}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug text-slate-400">
+        {formatHuf(yearlyTotal)} {t("pricing.yearlyBilledOnce")}
+      </div>
+    </div>
+  );
 }
 
 export function HomePricing(props: { campus?: boolean }) {
   const { campus = false } = props;
   const [interval] = useBillingInterval();
   const { t, locale } = useI18n();
-  const per = interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
-  const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
   const marketingVat = resolveVat({ country: SELLER_COUNTRY });
 
   return (
@@ -69,9 +92,7 @@ export function HomePricing(props: { campus?: boolean }) {
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.packages")}</div>
         <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t("pricing.hero")}</p>
         <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-foreground/85">{t("pricing.ethos")}</p>
-        <p className="mt-2 max-w-2xl text-[13px] italic leading-relaxed text-muted-foreground">
-          „{t("pricing.netNote")}”
-        </p>
+        <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">{t("pricing.netNote")}</p>
       </div>
 
       <PricingRopeHero />
@@ -113,18 +134,15 @@ export function HomePricing(props: { campus?: boolean }) {
                 ))}
               </ul>
               <div className="mt-auto pt-3">
-                <div className="text-base font-semibold text-foreground">
-                  {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval))} {per}
-                </div>
-                <div className="mt-1 inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                  {formatHuf(netAmount(TIER_MONTHLY_HUF[p.id], interval === "yearly" ? "monthly" : "yearly"))} {otherPer}
-                </div>
+                <TierPriceBlock monthlyHuf={TIER_MONTHLY_HUF[p.id]} interval={interval} />
               </div>
               <Button
                 asChild
                 className={cn(
                   "mt-2 h-8 text-[13px]",
-                  recommended ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400" : "border-white/35 bg-transparent text-foreground",
+                  recommended
+                    ? "btn-cta"
+                    : "border-white/35 bg-transparent text-foreground",
                 )}
                 variant={recommended ? "default" : "outline"}
               >
@@ -143,40 +161,45 @@ export function HomePricing(props: { campus?: boolean }) {
         })}
       </div>
 
-      <p className="mt-3 max-w-2xl rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
-        {t("pricing.seatDef")}
-      </p>
-
       <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{t("pricing.cumulative")}</p>
 
       <div className="mt-3">
         <PricingCompareTable />
       </div>
 
+      <PricingFootnotes />
+
       <div className="mt-3 space-y-2 rounded-2xl border border-border/60 bg-card px-4 py-3">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {t("pricing.slotExpandTitle")}
+          {t("pricing.jitTitle")}
         </div>
-        <p className="text-[12px] leading-relaxed text-muted-foreground">{t("pricing.slotExpandBody")}</p>
-        <p className="text-[12px] leading-relaxed text-muted-foreground">
-          <span aria-hidden>🎁 </span>
-          {t("pricing.slotReferralBonus")}
-        </p>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {SLOT_PACKS.map((p) => (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {JIT_ADDONS.map((a) => (
             <a
-              key={p.id}
-              href={billCheckoutUrl({ tier: "pro", interval, slotPack: p.id })}
+              key={a.id}
+              href={billCheckoutUrl({
+                tier: "pro",
+                interval,
+                addon: a.id,
+                slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+              })}
               className="rounded-lg border border-border/50 px-3 py-2 text-[12px] text-foreground hover:border-cyan-400/40"
               onClick={(e) => {
                 e.preventDefault();
-                window.location.assign(billCheckoutUrl({ tier: "pro", interval, slotPack: p.id }));
+                window.location.assign(
+                  billCheckoutUrl({
+                    tier: "pro",
+                    interval,
+                    addon: a.id,
+                    slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+                  }),
+                );
               }}
             >
-              <div className="font-medium">{slotPackLabel(p, locale)}</div>
+              <div className="font-medium">{jitAddonLabel(a, locale)}</div>
               <AddonPriceLine
                 className="mt-1"
-                monthlyNetHuf={p.priceHuf}
+                monthlyNetHuf={a.priceHuf}
                 interval={interval}
                 vatRate={marketingVat.rate}
               />
@@ -194,12 +217,15 @@ export function HomePricing(props: { campus?: boolean }) {
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.faq")}</div>
         {(
           [
-            ["brand.faqWhyQ", "brand.faqWhyA"],
-            ["brand.faqProQ", "brand.faqProA"],
-            ["brand.faqVatQ", "brand.faqVatA"],
+            ["faq-slot", "brand.faqCaseSlotQ", "brand.faqCaseSlotA"],
+            ["faq-pro", "brand.faqProConceptQ", "brand.faqProConceptA"],
+            ["faq-seat", "brand.faqSeatGuestQ", "brand.faqSeatGuestA"],
+            ["faq-case-reset", "brand.faqCaseResetQ", "brand.faqCaseResetA"],
+            [undefined, "brand.faqWhyQ", "brand.faqWhyA"],
+            [undefined, "brand.faqProQ", "brand.faqProA"],
           ] as const
-        ).map(([q, a]) => (
-          <details key={q} className="mt-1">
+        ).map(([id, q, a]) => (
+          <details key={q} id={id} className="mt-1 scroll-mt-24">
             <summary className="cursor-pointer py-2 text-left text-sm font-medium text-foreground">{t(q)}</summary>
             <p className="pb-2 text-[13px] text-muted-foreground">{t(a)}</p>
           </details>
@@ -212,20 +238,13 @@ export function HomePricing(props: { campus?: boolean }) {
 function CampusStrip({ interval }: { interval: BillingInterval }) {
   const href = billCheckoutUrl({ tier: "campus", interval, ref: "campus" });
   const { t } = useI18n();
-  const per = interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
-  const otherPer = interval === "yearly" ? t("pricing.perMonth") : t("pricing.perYear");
   return (
-    <div className="rounded-2xl border border-dashed border-cyan-400/35 bg-cyan-500/[0.06] p-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("pricing.campus")}</div>
+    <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-4">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{t("pricing.campus")}</div>
       <div className="mt-1 text-sm font-semibold text-foreground">{t("pricing.campusTitle")}</div>
       <p className="mt-1 text-[13px] text-muted-foreground">{t("pricing.campusBody")}</p>
       <div className="mt-2">
-        <div className="text-lg font-semibold text-foreground">
-          {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval))} {per}
-        </div>
-        <div className="mt-1 inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-muted-foreground">
-          {formatHuf(netAmount(CAMPUS_MONTHLY_HUF, interval === "yearly" ? "monthly" : "yearly"))} {otherPer}
-        </div>
+        <TierPriceBlock monthlyHuf={CAMPUS_MONTHLY_HUF} interval={interval} size="lg" />
       </div>
       <Button asChild className="mt-3 h-9" variant="outline">
         <a

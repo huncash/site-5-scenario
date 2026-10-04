@@ -1,5 +1,5 @@
 import { buildTierOffers, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
-import { WHY_FAQ } from "@/content/branding";
+import { CONCEPT_FAQ_ITEMS, WHY_FAQ } from "@/content/branding";
 import type { CampaignId } from "@/lib/campaignFunnels";
 
 const packages = STANDARD_TIER_COPY;
@@ -64,6 +64,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     packages,
     tierOffers: buildTierOffers(packages),
     faq: [
+      ...CONCEPT_FAQ_ITEMS,
       {
         q: "Ez világvége-szimulátor?",
         a: "Nem. Vállalati BCP és működési reziliencia. A pesszimista sáv érettség: aki a kiesést is számolja, az tartja a folytonosságot.",
@@ -106,6 +107,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     packages,
     tierOffers: buildTierOffers(packages),
     faq: [
+      ...CONCEPT_FAQ_ITEMS,
       {
         q: "Mi a Master Baseline?",
         a: "A cég működő törzse: partnerek, fix költség, core cash-flow. A stratégiai esetek ezt öröklik. A projekt csak a döntés rétegét viszi.",
@@ -148,6 +150,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     packages,
     tierOffers: buildTierOffers(packages),
     faq: [
+      ...CONCEPT_FAQ_ITEMS,
       {
         q: "Ez prepper- vagy bunker-szimulátor?",
         a: "Nem. Helyi önfenntartás és működési tartalék. A motor ugyanazokat a fizikai korlátokat számolja, mint a céges BCP — kisebb lépték.",
@@ -189,6 +192,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     packages,
     tierOffers: buildTierOffers(packages),
     faq: [
+      ...CONCEPT_FAQ_ITEMS,
       {
         q: "Ez ügyféladat?",
         a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő, nincs telemetria.",
@@ -231,6 +235,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     packages,
     tierOffers: buildTierOffers(packages),
     faq: [
+      ...CONCEPT_FAQ_ITEMS,
       {
         q: "Honnan jön a TFR?",
         a: "2023-as közzétett értékek helyi másolata. Strukturális trend, nem riadó. Nincs élő hívás.",

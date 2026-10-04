@@ -98,7 +98,7 @@ export function LedgerTxnRow({
                 "ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium opacity-90",
                 wsCls,
               )}
-              title={`Munkaterület: ${wsLabel}`}
+              title={`Slot: ${wsLabel}`}
             >
               {wsLabel}
             </span>

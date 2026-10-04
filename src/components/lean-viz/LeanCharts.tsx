@@ -34,7 +34,7 @@ export const SERIES_COLORS = {
   income: "#38bdf8",
   expense: "#fb7185",
   saving: "var(--accent-color)",
-  plus: "#34d399",
+  plus: "#40916c",
   minus: "#fb7185",
   neutral: "#94a3b8",
   source: "var(--accent-color)",

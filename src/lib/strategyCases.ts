@@ -96,13 +96,14 @@ export const STRATEGY_SEGMENTS: Array<{
   },
   {
     id: "demo11_strategy_kahn_fork",
-    name: "DEMO 11 — Kahn-féle jövőkutató & stratégiai elágazás",
-    title: "Kahn-féle Jövőkutató & Stratégiai Elágazás",
-    blurb: "Üzem bővítene. Hitel vagy saját tartalék; olcsó+kötbéres vagy drága+rugalmas. Először a rosszabb kimenet.",
+    name: "DEMO 11 — Bisztró bővítés & magánvagyon-kockázat",
+    title: "Bisztró bővítés & magánvagyon-kockázat szimuláció",
+    blurb:
+      "Vendéglátóipari kapacitás-elágazás, hitelek, magán ingatlanfedezet és adósságkezelés egyetlen integrált modellben.",
     lead:
-      "Egy üzem új sort vagy műszakot tervez. Felveszel hitelt, vagy a saját tartalékodból finanszírozod? Az olcsóbb hitel kilépéskor drága lehet — a rosszabb kimenetet nézd előbb.",
+      "Működő melegkonyhás bisztró elérte a kapacitásplafont. A tulajdonos lakására jelzálog/hitelkeret van. A-opció: terasz és konyha külső hitelből. B-opció: magán adósságrendezés és mérsékelt organikus fejlesztés. Először a pesszimista (Stop-Loss) ágat nézd.",
     baseRevenueNetHuf: MASTER_BASELINE.monthlyRevenueNet,
-    projectAlias: "Kapacitás-elágazás",
+    projectAlias: "Terasz & konyha elágazás",
     goalName: "60 napon belül döntés · rossz ágon ≥4 hó tartalék · árrés ≥12%",
   },
 ];

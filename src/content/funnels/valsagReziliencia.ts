@@ -1,5 +1,5 @@
 import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
-import { WHY_FAQ } from "@/content/branding";
+import { CONCEPT_FAQ_ITEMS, WHY_FAQ } from "@/content/branding";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -30,6 +30,7 @@ export const VALSAG_REZILIENCIA_FUNNEL = {
   packages,
   tierOffers: buildTierOffers(packages),
   faq: [
+    ...CONCEPT_FAQ_ITEMS,
     {
       q: "Ez világvége- vagy prepper-szimulátor?",
       a: "Nem. Vállalatnál BCP és működési reziliencia, makróban stratégiai előrejelzés, közösségben helyi önfenntartás. A pesszimista sáv érettség: a piac azt keresi, aki reziliens, nem aki vakon optimista.",

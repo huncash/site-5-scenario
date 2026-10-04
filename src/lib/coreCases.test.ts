@@ -42,22 +42,21 @@ describe("coreCases", () => {
     });
   });
 
-  it("routes each public case onto one door step without overlap", () => {
+  it("routes each public case onto one kind/industry without overlap", () => {
     const hospitality = coreCasesOnStep("hospitality");
     const manufacturing = coreCasesOnStep("manufacturing");
     const inner = coreCasesOnStep("inner");
     const listed = [
-      ...hospitality,
-      ...coreCasesOnStep("healthcare"),
-      ...manufacturing,
-      ...coreCasesOnStep("logistics"),
+      ...coreCasesOnStep("economic"),
+      ...coreCasesOnStep("resilience"),
+      ...coreCasesOnStep("education"),
       ...inner,
-      ...coreCasesOnStep("strategy"),
     ];
     expect(hospitality).toHaveLength(6);
     expect(manufacturing).toEqual(["demo8_industry_supply_shock", "demo9_industry_poka_recall"]);
-    expect(inner).toContain("demo18_personal_pocket_seasonal_pilot");
+    expect(inner).toEqual(["demo18_personal_pocket_seasonal_pilot"]);
     expect(new Set(listed).size).toBe(18);
+    expect(listed).toHaveLength(18);
   });
 
   it("groups login demos by scenario kind then industry", () => {

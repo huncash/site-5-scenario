@@ -45,7 +45,7 @@ export function KahnDecisionTree() {
     <div
       className="kahn-tree"
       role="img"
-      aria-label="Kahn-féle stratégiai döntési fa: hitel vagy organikus, A/B szerződés, majd PRO bővítés–tartás–tartalék"
+      aria-label="Bisztró stratégiai döntési fa: hitel vagy organikus, A/B szerződés, majd P-R-O bővítés–tartás–tartalék"
     >
       <div className="kahn-root">
         <span className="kahn-root-label">{MASTER_BASELINE_LABEL}</span>

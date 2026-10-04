@@ -1,5 +1,5 @@
 import { buildTierOffers, DEMO_STARTER_BLURB, PRICING_VAT_FAQ, STANDARD_TIER_COPY, type TierId } from "@/content/pricing/tiers";
-import { WHY_FAQ } from "@/content/branding";
+import { CONCEPT_FAQ_ITEMS, WHY_FAQ } from "@/content/branding";
 
 const packages = STANDARD_TIER_COPY;
 
@@ -28,6 +28,7 @@ export const OKTATAS_SZIMULACIO_FUNNEL = {
   packages,
   tierOffers: buildTierOffers(packages),
   faq: [
+    ...CONCEPT_FAQ_ITEMS,
     {
       q: "Mi keveredik itt?",
       a: "A fix PDCA keret. A pénzügyi sáv (burn, rezsi, helyreállás) és a Lean / Poka-Yoke mikro (OEE, SMED, kvóta, izoláció) ugyanazon a moszaikon van.",

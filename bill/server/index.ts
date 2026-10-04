@@ -56,7 +56,7 @@ function inferTier(name: string): BillTier {
   const n = name.toLowerCase();
   if (n.includes("campus") || n.includes("hallgató")) return "campus";
   if (n.includes("enterprise") || n.includes("nagyvállalat") || n.includes("nagyvallalat")) return "expert";
-  if (n.includes("alap")) return "starter";
+  if (n.includes("basic") || n.includes("alap")) return "starter";
   return "pro";
 }
 
@@ -155,9 +155,21 @@ function buyerFrom(body: Record<string, unknown>): Buyer | string {
   const email = String(body.email ?? "").trim();
   const taxId = String(body.taxId ?? "").trim();
   const country = String(body.country ?? "").trim() || countryFromTaxId(taxId) || undefined;
+  const rawKind = String(body.partnerKind ?? "").toLowerCase();
+  let partnerKind: Buyer["partnerKind"] = rawKind === "b2b" || rawKind === "b2c" ? rawKind : undefined;
+  if (!partnerKind) partnerKind = taxId.replace(/[\s./-]/g, "").length >= 8 ? "b2b" : "b2c";
   if (!name || !address || !email) return "Név, cím és e-mail kell.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Az e-mail formája hibás.";
-  return { name, address, email, taxId, country };
+  if (partnerKind === "b2b" && taxId.replace(/[\s./-]/g, "").length < 8) {
+    return "Céges vásárláskor az adószám megadása kötelező.";
+  }
+  if (partnerKind === "b2c" && body.immediateConsent !== true && body.immediateConsent !== "true") {
+    return "Fogyasztói vásárláskor az azonnali teljesítéshez való hozzájárulás kötelező.";
+  }
+  if (body.aszfAccepted !== true && body.aszfAccepted !== "true") {
+    return "Az ÁSZF és az adatvédelmi tájékoztató elfogadása kötelező.";
+  }
+  return { name, address, email, taxId, country, partnerKind };
 }
 
 async function handleApi(req: Request): Promise<Response> {

@@ -8,6 +8,7 @@ import {
 } from "@/content/branding";
 
 export type KnowledgeBaseCategoryId =
+  | "concepts"
   | "workspaces"
   | "promote"
   | "loans"
@@ -18,6 +19,9 @@ export type KnowledgeBaseCategoryId =
   | "lessons";
 
 export type KnowledgeBaseArticleId =
+  | "concept-case-slot"
+  | "concept-pro"
+  | "concept-seat-guest"
   | "workspaces-projects"
   | "promote-member-loan"
   | "loans-liabilities"
@@ -66,34 +70,87 @@ export type KnowledgeBaseArticle = {
 };
 
 export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }> = [
-  { id: "workspaces", title: "1. Munkaterületek & Projektek" },
+  { id: "concepts", title: "0. Fogalmak & Kapacitások" },
+  { id: "workspaces", title: "1. Slot / Munkaterek & Projektek" },
   { id: "promote", title: "2. Élesítés & Tagi kölcsön" },
   { id: "loans", title: "3. Hitelek & Kötelezettségek" },
   { id: "cashflow", title: "4. Cashflow & Megtakarítások" },
   { id: "bank-sync", title: "5. Banki Szinkron & Hash Dedup" },
   { id: "settings", title: "6. Beállítások & Danger Zone" },
-  { id: "scenario", title: "7. Szcenárió & PRO-grafikon" },
+  { id: "scenario", title: "7. P-R-O forgatókönyv & grafikon" },
   { id: "lessons", title: "8. Szcenárió-leckék" },
 ];
 
 export const KB_ARTICLES: KnowledgeBaseArticle[] = [
   {
+    id: "concept-case-slot",
+    category: "concepts",
+    title: "Case vs Slot – mi a különbség?",
+    summary:
+      "A Case egy elmentett döntési modell; a Slot a Case-en belüli lapfül (Magán, Vállalkozás, Projekt).",
+    body: `🎯 Fogalom
+- **Case:** komplett, elmentett döntési és szimulációs modell (pl. bisztró nyitás vagy átalakítás).
+- **Slot:** a Case-en belüli elkülönített adatterület / lapfül (Magán, Vállalkozás, Projekt).
+
+⚙️ Kapacitás
+- Egy Case-en belül a csomagodtól függően több Slot futhat párhuzamosan (Basic: 2, Pro: 4, Enterprise: 8 Case-enként).
+
+💡 Tip
+- Ne keverd a Slotot a P-R-O Szcenárióval: a Slot a tér, a P-R-O a három görbe azon a téren belül.`,
+    tags: ["case", "slot", "fogalom", "kapacitás"],
+  },
+  {
+    id: "concept-pro",
+    category: "concepts",
+    title: "P-R-O Szcenárió – mit jelent?",
+    summary:
+      "Pesszimista (🔴), Realista (🔵), Optimista (🟢) — három párhuzamos görbe minden Slotban és Case-ben.",
+    body: `🎯 Fogalom
+- A **P-R-O Szcenárió** a Pesszimista, Realista és Optimista kimenetelek rövidítése.
+- A motor minden Slotban automatikusan ezt a 3 párhuzamos görbét szimulálja.
+
+⚙️ Miért nem egy szám?
+- A cél a teljes kockázati mozgástér, nem egyetlen „jóslat”.
+
+💡 Tip
+- A grafikon nem a jövőt mutatja: a múlt adataidból számolt szórás és hibahatár.`,
+    tags: ["pro", "p-r-o", "szcenárió", "fogalom"],
+  },
+  {
+    id: "concept-seat-guest",
+    category: "concepts",
+    title: "Seat vs Guest",
+    summary:
+      "A Seat szerkesztői fiók; a Guest csak olvasható megosztás — nem fogyaszt Seat-et.",
+    body: `🎯 Fogalom
+- **Seat:** aktív módosítási joggal rendelkező szerkesztői fiók.
+- **Guest:** csak olvasható megosztás külső partnereknek, társtulajdonosoknak vagy könyvelőnek.
+
+⚙️ Kapacitás
+- Basic: 1 Seat + 1 Guest Code Slot · Pro: 1 Seat + 5 Guest Code Slot · Enterprise: 3 Seat + 20 Guest Code Slot.
+
+💡 Tip
+- A Guest nem írhatja át a modelljeidet; a kulcs bármikor visszavonható.`,
+    tags: ["seat", "guest", "fogalom", "hozzáférés"],
+  },
+  {
     id: "workspaces-projects",
     category: "workspaces",
-    title: "Munkaterületek & Projektek – mi a különbség?",
+    title: "Slotok & Projektek – mi a különbség?",
     summary:
-      "A munkaterület típusa (Magán / Vállalkozás / Projekt) segít ugyanazt a pénzügyi adatot más fókuszban látni: mindennapi keret, céges cashflow+ÁFA, vagy jövőbeli tervezés.",
+      "A Slot típusa (Magán / Vállalkozás / Projekt) segít ugyanazt a pénzügyi adatot más fókuszban látni: mindennapi keret, céges cashflow+ÁFA, vagy jövőbeli tervezés.",
     body: `🎯 Mire jó?
 - Hogy ugyanazokat a tételeket a megfelelő szemüvegen keresztül lásd: Magán (elkölthető keret), Vállalkozás (nettó+ÁFA és tartalék), Projekt (tervezés/szimuláció).
+- Ezek a típusok egy **Case**-en belüli **Slotok** — nem külön Case-ek.
 
 ⚙️ Hogyan működik?
 - Magán: bruttó szemlélet + perselyek/célok.
 - Vállalkozás: nettó tárolás + ÁFA logika, cashflow és ÁFA tartalék.
-- Projekt: fázis (Szimuláció / Pilot / Prep) + tétel státusz (tervezett / lekötött / tényleges) → forgatókönyv építés.
+- Projekt: fázis (Szimuláció / Pilot / Prep) + tétel státusz (tervezett / lekötött / tényleges) → P-R-O Szcenárió.
 
 💡 Pro Tip / Legjobb gyakorlat
 - Kezdd Projekttel, ha még formálódik az ötlet. Ha beérik, egy kattintással „élesítheted” (Promote) új Vállalkozássá vagy csatolhatod meglévőhöz.`,
-    tags: ["projekt", "pilot", "szimuláció", "ernyő", "workspaces"],
+    tags: ["projekt", "pilot", "szimuláció", "ernyő", "slot", "munkatér"],
   },
   {
     id: "promote-member-loan",
@@ -209,13 +266,13 @@ Mentéskor:
     category: "bank-sync",
     title: "Banki szinkron & SHA-256 deduplikáció",
     summary:
-      "A rendszer SHA-256 hash alapján megjegyzi a beolvasott fájlokat munkaterületenként, így elkerülhető a duplikált import – és van felülbírálás is.",
+      "A rendszer SHA-256 hash alapján megjegyzi a beolvasott fájlokat munkaterenként, így elkerülhető a duplikált import – és van felülbírálás is.",
     body: `🎯 Mire jó?
 - Hogy gyorsan és magabiztosan tudj importálni: a rendszer segít elkerülni a véletlen dupla beolvasást.
 
 ⚙️ Hogyan működik?
 - A CSV/XML tartalmából SHA-256 hash készül.
-- A hash workspace-scope: ugyanaz a fájl másik munkaterületre importálható.
+- A hash workspace-scope: ugyanaz a fájl másik munkatérre importálható.
 - Beállításokban törölhető az import memória (hash lista).
 - Importnál választható a „Force re-import” (dedup figyelmen kívül hagyása).
 
@@ -228,14 +285,14 @@ Mentéskor:
     category: "settings",
     title: "Beállítások & Danger Zone – mit csinál pontosan?",
     summary:
-      "A Danger Zone műveletek visszafordíthatatlan vagy nagy hatású törlések: import memória törlés, workspace purge, és végleges workspace törlés.",
+      "A Danger Zone műveletek visszafordíthatatlan vagy nagy hatású törlések: import memória törlés, Slot ürítés, és végleges Slot törlés.",
     body: `🎯 Mire jó?
-- Hogy kontrolláltan „rendbe tudd tenni” a munkaterületedet (pl. újrakezdés, teszt adatok takarítása), és közben tudd pontosan, mi fog változni.
+- Hogy kontrolláltan „rendbe tudd tenni” a munkateredet (pl. újrakezdés, teszt adatok takarítása), és közben tudd pontosan, mi fog változni.
 
 ⚙️ Hogyan működik?
 - Import memória törlése: csak a beolvasott fájl-hash listát üríti (újraimport lehetővé válik).
-- Workspace purge: törli az adott munkaterület tételeit + import előzményeket (és a kapcsolódó adatokat).
-- Végleges törlés: a munkaterület meta is kikerül, és a hozzá tartozó adat is törlődik.
+- Workspace purge: törli az adott munkatér tételeit + import előzményeket (és a kapcsolódó adatokat).
+- Végleges törlés: a munkatér meta is kikerül, és a hozzá tartozó adat is törlődik.
 
 💡 Pro Tip / Legjobb gyakorlat
 - Mielőtt nagy törlést indítasz, készíts egy titkosított mentést – így bármikor visszaállhatsz egy stabil pontra.`,
@@ -261,20 +318,20 @@ Mentéskor:
   {
     id: "new-workspace",
     category: "workspaces",
-    title: "„+ Új…” – hogyan válasszak munkaterület típust?",
+    title: "„+ Új…” – hogyan válasszak Slot típust?",
     summary:
-      "Magán = személyes, Vállalkozás = éles céges cashflow, Projekt = tervezés/szimuláció. Pilot projekt ernyővállalkozáshoz kapcsolható.",
+      "Magán = személyes, Vállalkozás = éles céges cashflow, Projekt = tervezés/szimuláció. Ezek egy Eseten belüli Slotok. Pilot projekt ernyővállalkozáshoz kapcsolható.",
     body: `🎯 Mire jó?
-- Hogy a megfelelő „üzemmódot” kapd: más KPI-k, más hangsúly, és gyorsabb döntéshozás.
+- Hogy a megfelelő „üzemmódot” kapd: más KPI-k, más hangsúly, és gyorsabb döntéshozás — egy Eseten belüli új Slotként.
 
 ⚙️ Hogyan működik?
 - Magán: személyes költések + megtakarítások (elkölthető keret).
 - Vállalkozás: céges cashflow + ÁFA + jogcímek (vezetői nézet).
-- Projekt: szimuláció/pilot/prep → státuszokkal és forgatókönyvekkel tervezel.
+- Projekt: szimuláció/pilot/prep → státuszokkal és P-R-O forgatókönyvvel tervezel.
 
 💡 Pro Tip / Legjobb gyakorlat
 - Ha nem biztos a konstrukció, indulj Projekttel (🧪 szimulációs szabadság), és csak akkor élesíts, amikor a számok és a folyamat összeállt.`,
-    tags: ["új", "workspace", "típus"],
+    tags: ["új", "slot", "munkatér", "típus"],
   },
   {
     id: "project-badges",
@@ -301,7 +358,7 @@ Mentéskor:
     summary:
       "🎯 Döntéstámogató lista: egy képernyőn látod a teljes képet (bevétel, kiadás, megtakarítás, törlesztés), és szűrhetsz a lényegre.",
     body: `🎯 Mire jó?
-- Hogy gyorsan átlásd: mi történt a pénzzel ebben a munkaterületben, és mi a „nettó eredmény” a kiválasztott szűrők szerint.
+- Hogy gyorsan átlásd: mi történt a pénzzel ebben a munkatérben, és mi a „nettó eredmény” a kiválasztott szűrők szerint.
 
 ⚙️ Hogyan működik?
 - A felső mini KPI-k a jelenlegi szűrés alapján számolódnak (összesítés).
@@ -395,7 +452,7 @@ Mentéskor:
     title: "Egyenleg – mit jelent a nettó eredmény a listában?",
     summary: "🎯 Gyors eredmény mutató: bevétel − kiadás − megtakarítás (a jelenlegi szűrés szerint).",
     body: `🎯 Mire jó?
-- Egy mondatban: „pluszban vagy mínuszban volt ez a munkaterület a kiválasztott tételek alapján?”
+- Egy mondatban: „pluszban vagy mínuszban volt ez a munkatér a kiválasztott tételek alapján?”
 
 ⚙️ Hogyan működik?
 - Az összesített bevétel, kiadás és megtakarítás különbsége.
@@ -584,46 +641,47 @@ ${PRO_ARTICLE_BODY}
   {
     id: "kahn-rand",
     category: "scenario",
-    title: "Herman Kahn és a RAND — a szcenárió eredete",
+    title: "Herman Kahn döntési elágazás & P-R-O szórásmodell",
     summary:
-      "Többágú jövőkép Kahn/RAND nyomán. Itt: hitel vagy organikus → A/B szerződés → PRO bővítés/tartás/tartalék — local-first.",
+      "Bisztró bővítés + magán ingatlanfedezet. P–R–O sávok és Stop-Loss a Core és a magánvagyon védelmére. DEMO 11, local-first.",
     body: `🎯 Mire jó?
-- Hogy a döntés előtt több lehetséges jövőt láss, ne egyetlen jóslatot.
+- Hogy a döntés előtt három párhuzamos pályát láss (🔴 P / 🔵 R / 🟢 O), ne egyetlen „legvalószínűbb” tervet — és lásd a magán–cég összefonódást.
 
 ⚙️ Hogyan működik?
-Herman Kahn a RAND Corporationnél a hidegháborúban dolgozta ki a szcenárió-módszert: alternatív jövőket rajzolsz, mielőtt elkötelezed az erőforrást. Nem riadó és nem jóslat — elágazás.
+Herman Kahn (RAND) szcenárió-módszere: kritikus elágazási pontok és szélsőséges kimenetek. A klasszikus fa korlátja: a magánvagyon kimaradt.
 
-A Szcenárió ugyanezt viszi a Master Baseline törzsre (demo: 14 fős core, 8,4 M Ft/hó). Két döntési fordulat:
-1) 4,5 M külső hitel vagy 3×1,1 M organikus kötés
-2) A: 0,9%/hó + 850 ezer kilépési kötbér · B: 1,25%/hó, kötbér 0
+A Szcenárió engine (DEMO 11 — Bisztró elágazás):
+1) Core: bisztró cash-flow, alapanyag, személyzet
+2) Magán: ingatlanfedezet, magánhitel, vésztartalék
+3) Projekt: terasz+konyha hitelből vs. adósságrendezés + organikus · P–R–O + Stop-Loss
 
-A PRO sáv a kimenet: optimista bővítés, realista tartás, pesszimista tartalék (stop-loss). A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
+A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
 
 💡 Pro Tip / Legjobb gyakorlat
-- Először a pesszimista ágat számold. Az „olcsó” hitel a kilépésnél drága lehet — Kahn óta ez a módszer lényege.
+- Akkor lépj előre, ha a pesszimista pálya mellett is megmarad a minimális működési runway — magán és cég együtt.
 
-A teljes esettanulmány-lecke a support tudástárban: Core → Kapacitás-projekt → Magán.`,
-    tags: ["kahn", "rand", "szcenárió", "döntési fa", "jövőkutatás", "demo19"],
+Teljes lecke: support tudástár → kahn-strategiai-elagazas.`,
+    tags: ["kahn", "rand", "bisztró", "P-R-O", "Stop-Loss", "demo11"],
   },
   {
     id: "lesson-kahn",
     category: "lessons",
-    title: "Kahn-elágazás — Core, projekt, Magán",
+    title: "Bisztró elágazás — Magán, Core, Projekt (P-R-O)",
     summary:
-      "Három fül egy történetben. Hitel vagy saját tartalék; kötbér vs rugalmas kilépés. A rosszabb kimenetet előbb számolod.",
+      "Kapacitásplafon, hitel vs. adósságrendezés, magán ingatlanfedezet. P–R–O és Stop-Loss. DEMO 11, local-first.",
     body: `🎯 Mire jó?
-- Hogy a bővítési döntés ne absztrakt mátrix legyen: lásd a törzset, a projektet és a magán kockázatot egy láncban.
+- Hogy a bővítés/hitelfelvétel előtt lásd a Cash Runway-t a pesszimista sávon — beleértve a magán fedezetet.
 
 ⚙️ Hogyan működik?
-1) Core üzem = a ház (14 fős működés).
-2) Kapacitás-projekt = hitel vs saját tartalék, olcsó+kötbéres vs drága+rugalmas, három sáv.
-3) Magán = ha bejön, kivét; ha elbukik, kivét-csökkentés a tartalékidő miatt.
+1) Core üzem (bisztró) runway és fix kötelezettségek.
+2) Magán/ingatlan: jelzálog, törlesztő, vésztartalék.
+3) Projekt elágazás + P–R–O (piros / kék / zöld) + Stop-Loss.
 
 A teljes lecke a support.szcenario.hu tudástárban (kahn-strategiai-elagazas).
 
 💡 Pro Tip / Legjobb gyakorlat
-- A döntés ára az, amit akkor fizetsz, ha visszalépsz. Először a rosszabb ágat olvasd.`,
-    tags: ["kahn", "demo19", "Magán", "Core", "kötbér", "runway"],
+- A rugalmasabb konstrukció rossz ágon is kilépési mozgásteret ad — először a 🔴 pesszimista sávot olvasd.`,
+    tags: ["kahn", "demo11", "bisztró", "P-R-O", "Core", "Stop-Loss", "runway"],
   },
   {
     id: "lesson-community",

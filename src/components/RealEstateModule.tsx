@@ -52,7 +52,7 @@ export function RealEstateModule({
           <CardTitle className="text-sm font-medium text-muted-foreground">🏠 {title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground">Nincs felvett ingatlan a Magán munkaterülethez.</div>
+          <div className="text-sm text-muted-foreground">Nincs felvett ingatlan a Magán munkatérhez.</div>
         </CardContent>
       </Card>
     );

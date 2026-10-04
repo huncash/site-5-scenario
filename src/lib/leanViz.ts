@@ -120,8 +120,7 @@ export function recommendLeanVisualizations(ctx: LeanVizContext): LeanVizAdvice[
       id: "viz.small_multiples.scenarios",
       kind: "small_multiples",
       slot: "plan.whatif",
-      title: "Forgatókönyvek: kis többszörösök",
-      why: "Három vonal egy grafikonon tésztaábra. Azonos skálájú miniatűrökön a kiugrás azonnal látszik.",
+      title: "P-R-O forgatókönyvek: kis többszörösök",      why: "Három vonal egy grafikonon tésztaábra. Azonos skálájú miniatűrökön a kiugrás azonnal látszik.",
       action: "A PLAN szimuláció a kis többszörösöket használja.",
     });
     out.push({

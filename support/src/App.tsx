@@ -5,7 +5,7 @@ import { lessonBySlug } from "./content";
 import {
   localizeLesson,
   supportCopy,
-  supportFaq,
+  supportFaqSections,
   supportKahn,
   supportLessons,
   supportTheory,
@@ -13,6 +13,20 @@ import {
 } from "./copy";
 import { Markdown } from "./markdown";
 
+/** Egyszerű **félkövér** a GYIK válaszokban. */
+function RichAnswer({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i}>{part.slice(2, -2)}</strong>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </span>
+  );
+}
 function KahnBonbon({ locale }: { locale: Locale }) {
   const k = supportKahn(locale);
   return (
@@ -101,13 +115,13 @@ function TicketForm({ locale }: { locale: Locale }) {
   );
 }
 
-function Items({ items }: { items: Array<{ q: string; a: string }> }) {
+function Items({ items }: { items: Array<{ q: string; a: string; id?: string }> }) {
   return (
     <div className="list">
       {items.map((x) => (
-        <div key={x.q} className="item">
+        <div key={x.id ?? x.q} id={x.id} className="item scroll-mt-24">
           <b>{x.q}</b>
-          <span>{x.a}</span>
+          <RichAnswer text={x.a} />
         </div>
       ))}
     </div>
@@ -116,13 +130,20 @@ function Items({ items }: { items: Array<{ q: string; a: string }> }) {
 
 function FaqSearch({ locale }: { locale: Locale }) {
   const t = supportCopy(locale);
-  const faq = supportFaq(locale);
+  const sections = supportFaqSections(locale);
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return faq;
-    return faq.filter((x) => `${x.q} ${x.a}`.toLowerCase().includes(needle));
-  }, [faq, q]);
+    if (!needle) return sections;
+    return sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (x) => `${section.category} ${x.q} ${x.a}`.toLowerCase().includes(needle),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [sections, q]);
 
   return (
     <div className="section-block">
@@ -136,11 +157,19 @@ function FaqSearch({ locale }: { locale: Locale }) {
           aria-label={t.searchPlaceholder}
         />
       </div>
-      {filtered.length ? <Items items={filtered} /> : <p className="note">{t.searchEmpty}</p>}
+      {filtered.length ? (
+        filtered.map((section) => (
+          <div key={section.category} className="faq-category">
+            <h3>{section.category}</h3>
+            <Items items={section.items} />
+          </div>
+        ))
+      ) : (
+        <p className="note">{t.searchEmpty}</p>
+      )}
     </div>
   );
 }
-
 function TicketGuard({
   locale,
   embed,

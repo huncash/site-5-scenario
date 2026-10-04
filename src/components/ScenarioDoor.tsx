@@ -1,6 +1,22 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { ArrowLeft, PlayCircle, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  CloudOff,
+  Cpu,
+  GraduationCap,
+  HardDrive,
+  KeyRound,
+  Laptop,
+  Lock,
+  PlayCircle,
+  SearchX,
+  ShieldAlert,
+  ShieldCheck,
+  UserCheck,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -9,19 +25,35 @@ import { CAMPAIGN_FUNNELS } from "@/content/funnels/campaigns";
 import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSession";
 import { demoSerialFromId, publicSegmentById, type DemoSegmentId } from "@/lib/demoCatalog";
-import { coreCasesOnStep, KAHN_SEGMENT_ID } from "@/lib/coreCases";
+import { coreCasesOnStep, KAHN_SEGMENT_ID, type DemoCatalogKind } from "@/lib/coreCases";
 import { readScenarioDoorStep, writeScenarioDoorStep, type ScenarioDoorStep } from "@/lib/doorStep";
-import { SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
+import {
+  AVAILABLE_SCENARIO_KINDS,
+  kindGroup,
+  LATER_KIND_BLURB_KEY,
+  LATER_KIND_TITLE_KEY,
+  LATER_SCENARIO_KINDS,
+  publicScenarioKindGroups,
+  SCENARIO_INDUSTRY_TITLE_KEY,
+  SCENARIO_KIND_BLURB_KEY,
+  SCENARIO_KIND_CARD_TITLE_KEY,
+  SCENARIO_KIND_FOOTER_KEY,
+  SCENARIO_KIND_TITLE_KEY,
+} from "@/lib/scenarioCatalog";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
+import { KahnEvolvePanel } from "@/components/strategy/KahnEvolvePanel";
 import { caseBlurb, caseTitle, useI18n, type MessageKey } from "@/i18n";
 import { useVault } from "@/lib/vault";
-import { localdb } from "@/lib/localdb";
-
 const HomePricing = lazy(() => import("@/components/home/HomePricing").then((m) => ({ default: m.HomePricing })));
 
-const LATER_TYPES = ["climate", "political"] as const;
+const KIND_STEPS = AVAILABLE_SCENARIO_KINDS;
 
-const ECONOMIC_INDUSTRIES = ["hospitality", "healthcare", "manufacturing", "strategy"] as const;
+const KIND_CARD_ICON: Record<DemoCatalogKind, LucideIcon> = {
+  economic: Cpu,
+  resilience: ShieldAlert,
+  education: GraduationCap,
+  inner: UserCheck,
+};
 
 export function ScenarioDoor() {
   const { t, locale } = useI18n();
@@ -37,7 +69,6 @@ export function ScenarioDoor() {
   const { unlockById, createProfile } = useVault();
   const [step, setStep] = useState<ScenarioDoorStep>("type");
   const [busyId, setBusyId] = useState<DemoSegmentId | null>(null);
-  const [resetBusy, setResetBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [campus, setCampus] = useState(false);
   const [campaignId, setCampaignId] = useState<CampaignId | null>(null);
@@ -48,8 +79,6 @@ export function ScenarioDoor() {
     coreCasesOnStep(stepName)
       .map((id) => publicSegmentById(id))
       .filter((s): s is NonNullable<typeof s> => Boolean(s));
-  const educationCases = useMemo(() => filterByCampaign(casesOn("education"), campaignId), [campaignId]);
-  const resilienceCases = useMemo(() => filterByCampaign(casesOn("resilience"), campaignId), [campaignId]);
   const strategyCases = useMemo(() => filterByCampaign(casesOn("strategy"), campaignId), [campaignId]);
 
   const preferDashboardHome = () => {
@@ -78,6 +107,7 @@ export function ScenarioDoor() {
     setStep(
       stored === "hospitality" ||
       stored === "industry" ||
+      stored === "economic" ||
       stored === "strategy" ||
       stored === "resilience" ||
       stored === "education" ||
@@ -86,7 +116,9 @@ export function ScenarioDoor() {
       stored === "logistics" ||
       stored === "services" ||
       stored === "inner"
-        ? stored
+        ? stored === "industry"
+          ? "economic"
+          : stored
         : "type",
     );
     try {
@@ -134,16 +166,16 @@ export function ScenarioDoor() {
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-foreground">{t("brand.name")}</div>
-            <div className="truncate text-[11px] leading-tight text-muted-foreground" title={t("brand.tagline")}>
-              {t("brand.tagline")}
+            <div
+              className="block truncate text-[10px] font-normal tracking-wide text-slate-300"
+              title={t("brand.heroPositioning")}
+            >
+              {t("brand.heroPositioning")}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ViewSettingsMenu />
-            <Button
-              asChild
-              className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
-            >
+            <Button asChild className="btn-cta h-8 px-3">
               <Link to="/login">{t("chrome.login")}</Link>
             </Button>
           </div>
@@ -151,57 +183,62 @@ export function ScenarioDoor() {
       </header>
 
       <div className="mx-auto w-full max-w-5xl space-y-10 px-4 py-8 pb-16">
-        <div className="space-y-5 text-center">
+        {/* Hero: márka → funkcionális pozicionálás (above-the-fold) → mikro. Szlogen lentebb. */}
+        <div className="mx-auto w-full max-w-3xl space-y-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             szcenario.hu
           </p>
-          <h1 className="mx-auto max-w-3xl text-balance text-[1.7rem] font-semibold leading-[1.18] tracking-tight text-foreground sm:text-3xl md:text-4xl">
-            {t("brand.heroHeadline")}
+          <h1 className="text-balance text-[2rem] font-semibold leading-[1.12] tracking-tight text-foreground sm:text-4xl md:text-5xl">
+            {t("brand.name")}
           </h1>
-          <p className="mx-auto max-w-2xl text-pretty text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+          <p
+            className="inline-flex max-w-full text-pretty rounded-md border border-[#2D6A4F]/45 bg-[#1B4332]/55 px-3 py-2 text-[13px] font-medium leading-snug text-[#F1F5F9] sm:text-[15px]"
+            role="doc-subtitle"
+          >
+            {t("brand.heroPositioning")}
+          </p>
+          <p className="text-pretty text-[14px] leading-relaxed text-slate-300 sm:text-[15px]">
+            {t("brand.heroMicro")}
+          </p>
+          <p className="text-pretty text-[13px] leading-relaxed text-muted-foreground sm:text-[14px]">
             {t("brand.heroSub")}
           </p>
-          <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-left text-[13px] leading-relaxed text-muted-foreground">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-emerald)]" />
-            <p>
-              <span className="font-semibold text-foreground">{t("brand.localFirstLabel")}</span>{" "}
-              {t("brand.localFirstBody")}
-            </p>
-          </div>
         </div>
 
         {step === "type" ? (
           <div className="space-y-12">
-            <section className="space-y-5" aria-labelledby="door-why-heading">
+            <section className="mx-auto w-full max-w-3xl space-y-5 text-left" aria-labelledby="door-why-heading">
               <h2
                 id="door-why-heading"
-                className="max-w-3xl text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
+                className="text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
               >
                 {t("brand.whyTitle")}
               </h2>
-              <p className="max-w-3xl text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+              <p className="text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
                 {t("brand.whyLead")}
               </p>
-              <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
+              <p className="text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
                 {t("brand.whyBody")}
               </p>
-              <div className="max-w-3xl space-y-2 border-l-2 border-cyan-400/40 pl-4">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-cyan-200/90">
+              <div className="space-y-2 border-l-2 border-slate-700 pl-4">
+                <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                   {t("brand.dailyOpsTitle")}
                 </p>
                 <p className="text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
                   {t("brand.dailyOpsBody")}
                 </p>
               </div>
-              <Link
-                to="/about"
-                className="inline-block text-[12px] text-[var(--accent)] underline-offset-4 hover:underline"
-              >
-                {t("door.aboutLink")}
-              </Link>
             </section>
 
             <section id="szcenariok" className="space-y-4 scroll-mt-24" aria-labelledby="door-case-heading">
+              <div className="max-w-3xl space-y-1 border-t border-slate-800 pt-8">
+                <p className="text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
+                  {t("brand.tagline")}
+                </p>
+                <p className="text-[13px] leading-relaxed text-slate-400 sm:text-[14px]">
+                  {t("rope.tipBody")}
+                </p>
+              </div>
               <div className="space-y-2">
                 <h2
                   id="door-case-heading"
@@ -212,33 +249,34 @@ export function ScenarioDoor() {
                 <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-muted-foreground sm:text-[15px]">
                   {t("brand.caseStudyLead")}
                 </p>
-                <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-cyan-100/90 sm:text-[15px]">
+                <p className="max-w-3xl text-pretty text-[14px] leading-relaxed text-slate-300 sm:text-[15px]">
                   {t("door.kahnBridge")}
                 </p>
               </div>
               <button
                 type="button"
-                disabled={busyId !== null || resetBusy}
+                disabled={busyId !== null}
                 onClick={() => void openCase(KAHN_SEGMENT_ID)}
-                className="w-full rounded-2xl border-2 border-cyan-300/80 bg-cyan-500/15 p-5 text-left shadow-[0_0_0_4px_rgba(34,211,238,0.12)] transition-colors hover:border-cyan-200 hover:bg-cyan-500/20"
+                className="w-full rounded-2xl border border-slate-800 bg-slate-900/70 p-5 text-left transition-colors hover:border-slate-700 hover:bg-slate-900/90"
               >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                   {t("door.kahnEyebrow")}
                 </div>
                 <div className="mt-1 text-lg font-semibold text-foreground sm:text-xl">{t("door.kahnTitle")}</div>
                 <p className="mt-2 max-w-3xl text-[13px] leading-snug text-muted-foreground">{t("door.kahnBody")}</p>
-                <span className="mt-4 inline-flex items-center gap-2 rounded-md bg-cyan-500 px-3 py-1.5 text-sm font-semibold text-slate-950">
+                <span className="btn-cta mt-4 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm">
                   <PlayCircle className="h-4 w-4" />
                   {busyId === KAHN_SEGMENT_ID ? t("door.opening") : t("door.kahnCta")}
                 </span>
               </button>
               <div className="space-y-3">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
                   {t("brand.proChartHeading")}
                 </div>
-                <ProChartSketch />
                 <ProChartCallout />
+                <ProChartSketch />
               </div>
+              <KahnEvolvePanel />
             </section>
 
             <section className="space-y-4" aria-labelledby="door-infra-heading">
@@ -255,13 +293,19 @@ export function ScenarioDoor() {
                 {t("brand.infraBody")}
               </p>
               <dl className="grid gap-3 sm:grid-cols-3">
-                <DoorFact term={t("brand.infraPoint1Title")}>{t("brand.infraPoint1Body")}</DoorFact>
-                <DoorFact term={t("brand.infraPoint2Title")}>{t("brand.infraPoint2Body")}</DoorFact>
-                <DoorFact term={t("brand.infraPoint3Title")}>{t("brand.infraPoint3Body")}</DoorFact>
+                <DoorFact term={t("brand.infraPoint1Title")} icon={CloudOff}>
+                  {t("brand.infraPoint1Body")}
+                </DoorFact>
+                <DoorFact term={t("brand.infraPoint2Title")} icon={SearchX}>
+                  {t("brand.infraPoint2Body")}
+                </DoorFact>
+                <DoorFact term={t("brand.infraPoint3Title")} icon={HardDrive}>
+                  {t("brand.infraPoint3Body")}
+                </DoorFact>
               </dl>
             </section>
 
-            <section id="tipusok" className="space-y-3 scroll-mt-24">
+            <section id="tipusok" className="space-y-4 scroll-mt-24">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("door.typesTitle")}
@@ -270,58 +314,81 @@ export function ScenarioDoor() {
                   {t("door.typesLead")}
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {(
-                  [
-                    { id: "industry", title: t("door.pillarIndustry"), blurb: t("door.pillarIndustryBlurb"), step: "industry" as const },
-                    { id: "logistics", title: t("door.pillarLogistics"), blurb: t("door.pillarLogisticsBlurb"), step: "logistics" as const },
-                    { id: "inner", title: t("door.pillarInner"), blurb: t("door.pillarInnerBlurb"), step: "inner" as const },
-                  ] as const
-                ).map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    onClick={() => go(row.step)}
-                    className="rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4 text-left transition-colors hover:border-cyan-300/50"
-                  >
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200">{t("door.available")}</div>
-                    <div className="mt-1 text-sm font-semibold text-foreground">{row.title}</div>
-                    <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{row.blurb}</p>
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                <TypesTrustBadge icon={ShieldCheck} label={t("door.typesBadgeLocal")} />
+                <TypesTrustBadge icon={KeyRound} label={t("door.typesBadgeCrypto")} />
+                <TypesTrustBadge icon={Zap} label={t("door.typesBadgeCash")} />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {LATER_TYPES.map((id) => (
+                {publicScenarioKindGroups().map((group) => {
+                  const Icon = KIND_CARD_ICON[group.kind];
+                  return (
+                    <button
+                      key={group.kind}
+                      type="button"
+                      onClick={() => go(group.kind)}
+                      className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-left transition-colors hover:border-slate-700"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/50 p-2.5">
+                          <Icon className="h-5 w-5 stroke-[1.5] text-emerald-600" aria-hidden />
+                        </div>
+                        <span className="rounded-md border border-emerald-800/40 bg-emerald-950/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-200/90">
+                          {t("door.available")}
+                        </span>
+                      </div>
+                      <div className="mt-3 text-sm font-semibold text-foreground">
+                        {t(SCENARIO_KIND_CARD_TITLE_KEY[group.kind])}
+                      </div>
+                      <p className="mt-1.5 text-[13px] leading-snug text-slate-300/90">
+                        {t(SCENARIO_KIND_BLURB_KEY[group.kind])}
+                      </p>
+                      <p className="mt-3 inline-flex rounded-md border border-slate-800 bg-slate-950/50 px-2.5 py-1 text-[11px] font-medium text-slate-400">
+                        {t(SCENARIO_KIND_FOOTER_KEY[group.kind])}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {LATER_SCENARIO_KINDS.map((id) => (
                   <div
                     key={id}
-                    className="rounded-2xl border border-dashed border-white/15 bg-card p-4"
+                    className="rounded-2xl border border-dashed border-white/15 bg-card/80 p-4"
                   >
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t("door.later")}
+                      {t("door.inDev")}
                     </div>
-                    <div className="mt-1 text-sm font-semibold text-foreground">{t(`door.type.${id}.title` as MessageKey)}</div>
-                    <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{t(`door.type.${id}.blurb` as MessageKey)}</p>
+                    <div className="mt-2 text-sm font-semibold text-foreground">{t(LATER_KIND_TITLE_KEY[id])}</div>
+                    <p className="mt-1.5 text-[13px] leading-snug text-slate-300/80">{t(LATER_KIND_BLURB_KEY[id])}</p>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="space-y-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("door.howTitle")}
+            <section className="space-y-5" aria-labelledby="door-how-heading">
+              <div className="text-center">
+                <h2
+                  id="door-how-heading"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
+                  {t("door.howTitle")}
+                </h2>
+                <p className="mx-auto mt-2 max-w-2xl text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+                  {t("door.howLead")}
+                </p>
               </div>
-              <dl className="grid gap-3 sm:grid-cols-2">
-                <DoorFact term={t("door.factLocal")}>
-                  {t("door.factLocalBody")}
-                </DoorFact>
-                <DoorFact term={t("door.factFocus")}>
-                  {t("door.factFocusBody")}
-                </DoorFact>
-                <DoorFact term={t("door.factDemo")}>{t("brand.demoPreviewBody")}</DoorFact>
-                <DoorFact term={t("door.factSave")}>
-                  {t("door.factSaveBody")}
-                </DoorFact>
-              </dl>
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
+                <HowValueCard icon={ShieldCheck} title={t("door.howLocalTitle")} body={t("door.howLocalBody")} />
+                <HowValueCard icon={Zap} title={t("door.howLeanTitle")} body={t("door.howLeanBody")} />
+                <HowValueCard icon={KeyRound} title={t("door.howSovTitle")} body={t("door.howSovBody")} />
+              </div>
+              <HowArchitecture
+                device={t("door.howArchDevice")}
+                engine={t("door.howArchEngine")}
+                flow={t("door.howArchFlow")}
+                blocked={t("door.howArchBlocked")}
+              />
             </section>
 
             <HomeProductShots />
@@ -331,132 +398,29 @@ export function ScenarioDoor() {
           </div>
         ) : null}
 
-        {step === "industry" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label={t("door.backTypes")} aside={t("door.economicAside")} />
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {t("door.industryLead")}
-            </p>
-            <div className="grid gap-3">
-              {ECONOMIC_INDUSTRIES.map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => go(id)}
-                    className="rounded-2xl border border-border/70 bg-card p-5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-card/80"
-                  >
-                    <div className="text-xs font-semibold uppercase tracking-wider text-primary">
-                      {t("door.available")}
-                    </div>
-                    <div className="mt-1 text-lg font-semibold text-foreground">{t(`door.industry.${id}.title` as MessageKey)}</div>
-                    <p className="mt-2 text-sm text-muted-foreground">{t(`door.industry.${id}.blurb` as MessageKey)}</p>
-                  </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === "hospitality" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("industry")} label={t("door.back")} aside={t("door.moreDemos")} />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">{t("brand.demoPreviewBody")}</p>
-            <div className="grid gap-2">
-              {casesOn("hospitality").map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === "education" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.education.title")} />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">
-              {campaign?.id === "oktatas"
+        {KIND_STEPS.includes(step as DemoCatalogKind) ? (
+          <KindBrowse
+            kind={step as DemoCatalogKind}
+            busyId={busyId}
+            onBack={() => go("type")}
+            onOpen={(id) => void openCase(id)}
+            face={face}
+            t={t}
+            lead={
+              step === "education" && campaign?.id === "oktatas"
                 ? campaign.chooserIntro
-                : t("door.educationLead")}
-            </p>
-            <div className="grid gap-2">
-              {educationCases.map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === "resilience" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.type.disaster.title")} />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">
-              {campaign && (campaign.id === "bcp" || campaign.id === "kozosseg" || campaign.id === "makro")
-                ? campaign.chooserIntro
-                : t("door.resilienceLead")}
-            </p>
-            <div className="grid gap-2">
-              {resilienceCases.map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
+                : step === "resilience" &&
+                    campaign &&
+                    (campaign.id === "bcp" || campaign.id === "kozosseg" || campaign.id === "makro")
+                  ? campaign.chooserIntro
+                  : t(SCENARIO_KIND_BLURB_KEY[step as DemoCatalogKind])
+            }
+          />
         ) : null}
 
         {step === "strategy" ? (
           <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.strategy.title")} />
+            <DoorBack onClick={() => go("economic")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.strategy.title")} />
             <p className="text-[12px] leading-relaxed text-muted-foreground">
               {campaign?.id === "strategia"
                 ? campaign.chooserIntro
@@ -488,45 +452,17 @@ export function ScenarioDoor() {
           </div>
         ) : null}
 
-        {step === "inner" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("type")} label={t("door.back")} aside={t("door.pillarInner")} />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">{t("door.pillarInnerBlurb")}</p>
-            <div className="grid gap-2">
-              {casesOn("inner").map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === "healthcare" || step === "manufacturing" || step === "logistics" ? (
+        {step === "healthcare" || step === "manufacturing" || step === "logistics" || step === "hospitality" ? (
           <div className="space-y-4">
             <DoorBack
-              onClick={() => go(step === "logistics" ? "type" : "industry")}
+              onClick={() => go("economic")}
               label={t("door.back")}
               aside={t(`door.industry.${step}.title` as MessageKey)}
             />
             <p className="text-[12px] leading-relaxed text-muted-foreground">
-              {t(`door.stepLead.${step}` as MessageKey)}
+              {step === "hospitality"
+                ? t("brand.demoPreviewBody")
+                : t(`door.stepLead.${step}` as MessageKey)}
             </p>
             <div className="grid gap-2">
               {casesOn(step).map((s) => (
@@ -555,43 +491,6 @@ export function ScenarioDoor() {
         ) : null}
 
         {error ? <p className="text-center text-xs font-medium text-destructive">{error}</p> : null}
-
-        <div className="border-t border-border/40 pt-6 text-center">
-          <Link to="/about" className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-            {t("chrome.about")}
-          </Link>
-          <span className="mx-2 text-muted-foreground/50">·</span>
-          <button
-            type="button"
-            className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            disabled={busyId !== null || resetBusy}
-            onClick={() => {
-              if (inFlight.current) return;
-              inFlight.current = true;
-              setResetBusy(true);
-              setError(null);
-              void (async () => {
-                try {
-                  const { enterRememberedOrFirstDemo } = await import("@/lib/demoSession");
-                  await enterRememberedOrFirstDemo({ unlockById, createProfile });
-                  const profileId = localdb.getActiveProfile();
-                  if (!profileId) throw new Error(t("door.noProfile"));
-                  await navigate({
-                    to: "/settings",
-                    search: { profile: profileId, tab: "danger", focus: SETTINGS_FOCUS_DEMO_RESET },
-                  });
-                } catch (err: unknown) {
-                  setError(err instanceof Error ? err.message : t("door.settingsFail"));
-                } finally {
-                  setResetBusy(false);
-                  inFlight.current = false;
-                }
-              })();
-            }}
-          >
-            {resetBusy ? t("chrome.unlocking") : t("door.resetCase")}
-          </button>
-        </div>
       </div>
       <SiteFooter inline />
     </div>
@@ -669,7 +568,7 @@ function PdcaShot() {
             <ShotLabel>0,8 M</ShotLabel>
           </div>
             <div className="flex items-end gap-1">
-            <div className="h-12 w-5 rounded-sm bg-emerald-400/70 a11y-pat-diagonal" />
+            <div className="h-12 w-5 rounded-sm bg-emerald-700/55 a11y-pat-diagonal" />
             <div className="h-8 w-5 rounded-sm bg-sky-400/60 a11y-pat-dots" />
           </div>
         </div>
@@ -773,7 +672,7 @@ function ItemsShot() {
           <div className="w-16 shrink-0 text-[10px] text-slate-400">{r.n}</div>
           <div className="relative h-5 flex-1 rounded-sm bg-slate-800">
             <div
-              className={`h-full rounded-sm bg-emerald-400/55 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots"][i]}`}
+              className={`h-full rounded-sm bg-emerald-700/45 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots"][i]}`}
               style={{ width: r.w }}
             />
           </div>
@@ -784,11 +683,150 @@ function ItemsShot() {
   );
 }
 
-function DoorFact({ term, children }: { term: string; children: ReactNode }) {
+function KindBrowse({
+  kind,
+  busyId,
+  onBack,
+  onOpen,
+  face,
+  t,
+  lead,
+}: {
+  kind: DemoCatalogKind;
+  busyId: DemoSegmentId | null;
+  onBack: () => void;
+  onOpen: (id: DemoSegmentId) => void;
+  face: (s: { id: string; title: string; blurb: string }) => { title: string; blurb: string };
+  t: (key: MessageKey, vars?: Record<string, string | number>) => string;
+  lead: string;
+}) {
+  const group = kindGroup(kind);
+  if (!group) return null;
   return (
-    <div className="rounded-xl border border-white/12 bg-card px-4 py-3">
+    <div className="space-y-4">
+      <DoorBack onClick={onBack} label={t("door.backTypes")} aside={t(SCENARIO_KIND_TITLE_KEY[kind])} />
+      <p className="text-[12px] leading-relaxed text-muted-foreground">{lead}</p>
+      <div className="space-y-4">
+        {group.industries.map((bucket) => (
+          <div key={bucket.industry} className="space-y-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200/90">
+              {t(SCENARIO_INDUSTRY_TITLE_KEY[bucket.industry])}
+            </div>
+            <div className="grid gap-2">
+              {bucket.segments.map((s) => {
+                const f = face(s);
+                return (
+                  <Button
+                    key={s.id}
+                    type="button"
+                    variant="secondary"
+                    className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
+                    disabled={busyId !== null}
+                    onClick={() => onOpen(s.id)}
+                  >
+                    <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">{f.title}</span>
+                      <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">{f.blurb}</span>
+                      {busyId === s.id ? (
+                        <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
+                      ) : null}
+                    </span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DoorFact({
+  term,
+  children,
+  icon: Icon,
+}: {
+  term: string;
+  children: ReactNode;
+  icon?: LucideIcon;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 px-4 py-3">
+      {Icon ? (
+        <div className="mb-2.5 flex justify-center">
+          <Icon className="h-7 w-7 stroke-[1.5] text-emerald-600" aria-hidden />
+        </div>
+      ) : null}
       <dt className="text-xs font-semibold uppercase tracking-wider text-foreground">{term}</dt>
       <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">{children}</dd>
+    </div>
+  );
+}
+
+function TypesTrustBadge({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/90 px-4 py-2 text-sm text-slate-300">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-800" aria-hidden />
+      <Icon className="h-4 w-4 stroke-[1.5] text-slate-400" aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+function HowValueCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-4 text-left">
+      <div className="mb-4 flex w-fit items-center justify-center rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+        <Icon className="h-6 w-6 stroke-[1.5] text-emerald-600" aria-hidden />
+      </div>
+      <h3 className="text-sm font-semibold leading-snug text-foreground">{title}</h3>
+      <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
+    </article>
+  );
+}
+
+function HowArchitecture({
+  device,
+  engine,
+  flow,
+  blocked,
+}: {
+  device: string;
+  engine: string;
+  flow: string;
+  blocked: string;
+}) {
+  return (
+    <div className="my-2 rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-6 sm:px-6">
+      <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+        <div className="flex flex-1 flex-col items-center gap-2 rounded-xl border border-slate-800/80 bg-slate-950/40 px-4 py-3 text-center">
+          <Laptop className="h-7 w-7 stroke-[1.5] text-emerald-600" aria-hidden />
+          <span className="text-[12px] font-semibold leading-snug text-foreground">{device}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 px-1 sm:min-w-[7rem]">
+          <div className="hidden h-px w-full bg-slate-700 sm:block" aria-hidden />
+          <div className="h-8 w-px bg-slate-700 sm:hidden" aria-hidden />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{flow}</span>
+        </div>
+        <div className="flex flex-1 flex-col items-center gap-2 rounded-xl border border-slate-800/80 bg-slate-950/40 px-4 py-3 text-center">
+          <Cpu className="h-7 w-7 stroke-[1.5] text-emerald-600" aria-hidden />
+          <span className="text-[12px] font-semibold leading-snug text-foreground">{engine}</span>
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2.5 text-center">
+        <Lock className="h-4 w-4 shrink-0 stroke-[1.5] text-slate-400" aria-hidden />
+        <p className="text-[12px] font-medium leading-snug text-slate-300">{blocked}</p>
+      </div>
     </div>
   );
 }

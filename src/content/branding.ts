@@ -1,9 +1,15 @@
 /** Nyilvános márka- és PRO-grafikon szövegek. SEO/ajtó: nincs következő lépés, nincs kopogtató. */
 
-export const HERO_HEADLINE =
-  "Kockázati mozgástér-modellezés — háztartástól a vállalkozásig, kompromisszumok nélkül.";
+import { CONCEPT_FAQ_HU } from "@/content/concepts";
+
+export const HERO_POSITIONING =
+  "Kockázati mozgástér-modellezés • 100%-ban lokális adatszuverenitás";
+export const HERO_MICRO =
+  "A modell a böngésződben fut: a döntési adat nem kötelezően felhőbe kerül.";
+export const HERO_HEADLINE = HERO_POSITIONING;
 export const HERO_SUBHEADLINE =
-  "Kaotikus táblázatok és bizonytalan, növekvő költségű felhős szoftverek helyett: helyben futó, szuverén számítás. Determinisztikus szórás- és hibahatár-számítás a saját gépeden — magán döntésektől (ingatlan, karrier) a vállalkozási stratégiáig.";
+  "Kaotikus táblázatok és bizonytalan, növekvő költségű felhős szoftverek helyett: helyben futó, szuverén számítás — magán döntésektől a vállalkozási stratégiáig.";
+export const HERO_SLOGAN = "Káoszból tiszta pálya.";
 export const HERO_LOCAL_FIRST_LABEL = "100%-ban lokális adatszuverenitás:";
 export const HERO_LOCAL_FIRST_BODY =
   "Adataid a böngészőben maradnak. Mentés fájl-exporttal vagy eszközök közötti (QR) szinkronnal. Nulla telemetria, nulla külső szerverfüggőség, teljes fizikai kontroll.";
@@ -57,3 +63,9 @@ export const WHY_FAQ = {
   q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",
   a: "Igen. A „jó/rossz év” találgatás kevés. Itt kockázati mozgástér-modellezés fut determinisztikus szórás- és hibahatár-számítással, 100%-ban lokális adatszuverenitással — háztartástól a vállalkozásig, a napi működtetésben is.",
 } as const;
+
+/** Funnel / pricing GYIK — fogalomhierarchia (Eset / Slot / P-R-O / Seat / Vendég). */
+export const CONCEPT_FAQ_ITEMS = CONCEPT_FAQ_HU.items.map((item) => ({
+  q: item.question,
+  a: item.answer.replace(/\*\*/g, ""),
+}));

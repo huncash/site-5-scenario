@@ -21,11 +21,11 @@ export function DemoSlotTeaser(props: {
         <p className="text-[12px] text-muted-foreground">{body}</p>
         <div className="flex flex-wrap items-center gap-2">
           {onCta ? (
-            <Button type="button" className="bg-cyan-500 text-slate-950 hover:bg-cyan-400" onClick={onCta}>
+            <Button type="button" className="btn-cta" onClick={onCta}>
               {cta}
             </Button>
           ) : (
-            <Button asChild className="bg-cyan-500 text-slate-950 hover:bg-cyan-400">
+            <Button asChild className="btn-cta">
               <a href={to}>{cta}</a>
             </Button>
           )}

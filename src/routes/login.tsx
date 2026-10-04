@@ -30,14 +30,15 @@ import {
 } from "lucide-react";
 import { ImportQrDialog } from "@/components/ProfileTransfer";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
-import { caseBlurb, caseTitle, useI18n, type MessageKey } from "@/i18n";
-import {
-  demoSerialFromId,
-  groupPublicDemoSegments,
-  type DemoCatalogIndustry,
-  type DemoCatalogKind,
-} from "@/lib/coreCases";
+import { caseBlurb, caseTitle, useI18n } from "@/i18n";
+import { demoSerialFromId } from "@/lib/coreCases";
 import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
+import {
+  publicScenarioKindGroups,
+  SCENARIO_INDUSTRY_TITLE_KEY,
+  SCENARIO_KIND_ACCENT,
+  SCENARIO_KIND_TITLE_KEY,
+} from "@/lib/scenarioCatalog";
 import { cn } from "@/lib/utils";
 import {
   LAST_PROFILE_KEY,
@@ -45,38 +46,11 @@ import {
   ensureDemoPackProfilesExist,
   enterDemoSegment,
 } from "@/lib/demoSession";
+import { GuestLoginCard } from "@/components/access/GuestLoginCard";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
-
-const DEMO_KIND_TITLE: Record<DemoCatalogKind, MessageKey> = {
-  economic: "login.demoKindEconomic",
-  resilience: "login.demoKindResilience",
-  education: "login.demoKindEducation",
-  inner: "login.demoKindInner",
-};
-
-const DEMO_INDUSTRY_TITLE: Record<DemoCatalogIndustry, MessageKey> = {
-  hospitality: "login.demoIndHospitality",
-  healthcare: "login.demoIndHealthcare",
-  manufacturing: "login.demoIndManufacturing",
-  logistics: "login.demoIndLogistics",
-  strategy: "login.demoIndStrategy",
-  education: "login.demoIndEducation",
-  firmBcp: "login.demoIndFirmBcp",
-  community: "login.demoIndCommunity",
-  household: "login.demoIndHousehold",
-  demography: "login.demoIndDemography",
-  personal: "login.demoIndPersonal",
-};
-
-const DEMO_KIND_ACCENT: Record<DemoCatalogKind, string> = {
-  economic: "border-l-sky-400/70",
-  resilience: "border-l-rose-400/70",
-  education: "border-l-emerald-400/70",
-  inner: "border-l-slate-400/70",
-};
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -152,7 +126,7 @@ function LoginPage() {
     const n = Number(demo);
     const byNum =
       Number.isInteger(n) && n >= 1 && n <= 18
-        ? (groupPublicDemoSegments()
+        ? (publicScenarioKindGroups()
             .flatMap((g) => g.industries.flatMap((b) => b.segments))
             .find((s) => demoSerialFromId(s.id) === n)?.id ?? null)
         : null;
@@ -401,6 +375,8 @@ function LoginPage() {
             </Button>
           </form>
 
+          <GuestLoginCard />
+
           {/* Additional Options */}
           <div className="mt-6 border-t border-border/60 pt-5 space-y-3">
             <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -444,16 +420,16 @@ function LoginPage() {
                 </div>
 
                 <div className="mt-3 space-y-4">
-                  {groupPublicDemoSegments().map((group) => (
+                  {publicScenarioKindGroups().map((group) => (
                     <div
                       key={group.kind}
                       className={cn(
                         "space-y-2 rounded-lg border border-border/50 bg-background/40 py-2.5 pl-3 pr-2 border-l-4",
-                        DEMO_KIND_ACCENT[group.kind],
+                        SCENARIO_KIND_ACCENT[group.kind],
                       )}
                     >
                       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {t(DEMO_KIND_TITLE[group.kind])}
+                        {t(SCENARIO_KIND_TITLE_KEY[group.kind])}
                       </p>
                       <div className="space-y-3">
                         {group.industries.map((bucket) => (
@@ -462,7 +438,7 @@ function LoginPage() {
                               variant="outline"
                               className="text-[10px] font-medium text-foreground/90"
                             >
-                              {t(DEMO_INDUSTRY_TITLE[bucket.industry])}
+                              {t(SCENARIO_INDUSTRY_TITLE_KEY[bucket.industry])}
                             </Badge>
                             <div className="grid grid-cols-1 gap-1.5">
                               {bucket.segments.map((s) => (

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { PairingGateway } from "@/components/PairingGateway";
 import { ACCESS_ROLE, writeAccessRole, writeViewerToken } from "@/lib/accessRole";
+import { claimGuestSession, parseGuestCode } from "@/lib/auth/guestSlots";
 import { isViewerInviteRevokedLocally, roleFromConnectSearch } from "@/lib/viewerInvite";
 
 export const Route = createFileRoute("/connect")({
@@ -23,6 +24,9 @@ function ConnectPage() {
     if (isViewerInviteRevokedLocally(session)) return;
     writeAccessRole(ACCESS_ROLE.VIEWER_READONLY);
     writeViewerToken(session);
+    if (parseGuestCode(session)) {
+      void claimGuestSession({ code: session });
+    }
   }, [accessRole, session]);
 
   return <PairingGateway sessionId={session} accessRole={accessRole} />;

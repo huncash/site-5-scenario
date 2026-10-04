@@ -128,7 +128,7 @@ export function WorkspaceSettings({
   const saveAll = () => {
     ask(
       "Biztosan frissíted a törzsadat-kapcsolatot?",
-      `Mentés a(z) „${workspaceLabel}” munkaterületre (workspace_id: ${workspaceId}).`,
+      `Mentés a(z) „${workspaceLabel}” munkatérre (workspace_id: ${workspaceId}).`,
       () => {
         void Promise.resolve(
           onPersistMeta(
@@ -183,10 +183,10 @@ export function WorkspaceSettings({
 
           {showWorkspaceSwitcher && workspaceOptions && onWorkspaceChange ? (
             <div className="flex flex-col gap-2 sm:max-w-xs">
-              <Label className="text-[11px] text-muted-foreground">Munkatér</Label>
+              <Label className="text-[11px] text-muted-foreground">Slot</Label>
               <Select value={workspaceId} onValueChange={onWorkspaceChange}>
                 <SelectTrigger className="h-10 w-full sm:w-[240px]" title="Workspace váltó">
-                  <SelectValue placeholder="Válassz munkateret" />
+                  <SelectValue placeholder="Válassz Slot / Munkateret" />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaceOptions.map((w) => (
@@ -802,7 +802,7 @@ export function WorkspaceSettings({
           </CardHeader>
           <CardContent>
             {wsLoans.length === 0 ? (
-              <div className="text-sm text-muted-foreground">Nincs tartozás ezen a munkaterületen.</div>
+              <div className="text-sm text-muted-foreground">Nincs tartozás ezen a munkatéren.</div>
             ) : (
               <ul className="grid gap-3">
                 {wsLoans.map((l) => (
@@ -851,7 +851,7 @@ export function WorkspaceSettings({
                           onClick={() =>
                             ask(
                               "Tartozás törlése?",
-                              `„${l.name}” végleg törlődik a(z) ${workspaceId} munkaterületről.`,
+                              `„${l.name}” végleg törlődik a(z) ${workspaceId} munkatérről.`,
                               () => void onDeleteLoan(l.id),
                             )
                           }

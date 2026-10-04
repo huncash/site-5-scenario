@@ -20,6 +20,8 @@ export function billCheckoutUrl(opts: {
   referral?: string;
   /** Slot bővítő pack (campus kizárva a bill oldalon). */
   slotPack?: string;
+  /** JIT egység-modul: case_plus_1 | slot_plus_1 | seat_plus_1 | guest_plus_1 */
+  addon?: string;
   country?: string;
   utm?: CampaignUtm;
 }): string {
@@ -33,6 +35,7 @@ export function billCheckoutUrl(opts: {
     "";
   if (pendingReferral) url.searchParams.set("referral", pendingReferral.toUpperCase());
   if (opts.slotPack) url.searchParams.set("slotPack", opts.slotPack);
+  if (opts.addon) url.searchParams.set("addon", opts.addon);
   const stored = typeof window !== "undefined" ? readCampaignAttribution() : null;
   applyAttributionSearchParams(
     url,

@@ -47,6 +47,8 @@ export type ActivationTicket = {
   emailHint: string;
   profileLabel: string;
   used: boolean;
+  /** b2c | b2b — elállási / ÁSZF besorolás a pénztárból. */
+  partnerKind?: "b2c" | "b2b";
   campaignId?: CampaignId;
   utm?: CampaignUtm;
 };

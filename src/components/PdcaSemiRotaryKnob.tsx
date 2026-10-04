@@ -178,7 +178,7 @@ export const PdcaSemiRotaryKnob = forwardRef<PdcaSemiRotaryKnobHandle, {
           {/* C (bottom-right) */}
           <path
             d="M 0 0 L 45 0 A 45 45 0 0 1 0 45 Z"
-            fill="#10B981"
+            fill="#2D6A4F"
             fillOpacity="0.8"
             stroke="#059669"
             strokeWidth="1.5"

@@ -53,7 +53,7 @@ export function isWorkspacePath(pathname: string): boolean {
 
 export function isPublicMarketingPath(pathname: string): boolean {
   const path = normalizePath(pathname);
-  if (path === "/" || path === "/about" || path === "/login") return true;
+  if (path === "/" || path === "/about" || path === "/gdpr" || path === "/aszf" || path === "/login") return true;
   if (path.startsWith("/f/")) return true;
   return path === "/bcp" || path === "/oktatas" || path === "/strategia" || path === "/kozosseg" || path === "/makro";
 }

@@ -4,23 +4,25 @@ export type SlotPackId = "slot_plus_1" | "slot_plus_3" | "slot_plus_5";
 
 const MONTHLY_HUF: Record<BillTier, number> = {
   starter: 8_900,
-  pro: 24_900,
+  pro: 24_420,
   expert: 59_000,
   campus: 1_490,
 };
 
 const LABELS: Record<BillTier, string> = {
-  starter: "Alap",
+  starter: "Basic",
   pro: "Pro",
   expert: "Enterprise",
   campus: "Hallgatói / Campus",
 };
 
-/** Nettó Ft / hó — a yearly a fő csomag kedvezményével számol. */
+const SLOT_UNIT_HUF = 2_900;
+
+/** Nettó Ft / hó — egységár × db (JIT), yearly a fő csomag kedvezményével. */
 export const SLOT_PACK_HUF: Record<SlotPackId, number> = {
-  slot_plus_1: 2_900,
-  slot_plus_3: 7_900,
-  slot_plus_5: 11_900,
+  slot_plus_1: SLOT_UNIT_HUF * 1,
+  slot_plus_3: SLOT_UNIT_HUF * 3,
+  slot_plus_5: SLOT_UNIT_HUF * 5,
 };
 
 export function slotPackNetForInterval(packId: SlotPackId, interval: BillInterval): number {
@@ -35,11 +37,31 @@ export const SLOT_PACK_SLOTS: Record<SlotPackId, number> = {
 };
 
 export const SLOT_PACK_LABELS: Record<SlotPackId, string> = {
-  slot_plus_1: "+1 Extra Szcenárió Slot",
-  slot_plus_3: "+3 Extra Szcenárió Slot csomag",
-  slot_plus_5: "+5 Extra Szcenárió Slot csomag",
+  slot_plus_1: "+1 Extra Slot",
+  slot_plus_3: "+3 Extra Slot",
+  slot_plus_5: "+5 Extra Slot",
 };
 
+/** JIT egység-modulok (Case / Slot / Seat / Guest). */
+export type JitAddonId = "case_plus_1" | "slot_plus_1" | "seat_plus_1" | "guest_plus_1";
+
+export const JIT_ADDON_HUF: Record<JitAddonId, number> = {
+  case_plus_1: 4_900,
+  slot_plus_1: 2_900,
+  seat_plus_1: 6_900,
+  guest_plus_1: 1_200,
+};
+
+export const JIT_ADDON_LABELS: Record<JitAddonId, string> = {
+  case_plus_1: "+1 Extra Case",
+  slot_plus_1: "+1 Extra Slot",
+  seat_plus_1: "+1 Extra Seat",
+  guest_plus_1: "+1 Extra Guest",
+};
+
+export function isJitAddonId(v: unknown): v is JitAddonId {
+  return v === "case_plus_1" || v === "slot_plus_1" || v === "seat_plus_1" || v === "guest_plus_1";
+}
 export function isSlotPackId(v: unknown): v is SlotPackId {
   return v === "slot_plus_1" || v === "slot_plus_3" || v === "slot_plus_5";
 }

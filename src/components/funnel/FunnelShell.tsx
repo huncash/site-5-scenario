@@ -25,18 +25,17 @@ export function FunnelShell(props: {
             <Link to="/" className="block min-w-0 truncate text-sm font-semibold text-foreground">
               {t("brand.name")}
             </Link>
-            <div className="truncate text-[11px] leading-tight text-muted-foreground" title={t("brand.tagline")}>
-              {t("brand.tagline")}
+            <div
+              className="block truncate text-[10px] font-normal tracking-wide text-slate-300"
+              title={t("brand.heroPositioning")}
+            >
+              {t("brand.heroPositioning")}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {rightSlot}
             <ViewSettingsMenu />
-            <Button
-              asChild
-              size="sm"
-              className="h-8 bg-[var(--accent)] px-3 font-semibold text-[var(--btn-text)] shadow-md hover:opacity-90"
-            >
+            <Button asChild size="sm" className="btn-cta h-8 px-3">
               <Link to="/login">{t("chrome.login")}</Link>
             </Button>
           </div>

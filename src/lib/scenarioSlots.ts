@@ -1,6 +1,7 @@
-/** Szcenárió-slot kapacitás: alapcsomag + bővítő mátrix + ajánlói ajándék slot. */
+/** Slot kapacitás: csomagmátrix (Eset × Slot/Eset) + bővítő + ajánlói ajándék. */
 
-import { yearlyPriceHuf } from "@/content/pricing/tiers";
+import { slotPackPriceFromUnit } from "@/content/pricing/addons";
+import { TIER_CAPACITY, yearlyPriceHuf } from "@/content/pricing/tiers";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
 export type PublicTierId = "starter" | "pro" | "expert";
@@ -20,21 +21,47 @@ export type SlotPack = {
 /** Ajánlói ajándék slot hard cap (aktív párokra). */
 export const MAX_REFERRAL_GIFT_SLOTS = 25;
 
-/** Alap szcenárió-helyek csomagonként (marketing + engine). */
+function totalSlotsForTier(tier: PublicTierId): number {
+  const c = TIER_CAPACITY[tier];
+  return c.cases * c.slotsPerCase;
+}
+
+/**
+ * Összes Slot a csomagban (Eset × Slot/Eset alsó határ).
+ * Basic 1×2=2 · Pro 2×4=8 · Enterprise 5×8=40.
+ */
 export const BASE_SCENARIO_SLOTS: Record<SlotTierId, number> = {
-  starter: 3,
-  pro: 8,
-  expert: 20,
+  starter: totalSlotsForTier("starter"),
+  pro: totalSlotsForTier("pro"),
+  expert: totalSlotsForTier("expert"),
   campus: 5,
   local: 8,
 };
 
+/** Egységár × db (JIT) — nincs mélykedvezmény, ami aláásná a Pro/Enterprise margót. */
 export const SLOT_PACKS: SlotPack[] = [
-  { id: "slot_plus_1", slots: 1, priceHuf: 2_900, labelHu: "+1 Extra Szcenárió Slot", labelEn: "+1 Extra scenario slot" },
-  { id: "slot_plus_3", slots: 3, priceHuf: 7_900, labelHu: "+3 Extra Szcenárió Slot csomag", labelEn: "+3 Extra scenario slot pack" },
-  { id: "slot_plus_5", slots: 5, priceHuf: 11_900, labelHu: "+5 Extra Szcenárió Slot csomag", labelEn: "+5 Extra scenario slot pack" },
+  {
+    id: "slot_plus_1",
+    slots: 1,
+    priceHuf: slotPackPriceFromUnit(1),
+    labelHu: "+1 Extra Slot",
+    labelEn: "+1 Extra Slot",
+  },
+  {
+    id: "slot_plus_3",
+    slots: 3,
+    priceHuf: slotPackPriceFromUnit(3),
+    labelHu: "+3 Extra Slot",
+    labelEn: "+3 Extra Slot",
+  },
+  {
+    id: "slot_plus_5",
+    slots: 5,
+    priceHuf: slotPackPriceFromUnit(5),
+    labelHu: "+5 Extra Slot",
+    labelEn: "+5 Extra Slot",
+  },
 ];
-
 export function isSlotPackId(v: unknown): v is SlotPackId {
   return v === "slot_plus_1" || v === "slot_plus_3" || v === "slot_plus_5";
 }

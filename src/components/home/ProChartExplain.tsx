@@ -12,7 +12,24 @@ export function ProChartCallout(props: { compact?: boolean; className?: string }
         <HelpIcon kbId="pro-chart" title={t("brand.proSketchAria")} />
       </div>
       {compact ? null : (
-        <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{t("brand.proWhy")}</p>
+        <div className="mt-1.5 space-y-2 text-[13px] leading-relaxed text-muted-foreground">
+          <p>{t("brand.proWhy")}</p>
+          <ul className="space-y-1">
+            <li className="flex items-center gap-2">
+              <span className={PRO_SWATCH_CLASS.opt} aria-hidden />
+              <span>{t("brand.proWhyOpt")}</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={PRO_SWATCH_CLASS.real} aria-hidden />
+              <span>{t("brand.proWhyReal")}</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={PRO_SWATCH_CLASS.pess} aria-hidden />
+              <span>{t("brand.proWhyPess")}</span>
+            </li>
+          </ul>
+          <p>{t("brand.proWhyRule")}</p>
+        </div>
       )}
     </aside>
   );

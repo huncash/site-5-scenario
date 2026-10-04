@@ -196,3 +196,17 @@ export function splitVat(net: number, rate: number): { net: number; vat: number;
   const vat = Math.round((n * rate) / 100);
   return { net: n, vat, gross: n + vat };
 }
+
+/**
+ * Publikus bruttó megjelenítés: legközelebbi 10 Ft-ra kerekítve
+ * (4900→6223→6220, 2900→3683→3680, 6900→8763→8760, 1200→1524→1520).
+ */
+export function roundCommercialGrossHuf(gross: number): number {
+  if (!Number.isFinite(gross)) return 0;
+  return Math.round(gross / 10) * 10;
+}
+
+/** Nettó → kerekített publikus bruttó (ÁFA-val). */
+export function publicGrossFromNet(net: number, rate: number): number {
+  return roundCommercialGrossHuf(splitVat(net, rate).gross);
+}

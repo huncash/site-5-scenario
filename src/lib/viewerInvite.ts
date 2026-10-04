@@ -1,82 +1,75 @@
 import { ACCESS_ROLE, type AccessRole } from "@/lib/accessRole";
+import {
+  findGuestSlotByCode,
+  generateNextGuestCode,
+  isGuestCodeActive,
+  listGuestSlots,
+  normalizeGuestCode,
+  revokeGuestCode,
+  type GuestCodeSlot,
+} from "@/lib/auth/guestSlots";
 
+/** @deprecated Prefer GuestCodeSlot — kept for connect / panel compatibility. */
 export type ViewerInvite = {
   id: string;
   token: string;
   createdAt: string;
   revokedAt: string | null;
   label?: string;
+  slotIndex?: number;
+  fragment?: string | null;
 };
 
-const STORE_KEY = "szcenario_viewer_invites_v1";
-
-function load(): ViewerInvite[] {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (!raw) return [];
-    const rows = JSON.parse(raw) as ViewerInvite[];
-    return Array.isArray(rows) ? rows : [];
-  } catch {
-    return [];
-  }
-}
-
-function save(rows: ViewerInvite[]): void {
-  localStorage.setItem(STORE_KEY, JSON.stringify(rows));
-  window.dispatchEvent(new Event("szcenario:viewer_invites"));
-}
-
-function randomToken(): string {
-  const bytes = new Uint8Array(12);
-  crypto.getRandomValues(bytes);
-  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-  return `VW-${hex.slice(0, 8).toUpperCase()}-${hex.slice(8, 16).toUpperCase()}`;
-}
-
-/** Tulajdonos: egy kattintással korlátozott szinkronkulcs. */
-export function createViewerInvite(label?: string): ViewerInvite {
-  const invite: ViewerInvite = {
-    id: crypto.randomUUID(),
-    token: randomToken(),
-    createdAt: new Date().toISOString(),
-    revokedAt: null,
-    label: label?.trim() || undefined,
+function slotToInvite(s: GuestCodeSlot): ViewerInvite | null {
+  if (!s.code) return null;
+  return {
+    id: `guest-slot-${s.index}`,
+    token: s.code,
+    createdAt: s.createdAt ?? new Date().toISOString(),
+    revokedAt: s.revokedAt,
+    label: `Guest #${String(s.index).padStart(2, "0")}`,
+    slotIndex: s.index,
+    fragment: s.fragment,
   };
-  const rows = load();
-  rows.unshift(invite);
-  save(rows);
-  return invite;
+}
+
+/** Seat: következő szabad Guest Code Slot feltöltése. */
+export function createViewerInvite(label?: string): ViewerInvite {
+  void label;
+  const res = generateNextGuestCode();
+  if (!res.ok) {
+    throw new Error(
+      res.reason === "pool_full"
+        ? "Nincs szabad Guest Code Slot a csomagban."
+        : "Guest kód nem generálható.",
+    );
+  }
+  const inv = slotToInvite(res.slot);
+  if (!inv) throw new Error("Guest kód nem generálható.");
+  return inv;
 }
 
 export function listViewerInvites(): ViewerInvite[] {
-  return load();
+  return listGuestSlots()
+    .map(slotToInvite)
+    .filter((x): x is ViewerInvite => Boolean(x));
 }
 
 export function revokeViewerInvite(token: string): boolean {
-  const rows = load();
-  const i = rows.findIndex((r) => r.token === token);
-  if (i < 0) return false;
-  if (rows[i].revokedAt) return true;
-  rows[i] = { ...rows[i], revokedAt: new Date().toISOString() };
-  save(rows);
-  return true;
+  return revokeGuestCode(token);
 }
 
 export function findViewerInvite(token: string): ViewerInvite | null {
-  const t = token.trim();
-  if (!t) return null;
-  return load().find((r) => r.token === t) ?? null;
+  const slot = findGuestSlotByCode(token);
+  return slot ? slotToInvite(slot) : null;
 }
 
 /**
- * Tulajdonos gépen: csak aktív meghívó engedélyezett.
- * Vendég gépen (nincs helyi meghívó rekord): a URL szerepköre érvényes, amíg a tulajdonos
- * visszavonás után új párosítást nem utasít el.
+ * Seat gépen: csak aktív (nem visszavont) kód.
+ * Vendég gépen (nincs helyi pool rekord): formai Guest kód elfogadott.
  */
 export function isViewerInviteActive(token: string): boolean {
-  const inv = findViewerInvite(token);
-  if (!inv) return true;
-  return !inv.revokedAt;
+  return isGuestCodeActive(token);
 }
 
 export function isViewerInviteRevokedLocally(token: string): boolean {
@@ -86,7 +79,7 @@ export function isViewerInviteRevokedLocally(token: string): boolean {
 
 export function viewerConnectUrl(token: string, origin = typeof window !== "undefined" ? window.location.origin : ""): string {
   const url = new URL("/connect", origin || "https://app.szcenario.hu");
-  url.searchParams.set("session", token);
+  url.searchParams.set("session", normalizeGuestCode(token));
   url.searchParams.set("role", ACCESS_ROLE.VIEWER_READONLY);
   return url.toString();
 }

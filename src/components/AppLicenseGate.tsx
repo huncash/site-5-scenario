@@ -32,7 +32,7 @@ export function AppLicenseGate({ onGranted }: { onGranted?: () => void }) {
       <div className="w-full max-w-md space-y-4 rounded-2xl border border-border/60 bg-card p-8">
         <h1 className="text-xl font-semibold text-foreground">app.szcenario.hu</h1>
         <p className="text-sm text-muted-foreground">
-          Védett munkaterület. A belépés a bill.szcenario.hu rendelési tokenjével (rendelésazonosító vagy SZC-kód) nyílik.
+          Védett munkatér. A belépés a bill.szcenario.hu rendelési tokenjével (rendelésazonosító vagy SZC-kód) nyílik.
           A szcenáriók a saját eszközödön maradnak.
         </p>
         <form className="grid gap-3" onSubmit={(e) => void submit(e)}>
