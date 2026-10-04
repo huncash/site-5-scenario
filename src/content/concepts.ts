@@ -25,15 +25,15 @@ export const CONCEPT_FAQ_HU: ConceptFaqSection = {
   items: [
     {
       id: "faq-case",
-      question: "Mi a Case?",
+      question: "Mi az Aktív Case?",
       answer:
-        "A **Case** a komplett, elmentett döntési és szimulációs modell.",
+        "Az **Aktív Case** az egyidejűleg éles döntési / szimulációs munkaterület. A licenc a párhuzamosan futó aktív Case-ek számát köti — nem a felhalmozott adatokét. Lezárt Case törölhető vagy felülírható díj nélkül.",
     },
     {
       id: "faq-slot",
-      question: "Mi a Slot?",
+      question: "Mi az Aktív Slot?",
       answer:
-        "A **Slot** a Case-en belüli elkülönített adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt. Egy Case-en belül a csomagtól függően több Slot is futhat egyidejűleg.",
+        "Az **Aktív Slot** a Case-en belüli egyidejűleg éles adatterület (lapfül: Magán, Vállalkozás, Projekt). Inaktív Slot törölhető / felülírható; új párhuzamos éles Slot-hoz bővítő modul kell.",
     },
     {
       id: "faq-pro",

@@ -151,7 +151,7 @@ export const FAQ_GENERAL: FaqItem[] = [
   { q: "Működik offline?", a: "Az app igen. A support iframe hálózatot kér; offline a helyi súgó marad." },
   {
     q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",
-    a: "Igen. A hagyományos „jó/rossz év” találgatás kevés. Itt a szcenárió-módszertan Lean eszközökkel és a múlt adataiból számolt szórással fut: strukturált jövőkép, a napi működtetésben is.",
+    a: "Igen, sokkal több. A „jó év / rossz év” csak két statikus szám egy táblázat alján. A Szcenárió viszont egy élő forgatókönyv: megmutatja a döntéseid láncreakcióját és pontos időzítését. Nem azt találgatja, mi lesz év végén, hanem megmutatja, hogy egy váratlan kiadás vagy kieső bevétel pontosan melyik hónapban és napon éri el a kritikus biztonsági határodat — így nem utólag reagálsz, hanem előre látod a mozgásteredet.",
   },
   {
     q: "Hogyan értelmezzük a Pesszimista – Realista – Optimista (PRO) grafikont?",

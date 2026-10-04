@@ -609,9 +609,9 @@ Mentéskor:
     category: "scenario",
     title: "Miért „Szcenárió” — túl a jó/rossz éven",
     summary:
-      "Nem két találgatott év. A szcenárió-módszertan Lean eszközökkel és a múlt adataiból számolt szórással ad strukturált, alacsonyabb hibahatárú jövőképet.",
+      "Nem két statikus évvég-szám. A szcenárió élő forgatókönyv: időzítés, láncreakció és Stop-Loss a döntési idővonalon.",
     body: `🎯 Mire jó?
-- Hogy a tervezés ne merüljön ki egy „jó” és egy „rossz” év beírásában.
+- Hogy a tervezés ne merüljön ki egy „jó” és egy „rossz” év beírásában — hanem lássd a folyamatot, a mikort és a döntési pontokat.
 
 ⚙️ Hogyan működik?
 ${WHY_LEAD}
@@ -621,8 +621,8 @@ ${WHY_BODY}
 ${DAILY_OPS_BODY}
 
 💡 Pro Tip / Legjobb gyakorlat
-- Frissítsd a múltbeli adatokat, ha változik a piac: a szórás és a mozgástér azonnal újraszámolódik, és látszik, hol kell beavatkozni.`,
-    tags: ["szcenárió", "lean", "jövőkép", "márka"],
+- Olvasd a P-R-O görbéket időrendben: nem az év végi összeget keresd, hanem azt a hónapot, amikor a pesszimista szál eléri a Stop-Loss határt.`,
+    tags: ["szcenárió", "forgatókönyv", "idővonal", "stop-loss", "márka"],
   },
   {
     id: "pro-chart",

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "@tanstack/react-router";
 import {
   CloudOff,
   Cpu,
+  GitBranch,
   HardDrive,
   KeyRound,
   Laptop,
@@ -10,6 +11,8 @@ import {
   PlayCircle,
   SearchX,
   ShieldCheck,
+  TrendingUp,
+  Upload,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -177,6 +180,22 @@ export function ScenarioDoor() {
                   {t("brand.dailyOpsBody")}
                 </p>
               </div>
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  className="btn-cta h-11 px-5 text-[14px] font-semibold"
+                  onClick={() => {
+                    const root = scrollerRef.current;
+                    const el = document.getElementById("csomagok");
+                    if (!root || !el) return;
+                    const top =
+                      el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop - 12;
+                    root.scrollTo({ top, behavior: "smooth" });
+                  }}
+                >
+                  {t("pricing.viewPlansCta")}
+                </Button>
+              </div>
             </section>
 
             <section id="szcenariok" className="space-y-4 scroll-mt-24" aria-labelledby="door-case-heading">
@@ -292,17 +311,51 @@ export function ScenarioDoor() {
               </div>
             </section>
 
-            <section className="space-y-5" aria-labelledby="door-how-heading">
+            <section id="how-it-works" className="scroll-mt-24 space-y-5" aria-labelledby="door-how-heading">
               <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("door.howTitle")}
+                </p>
                 <h2
                   id="door-how-heading"
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  className="mx-auto mt-2 max-w-2xl text-pretty text-[15px] font-semibold leading-relaxed text-foreground/90 sm:text-base"
                 >
-                  {t("door.howTitle")}
-                </h2>
-                <p className="mx-auto mt-2 max-w-2xl text-pretty text-[15px] leading-relaxed text-foreground/90 sm:text-base">
                   {t("door.howLead")}
+                </h2>
+              </div>
+              <ol className="grid list-none gap-3 grid-cols-1 md:grid-cols-3 p-0">
+                <HowValueCard
+                  step="1"
+                  icon={Upload}
+                  title={t("door.howStep1Title")}
+                  body={t("door.howStep1Body")}
+                />
+                <HowValueCard
+                  step="2"
+                  icon={GitBranch}
+                  title={t("door.howStep2Title")}
+                  body={t("door.howStep2Body")}
+                />
+                <HowValueCard
+                  step="3"
+                  icon={TrendingUp}
+                  title={t("door.howStep3Title")}
+                  body={t("door.howStep3Body")}
+                />
+              </ol>
+            </section>
+
+            <section id="under-the-hood" className="scroll-mt-24 space-y-5" aria-labelledby="door-hood-heading">
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("door.hoodTitle")}
                 </p>
+                <h2
+                  id="door-hood-heading"
+                  className="mx-auto mt-2 max-w-2xl text-pretty text-[15px] font-semibold leading-relaxed text-foreground/90 sm:text-base"
+                >
+                  {t("door.hoodLead")}
+                </h2>
               </div>
               <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
                 <HowValueCard icon={ShieldCheck} title={t("door.howLocalTitle")} body={t("door.howLocalBody")} />
@@ -552,19 +605,29 @@ function HowValueCard({
   icon: Icon,
   title,
   body,
+  step,
 }: {
   icon: LucideIcon;
   title: string;
   body: string;
+  step?: string;
 }) {
+  const Tag = step ? "li" : "article";
   return (
-    <article className="rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-4 text-left">
-      <div className="mb-4 flex w-fit items-center justify-center rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-        <Icon className="h-6 w-6 stroke-[1.5] text-emerald-600" aria-hidden />
+    <Tag className="rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-4 text-left">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex w-fit items-center justify-center rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+          <Icon className="h-6 w-6 stroke-[1.5] text-emerald-600" aria-hidden />
+        </div>
+        {step ? (
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {step}
+          </span>
+        ) : null}
       </div>
       <h3 className="text-sm font-semibold leading-snug text-foreground">{title}</h3>
       <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
-    </article>
+    </Tag>
   );
 }
 

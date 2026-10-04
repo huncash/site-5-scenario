@@ -43,7 +43,7 @@ export type TierCapacity = {
 
 function quotasToCapacity(q: PlanQuotas): TierCapacity {
   return {
-    cases: q.cases,
+    cases: q.cases === "unlimited" ? 999 : q.cases,
     slotsPerCase: q.slotsPerCase,
     editors: q.seats,
     guests: q.guests,
@@ -68,7 +68,7 @@ export const TIER_CORE: TierCore[] = getPublicPlans().map((p) => ({
 }));
 
 export const PRICING_HERO =
-  "A Basic, Pro és Enterprise csomagok a Case*, Slot**, P-R-O Szcenárió*** és Seat / Guest**** kapacitását skálázzák. Minden csomag: 100%-ban lokális adatszuverenitás és kiszámítható, fix költségszerkezet.";
+  "Fizess egyszer, használd örökké — 100% off-grid szuverenitás";
 
 /** @deprecated Lábjegyzetbe került — ne ismételd a mátrix celláiban. */
 export const PRICING_SEAT_DEF =

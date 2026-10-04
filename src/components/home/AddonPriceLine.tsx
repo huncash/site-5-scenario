@@ -1,20 +1,23 @@
-import { yearlyPriceHuf } from "@/content/pricing/tiers";
 import { publicGrossFromNet } from "@/content/pricing/vat";
 import { useI18n } from "@/i18n";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
-/** Add-on ár: kerekített bruttó + nettó alcím (ÁFA % nélkül a publikus sorban). */
+/** Add-on ár: kerekített bruttó + nettó alcím. Perpetual: egyszeri (once). */
 export function AddonPriceLine(props: {
   monthlyNetHuf: number;
-  interval: BillingInterval;
+  interval: BillingInterval | "once";
   vatRate: number;
   className?: string;
 }) {
   const { t, money } = useI18n();
-  const dueNet =
-    props.interval === "yearly" ? yearlyPriceHuf(props.monthlyNetHuf) : props.monthlyNetHuf;
+  const dueNet = props.monthlyNetHuf;
   const gross = publicGrossFromNet(dueNet, props.vatRate);
-  const per = props.interval === "yearly" ? t("pricing.perYear") : t("pricing.perMonth");
+  const per =
+    props.interval === "once"
+      ? t("pricing.once")
+      : props.interval === "yearly"
+        ? t("pricing.perYear")
+        : t("pricing.perMonth");
 
   return (
     <div className={props.className}>

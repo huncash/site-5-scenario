@@ -1,5 +1,5 @@
 /**
- * JIT add-on unit prices — forrás: `JIT_ADDON_PRICES` (`src/config/plans.ts`).
+ * JIT örökös modulárak — forrás: `JIT_ADDON_PRICES` (`src/config/plans.ts`).
  */
 
 import {
@@ -13,38 +13,46 @@ export { JIT_ADDON_MIN_COMMITMENT_DAYS };
 
 export type JitAddon = {
   id: JitAddonId;
-  /** Nettó Ft / hó / db */
+  /** Nettó Ft / örökös modul (egyszeri). */
   priceHuf: number;
   labelHu: string;
   labelEn: string;
+  /** Publikus JIT listában megjelenik. */
+  public: boolean;
 };
 
 export const JIT_ADDONS: JitAddon[] = [
   {
-    id: "case_plus_1",
-    priceHuf: JIT_ADDON_PRICES.case_plus_1,
-    labelHu: "+1 Extra Case",
-    labelEn: "+1 Extra Case",
-  },
-  {
     id: "slot_plus_1",
     priceHuf: JIT_ADDON_PRICES.slot_plus_1,
-    labelHu: "+1 Extra Slot",
-    labelEn: "+1 Extra Slot",
+    labelHu: "+1 Extra aktív Slot (örökös modul)",
+    labelEn: "+1 Extra active Slot (perpetual module)",
+    public: true,
   },
   {
     id: "seat_plus_1",
     priceHuf: JIT_ADDON_PRICES.seat_plus_1,
-    labelHu: "+1 Extra Seat",
-    labelEn: "+1 Extra Seat",
+    labelHu: "+1 Extra Seat / szerkesztő (örökös modul)",
+    labelEn: "+1 Extra Seat / editor (perpetual module)",
+    public: true,
   },
   {
     id: "guest_plus_1",
     priceHuf: JIT_ADDON_PRICES.guest_plus_1,
     labelHu: "+1 Extra Guest",
     labelEn: "+1 Extra Guest",
+    public: false,
+  },
+  {
+    id: "case_plus_1",
+    priceHuf: JIT_ADDON_PRICES.case_plus_1,
+    labelHu: "+1 Extra aktív Case (örökös modul)",
+    labelEn: "+1 Extra active Case (perpetual module)",
+    public: true,
   },
 ];
+
+export const PUBLIC_JIT_ADDONS = JIT_ADDONS.filter((a) => a.public && a.priceHuf > 0);
 
 export const JIT_ADDON_BY_ID: Record<JitAddonId, JitAddon> = Object.fromEntries(
   JIT_ADDONS.map((a) => [a.id, a]),
@@ -58,12 +66,12 @@ export function jitAddonLabel(addon: JitAddon, locale: "hu" | "en"): string {
   return locale === "en" ? addon.labelEn : addon.labelHu;
 }
 
-/** Test helper: +1 Case + 3 Slot net bundle. */
+/** Test helper: 1 Slot + 1 Seat örökös modul. */
 export function jitExampleBundleHuf(): number {
-  return JIT_ADDON_BY_ID.case_plus_1.priceHuf + 3 * JIT_ADDON_BY_ID.slot_plus_1.priceHuf;
+  return JIT_ADDON_BY_ID.slot_plus_1.priceHuf + JIT_ADDON_BY_ID.seat_plus_1.priceHuf;
 }
 
-/** Slot pack qty — unit × count. */
+/** Slot pack qty — unit × count (örökös). */
 export function slotPackPriceFromUnit(qty: 1 | 3 | 5): number {
   return JIT_ADDON_BY_ID.slot_plus_1.priceHuf * qty;
 }

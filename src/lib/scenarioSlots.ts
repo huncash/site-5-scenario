@@ -67,9 +67,10 @@ export function slotPackLabel(pack: SlotPack, locale: "hu" | "en"): string {
   return locale === "en" ? pack.labelEn : pack.labelHu;
 }
 
-/** Add-on nettó a fő előfizetés billing cycle-jével szinkronban. */
-export function slotPackNetForInterval(monthlyNetHuf: number, interval: BillingInterval): number {
-  return interval === "yearly" ? yearlyPriceHuf(monthlyNetHuf) : monthlyNetHuf;
+/** JIT Slot örökös modul — egyszeri ár (interval legacy, nincs havi átszámítás). */
+export function slotPackNetForInterval(oneTimeNetHuf: number, _interval: BillingInterval): number {
+  void yearlyPriceHuf;
+  return oneTimeNetHuf;
 }
 
 /** Campus / zárt oktatási keret: bővítő mátrix ki van zárva. */

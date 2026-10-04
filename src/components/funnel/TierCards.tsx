@@ -16,22 +16,20 @@ import type { BillingInterval } from "@/lib/funnelOrder";
 import { cn } from "@/lib/utils";
 
 function PriceLines(props: { monthly: number; interval: BillingInterval }) {
-  const { monthly, interval } = props;
-  if (interval === "monthly") {
+  const { monthly } = props;
+  void props.interval;
+  void yearlyPriceHuf;
+  if (!monthly) {
     return (
       <div className="mt-2">
-        <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthly)} / hó</div>
+        <div className="text-[15px] font-semibold text-slate-100">Egyedi árazás</div>
       </div>
     );
   }
-  const yearly = yearlyPriceHuf(monthly);
-  const monthlyAvg = Math.round(yearly / 12);
   return (
     <div className="mt-2">
-      <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthlyAvg)} / hó</div>
-      <div className="mt-0.5 text-[11px] text-slate-300">
-        {formatHuf(yearly)} / év (egy összegben)
-      </div>
+      <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthly)} (Éves hűség-licenc)</div>
+      <div className="mt-0.5 text-[11px] text-slate-300">2. év: −25% · 3. év: −40% · 4. évtől: örökélet</div>
     </div>
   );
 }

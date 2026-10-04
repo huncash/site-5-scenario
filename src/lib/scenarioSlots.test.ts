@@ -25,23 +25,25 @@ describe("scenarioSlots", () => {
     let ledger = emptySlotLedger("starter");
     ledger = addPurchasedPack(ledger, "slot_plus_3");
     ledger = addPermanentBonus(ledger, 1);
-    // Basic: 1 Eset × 2 Slot = 2 + pack(3) + gift(1)
-    expect(totalScenarioSlots(ledger)).toBe(2 + 3 + 1);
+    // Solo: 1 Case × 3 Slot = 3 + pack(3) + gift(1)
+    expect(totalScenarioSlots(ledger)).toBe(3 + 3 + 1);
     ledger = addPermanentBonus(ledger, MAX_REFERRAL_GIFT_SLOTS);
     expect(ledger.permanentBonus).toBe(MAX_REFERRAL_GIFT_SLOTS);
   });
 
-  it("aligns add-on net with monthly/yearly billing cycle", () => {
-    expect(slotPackNetForInterval(2_900, "monthly")).toBe(2_900);
-    expect(slotPackNetForInterval(2_900, "yearly")).toBe(yearlyPriceHuf(2_900));
+  it("treats JIT slot packs as one-time perpetual price", () => {
+    expect(slotPackNetForInterval(49_000, "monthly")).toBe(49_000);
+    expect(slotPackNetForInterval(49_000, "yearly")).toBe(49_000);
+    void yearlyPriceHuf;
   });
 
   it("signals limit_reached for chooser UI", () => {
     const ledger = emptySlotLedger("starter");
-    const r = checkScenarioSlotCapacity(2, ledger);
+    const r = checkScenarioSlotCapacity(3, ledger);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.reason).toBe("limit_reached");
-  });});
+  });
+});
 
 describe("referral gift rules", () => {
   it("rejects same billing fingerprint", () => {

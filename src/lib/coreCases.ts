@@ -5,6 +5,7 @@ import {
   LENS_CASE_IDS,
   PUBLIC_DEMO_SEGMENTS,
   isCoreCaseId as catalogIsCore,
+  publicDemoSegments as catalogPublicDemoSegments,
   type BaseCaseId,
   type CoreCaseId,
   type DemoSegmentId,
@@ -14,6 +15,7 @@ import {
 import type { ScenarioDoorStep } from "@/lib/doorStep";
 import { industryCaseById, isIndustrySegment } from "@/lib/industryCases";
 import { isEducationSegment } from "@/lib/educationCases";
+import { filterPublicCases } from "@/lib/private/publicCaseFilter";
 import { isResilienceSegment } from "@/lib/resilienceCases";
 import { isStrategySegment } from "@/lib/strategyCases";
 
@@ -91,7 +93,7 @@ export function isLensCaseId(id: string | null | undefined): id is LensCaseId {
 }
 
 export function publicDemoSegments() {
-  return PUBLIC_DEMO_SEGMENTS;
+  return catalogPublicDemoSegments();
 }
 
 /** Eset / Szituáció fajta (ajtó „type” réteg) a login demó indító csoportosításához. */
@@ -161,7 +163,7 @@ export function groupPublicDemoSegments(): DemoCatalogKindGroup[] {
   const byKind = new Map<DemoCatalogKind, Map<DemoCatalogIndustry, DemoSegmentMeta[]>>();
   for (const kind of KIND_ORDER) byKind.set(kind, new Map());
 
-  for (const seg of PUBLIC_DEMO_SEGMENTS) {
+  for (const seg of filterPublicCases(PUBLIC_DEMO_SEGMENTS)) {
     const { kind, industry } = catalogPlacement(seg.id);
     const indMap = byKind.get(kind)!;
     const list = indMap.get(industry) ?? [];

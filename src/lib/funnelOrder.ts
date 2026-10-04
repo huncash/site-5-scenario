@@ -53,9 +53,10 @@ export type ActivationTicket = {
   utm?: CampaignUtm;
 };
 
-export function chargeHuf(tierId: TierId, interval: BillingInterval): number {
-  const m = TIER_MONTHLY_HUF[tierId];
-  return interval === "yearly" ? yearlyPriceHuf(m) : m;
+/** Örökös listaár (egyszeri) — interval legacy, nincs havi átszámítás. */
+export function chargeHuf(tierId: TierId, _interval: BillingInterval): number {
+  void yearlyPriceHuf;
+  return TIER_MONTHLY_HUF[tierId] ?? 0;
 }
 
 export function readActivationTicket(): ActivationTicket | null {

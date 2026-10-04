@@ -1,4 +1,5 @@
 import { MASTER_BASELINE } from "@/lib/masterBaseline";
+import { filterPublicCases } from "@/lib/private/publicCaseFilter";
 
 export const DEMO_PASSWORD = "demo";
 
@@ -64,6 +65,8 @@ export type DemoSegmentMeta = {
   blurb: string;
   lead: string;
   baseRevenueNetHuf: number;
+  /** Ha true, soha nem jelenik meg publikus listában / ajtón. */
+  isPrivate?: boolean;
 };
 
 export const HOSPITALITY_SEGMENTS: DemoSegmentMeta[] = [
@@ -249,5 +252,5 @@ export function publicSegmentById(id: string | null | undefined): DemoSegmentMet
 }
 
 export function publicDemoSegments(): DemoSegmentMeta[] {
-  return PUBLIC_DEMO_SEGMENTS;
+  return filterPublicCases(PUBLIC_DEMO_SEGMENTS);
 }

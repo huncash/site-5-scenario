@@ -1,3 +1,4 @@
+import { ENGINE_VERSION } from "@/config/plans";
 import { billPublicOrigin } from "@/lib/billing";
 import {
   activeGiftSlotsFromCredits,
@@ -23,9 +24,16 @@ export type LicenseStatus = "paid" | "invoiced" | "awaiting_transfer" | "local";
 export type LicenseEntitlement = {
   token: string;
   tier: string;
+  /** @deprecated Perpetual modell — legacy bill mező; „perpetual” / „maintenance”. */
   interval: string;
   status: LicenseStatus;
   verifiedAt: string;
+  /** Licencelt motorverzió (semver) — frissítés nélkül efölé nem lép. */
+  engineVersion?: string;
+  /** Frissítési jogosultság vége (ISO) — included year vagy maintenance. */
+  updatesUntil?: string | null;
+  /** Runtime lejárat (ISO); null/undefined = örökös használat. */
+  licenseExpiryDate?: string | null;
   /** Saját ajánlói kód (bill / helyi). */
   referralCode?: string;
   /** Aktív ajánlói ajándék slotok a bill szerint (páros előfizetés + max 25). */
@@ -126,12 +134,17 @@ function syncLedgerFromLicense(e: LicenseEntitlement): void {
 
 export function grantLocalLicense(tier: SlotTierId = "local"): LicenseEntitlement {
   const code = ensureReferralCode();
+  const far = new Date();
+  far.setFullYear(far.getFullYear() + 99);
   const entitlement: LicenseEntitlement = {
     token: `local-${code}`,
     tier,
-    interval: "yearly",
+    interval: "perpetual",
     status: "local",
     verifiedAt: new Date().toISOString(),
+    engineVersion: ENGINE_VERSION,
+    updatesUntil: far.toISOString(),
+    licenseExpiryDate: null,
     referralCode: code,
     permanentSlots: permanentSlotsFromCredits(),
     slotPacks: [],

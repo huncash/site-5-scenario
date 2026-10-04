@@ -26,7 +26,7 @@ function readHomeMode(): HomeMode {
   try {
     const v = typeof window !== "undefined" ? window.localStorage.getItem(HOME_MODE_KEY) : null;
     return v === "dashboard" ? "dashboard" : "door";
-  } catch {
+      } catch {
     return "door";
   }
 }

@@ -162,7 +162,6 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const faqHref = supportPath("/gyik");
   const ticketHref = supportPath("/ticket");
   const year = new Date().getFullYear();
-  const [footerHovered, setFooterHovered] = useState(false);
 
   const productLinks = [
     { href: scenariosHref, label: t("footer.scenarios") },

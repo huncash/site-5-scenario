@@ -54,6 +54,19 @@ const hu = {
   helpBody: "A fogalom a helyi appban is ott van. Részletes lecke a YouTube-on, nem a VPS-en.",
   noVideo: "A lecke videója YouTube-on jelenik meg. A saját szerver nem tárol és nem szolgál ki videófájlt.",
   sla: SUPPORT_SLA,
+  pricingNav: "Árazás",
+  pricingTitle: "Csomagok és hűség-licenc",
+  pricingLead:
+    "Transzparens örökös modell: a megvásárolt verzió a tiéd marad. A keret az egyidejűleg aktív munkaterületekre vonatkozik.",
+  pricingLoyaltyTitle: "3 éves lépcsőzetes hűség · 4. évtől örökélet frissítés",
+  pricingLoyaltyBody:
+    "1. év: belépő listaár. 2. év: −25% frissítési díj. 3. év: −40%. A 4. évtől minden jövőbeli frissítés díjmentes. A megvásárolt verzió mindig használható, akkor is, ha nem újítasz.",
+  pricingActiveTitle: "Aktív Case & Aktív Slot — etikus keret",
+  pricingActiveBody:
+    "A licenc az egyidejűleg éles munkaterületek számát köti, nem a felhalmozott adatokét. Inaktív Case/Slot törölhető vagy felülírható díj nélkül. Új párhuzamos éles munkaterülethez bővítő modul kell.",
+  pricingDeviceTitle: "Hardverhez kötött, helyi licenc",
+  pricingDeviceBody:
+    "A számítás a saját gépeden fut (local-first). Nincs kötelező felhő; a szenzitív adatok nem mennek szolgáltatói szerverre. A licenc a megvásárolt verzióra örökös fallback jogot ad.",
 };
 
 const en: typeof hu = {
@@ -98,6 +111,19 @@ const en: typeof hu = {
   helpBody: "The term is also in the local app. The full lesson is on YouTube, not on the VPS.",
   noVideo: "The lesson video appears on YouTube. This server does not store or serve video files.",
   sla: "Average reply within 24 hours, in writing only — faster and more precise than a phone queue.",
+  pricingNav: "Pricing",
+  pricingTitle: "Plans & loyalty license",
+  pricingLead:
+    "Transparent perpetual model: the purchased version stays yours. Quotas cover concurrently active workspaces only.",
+  pricingLoyaltyTitle: "3-year loyalty ladder · Lifetime free updates from year 4",
+  pricingLoyaltyBody:
+    "Year 1: entry list price. Year 2: −25% update fee. Year 3: −40%. From year 4, every future update is free. The purchased version remains usable even if you do not renew.",
+  pricingActiveTitle: "Active Case & Active Slot — ethical capacity",
+  pricingActiveBody:
+    "The license limits concurrently live workspaces, not accumulated data. Inactive Cases/Slots can be deleted or overwritten at no charge. A new parallel live workspace needs an add-on.",
+  pricingDeviceTitle: "Device-bound, local license",
+  pricingDeviceBody:
+    "Computation runs on your machine (local-first). No mandatory cloud; sensitive data does not go to a vendor server. The license grants a perpetual fallback right to the purchased version.",
 };
 
 const TIPS_EN = [
@@ -118,7 +144,7 @@ const FAQ_GENERAL_EN: FaqItem[] = [
   { q: "Does it work offline?", a: "The app does. The support iframe needs a network; offline, local help stays." },
   {
     q: "Why is it called Szcenárió — more than a good year and a bad year?",
-    a: "Yes. Guessing a “good/bad year” is not enough. Here scenario method runs with Lean tools and spread from past data: a structured outlook, in daily operations too.",
+    a: "Yes — much more. A “good year / bad year” is just two static numbers at the bottom of a spreadsheet. A Szcenárió is a living storyline: it shows the chain reaction of your decisions and their exact timing. It does not guess what you will have at year-end; it shows which month and day an unexpected cost or lost revenue hits your critical safety bound — so you see your room to move ahead of time, instead of reacting after the fact.",
   },
   {
     q: "How to read the Pessimistic – Realistic – Optimistic (PRO) chart?",
@@ -235,4 +261,87 @@ export function localizeLesson(locale: Locale, lesson: Lesson): Lesson {
   const theory = THEORY_EN[lesson.slug];
   if (theory) return { ...lesson, title: theory.title, summary: theory.summary };
   return lesson;
+}
+
+export type SupportPricingTier = {
+  id: "basic" | "pro" | "enterprise";
+  title: string;
+  priceLine: string;
+  ladder: string;
+  bullets: string[];
+};
+
+export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
+  if (locale === "en") {
+    return [
+      {
+        id: "basic",
+        title: "Solo (Basic)",
+        priceLine: "€199 year 1 (one-time entry / Gradual Perpetual)",
+        ladder: "Y2 €149 (−25%) · Y3 €119 (−40%) · Y4+ Lifetime Free Upgrades",
+        bullets: [
+          "1 Active Case · 3 Active Slots / Case · 1 Seat + 1 Guest",
+          "Unlimited import & overwrite of inactive slots",
+          "P-R-O base paths on your device",
+        ],
+      },
+      {
+        id: "pro",
+        title: "Pro Scenario (Recommended)",
+        priceLine: "€399 year 1 (one-time entry / Gradual Perpetual)",
+        ladder: "Y2 €299 (−25%) · Y3 €239 (−40%) · Y4+ Lifetime Free Upgrades",
+        bullets: [
+          "2 Active Cases · 3 Active Slots / Case · 1 Seat + 5 Guests",
+          "Advanced capacity & risk simulation",
+          "Extra Active Case add-on: +€49 perpetual",
+        ],
+      },
+      {
+        id: "enterprise",
+        title: "Enterprise & Teams",
+        priceLine: "€799 year 1 (one-time entry / Gradual Perpetual)",
+        ladder: "Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ Lifetime Free Upgrades",
+        bullets: [
+          "5 Active Cases · 4 Active Slots / Case · 3 Seats + 20 Guests",
+          "Bank / accounting API · multi-portfolio · organisational BCP audit",
+          "Add-ons: +€39 Case · +€49 Slot · +€79 Seat (perpetual)",
+        ],
+      },
+    ];
+  }
+  return [
+    {
+      id: "basic",
+      title: "Solo (Basic)",
+      priceLine: "199 000 Ft az 1. évben (egyszeri belépő / éves hűség-licenc)",
+      ladder: "2. év 149 000 Ft (−25%) · 3. év 119 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      bullets: [
+        "1 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 1 Guest",
+        "Korlátlan import és inaktív slot felülírás",
+        "P-R-O alappályák a saját gépeden",
+      ],
+    },
+    {
+      id: "pro",
+      title: "Pro Szcenárió (Ajánlott)",
+      priceLine: "399 000 Ft az 1. évben (egyszeri belépő / éves hűség-licenc)",
+      ladder: "2. év 299 000 Ft (−25%) · 3. év 239 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      bullets: [
+        "2 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 5 Guest",
+        "Haladó kapacitás- és kockázatszimuláció",
+        "Extra Aktív Case modul: +49 000 Ft örökös",
+      ],
+    },
+    {
+      id: "enterprise",
+      title: "Enterprise & Csapatok",
+      priceLine: "799 000 Ft az 1. évben (egyszeri belépő / éves hűség-licenc)",
+      ladder: "2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      bullets: [
+        "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
+        "Banki/könyvelési API · multi-portfólió · szervezeti BCP audit",
+        "Bővítők: +39 000 Ft Case · +49 000 Ft Slot · +79 000 Ft Seat (örökös)",
+      ],
+    },
+  ];
 }

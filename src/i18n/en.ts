@@ -20,11 +20,11 @@ export const en: DeepString<typeof hu> = {
     demoPreviewTitle: "More sample situations",
     demoPreviewBody:
       "Interactive preview: the engine runs on a preloaded case. No registration — one click shows cash-flow focus and liquidity gauges.",
-    whyTitle: "Instead of spreadsheet chaos: local room-to-move calculation",
+    whyTitle: "Why it’s called Szcenárió — beyond a good and a bad year",
     whyLead:
-      "Most decision tools either trap you in a messy spreadsheet or lock you into a cloud subscription whose cost and data path are unclear. Typing a “good year” and a “bad year” is not a risk model.",
+      "A “good year / bad year” is just two static endpoints at year-end. A scenario is a storyline: a process that shows the when, the how, and the chain reactions — not only how much cash you have in December.",
     whyBody:
-      "Szcenárió delivers risk room-to-move modelling: deterministic spread and error-band calculation from past data. The same engine serves household decisions (buying property, changing career) and business strategy — with 100% local data sovereignty and a predictable, fixed cost structure.",
+      "If a client drops in July or a production line fails, Szcenárió shows whether you hit the Stop-Loss bound by September. It runs three parallel realities (Pessimistic · Realistic · Optimistic) fitted to your real historical data — so you see reaction time and the limits of your safety reserve, not a single guessed outcome.",
     dailyOpsTitle: "Not only at launch",
     dailyOpsBody:
       "Planning often stops at the decision moment. With Lean tools, the system also supports daily running, tuning, and bottlenecks — in a private household and in a firm alike.",
@@ -75,15 +75,16 @@ export const en: DeepString<typeof hu> = {
     aboutBack: "Back to the home page",
     faqWhyQ: "Why is it called Szcenárió — more than a good year and a bad year?",
     faqWhyA:
-      "Yes. Guessing a “good/bad year” is not enough. Here risk room-to-move modelling runs with deterministic spread and error-band calculation, and 100% local data sovereignty — from household to firm, in daily operations too.",
+      "Yes — much more. A “good year / bad year” is just two static numbers at the bottom of a spreadsheet. A Szcenárió is a living storyline: it shows the chain reaction of your decisions and their exact timing. It does not guess what you will have at year-end; it shows which month and day an unexpected cost or lost revenue hits your critical safety bound — so you see your room to move ahead of time, instead of reacting after the fact.",
     faqProQ: "How to read the Pessimistic – Realistic – Optimistic (PRO) chart?",
     faqProA:
       "You are not looking at reality or a forecast. Deterministic spread and error-band calculation from past data: risk room to move, pessimistic reserve vs optimistic capacity need. Fresh data shows where to intervene at once.",
-    faqCaseQ: "What is a Case?",
-    faqCaseA: "A Case is the complete, saved decision and simulation model.",
-    faqSlotQ: "What is a Slot?",
+    faqCaseQ: "What is an Active Case?",
+    faqCaseA:
+      "An Active Case is a concurrently live decision / simulation workspace (project). The license limits how many Cases can run at once — not how much data you ever imported. A finished Case can be deleted or overwritten at no charge.",
+    faqSlotQ: "What is an Active Slot?",
     faqSlotA:
-      "A Slot is a separate data area inside a Case (the top tabs). Types: Personal, Business, Project. Within one Case, several Slots can run simultaneously depending on your plan.",
+      "An Active Slot is a concurrently live data area inside a Case (tabs: Personal, Business, Project). Inactive Slot content can be deleted or overwritten; a new parallel live Slot needs an add-on module.",
     faqProConceptQ: "What does the P-R-O Scenario mean?",
     faqProConceptA:
       "The P-R-O Scenario stands for Pessimistic · Realistic · Optimistic: the three simultaneously running simulation curves in every Slot — the full risk room to move, not a single number.",
@@ -328,7 +329,18 @@ export const en: DeepString<typeof hu> = {
     pillarInner: "Inner zones",
     pillarInnerBlurb: "Personal, civil, BCP, demography, education — frames inside the house.",
     howTitle: "How it works",
-    howLead: "Decision prep and scenario modeling with 100% local data security",
+    howLead: "From your own data to decision confidence in 3 steps",
+    howStep1Title: "Upload bank statements",
+    howStep1Body:
+      "PDF/CSV upload going back 1–3 years. 100% local-first processing — statements stay on your device.",
+    howStep2Title: "Fit a new plan onto the baseline",
+    howStep2Body:
+      "Overlay your plan on the automatically analysed historical baseline.",
+    howStep3Title: "Personalised P-R-O scenarios and Stop-Loss",
+    howStep3Body:
+      "Personalised P-R-O scenarios and Stop-Loss bounds are drawn instantly.",
+    hoodTitle: "Under the hood",
+    hoodLead: "Local-first performance with zero-cloud data sovereignty",
     howLocalTitle: "Runs on your device",
     howLocalBody:
       "The full model and risk math run in your browser. Sensitive finance and plan numbers never go to a cloud server.",
@@ -502,8 +514,52 @@ export const en: DeepString<typeof hu> = {
   },
   pricing: {
     packages: "Plans",
+    packagesHeading: "Choose your plan",
+    viewPlansCta: "View Plans & Pricing ↓",
+    compareToggle: "Detailed comparison",
+    moreInfo: "More info…",
+    loyaltyFooterTitle: "Perpetual usage rights:",
+    loyaltyFooterBody:
+      "The purchased version is yours forever. Future updates: −25% in year 2, −40% in year 3, and free from year 4 onward.",
     perMonth: "/ mo",
     perYear: "/ yr",
+    once: "One-time fee",
+    loyaltyFee: "Gradual Perpetual License",
+    perpetualNote:
+      "The purchased version stays yours forever. After year 3, all future updates become free.",
+    customPrice: "Custom pricing",
+    maintenanceFromY2: "Loyalty renewal (years 2–3)",
+    badgePerpetual: "Perpetual License",
+    badgeFreeUpdates: "Year-1 updates included",
+    badgeOptionalRenewal: "Y2: −25% · Y3: −40% · Y4+: Lifetime free",
+    badgeLoyalty: "Gradual Perpetual License",
+    loyaltyLadderShort: "Year 2: −25% | Year 3: −40% | Year 4+: Lifetime Free Upgrades",
+    loyaltyPromise:
+      "The purchased version stays yours forever. After year 3, all future updates become free.",
+    proDetail:
+      "Advanced capacity and risk simulation across multiple active projects. Loyalty ladder: €399 → €299 → €239, then Lifetime Free Upgrades.",
+    enterpriseDetail:
+      "Automated bank/accounting API integration, multi-portfolio and organisational BCP audit. Loyalty ladder: €799 → €599 → €479, then Lifetime Free Upgrades.",
+    enterpriseBaseNote: "Base package: 5 Active Cases, 4 Active Slots/Case, 3 Seats + 20 Guests",
+    enterpriseAddonCase: "+€39 / extra active Case (perpetual)",
+    enterpriseAddonSeat: "+€79 / extra Seat (perpetual)",
+    enterpriseAddonSlot: "+€49 / extra active Slot (perpetual)",
+    enterprisePlg: "0% sales friction — 100% transparent pricing and instant access.",
+    proUpsellCase:
+      "Extra active Case module: +€49 (perpetual) if you need more than 2 concurrent projects.",
+    activeWorkspaceNote:
+      "Deletable, overwritable, reloadable — only the number of concurrently live workspaces is capped.",
+    activeWorkspaceTitle: "Active workspaces",
+    fnCaseLabel: "Active Case",
+    fnSlotLabel: "Active Slot",
+    fnConceptsLink: "Concept FAQ",
+    fnCase:
+      "a concurrently live decision / simulation workspace. The quota limits parallel projects, not accumulated data volume.",
+    fnSlot:
+      "a concurrently live data area inside a Case (Personal, Business, Project). Inactive Slots can be deleted or overwritten at no charge.",
+    fnPro:
+      "Pessimistic · Realistic · Optimistic — the three simultaneously running curves in every Active Slot.",
+    fnSeat: "Seat = editor account (full edit rights). Guest = read-only guest account.",
     yearlyBilledOnce: "/ yr billed upfront",
     yearly: "Yearly",
     monthly: "Monthly",
@@ -513,10 +569,9 @@ export const en: DeepString<typeof hu> = {
     includes: "Included",
     notInTier: "Not in this plan",
     featureCol: "Feature / service",
-    hero:
-      "Basic, Pro and Enterprise scale Case*, Slot**, P-R-O Scenario*** and Seat / Guest**** capacity. Every plan: 100% local data sovereignty and a predictable, fixed cost structure.",
+    hero: "Gradual Perpetual License — Lifetime Free Upgrades from year 4, 100% off-grid",
     ethos:
-      "The same risk room-to-move modelling runs on household and business situations. The difference is capacity (Case*, Slot**, P-R-O Scenario***, Seat / Guest****).",
+      "The purchased version stays yours forever. Three-step loyalty (−25% / −40%), then from year 4 every future update is free.",
     seatDef:
       "Seat: editor account (full editing and model-alignment rights). Guest: guest account with read-only access (viewer / auditor).",
     jitTitle: "Add-ons",
@@ -525,8 +580,9 @@ export const en: DeepString<typeof hu> = {
     slotExpandBody: "",
     slotReferralBonus:
       "Referral bonus: a successful referral gives both parties +1 gift Slot** (max. 25).",
-    slotLimitTitle: "Slot** limit reached",
-    slotLimitBody: "You are using {used} / {limit} Slots**. Choose an add-on to continue.",
+    slotLimitTitle: "Active Slot** limit reached",
+    slotLimitBody:
+      "You have {used} / {limit} active Slots** running. Delete or overwrite an inactive Slot, or choose an add-on for another concurrent live workspace.",
     slotReferralTitle: "Refer for +1 gift Slot**",
     slotReferralBody:
       "After a successful payment you and the new subscriber each get +1 gift Slot**. Code: {code}",
@@ -543,27 +599,27 @@ export const en: DeepString<typeof hu> = {
     campusTitle: "Student / token fee",
     campusBody: "Education frame. Not in the public table. The engine is the same; the fee is token.",
     campusOrder: "Student order",
-    starter: "Basic",
-    pro: "Pro",
-    expert: "Enterprise",
-    sloganStarter: "1 Active Case* · 2 Slot** / Case · 1 bank statement / Slot**",
-    sloganPro: "2 Active Case* · 4 Slot** / Case · multiple bank branches & statements / Slot**",
-    sloganExpert: "5 Active Case* · 8 Slot** / Case · 3 Seat + 20 Guest",
-    audienceStarter: "One saved Case*, two Slots** — bank statement import for any period.",
-    audiencePro: "Two Active Cases*, four Slots** each — multiple attached bank branches & statements.",
-    audienceExpert: "Five Cases*, 8 Slots** / Case, 3 Seats — automated bank/accounting API.",
+    starter: "Solo",
+    pro: "Pro Scenario",
+    expert: "Enterprise & Teams",
+    sloganStarter: "1 Active Case* · 3 Active Slot** / Case · P-R-O base paths",
+    sloganPro: "2 Active Case* · 3 Active Slot** / Case · 1 Seat + 5 Guest",
+    sloganExpert: "5 Active Case* · 4 Active Slot** / Case · 3 Seat + 20 Guest",
+    audienceStarter: "1 active project, 3 active scenario slots (P-R-O base paths).",
+    audiencePro: "Advanced capacity and risk simulation across multiple active projects.",
+    audienceExpert: "Automated bank/accounting API integration, multi-portfolio and organisational BCP audit.",
     hs1: "1 Active Case*",
-    hs2: "2 Slot** / Case",
+    hs2: "3 Active Slot** / Case",
     hs3: "Basic P-R-O Scenario*** & BCP",
     hs4: "1 Seat + 1 Guest****",
     hs5: "1 Bank statement import / Slot**",
     hp1: "2 Active Case*",
-    hp2: "4 Slot** / Case",
+    hp2: "3 Active Slot** / Case",
     hp3: "Advanced capacity and risk simulation",
     hp4: "1 Seat + 5 Guest****",
     hp5: "Multiple bank branches & statement import / Slot**",
     he1: "5 Active Case*",
-    he2: "8 Slot** / Case",
+    he2: "4 Active Slot** / Case",
     he3: "3 Seat + 20 Guest****",
     he4: "Automated bank/accounting API",
     he5: "Multi-portfolio & organisational BCP audit",
@@ -575,10 +631,10 @@ export const en: DeepString<typeof hu> = {
     cs2: "1",
     cp2: "2",
     ce2: "5",
-    cf3: "Slot** / Case",
-    cs3: "2",
-    cp3: "4",
-    ce3: "8",
+    cf3: "Active Slot** / Case",
+    cs3: "3",
+    cp3: "3",
+    ce3: "4",
     cf4: "P-R-O Scenario*** & BCP",
     cs4: "Basic P-R-O & BCP calculation",
     cp4: "Advanced capacity and risk simulation",

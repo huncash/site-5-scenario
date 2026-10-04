@@ -21,11 +21,11 @@ export const ABOUT_TAGLINE =
 export const ABOUT_LEAD =
   "A múlt adataira épülő, determinisztikus szórás- és hibahatár-számítás — háztartási beruházástól a vállalkozási stratégiáig.";
 
-export const WHY_TITLE = "Táblázat-káosz helyett: helyben futó mozgástér-számítás";
+export const WHY_TITLE = "Miért hívják Szcenáriónak — túl a jó és a rossz éven";
 export const WHY_LEAD =
-  "A legtöbb döntéstámogató eszköz vagy egy kaotikus táblázatba zár, vagy felhős előfizetésbe, amelynek költsége és adatútja nem látszik előre. Egy „jó” és egy „rossz” év begépelése nem kockázati modell.";
+  "A „jó év / rossz év” csak két statikus végpont az év végén. A szcenárió ezzel szemben forgatókönyv: folyamat, amely megmutatja a mikort, a hogyan-t és a láncreakciókat — nem csupán azt, mennyi pénzed lesz decemberben.";
 export const WHY_BODY =
-  "A Szcenárió kockázati mozgástér-modellezést ad: a múlt adataiból determinisztikus szórás- és hibahatár-számítással rajzol pályát. Ugyanaz a motor szolgálja a háztartási döntéseket (ingatlanvásárlás, karrierváltás) és a vállalkozási stratégiákat — 100%-ban lokális adatszuverenitással és kiszámítható, fix költségszerkezettel.";
+  "Ha júliusban kiesik egy ügyfél vagy elromlik egy gépsor, a Szcenárió megmutatja, szeptemberben eléred-e a Stop-Loss határt. Három párhuzamos valóságot (Pesszimista · Realista · Optimista) futtat a valós múltbeli adataidra illesztve — így a reakcióidőt és a biztonsági tartalékod határait látod, nem egyetlen tippelt végeredményt.";
 
 export const PRO_CHART_CALLOUT = "Fontos: ez a grafikon nem a valóság — és nem is jóslat.";
 export const PRO_CHART_WHY =
