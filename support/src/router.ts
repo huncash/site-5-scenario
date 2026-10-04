@@ -5,7 +5,6 @@ export type SupportSlug =
   | "tippek"
   | "gyik"
   | "ticket"
-  | "pricing"
   | "kb/kahn-rand"
   | (string & {});
 

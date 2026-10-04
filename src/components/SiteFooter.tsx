@@ -183,17 +183,12 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   ];
 
   return (
-    <footer
-      className="site-footer"
-      role="contentinfo"
-      onMouseEnter={() => setFooterHovered(true)}
-      onMouseLeave={() => setFooterHovered(false)}
-    >
+    <footer className="site-footer" role="contentinfo">
       <div className="site-footer-shell">
         <div className="site-footer-inner">
           <div className="site-footer-col site-footer-brand-col">
             <button type="button" className="site-footer-logo" aria-label={t("brand.name")}>
-              <FooterRopeMark hovered={footerHovered} />
+              <FooterRopeMark />
             </button>
             <RopeSlogan variant="footer" className="site-footer-tagline" />
           </div>

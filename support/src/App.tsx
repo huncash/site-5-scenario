@@ -8,7 +8,6 @@ import {
   supportFaqSections,
   supportKahn,
   supportLessons,
-  supportPricingTiers,
   supportTheory,
   supportTips,
 } from "./copy";
@@ -202,55 +201,6 @@ function TicketGuard({
   );
 }
 
-function PricingPage({ locale }: { locale: Locale }) {
-  const t = supportCopy(locale);
-  const tiers = supportPricingTiers(locale);
-
-  useEffect(() => {
-    const id = window.location.hash.replace(/^#/, "");
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
-  return (
-    <>
-      <h1>{t.pricingTitle}</h1>
-      <p>{t.pricingLead}</p>
-
-      <div className="section-block">
-        {tiers.map((tier) => (
-          <article key={tier.id} id={tier.id} className="item scroll-mt-24" style={{ marginBottom: 16 }}>
-            <b>{tier.title}</b>
-            <p style={{ margin: "6px 0 0" }}>{tier.priceLine}</p>
-            <p className="note" style={{ margin: "4px 0 8px" }}>
-              {tier.ladder}
-            </p>
-            <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
-              {tier.bullets.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
-      <div className="section-block">
-        <h2>{t.pricingLoyaltyTitle}</h2>
-        <p>{t.pricingLoyaltyBody}</p>
-      </div>
-      <div className="section-block">
-        <h2>{t.pricingActiveTitle}</h2>
-        <p>{t.pricingActiveBody}</p>
-      </div>
-      <div className="section-block">
-        <h2>{t.pricingDeviceTitle}</h2>
-        <p>{t.pricingDeviceBody}</p>
-      </div>
-    </>
-  );
-}
-
 function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
   const t = supportCopy(locale);
   const videoLessons = supportLessons(locale).filter((l) => Boolean(l.youtubeId));
@@ -262,7 +212,6 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
       <p className="sla">{t.sla}</p>
 
       <div className="nav">
-        <a href={supportHref("pricing", { embed, lang: locale })}>{t.pricingNav}</a>
         <a href={supportHref("tippek", { embed, lang: locale })}>{t.tips}</a>
         <a href={supportHref("gyik", { embed, lang: locale })}>{t.faq}</a>
         {supportLessons(locale).map((l) => (
@@ -377,8 +326,6 @@ export function App() {
         )}
       </>
     );
-  } else if (slug === "pricing") {
-    body = <PricingPage locale={locale} />;
   } else if (lesson) {
     body = (
       <>

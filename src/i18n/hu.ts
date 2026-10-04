@@ -518,7 +518,6 @@ export const hu = {
     packagesHeading: "Válaszd ki a keretedet",
     viewPlansCta: "Csomagok és árazás megtekintése ↓",
     compareToggle: "Részletes összehasonlítás",
-    moreInfo: "Több infó…",
     loyaltyFooterTitle: "Örökös használati jog:",
     loyaltyFooterBody:
       "A megvásárolt verzió örökre a tiéd marad. A jövőbeli frissítések díja: 2. évben −25%, 3. évben −40%, a 4. évtől pedig minden frissítés díjmentes.",

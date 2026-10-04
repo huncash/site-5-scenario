@@ -517,7 +517,6 @@ export const en: DeepString<typeof hu> = {
     packagesHeading: "Choose your plan",
     viewPlansCta: "View Plans & Pricing ↓",
     compareToggle: "Detailed comparison",
-    moreInfo: "More info…",
     loyaltyFooterTitle: "Perpetual usage rights:",
     loyaltyFooterBody:
       "The purchased version is yours forever. Future updates: −25% in year 2, −40% in year 3, and free from year 4 onward.",
