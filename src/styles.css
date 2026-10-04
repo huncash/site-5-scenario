@@ -2092,12 +2092,21 @@ html.light-mode [class*="border-slate-8"] {
   pointer-events: auto;
 }
 
+/* Belső felület: a gombok nem lóghatnak ki a sötétzöld félkörívből. */
+.semicircle-menu-surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Ugyanaz a path, mint a tray SVG (sweep 0 / alsó félkör a viewBoxban). */
+  clip-path: path("M16 0.5 A 84 84 0 0 0 184 0.5 Z");
+}
+
 .semicircle-tray-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
@@ -2114,28 +2123,29 @@ html.light-mode [class*="border-slate-8"] {
   z-index: 1;
 }
 
+/* Gombközéppontok ~12%-kal beljebb az ív origójához (100, 0) képest; 32px gomb. */
 .sector-1 {
-  left: 24px;
-  top: 22px;
+  left: 34px;
+  top: 20px;
 }
 
 .sector-2 {
-  left: 82px;
-  top: 46px;
+  left: 84px;
+  top: 40px;
 }
 
 .sector-3 {
-  left: 140px;
-  top: 22px;
+  left: 134px;
+  top: 20px;
 }
 
 .sector-lang {
-  left: 82px;
-  top: 4px;
+  left: 84px;
+  top: 6px;
 }
 
 .lang-mark {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -2143,8 +2153,8 @@ html.light-mode [class*="border-slate-8"] {
 
 .view-settings-icon-btn {
   display: inline-flex;
-  height: 36px;
-  width: 36px;
+  height: 32px;
+  width: 32px;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
@@ -2153,6 +2163,7 @@ html.light-mode [class*="border-slate-8"] {
   background: var(--dropdown-hover);
   color: var(--text-main);
   cursor: pointer;
+  box-shadow: none;
   transition: background-color 0.2s, color 0.2s, transform 0.2s;
 }
 
@@ -2161,11 +2172,11 @@ html.light-mode [class*="border-slate-8"] {
   background: var(--accent-color);
   color: #ffffff;
   outline: none;
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .view-settings-icon-btn.is-active {
-  box-shadow: 0 0 0 2px var(--accent-color, var(--accent));
+  box-shadow: inset 0 0 0 2px var(--accent-color, var(--accent));
 }
 
 .view-settings-icon-btn.a11y-btn {
@@ -2175,10 +2186,14 @@ html.light-mode [class*="border-slate-8"] {
   padding: 0;
 }
 
+.view-settings-icon-btn.a11y-btn.is-active {
+  box-shadow: inset 0 0 0 2px var(--accent-color, var(--accent));
+}
+
 .view-settings-icon-btn.a11y-btn img {
   display: block;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   pointer-events: none;
 }
@@ -2187,11 +2202,11 @@ html.light-mode [class*="border-slate-8"] {
 .view-settings-icon-btn.a11y-btn:focus-visible {
   background: transparent;
   color: inherit;
-  transform: scale(1.08);
+  transform: scale(1.03);
 }
 
 .view-settings-icon-btn.a11y-btn.is-active {
-  box-shadow: 0 0 0 3px #ffd100;
+  box-shadow: inset 0 0 0 2px #ffd100;
 }
 
 html.a11y-vision .view-settings-icon-btn:focus-visible,
@@ -2199,9 +2214,9 @@ html.a11y-vision .settings-trigger-btn:focus-visible,
 html.a11y-vision .split-view-toggle-btn:focus-visible,
 html.accessibility-mode .view-settings-icon-btn:focus-visible,
 html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
-  outline: 4px solid var(--a11y-focus, #ffd100) !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 0 7px var(--a11y-focus-gap, #000000) !important;
+  outline: 2px solid var(--a11y-focus, #ffd100) !important;
+  outline-offset: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--a11y-focus-gap, #000000) !important;
 }
 
 .btn-new-item-wrap {

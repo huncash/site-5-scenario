@@ -69,7 +69,8 @@ export function enterCampaignChooser(id: CampaignId, utm?: CampaignUtm | null) {
     touch: "path",
     utm: defaultUtmForCampaign(id, mergeUtm(same, utm ?? {})),
   });
-  writeScenarioDoorStep(CAMPAIGN_DOOR_STEP[id]);
+  // Köztes lépés kivezetve — a hierarchikus #tipusok nézetre viszünk.
+  writeScenarioDoorStep("type");
   if (typeof window === "undefined") return;
   try {
     window.localStorage.removeItem("szcenario_home_mode");

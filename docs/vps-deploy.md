@@ -2,7 +2,10 @@
 
 **Forrásmappa:** `C:\Users\patri\DEVELOPMENT\dev\fuszer-platform\vendor\mesh-data-manager-fuszer`  
 GitHub repo: `site-5-scenario`. VPS: `/var/www/szcenario`, PM2 `szcenario`, port **5100**.  
-Bill: **5110**, support: **5120**, signaling: **5130**.
+Bill: **5110**, support/docs/blog: ugyanaz a **5100** static-origin (Host → `sites/*`), local support: **5120**, signaling: **5130**.
+
+Aldomain nginx: `deploy/nginx/szcenario.subdomains.conf` — `support` / `docs` / `blog` / `app` → `:5100`.  
+Cloudflare / DNS: ezeknek a VPS-re kell mutatniuk (ne idegen Next.js originre), különben `/ticket` 404 marad.
 
 A site-1–4 menete: DNS → GitHub repo + `VPS_SSH_KEY` → `main` push → Actions (nginx/PM2).  
 A jegyzettömbös kulcs a **GitHub secret**, nem Windows `ssh -i`. A Cursor terminaljába semmit se másolj.

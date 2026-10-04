@@ -39,8 +39,7 @@ import { localdb } from "@/lib/localdb";
 import { getPdcaCycleSum } from "@/lib/pdcaCycle";
 import { useVault } from "@/lib/vault";
 import { toast } from "sonner";
-import { doorStepForSegment, isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
-import { segmentIdFromDemoName } from "@/lib/demoSeed";
+import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useI18n } from "@/i18n";
@@ -145,7 +144,16 @@ export function ProfileHeader({
 
   const leaveVisitorCase = useCallback(async () => {
     setProfileOpen(false);
-    if (visitorShell) writeScenarioDoorStep(doorStepForSegment(segmentIdFromDemoName(profileName)));
+    if (visitorShell) {
+      // Köztes esetválasztó kivezetve: mindig a hierarchikus főoldalra.
+      writeScenarioDoorStep("type");
+      try {
+        window.localStorage.setItem("szcenario_home_mode", "door");
+        window.dispatchEvent(new Event("szcenario:home_mode"));
+      } catch {
+        /* ignore */
+      }
+    }
     await lock();
     if (visitorShell) await router.navigate({ to: "/" });
   }, [lock, router, visitorShell]);

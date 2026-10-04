@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
+import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { RopeTensionPlayer } from "@/components/rope/RopeTensionPlayer";
 
 export const Route = createFileRoute("/kotel")({
@@ -23,15 +24,13 @@ function KotelPage() {
         }}
       />
 
-      <header className="relative z-10 flex items-center justify-between px-5 py-4 text-[13px]">
-        <Link to="/" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-          ← Szcenárió
-        </Link>
+      <header className="relative z-10 flex items-center justify-end px-5 py-4 text-[13px]">
         <span className="tracking-wide text-muted-foreground">kötél · feszítés</span>
       </header>
 
       <main className="relative z-10 flex flex-1 flex-col justify-center px-3 pb-12 pt-4 sm:px-8">
         <div className="mx-auto w-full max-w-7xl">
+          <ContentBackButton className="mb-3" />
           <h1 className="mb-2 text-center font-serif text-3xl tracking-tight text-[var(--foreground)] sm:text-4xl">
             Kötél
           </h1>

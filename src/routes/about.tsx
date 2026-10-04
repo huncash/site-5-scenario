@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
@@ -29,11 +29,6 @@ function AboutPage() {
           <div className="whitespace-pre-wrap">{t("brand.aboutProBody")}</div>
         </section>
 
-        <p>
-          <Link to="/" className="text-[var(--accent)] underline-offset-4 hover:underline">
-            {t("brand.aboutBack")}
-          </Link>
-        </p>
       </div>
     </FunnelShell>
   );

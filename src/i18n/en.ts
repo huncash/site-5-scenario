@@ -156,6 +156,8 @@ export const en: DeepString<typeof hu> = {
     comingSoon: "Coming soon",
     noTelemetry: "No sign-up, no telemetry — it runs on your device.",
     close: "Close",
+    backPrev: "Back to previous page",
+    scrollTop: "Back to top",
   },
   rope: {
     tipTitle: "From chaos to a clear path.",
@@ -264,6 +266,9 @@ export const en: DeepString<typeof hu> = {
     typesTitle: "Case / Situation types",
     typesLead:
       "Pick a decision frame: financial risk, continuity, process modeling, or a private zone — all local, ready to run.",
+    industryFilters: "Industry filters",
+    filterAll: "All",
+    slotCount: "{n} slot",
     typesBadgeLocal: "100% local data sovereignty",
     typesBadgeCrypto: "Multi-layer local encryption",
     typesBadgeCash: "Real-time P-R-O scenario modeling",
@@ -464,6 +469,9 @@ export const en: DeepString<typeof hu> = {
     passwordPlaceholder: "Enter the master password...",
     noProfile: "No profile on this device. Create one or import with QR.",
     demoTip: "Tip: autologin e.g. /login?demo=1 … /login?demo=18 or /login?demo=demo1_multisite_operator .",
+    demoWipe: "Clear demo cases",
+    demoWipeConfirm: "Delete all DEMO profiles on this device? This cannot be undone.",
+    demoWipeFail: "Could not clear demo cases.",
     badPassword: "Wrong master password. Try again.",
     unlockFail: "Unlock failed.",
     demoFail: "Demo sign-in failed.",

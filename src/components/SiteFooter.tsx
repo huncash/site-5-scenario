@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { EuAiActNotice } from "@/components/legal/EuAiActNotice";
+import { ScrollToTopButton } from "@/components/nav/ScrollToTopButton";
 import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
 import { RopeSlogan } from "@/components/rope/RopeSlogan";
 import { translate } from "@/i18n";
@@ -201,6 +202,9 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
           <FooterCol title={t("footer.aboutCol")} links={aboutLinks} soonTitle={t("footer.comingSoon")} />
         </div>
         <EuAiActNotice locale={locale} />
+        <div className="mt-4 flex justify-end">
+          <ScrollToTopButton />
+        </div>
         <div className="site-footer-bottom">
           <p className="site-footer-copyline">
             <span>

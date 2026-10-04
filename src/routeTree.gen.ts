@@ -28,6 +28,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as StrategiaRouteImport } from './routes/strategia'
+import { Route as TicketRouteImport } from './routes/ticket'
 import { Route as LoginActivateRouteImport } from './routes/login_.activate'
 import { Route as FOktatasSzimulacioIndexRouteImport } from './routes/f/oktatas-szimulacio/index'
 import { Route as FOktatasSzimulacioCheckoutRouteImport } from './routes/f/oktatas-szimulacio/checkout'
@@ -137,6 +138,11 @@ const StrategiaRoute = StrategiaRouteImport.update({
   path: '/strategia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TicketRoute = TicketRouteImport.update({
+  id: '/ticket',
+  path: '/ticket',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginActivateRoute = LoginActivateRouteImport.update({
   id: '/login_/activate',
   path: '/login/activate',
@@ -228,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/ticket': typeof TicketRoute
   '/login/activate': typeof LoginActivateRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/ticket': typeof TicketRoute
   '/login/activate': typeof LoginActivateRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
@@ -297,6 +305,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/ticket': typeof TicketRoute
   '/login_/activate': typeof LoginActivateRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/ticket'
     | '/login/activate'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/ticket'
     | '/login/activate'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/ticket'
     | '/login_/activate'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
@@ -436,6 +448,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
   StrategiaRoute: typeof StrategiaRoute
+  TicketRoute: typeof TicketRoute
   LoginActivateRoute: typeof LoginActivateRoute
   FOktatasSzimulacioCheckoutRoute: typeof FOktatasSzimulacioCheckoutRoute
   FOktatasSzimulacioDemoRoute: typeof FOktatasSzimulacioDemoRoute
@@ -586,6 +599,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StrategiaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ticket': {
+      id: '/ticket'
+      path: '/ticket'
+      fullPath: '/ticket'
+      preLoaderRoute: typeof TicketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login_/activate': {
       id: '/login_/activate'
       path: '/login/activate'
@@ -700,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
   StrategiaRoute: StrategiaRoute,
+  TicketRoute: TicketRoute,
   LoginActivateRoute: LoginActivateRoute,
   FOktatasSzimulacioCheckoutRoute: FOktatasSzimulacioCheckoutRoute,
   FOktatasSzimulacioDemoRoute: FOktatasSzimulacioDemoRoute,

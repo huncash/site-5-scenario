@@ -3,7 +3,7 @@ export const MAIN_ORIGIN_PROD = "https://szcenario.hu";
 export const HOME_MODE_KEY = "szcenario_home_mode";
 export const HOME_MODE_EVENT = "szcenario:home_mode";
 
-export type SiteHostKind = "main" | "bill" | "support" | "app";
+export type SiteHostKind = "main" | "bill" | "support" | "docs" | "blog" | "app";
 export type HomeMode = "door" | "dashboard";
 
 const WORKSPACE_PREFIXES = [
@@ -28,6 +28,8 @@ export function resolveSiteHost(hostname: string, port = ""): SiteHostKind {
   if (h === "app.szcenario.hu" || h.startsWith("app.")) return "app";
   if (h === "bill.szcenario.hu" || h.startsWith("bill.") || (isLocalHost(h) && p === "5110")) return "bill";
   if (h === "support.szcenario.hu" || h.startsWith("support.") || (isLocalHost(h) && p === "5120")) return "support";
+  if (h === "docs.szcenario.hu" || h.startsWith("docs.") || (isLocalHost(h) && p === "5121")) return "docs";
+  if (h === "blog.szcenario.hu" || h.startsWith("blog.") || (isLocalHost(h) && p === "5122")) return "blog";
   return "main";
 }
 
@@ -68,7 +70,7 @@ export function shouldShowSiteFooter(opts: {
   if (opts.embed) return false;
   const kind = resolveSiteHost(opts.hostname, opts.port);
   if (kind === "app") return false;
-  if (kind === "bill" || kind === "support") {
+  if (kind === "bill" || kind === "support" || kind === "docs" || kind === "blog") {
     return !normalizePath(opts.pathname).startsWith("/embed");
   }
   if (isWorkspacePath(opts.pathname)) return false;

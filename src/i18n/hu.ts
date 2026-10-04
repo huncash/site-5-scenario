@@ -154,6 +154,8 @@ export const hu = {
     comingSoon: "Hamarosan",
     noTelemetry: "Nincs regisztráció, nincs telemetria — a működés a te eszközödön fut.",
     close: "Bezárás",
+    backPrev: "Vissza az előző oldalra",
+    scrollTop: "Oldal tetejére",
   },
   rope: {
     tipTitle: "Káoszból tiszta pálya.",
@@ -261,6 +263,9 @@ export const hu = {
     typesTitle: "Eset fajták",
     typesLead:
       "Válassz döntési keretet: pénzügyi kockázat, működésfolytonosság, folyamat-modellezés vagy magán zóna — mind lokálisan, azonnal futtatható.",
+    industryFilters: "Iparági szűrők",
+    filterAll: "Összes",
+    slotCount: "{n} slot",
     typesBadgeLocal: "100% lokális adatszuverenitás",
     typesBadgeCrypto: "Többkörös helyi adattitkosítás",
     typesBadgeCash: "Real-time P-R-O forgatókönyv-modellezés",
@@ -464,6 +469,10 @@ export const hu = {
     passwordPlaceholder: "Add meg a mesterjelszót...",
     noProfile: "Nincs elérhető profil az eszközön. Hozz létre újat vagy importálj QR kóddal.",
     demoTip: "Tipp: autologin pl. /login?demo=1 … /login?demo=18 vagy /login?demo=demo1_multisite_operator .",
+    demoWipe: "Demó esetek törlése",
+    demoWipeConfirm:
+      "Töröljük az összes DEMO profilt erről az eszközről? A művelet nem vonható vissza.",
+    demoWipeFail: "A demó esetek törlése nem sikerült.",
     badPassword: "Hibás mesterjelszó. Próbáld újra.",
     unlockFail: "Hiba történt a feloldás során.",
     demoFail: "Demo belépési hiba.",

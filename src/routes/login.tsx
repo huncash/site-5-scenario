@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useVault } from "@/lib/vault";
 import { Profile, localdb } from "@/lib/localdb";
@@ -30,16 +30,12 @@ import {
 } from "lucide-react";
 import { ImportQrDialog } from "@/components/ProfileTransfer";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
-import { caseBlurb, caseTitle, useI18n } from "@/i18n";
+import { HierarchicalCaseChooser } from "@/components/cases/HierarchicalCaseChooser";
+import { ContentBackButton } from "@/components/nav/ContentBackButton";
+import { useI18n } from "@/i18n";
 import { demoSerialFromId } from "@/lib/coreCases";
 import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
-import {
-  publicScenarioKindGroups,
-  SCENARIO_INDUSTRY_TITLE_KEY,
-  SCENARIO_KIND_ACCENT,
-  SCENARIO_KIND_TITLE_KEY,
-} from "@/lib/scenarioCatalog";
-import { cn } from "@/lib/utils";
+import { publicScenarioKindGroups } from "@/lib/scenarioCatalog";
 import {
   LAST_PROFILE_KEY,
   dedupeAllDemoProfiles,
@@ -55,7 +51,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { state, unlockById, lock, beginCreate, backToPicker, createProfile } = useVault();
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -64,6 +60,7 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [demoBusyId, setDemoBusyId] = useState<DemoSegmentId | null>(null);
   const demoInFlightRef = useRef(false);
   const demoDedupeOnMountRef = useRef(false);
 
@@ -98,6 +95,7 @@ function LoginPage() {
     if (demoInFlightRef.current) return;
     demoInFlightRef.current = true;
     setBusy(true);
+    setDemoBusyId(segmentId);
     setError(null);
     try {
       await enterDemoSegment(segmentId, { unlockById, createProfile });
@@ -113,7 +111,33 @@ function LoginPage() {
       setError(err?.message || t("login.demoFail"));
     } finally {
       setBusy(false);
+      setDemoBusyId(null);
       demoInFlightRef.current = false;
+    }
+  };
+
+  const wipeDemoCases = async () => {
+    if (typeof window !== "undefined") {
+      const ok = window.confirm(t("login.demoWipeConfirm"));
+      if (!ok) return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      if (state.status === "unlocked" && String(state.profile.name ?? "").startsWith("DEMO ")) {
+        await lock();
+      }
+      const list = await localdb.listProfiles();
+      const demos = list.filter((p) => String(p.name ?? "").startsWith("DEMO "));
+      for (const p of demos) {
+        await localdb.deleteProfile(p.id);
+      }
+      await reloadProfiles();
+      setSelectedId("");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("login.demoWipeFail"));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -202,10 +226,8 @@ function LoginPage() {
     <div className="door-page flex h-dvh flex-col overflow-x-hidden overflow-y-auto bg-background">
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center justify-between text-[12px]">
-          <Link to="/" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-            {t("login.home")}
-          </Link>
+        <div className="flex items-center justify-between gap-3">
+          <ContentBackButton className="mb-0" />
           <ViewSettingsMenu />
         </div>
         {/* Device Status Header */}
@@ -419,55 +441,27 @@ function LoginPage() {
                   <Badge variant="outline" className="text-[10px]">{t("login.demoBadge")}</Badge>
                 </div>
 
-                <div className="mt-3 space-y-4">
-                  {publicScenarioKindGroups().map((group) => (
-                    <div
-                      key={group.kind}
-                      className={cn(
-                        "space-y-2 rounded-lg border border-border/50 bg-background/40 py-2.5 pl-3 pr-2 border-l-4",
-                        SCENARIO_KIND_ACCENT[group.kind],
-                      )}
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {t(SCENARIO_KIND_TITLE_KEY[group.kind])}
-                      </p>
-                      <div className="space-y-3">
-                        {group.industries.map((bucket) => (
-                          <div key={bucket.industry} className="space-y-1.5">
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] font-medium text-foreground/90"
-                            >
-                              {t(SCENARIO_INDUSTRY_TITLE_KEY[bucket.industry])}
-                            </Badge>
-                            <div className="grid grid-cols-1 gap-1.5">
-                              {bucket.segments.map((s) => (
-                                <Button
-                                  key={s.id}
-                                  variant="secondary"
-                                  size="sm"
-                                  className="w-full justify-start gap-2 text-xs"
-                                  disabled={busy}
-                                  onClick={() => void handleDemoLogin(s.id)}
-                                  title={caseBlurb(s.id, locale) ?? s.blurb}
-                                >
-                                  <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-                                  <span className="font-medium text-left">
-                                    {caseTitle(s.id, locale) ?? s.title}
-                                  </span>
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="mt-3">
+                  <HierarchicalCaseChooser
+                    variant="login"
+                    disabled={busy}
+                    busyId={demoBusyId}
+                    onSelect={(id) => void handleDemoLogin(id)}
+                  />
                 </div>
 
                 <p className="mt-2 text-[11px] text-muted-foreground">{t("login.demoTip")}</p>
 
-                {/* DEMO reset moved to Settings → Danger Zone */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-rose-500/30 text-rose-200 hover:bg-rose-950/40"
+                  disabled={busy}
+                  onClick={() => void wipeDemoCases()}
+                >
+                  {t("login.demoWipe")}
+                </Button>
               </div>
             </div>
           </div>

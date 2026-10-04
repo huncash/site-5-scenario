@@ -156,59 +156,61 @@ export function ViewSettingsMenu({
           inert={!open ? true : undefined}
           style={{ top: fan.top, left: fan.left }}
         >
-          <svg className="semicircle-tray-svg" viewBox="0 0 200 86" aria-hidden="true">
-            <path d="M16 0.5 A 84 84 0 0 0 184 0.5 Z" />
-          </svg>
+          <div className="semicircle-menu-surface">
+            <svg className="semicircle-tray-svg" viewBox="0 0 200 86" aria-hidden="true">
+              <path d="M16 0.5 A 84 84 0 0 0 184 0.5 Z" />
+            </svg>
 
-          <button
-            type="button"
-            className="view-settings-icon-btn menu-sector sector-1"
-            role="menuitem"
-            title={`${t("view.palette")} — ${activePalette}`}
-            aria-label={t("view.paletteActive", { name: activePalette })}
-            onClick={cyclePalette}
-          >
-            <Palette className="h-[18px] w-[18px]" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              className="view-settings-icon-btn menu-sector sector-1"
+              role="menuitem"
+              title={`${t("view.palette")} — ${activePalette}`}
+              aria-label={t("view.paletteActive", { name: activePalette })}
+              onClick={cyclePalette}
+            >
+              <Palette className="h-4 w-4" aria-hidden="true" />
+            </button>
 
-          <button
-            type="button"
-            className="view-settings-icon-btn menu-sector sector-2"
-            role="menuitem"
-            title={t("view.theme")}
-            aria-label={isDark ? t("view.themeToLight") : t("view.themeToDark")}
-            aria-pressed={!isDark}
-            onClick={toggleTheme}
-          >
-            {isDark ? (
-              <Sun className="h-[18px] w-[18px]" aria-hidden="true" />
-            ) : (
-              <Moon className="h-[18px] w-[18px]" aria-hidden="true" />
-            )}
-          </button>
+            <button
+              type="button"
+              className="view-settings-icon-btn menu-sector sector-2"
+              role="menuitem"
+              title={t("view.theme")}
+              aria-label={isDark ? t("view.themeToLight") : t("view.themeToDark")}
+              aria-pressed={!isDark}
+              onClick={toggleTheme}
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
 
-          <button
-            type="button"
-            className={cn("view-settings-icon-btn a11y-btn menu-sector sector-3", a11y && "is-active")}
-            role="menuitemcheckbox"
-            title={a11y ? t("view.a11yOn") : t("view.a11yOff")}
-            aria-label={a11y ? t("view.a11yOn") : t("view.a11yOffAria")}
-            aria-checked={a11y}
-            onClick={toggleA11y}
-          >
-            <img src={A11Y_ICON_SRC} alt="" width={28} height={28} draggable={false} />
-          </button>
+            <button
+              type="button"
+              className={cn("view-settings-icon-btn a11y-btn menu-sector sector-3", a11y && "is-active")}
+              role="menuitemcheckbox"
+              title={a11y ? t("view.a11yOn") : t("view.a11yOff")}
+              aria-label={a11y ? t("view.a11yOn") : t("view.a11yOffAria")}
+              aria-checked={a11y}
+              onClick={toggleA11y}
+            >
+              <img src={A11Y_ICON_SRC} alt="" width={24} height={24} draggable={false} />
+            </button>
 
-          <button
-            type="button"
-            className={cn("view-settings-icon-btn lang-btn menu-sector sector-lang")}
-            role="menuitem"
-            title={t("view.lang")}
-            aria-label={t("view.langAria")}
-            onClick={toggleLocale}
-          >
-            <span className="lang-mark">{localeLabel(locale)}</span>
-          </button>
+            <button
+              type="button"
+              className={cn("view-settings-icon-btn lang-btn menu-sector sector-lang")}
+              role="menuitem"
+              title={t("view.lang")}
+              aria-label={t("view.langAria")}
+              onClick={toggleLocale}
+            >
+              <span className="lang-mark">{localeLabel(locale)}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

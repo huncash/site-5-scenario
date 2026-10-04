@@ -12,6 +12,7 @@ import {
   supportTips,
 } from "./copy";
 import { Markdown } from "./markdown";
+import { navigateTo, parseSupportPath, pathOf, supportHref } from "./router";
 
 /** Egyszerű **félkövér** a GYIK válaszokban. */
 function RichAnswer({ text }: { text: string }) {
@@ -38,20 +39,6 @@ function KahnBonbon({ locale }: { locale: Locale }) {
       <span className="chip">{k.foot}</span>
     </article>
   );
-}
-
-function pathOf() {
-  return window.location.pathname.replace(/\/+$/, "") || "/";
-}
-
-function navigateTo(path: string) {
-  const url = new URL(path, window.location.origin);
-  if (window.location.search) {
-    const lang = new URLSearchParams(window.location.search).get("lang");
-    if (lang && !url.searchParams.has("lang")) url.searchParams.set("lang", lang);
-  }
-  window.history.pushState({}, "", `${url.pathname}${url.search}`);
-  window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
 function YouTube({ id, title, empty }: { id: string; title: string; empty: string }) {
@@ -180,31 +167,30 @@ function TicketGuard({
   onUnlock: () => void;
 }) {
   const t = supportCopy(locale);
-  const prefix = embed ? "/embed" : "";
   return (
     <div className="guard" role="dialog" aria-labelledby="ticket-guard-title">
       <h2 id="ticket-guard-title">{t.guardTitle}</h2>
       <p>{t.guardLead}</p>
       <div className="guard-tiles">
-        <a className="guard-tile" href={`${prefix}/gyik?lang=${locale}`}>
+        <a className="guard-tile" href={supportHref("gyik", { embed, lang: locale })}>
           {t.guardFaq}
           <span>{t.guardFaqHint}</span>
         </a>
-        <a className="guard-tile" href={embed ? `${prefix}/lecke-01?lang=${locale}` : `/?lang=${locale}#leckek`}>
+        <a className="guard-tile" href={embed ? supportHref("lecke-01", { embed, lang: locale }) : supportHref("home", { lang: locale }) + "#leckek"}>
           {t.guardLessons}
           <span>{t.guardLessonsHint}</span>
         </a>
-        <a className="guard-tile" href={`${prefix}/lecke-01?lang=${locale}`}>
+        <a className="guard-tile" href={supportHref("lecke-01", { embed, lang: locale })}>
           {t.guardVideos}
           <span>{t.guardVideosHint}</span>
         </a>
-        <a className="guard-tile" href={`${prefix}/tippek?lang=${locale}`}>
+        <a className="guard-tile" href={supportHref("tippek", { embed, lang: locale })}>
           {t.guardCommunity}
           <span>{t.guardCommunityHint}</span>
         </a>
       </div>
       <div className="guard-actions">
-        <button type="button" className="ticket-cta secondary" onClick={() => navigateTo(embed ? `/embed/gyik?lang=${locale}` : `/gyik?lang=${locale}`)}>
+        <button type="button" className="ticket-cta secondary" onClick={() => navigateTo(supportHref("gyik", { embed, lang: locale }))}>
           {t.guardFound}
         </button>
         <button type="button" className="ticket-cta" onClick={onUnlock}>
@@ -217,7 +203,6 @@ function TicketGuard({
 
 function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
   const t = supportCopy(locale);
-  const prefix = embed ? "/embed" : "";
   const videoLessons = supportLessons(locale).filter((l) => Boolean(l.youtubeId));
 
   return (
@@ -227,10 +212,10 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
       <p className="sla">{t.sla}</p>
 
       <div className="nav">
-        <a href={`${prefix}/tippek?lang=${locale}`}>{t.tips}</a>
-        <a href={`${prefix}/gyik?lang=${locale}`}>{t.faq}</a>
+        <a href={supportHref("tippek", { embed, lang: locale })}>{t.tips}</a>
+        <a href={supportHref("gyik", { embed, lang: locale })}>{t.faq}</a>
         {supportLessons(locale).map((l) => (
-          <a key={l.slug} href={`${prefix}/${l.slug}?lang=${locale}`}>
+          <a key={l.slug} href={supportHref(l.slug, { embed, lang: locale })}>
             {l.title}
           </a>
         ))}
@@ -244,7 +229,7 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
         <p className="note">{t.lessonsNote}</p>
         <div className="nav">
           {supportTheory(locale).map((l) => (
-            <a key={l.slug} href={`/${l.slug}?lang=${locale}`}>
+            <a key={l.slug} href={supportHref(l.slug, { lang: locale })}>
               {l.title}
             </a>
           ))}
@@ -256,7 +241,7 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
           <h2>{t.videos}</h2>
           <div className="nav">
             {videoLessons.map((l) => (
-              <a key={l.slug} href={`${prefix}/${l.slug}?lang=${locale}`}>
+              <a key={l.slug} href={supportHref(l.slug, { embed, lang: locale })}>
                 {l.title}
               </a>
             ))}
@@ -267,7 +252,7 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
       <button
         type="button"
         className="ticket-cta"
-        onClick={() => navigateTo(`${prefix}/ticket?lang=${locale}`)}
+        onClick={() => navigateTo(supportHref("ticket", { embed, lang: locale }))}
       >
         {t.noTicketCta}
       </button>
@@ -294,13 +279,7 @@ export function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const embed = path.startsWith("/embed");
-  const slug = useMemo(() => {
-    if (path === "/embed" || path === "/embed/") return "home";
-    if (path.startsWith("/embed/")) return path.slice("/embed/".length);
-    if (path === "/") return "home";
-    return path.replace(/^\//, "");
-  }, [path]);
+  const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
 
   const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
   const lesson = rawLesson ? localizeLesson(locale, rawLesson) : null;
@@ -316,7 +295,7 @@ export function App() {
         <Items items={supportTips(locale)} />
         {!embed ? (
           <p className="note" style={{ marginTop: 16 }}>
-            <a href={`/?lang=${locale}`}>{t.backHome}</a>
+            <a href={supportHref("home", { lang: locale })}>{t.backHome}</a>
           </p>
         ) : null}
       </>
@@ -330,7 +309,7 @@ export function App() {
         <button
           type="button"
           className="ticket-cta"
-          onClick={() => navigateTo(`${embed ? "/embed" : ""}/ticket?lang=${locale}`)}
+          onClick={() => navigateTo(supportHref("ticket", { embed, lang: locale }))}
         >
           {t.noTicketCta}
         </button>
@@ -376,7 +355,9 @@ export function App() {
       <>
         <h1>{t.noLesson}</h1>
         <p>
-          <a href={`/embed/tippek?lang=${locale}`}>{t.backTips}</a>
+          <a href={supportHref("tippek", { embed, lang: locale })}>{t.backTips}</a>
+          {" · "}
+          <a href={supportHref("home", { embed, lang: locale })}>{t.backHome}</a>
         </p>
       </>
     );

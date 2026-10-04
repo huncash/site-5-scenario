@@ -1,12 +1,14 @@
 /**
- * Lightweight static origin for .output/public.
- * No React SSR, no database — Cloudflare cache-eli, a VPS csak cache-miss-t szolgál ki.
+ * Lightweight static origin for .output/public (+ aldomain site rootok).
+ * Host header alapján: support/docs/blog → sites/<key>, egyébként main.
+ * SPA fallback: ismeretlen HTML útvonal → az adott site index.html-je (pl. /ticket).
  */
 import { createServer } from "node:http";
 import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveSiteKey, resolveSiteRoot } from "./site-hosts.mjs";
 
 process.on("uncaughtException", (error) => {
   console.error("[static-origin] uncaughtException", error);
@@ -30,7 +32,7 @@ function resolvePort() {
   return port;
 }
 
-function resolveRoot() {
+function resolveMainRoot() {
   const candidates = [
     process.env.STATIC_ROOT,
     path.resolve(process.cwd(), ".output/public"),
@@ -53,7 +55,7 @@ function resolveRoot() {
 
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = resolvePort();
-const ROOT = resolveRoot();
+const MAIN_ROOT = resolveMainRoot();
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -82,17 +84,24 @@ function cacheControl(urlPath, ext) {
   return "public, max-age=86400";
 }
 
-function safeJoin(urlPath) {
+function parseHostPort(req) {
+  const raw = String(req.headers["x-forwarded-host"] || req.headers.host || "");
+  const hostOnly = raw.split(",")[0].trim().toLowerCase();
+  const [hostname, headerPort] = hostOnly.split(":");
+  return { hostname: hostname || "", port: headerPort || String(PORT) };
+}
+
+function safeJoin(root, urlPath) {
   const decoded = decodeURIComponent(urlPath.split("?")[0]);
   const rel = decoded.replace(/^\/+/, "");
-  const abs = path.resolve(ROOT, rel);
-  const relToRoot = path.relative(ROOT, abs);
+  const abs = path.resolve(root, rel);
+  const relToRoot = path.relative(root, abs);
   if (relToRoot.startsWith("..") || path.isAbsolute(relToRoot)) return null;
   return abs;
 }
 
 async function readBuildId() {
-  const direct = path.join(ROOT, "build-id.txt");
+  const direct = path.join(MAIN_ROOT, "build-id.txt");
   if (existsSync(direct)) return readFile(direct);
   if (process.env.BUILD_SHA) return Buffer.from(`${process.env.BUILD_SHA}\n`);
   const shaFile = path.join(RELEASE_ROOT, "BUILD_SHA");
@@ -115,8 +124,8 @@ async function fileIfExists(filePath) {
   return null;
 }
 
-async function resolveFile(urlPath) {
-  const abs = safeJoin(urlPath);
+async function resolveFile(root, urlPath) {
+  const abs = safeJoin(root, urlPath);
   if (!abs) return null;
   const direct = await fileIfExists(abs);
   if (direct) return direct;
@@ -127,17 +136,21 @@ async function resolveFile(urlPath) {
   return null;
 }
 
-async function shellFile() {
+async function shellFile(root) {
   return (
-    (await fileIfExists(path.join(ROOT, "_shell.html"))) ||
-    (await fileIfExists(path.join(ROOT, "index.html"))) ||
-    (await fileIfExists(path.join(ROOT, "offline.html")))
+    (await fileIfExists(path.join(root, "_shell.html"))) ||
+    (await fileIfExists(path.join(root, "index.html"))) ||
+    (await fileIfExists(path.join(root, "offline.html")))
   );
 }
 
 const server = createServer(async (req, res) => {
   try {
+    const { hostname, port } = parseHostPort(req);
+    const siteKey = resolveSiteKey(hostname, port);
+    const root = resolveSiteRoot(siteKey, MAIN_ROOT);
     const urlPath = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`).pathname;
+
     if (urlPath === "/mnb-rates") {
       const upstream = await fetch("http://www.mnb.hu/arfolyamok.asmx", {
         method: req.method || "POST",
@@ -145,12 +158,15 @@ const server = createServer(async (req, res) => {
           "Content-Type": "text/xml; charset=utf-8",
           SOAPAction: "http://www.mnb.hu/webservices/MNBArfolyamServiceSoap/GetCurrentExchangeRates",
         },
-        body: req.method === "GET" ? undefined : await new Promise((resolve, reject) => {
-          const chunks = [];
-          req.on("data", (c) => chunks.push(c));
-          req.on("end", () => resolve(Buffer.concat(chunks)));
-          req.on("error", reject);
-        }),
+        body:
+          req.method === "GET"
+            ? undefined
+            : await new Promise((resolve, reject) => {
+                const chunks = [];
+                req.on("data", (c) => chunks.push(c));
+                req.on("end", () => resolve(Buffer.concat(chunks)));
+                req.on("error", reject);
+              }),
       });
       const xml = await upstream.text();
       res.writeHead(upstream.ok ? 200 : upstream.status, {
@@ -165,13 +181,13 @@ const server = createServer(async (req, res) => {
         "content-type": "text/plain; charset=utf-8",
         "cache-control": "no-store",
       });
-      res.end(`ok ${HOST}:${PORT} ${ROOT}\n`);
+      res.end(`ok ${HOST}:${PORT} site=${siteKey} root=${root}\n`);
       return;
     }
     if (urlPath === "/build-id.txt") {
       const body = await readBuildId();
       if (!body) {
-        console.error("[static-origin] 404 /build-id.txt", { root: ROOT, cwd: process.cwd() });
+        console.error("[static-origin] 404 /build-id.txt", { root: MAIN_ROOT, cwd: process.cwd() });
         res.writeHead(404, { "cache-control": "no-store" });
         res.end("Not found");
         return;
@@ -183,20 +199,36 @@ const server = createServer(async (req, res) => {
       res.end(body);
       return;
     }
-    let file = await resolveFile(urlPath);
+
+    if (!existsSync(path.join(root, "index.html")) && !existsSync(path.join(root, "_shell.html"))) {
+      console.error("[static-origin] site root missing", { siteKey, root, host: hostname });
+      res.writeHead(503, {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+      });
+      res.end(`site unavailable: ${siteKey}\n`);
+      return;
+    }
+
+    let file = await resolveFile(root, urlPath);
     let status = 200;
     if (!file) {
       const accept = req.headers.accept || "";
-      if (req.method === "GET" && (accept.includes("text/html") || urlPath === "/")) {
-        file = await shellFile();
+      const method = String(req.method || "GET").toUpperCase();
+      const isDoc = method === "GET" || method === "HEAD";
+      // SPA deep-link: /ticket, /gyik, /embed/* → site index (HEAD is, nginx/curl probe)
+      const wantsSpa =
+        isDoc && (accept.includes("text/html") || accept.includes("*/*") || urlPath === "/" || !path.extname(urlPath));
+      if (wantsSpa) {
+        file = await shellFile(root);
       }
       if (!file) {
-        console.error("[static-origin] 404", urlPath, ROOT);
+        console.error("[static-origin] 404", { urlPath, siteKey, root });
         res.writeHead(404, { "cache-control": "no-store" });
         res.end("Not found");
         return;
       }
-      status = accept.includes("text/html") ? 200 : 404;
+      status = accept.includes("text/html") || accept.includes("*/*") || !path.extname(urlPath) ? 200 : 404;
       if (urlPath === "/") status = 200;
     }
 
@@ -204,6 +236,7 @@ const server = createServer(async (req, res) => {
     const headers = {
       "content-type": MIME[ext] || "application/octet-stream",
       "cache-control": cacheControl(urlPath, ext),
+      "x-szcenario-site": siteKey,
     };
     if (urlPath === "/sw.js") headers["service-worker-allowed"] = "/";
 
@@ -219,11 +252,12 @@ const server = createServer(async (req, res) => {
 
 server.on("error", (error) => {
   const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
-  console.error("[static-origin] listen failed", { host: HOST, port: PORT, root: ROOT, code, error });
+  console.error("[static-origin] listen failed", { host: HOST, port: PORT, root: MAIN_ROOT, code, error });
   process.exit(1);
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`[static-origin] ${HOST}:${PORT} → ${ROOT}`);
-  console.log(`[static-origin] build-id.txt=${existsSync(path.join(ROOT, "build-id.txt"))}`);
+  console.log(`[static-origin] ${HOST}:${PORT} → ${MAIN_ROOT}`);
+  console.log(`[static-origin] sites: support/docs/blog under ${path.join(MAIN_ROOT, "sites")}`);
+  console.log(`[static-origin] build-id.txt=${existsSync(path.join(MAIN_ROOT, "build-id.txt"))}`);
 });

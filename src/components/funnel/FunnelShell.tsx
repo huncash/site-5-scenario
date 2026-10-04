@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
@@ -43,6 +44,7 @@ export function FunnelShell(props: {
       </header>
 
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
+        <ContentBackButton />
         <div className="mb-6">
           {eyebrow ? (
             <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{eyebrow}</div>

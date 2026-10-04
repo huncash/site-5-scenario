@@ -34,7 +34,7 @@ export function CampaignLanding(props: { campaignId: CampaignId }) {
 
   const openChooser = () => {
     enterCampaignChooser(campaignId);
-    void navigate({ to: "/" });
+    void navigate({ to: "/", hash: "tipusok" });
   };
 
   return (

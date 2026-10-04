@@ -45,9 +45,13 @@ jobs:
           test -f .output/public/manifest.json
           test -f .output/public/index.html
           test -f .output/public/_shell.html
+          test -f .output/public/sites/support/index.html
+          test -f .output/public/sites/docs/index.html
+          test -f .output/public/sites/blog/index.html
           test -f scripts/static-origin.mjs
+          test -f scripts/site-hosts.mjs
           echo "Built SHA ${{ github.sha }}"
-          find .output/public -maxdepth 2 -type f | sort
+          find .output/public -maxdepth 3 -type f | sort
 
       - name: Package release
         run: |
@@ -61,11 +65,12 @@ jobs:
           mkdir -p release/scripts
           cp -a .output release/.output
           cp -a package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
-          cp -a scripts/static-origin.mjs scripts/vps-activate.sh release/scripts/
+          cp -a scripts/static-origin.mjs scripts/site-hosts.mjs scripts/vps-activate.sh release/scripts/
           tar -czf release.tar.gz -C release .
           tar -tzf release.tar.gz | grep -E '^\./ecosystem\.config\.cjs$|^ecosystem\.config\.cjs$'
           tar -tzf release.tar.gz | grep -E 'scripts/vps-activate\.sh'
-          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs'
+          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs|scripts/site-hosts\.mjs'
+          tar -tzf release.tar.gz | grep -E 'sites/support/index\.html|sites/docs/index\.html|sites/blog/index\.html'
           ls -lh release.tar.gz
 
       - name: Validate VPS SSH key secret

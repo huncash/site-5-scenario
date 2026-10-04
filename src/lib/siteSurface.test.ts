@@ -14,6 +14,9 @@ describe("siteSurface footer visibility", () => {
     expect(resolveSiteHost("bill.szcenario.hu")).toBe("bill");
     expect(resolveSiteHost("localhost", "5110")).toBe("bill");
     expect(resolveSiteHost("support.szcenario.hu")).toBe("support");
+    expect(resolveSiteHost("docs.szcenario.hu")).toBe("docs");
+    expect(resolveSiteHost("blog.szcenario.hu")).toBe("blog");
+    expect(resolveSiteHost("localhost", "5121")).toBe("docs");
     expect(resolveSiteHost("app.szcenario.hu")).toBe("app");
     expect(resolveSiteHost("app.example.test")).toBe("app");
   });

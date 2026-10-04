@@ -1,73 +1,44 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import {
-  ArrowLeft,
   CloudOff,
   Cpu,
-  GraduationCap,
   HardDrive,
   KeyRound,
   Laptop,
   Lock,
   PlayCircle,
   SearchX,
-  ShieldAlert,
   ShieldCheck,
-  UserCheck,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 
+import { HierarchicalCaseChooser } from "@/components/cases/HierarchicalCaseChooser";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { CAMPAIGN_FUNNELS } from "@/content/funnels/campaigns";
-import { filterByCampaign, type CampaignId } from "@/lib/campaignFunnels";
+import { type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSession";
-import { demoSerialFromId, publicSegmentById, type DemoSegmentId } from "@/lib/demoCatalog";
-import { coreCasesOnStep, KAHN_SEGMENT_ID, type DemoCatalogKind } from "@/lib/coreCases";
-import { readScenarioDoorStep, writeScenarioDoorStep, type ScenarioDoorStep } from "@/lib/doorStep";
+import { type DemoSegmentId } from "@/lib/demoCatalog";
+import { KAHN_SEGMENT_ID } from "@/lib/coreCases";
+import { writeScenarioDoorStep } from "@/lib/doorStep";
 import {
-  AVAILABLE_SCENARIO_KINDS,
-  kindGroup,
   LATER_KIND_BLURB_KEY,
   LATER_KIND_TITLE_KEY,
   LATER_SCENARIO_KINDS,
-  publicScenarioKindGroups,
-  SCENARIO_INDUSTRY_TITLE_KEY,
-  SCENARIO_KIND_BLURB_KEY,
-  SCENARIO_KIND_CARD_TITLE_KEY,
-  SCENARIO_KIND_FOOTER_KEY,
-  SCENARIO_KIND_TITLE_KEY,
 } from "@/lib/scenarioCatalog";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
 import { KahnEvolvePanel } from "@/components/strategy/KahnEvolvePanel";
-import { caseBlurb, caseTitle, useI18n, type MessageKey } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { useVault } from "@/lib/vault";
 const HomePricing = lazy(() => import("@/components/home/HomePricing").then((m) => ({ default: m.HomePricing })));
 
-const KIND_STEPS = AVAILABLE_SCENARIO_KINDS;
-
-const KIND_CARD_ICON: Record<DemoCatalogKind, LucideIcon> = {
-  economic: Cpu,
-  resilience: ShieldAlert,
-  education: GraduationCap,
-  inner: UserCheck,
-};
-
 export function ScenarioDoor() {
-  const { t, locale } = useI18n();
-  const face = (s: { id: string; title: string; blurb: string }) => {
-    const title = caseTitle(s.id, locale) ?? s.title;
-    const serial = demoSerialFromId(s.id);
-    return {
-      title: serial != null ? `DEMO ${serial} — ${title}` : title,
-      blurb: caseBlurb(s.id, locale) ?? s.blurb,
-    };
-  };
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { unlockById, createProfile } = useVault();
-  const [step, setStep] = useState<ScenarioDoorStep>("type");
   const [busyId, setBusyId] = useState<DemoSegmentId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [campus, setCampus] = useState(false);
@@ -75,11 +46,6 @@ export function ScenarioDoor() {
   const inFlight = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const campaign = campaignId ? CAMPAIGN_FUNNELS[campaignId] : null;
-  const casesOn = (stepName: ScenarioDoorStep) =>
-    coreCasesOnStep(stepName)
-      .map((id) => publicSegmentById(id))
-      .filter((s): s is NonNullable<typeof s> => Boolean(s));
-  const strategyCases = useMemo(() => filterByCampaign(casesOn("strategy"), campaignId), [campaignId]);
 
   const preferDashboardHome = () => {
     try {
@@ -93,7 +59,9 @@ export function ScenarioDoor() {
   };
 
   useEffect(() => {
-    captureCampaignFromLocation({ doorStep: true });
+    captureCampaignFromLocation({ doorStep: false });
+    // Köztes esetválasztó lépés kivezetve — mindig a hierarchikus főnézet.
+    writeScenarioDoorStep("type");
     setCampaignId(readCampaignId());
     try {
       const refCode = new URLSearchParams(window.location.search).get("referral");
@@ -103,39 +71,21 @@ export function ScenarioDoor() {
     } catch {
       // ignore
     }
-    const stored = readScenarioDoorStep();
-    setStep(
-      stored === "hospitality" ||
-      stored === "industry" ||
-      stored === "economic" ||
-      stored === "strategy" ||
-      stored === "resilience" ||
-      stored === "education" ||
-      stored === "healthcare" ||
-      stored === "manufacturing" ||
-      stored === "logistics" ||
-      stored === "services" ||
-      stored === "inner"
-        ? stored === "industry"
-          ? "economic"
-          : stored
-        : "type",
-    );
     try {
       setCampus(new URLSearchParams(window.location.search).get("ref") === "campus");
     } catch {
       setCampus(false);
     }
+    if (window.location.hash === "#tipusok") {
+      window.requestAnimationFrame(() => {
+        document.getElementById("tipusok")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }, []);
 
   useEffect(() => {
     scrollerRef.current?.focus({ preventScroll: true });
-  }, [step]);
-
-  const go = (next: ScenarioDoorStep) => {
-    writeScenarioDoorStep(next);
-    setStep(next);
-  };
+  }, []);
 
   const openCase = async (segmentId: DemoSegmentId) => {
     if (inFlight.current) return;
@@ -205,8 +155,7 @@ export function ScenarioDoor() {
           </p>
         </div>
 
-        {step === "type" ? (
-          <div className="space-y-12">
+        <div className="space-y-12">
             <section className="mx-auto w-full max-w-3xl space-y-5 text-left" aria-labelledby="door-why-heading">
               <h2
                 id="door-why-heading"
@@ -319,37 +268,14 @@ export function ScenarioDoor() {
                 <TypesTrustBadge icon={KeyRound} label={t("door.typesBadgeCrypto")} />
                 <TypesTrustBadge icon={Zap} label={t("door.typesBadgeCash")} />
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {publicScenarioKindGroups().map((group) => {
-                  const Icon = KIND_CARD_ICON[group.kind];
-                  return (
-                    <button
-                      key={group.kind}
-                      type="button"
-                      onClick={() => go(group.kind)}
-                      className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-left transition-colors hover:border-slate-700"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/50 p-2.5">
-                          <Icon className="h-5 w-5 stroke-[1.5] text-emerald-600" aria-hidden />
-                        </div>
-                        <span className="rounded-md border border-emerald-800/40 bg-emerald-950/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-200/90">
-                          {t("door.available")}
-                        </span>
-                      </div>
-                      <div className="mt-3 text-sm font-semibold text-foreground">
-                        {t(SCENARIO_KIND_CARD_TITLE_KEY[group.kind])}
-                      </div>
-                      <p className="mt-1.5 text-[13px] leading-snug text-slate-300/90">
-                        {t(SCENARIO_KIND_BLURB_KEY[group.kind])}
-                      </p>
-                      <p className="mt-3 inline-flex rounded-md border border-slate-800 bg-slate-950/50 px-2.5 py-1 text-[11px] font-medium text-slate-400">
-                        {t(SCENARIO_KIND_FOOTER_KEY[group.kind])}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+              {campaign?.chooserIntro ? (
+                <p className="max-w-2xl text-[13px] leading-relaxed text-muted-foreground">{campaign.chooserIntro}</p>
+              ) : null}
+              <HierarchicalCaseChooser
+                variant="door"
+                busyId={busyId}
+                onSelect={(id) => void openCase(id)}
+              />
               <div className="grid gap-3 sm:grid-cols-2">
                 {LATER_SCENARIO_KINDS.map((id) => (
                   <div
@@ -396,99 +322,6 @@ export function ScenarioDoor() {
               <HomePricing campus={campus} />
             </Suspense>
           </div>
-        ) : null}
-
-        {KIND_STEPS.includes(step as DemoCatalogKind) ? (
-          <KindBrowse
-            kind={step as DemoCatalogKind}
-            busyId={busyId}
-            onBack={() => go("type")}
-            onOpen={(id) => void openCase(id)}
-            face={face}
-            t={t}
-            lead={
-              step === "education" && campaign?.id === "oktatas"
-                ? campaign.chooserIntro
-                : step === "resilience" &&
-                    campaign &&
-                    (campaign.id === "bcp" || campaign.id === "kozosseg" || campaign.id === "makro")
-                  ? campaign.chooserIntro
-                  : t(SCENARIO_KIND_BLURB_KEY[step as DemoCatalogKind])
-            }
-          />
-        ) : null}
-
-        {step === "strategy" ? (
-          <div className="space-y-4">
-            <DoorBack onClick={() => go("economic")} label={t("door.back")} aside={campaign?.hero.eyebrow ?? t("door.industry.strategy.title")} />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">
-              {campaign?.id === "strategia"
-                ? campaign.chooserIntro
-                : t("door.strategyLead")}
-            </p>
-            <div className="grid gap-2">
-              {strategyCases.map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === "healthcare" || step === "manufacturing" || step === "logistics" || step === "hospitality" ? (
-          <div className="space-y-4">
-            <DoorBack
-              onClick={() => go("economic")}
-              label={t("door.back")}
-              aside={t(`door.industry.${step}.title` as MessageKey)}
-            />
-            <p className="text-[12px] leading-relaxed text-muted-foreground">
-              {step === "hospitality"
-                ? t("brand.demoPreviewBody")
-                : t(`door.stepLead.${step}` as MessageKey)}
-            </p>
-            <div className="grid gap-2">
-              {casesOn(step).map((s) => (
-                <Button
-                  key={s.id}
-                  type="button"
-                  variant="secondary"
-                  className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                  disabled={busyId !== null}
-                  onClick={() => void openCase(s.id)}
-                >
-                  <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium">{face(s).title}</span>
-                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                      {face(s).blurb}
-                    </span>
-                    {busyId === s.id ? (
-                      <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                    ) : null}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
 
         {error ? <p className="text-center text-xs font-medium text-destructive">{error}</p> : null}
       </div>
@@ -683,66 +516,6 @@ function ItemsShot() {
   );
 }
 
-function KindBrowse({
-  kind,
-  busyId,
-  onBack,
-  onOpen,
-  face,
-  t,
-  lead,
-}: {
-  kind: DemoCatalogKind;
-  busyId: DemoSegmentId | null;
-  onBack: () => void;
-  onOpen: (id: DemoSegmentId) => void;
-  face: (s: { id: string; title: string; blurb: string }) => { title: string; blurb: string };
-  t: (key: MessageKey, vars?: Record<string, string | number>) => string;
-  lead: string;
-}) {
-  const group = kindGroup(kind);
-  if (!group) return null;
-  return (
-    <div className="space-y-4">
-      <DoorBack onClick={onBack} label={t("door.backTypes")} aside={t(SCENARIO_KIND_TITLE_KEY[kind])} />
-      <p className="text-[12px] leading-relaxed text-muted-foreground">{lead}</p>
-      <div className="space-y-4">
-        {group.industries.map((bucket) => (
-          <div key={bucket.industry} className="space-y-2">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-200/90">
-              {t(SCENARIO_INDUSTRY_TITLE_KEY[bucket.industry])}
-            </div>
-            <div className="grid gap-2">
-              {bucket.segments.map((s) => {
-                const f = face(s);
-                return (
-                  <Button
-                    key={s.id}
-                    type="button"
-                    variant="secondary"
-                    className="h-auto w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left"
-                    disabled={busyId !== null}
-                    onClick={() => onOpen(s.id)}
-                  >
-                    <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-medium">{f.title}</span>
-                      <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">{f.blurb}</span>
-                      {busyId === s.id ? (
-                        <span className="mt-1 block text-[11px] text-primary">{t("door.opening")}</span>
-                      ) : null}
-                    </span>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function DoorFact({
   term,
   children,
@@ -831,26 +604,3 @@ function HowArchitecture({
   );
 }
 
-function DoorBack({
-  onClick,
-  label,
-  aside,
-}: {
-  onClick: () => void;
-  label: string;
-  aside: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <button
-        type="button"
-        onClick={onClick}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        {label}
-      </button>
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{aside}</p>
-    </div>
-  );
-}
