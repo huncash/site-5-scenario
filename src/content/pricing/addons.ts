@@ -1,9 +1,15 @@
 /**
- * JIT add-on unit prices (net HUF / month).
- * Internal margin strategy stays out of public UI copy.
+ * JIT add-on unit prices — forrás: `JIT_ADDON_PRICES` (`src/config/plans.ts`).
  */
 
-export type JitAddonId = "case_plus_1" | "slot_plus_1" | "seat_plus_1" | "guest_plus_1";
+import {
+  JIT_ADDON_MIN_COMMITMENT_DAYS,
+  JIT_ADDON_PRICES,
+  type JitAddonId,
+} from "@/config/plans";
+
+export type { JitAddonId };
+export { JIT_ADDON_MIN_COMMITMENT_DAYS };
 
 export type JitAddon = {
   id: JitAddonId;
@@ -13,31 +19,28 @@ export type JitAddon = {
   labelEn: string;
 };
 
-/** Minimum commitment (days) per active JIT add-on — policy, not marketing copy. */
-export const JIT_ADDON_MIN_COMMITMENT_DAYS = 30;
-
 export const JIT_ADDONS: JitAddon[] = [
   {
     id: "case_plus_1",
-    priceHuf: 4_900,
+    priceHuf: JIT_ADDON_PRICES.case_plus_1,
     labelHu: "+1 Extra Case",
     labelEn: "+1 Extra Case",
   },
   {
     id: "slot_plus_1",
-    priceHuf: 2_900,
+    priceHuf: JIT_ADDON_PRICES.slot_plus_1,
     labelHu: "+1 Extra Slot",
     labelEn: "+1 Extra Slot",
   },
   {
     id: "seat_plus_1",
-    priceHuf: 6_900,
+    priceHuf: JIT_ADDON_PRICES.seat_plus_1,
     labelHu: "+1 Extra Seat",
     labelEn: "+1 Extra Seat",
   },
   {
     id: "guest_plus_1",
-    priceHuf: 1_200,
+    priceHuf: JIT_ADDON_PRICES.guest_plus_1,
     labelHu: "+1 Extra Guest",
     labelEn: "+1 Extra Guest",
   },

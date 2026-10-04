@@ -124,7 +124,7 @@ export function lessonBySlug(slug: string) {
 export const KAHN_BONBON = {
   eyebrow: "Tudástár · P-R-O szórásmodell",
   title: "Herman Kahn döntési elágazás & szórásmodell",
-  p1: "Nem jóslat, hanem tartomány: kritikus elágazási pontok (1–2. forduló) és három párhuzamos kimenet — Pesszimista, Realista, Optimista.",
+  p1: "Nem jóslat, hanem tartomány: kritikus elágazási pontok (1–2. forduló) és három egyidejűleg futó kimenet — Pesszimista, Realista, Optimista.",
   p2: "Stop-Loss a pesszimista sávon védi a Core üzemet. Teljes lecke: döntési fa, finanszírozási konstrukció, Cash Runway. DEMO 11, local-first.",
   foot: "Local-first · nincs felhő-adat · nincs használatküldés",
 } as const;

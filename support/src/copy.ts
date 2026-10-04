@@ -144,7 +144,7 @@ function toFaqSection(locale: Locale): FaqSection[] {
 const KAHN_EN = {
   eyebrow: "Knowledge · P-R-O spread model",
   title: "Herman Kahn decision fork & spread model",
-  p1: "Not a forecast — a range: critical decision nodes (rounds 1–2) and three parallel outcomes — Pessimistic, Realistic, Optimistic.",
+  p1: "Not a forecast — a range: critical decision nodes (rounds 1–2) and three simultaneously running outcomes — Pessimistic, Realistic, Optimistic.",
   p2: "Stop-Loss on the pessimistic band protects the core plant. Full lesson: decision tree, financing structure, Cash Runway. DEMO 11, local-first.",
   foot: "Local-first · no cloud data · no usage send",
 } as const;

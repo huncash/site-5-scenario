@@ -35,7 +35,7 @@ export function KahnEvolvePanel() {
           </text>
         </svg>
       </div>
-      <div className="grid grid-cols-1 gap-4 text-xs text-slate-400 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 text-xs text-slate-400 min-w-0 xl:grid-cols-2">
         <div className="rounded-xl border border-slate-800/80 bg-slate-950/50 p-4">
           <span className="mb-1 block font-medium text-red-400">{t("door.kahnEvolveLimitTitle")}</span>
           {t("door.kahnEvolveLimitBody")}

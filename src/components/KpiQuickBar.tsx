@@ -62,7 +62,7 @@ export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
         </button>
 
         {!collapsed ? (
-          <div className="grid grid-cols-2 gap-2 pr-9 sm:grid-cols-3 md:grid-cols-4 md:gap-3">
+          <div className="grid grid-cols-1 gap-2 pr-9 min-w-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-3">
             {safe.map((s, idx) => {
               const hasContent = Boolean(s.content || s.label || s.value);
               const isPlaceholder = !hasContent || s.comingSoon;

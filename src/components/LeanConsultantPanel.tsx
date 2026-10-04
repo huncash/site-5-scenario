@@ -246,7 +246,7 @@ export function LeanConsultantPanel({
                   Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins)
                 </div>
                 <p className="mt-1.5 text-xs leading-snug text-emerald-100/90">{LEAN_QUICK_WINS_COPY_HU}</p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-emerald-100/85 sm:grid-cols-4">
+                <dl className="mt-2 grid grid-cols-1 gap-x-3 gap-y-1 text-[11px] text-emerald-100/85 min-w-0 sm:grid-cols-2 xl:grid-cols-4">
                   <div>
                     <dt className="text-emerald-200/60">CapEx</dt>
                     <dd className="font-medium">{formatMoney(result.quickWins.capexHuf, "HUF")}</dd>

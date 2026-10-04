@@ -136,7 +136,7 @@ export function WorkspaceTabs({
 
   return (
     <div className={`flex min-w-0 items-end gap-2 pb-0.5 ${className ?? ""}`.trim()}>
-      <div className="grid min-w-0 flex-1 grid-cols-2 items-end gap-2">
+      <div className="grid min-w-0 flex-1 grid-cols-1 items-end gap-2 xl:grid-cols-2">
         <div className="no-scrollbar flex min-w-0 flex-nowrap items-end gap-2 overflow-x-auto pr-1">
           {leftIds.map((id) => tabBtn(id, tintByWs.map.get(id)))}
         </div>
@@ -275,11 +275,11 @@ export function WorkspacePanels({
       >
         <div
           className={`relative grid w-full grid-cols-1 items-start gap-2 md:gap-2.5 ${
-            isFull ? "" : "md:grid-cols-2"
+            isFull ? "" : "xl:grid-cols-2"
           }`}
         >
           {!isFull ? (
-            <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-slate-800 md:block" />
+            <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-slate-800 xl:block" />
           ) : null}
 
           {/* LEFT COLUMN */}
@@ -315,17 +315,17 @@ export function WorkspacePanels({
         highlightPanels ? "rounded-xl ring-2 ring-cyan-300/70 shadow-[0_0_0_4px_rgba(34,211,238,0.16)]" : ""
       }`}
     >
-      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6">
+      <div className="mt-2 grid grid-cols-1 gap-3 xl:grid-cols-2 xl:gap-6">
         <div className="text-xs font-semibold uppercase tracking-wider">
           <span className={headerLeftCls}>{headerLeft}</span>
         </div>
-        <div className="text-left text-xs font-semibold uppercase tracking-wider sm:text-left">
+        <div className="text-left text-xs font-semibold uppercase tracking-wider">
           <span className={headerRightCls}>{headerRight}</span>
         </div>
       </div>
 
       {pdcaMode === "CA" ? (
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
           <div className="rounded-lg border border-border/60 bg-background/40 p-5">
             <div className="mb-3 text-xs font-medium text-emerald-300">{t("pdca.checkNotes")}</div>
 

@@ -1,3 +1,4 @@
+import { capacityTipHu, seatGuestCapacityTipHu } from "@/config/planCopy";
 import {
   DAILY_OPS_BODY,
   PRO_ARTICLE_BODY,
@@ -87,16 +88,16 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "Case vs Slot – mi a különbség?",
     summary:
-      "A Case egy elmentett döntési modell; a Slot a Case-en belüli lapfül (Magán, Vállalkozás, Projekt).",
+      "A Case a komplett, elmentett döntési és szimulációs modell; a Slot a Case-en belüli elkülönített adatterület (Magán, Vállalkozás, Projekt).",
     body: `🎯 Fogalom
-- **Case:** komplett, elmentett döntési és szimulációs modell (pl. bisztró nyitás vagy átalakítás).
-- **Slot:** a Case-en belüli elkülönített adatterület / lapfül (Magán, Vállalkozás, Projekt).
+- **Case:** a komplett, elmentett döntési és szimulációs modell.
+- **Slot:** a Case-en belüli elkülönített adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt.
 
 ⚙️ Kapacitás
-- Egy Case-en belül a csomagodtól függően több Slot futhat párhuzamosan (Basic: 2, Pro: 4, Enterprise: 8 Case-enként).
+- ${capacityTipHu()}
 
 💡 Tip
-- Ne keverd a Slotot a P-R-O Szcenárióval: a Slot a tér, a P-R-O a három görbe azon a téren belül.`,
+- Ne keverd a Slotot a P-R-O Szcenárióval: a Slot a tér, a P-R-O a három egyidejűleg futó görbe azon a téren belül.`,
     tags: ["case", "slot", "fogalom", "kapacitás"],
   },
   {
@@ -104,10 +105,10 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "P-R-O Szcenárió – mit jelent?",
     summary:
-      "Pesszimista (🔴), Realista (🔵), Optimista (🟢) — három párhuzamos görbe minden Slotban és Case-ben.",
+      "Pesszimista · Realista · Optimista — a három egyidejűleg futó szimulációs görbe minden Slotban.",
     body: `🎯 Fogalom
-- A **P-R-O Szcenárió** a Pesszimista, Realista és Optimista kimenetelek rövidítése.
-- A motor minden Slotban automatikusan ezt a 3 párhuzamos görbét szimulálja.
+- A **P-R-O Szcenárió** a Pesszimista, Realista és Optimista rövidítése.
+- A motor minden Slotban automatikusan ezt a három egyidejűleg futó szimulációs görbét számolja.
 
 ⚙️ Miért nem egy szám?
 - A cél a teljes kockázati mozgástér, nem egyetlen „jóslat”.
@@ -121,13 +122,13 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "Seat vs Guest",
     summary:
-      "A Seat szerkesztői fiók; a Guest csak olvasható megosztás — nem fogyaszt Seat-et.",
+      "A Seat szerkesztői fiók; a Guest vendégfiók csak olvasói joggal.",
     body: `🎯 Fogalom
-- **Seat:** aktív módosítási joggal rendelkező szerkesztői fiók.
-- **Guest:** csak olvasható megosztás külső partnereknek, társtulajdonosoknak vagy könyvelőnek.
+- **Seat:** szerkesztői fiók (teljes szerkesztési és modelligazítási jogkörrel).
+- **Guest:** vendégfiók csak olvasói joggal (nézelődő / ellenőrző hozzáférés).
 
 ⚙️ Kapacitás
-- Basic: 1 Seat + 1 Guest Code Slot · Pro: 1 Seat + 5 Guest Code Slot · Enterprise: 3 Seat + 20 Guest Code Slot.
+- ${seatGuestCapacityTipHu()}
 
 💡 Tip
 - A Guest nem írhatja át a modelljeidet; a kulcs bármikor visszavonható.`,
@@ -645,7 +646,7 @@ ${PRO_ARTICLE_BODY}
     summary:
       "Bisztró bővítés + magán ingatlanfedezet. P–R–O sávok és Stop-Loss a Core és a magánvagyon védelmére. DEMO 11, local-first.",
     body: `🎯 Mire jó?
-- Hogy a döntés előtt három párhuzamos pályát láss (🔴 P / 🔵 R / 🟢 O), ne egyetlen „legvalószínűbb” tervet — és lásd a magán–cég összefonódást.
+- Hogy a döntés előtt három egyidejű pályát láss (🔴 P / 🔵 R / 🟢 O), ne egyetlen „legvalószínűbb” tervet — és lásd a magán–cég összefonódást.
 
 ⚙️ Hogyan működik?
 Herman Kahn (RAND) szcenárió-módszere: kritikus elágazási pontok és szélsőséges kimenetek. A klasszikus fa korlátja: a magánvagyon kimaradt.

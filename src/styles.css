@@ -109,7 +109,8 @@ body,
   grid-column: 1 / -1;
   min-width: 0;
 }
-@container pdca (max-width: 40rem) {
+/* Félképernyő / keskeny PDCA oszlop: egyoszlopos csempék (48rem ≈ 768px). */
+@container pdca (max-width: 48rem) {
   .pdca-tile-grid,
   .pdca-module-stack {
     grid-template-columns: minmax(0, 1fr);

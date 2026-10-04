@@ -1,7 +1,7 @@
 /** Slot kapacitás: csomagmátrix (Eset × Slot/Eset) + bővítő + ajánlói ajándék. */
 
+import { MAX_REFERRAL_GIFT_SLOTS, PLANS_CONFIG, totalSlots, yearlyPriceHuf } from "@/config/plans";
 import { slotPackPriceFromUnit } from "@/content/pricing/addons";
-import { TIER_CAPACITY, yearlyPriceHuf } from "@/content/pricing/tiers";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
 export type PublicTierId = "starter" | "pro" | "expert";
@@ -18,24 +18,17 @@ export type SlotPack = {
   labelEn: string;
 };
 
-/** Ajánlói ajándék slot hard cap (aktív párokra). */
-export const MAX_REFERRAL_GIFT_SLOTS = 25;
-
-function totalSlotsForTier(tier: PublicTierId): number {
-  const c = TIER_CAPACITY[tier];
-  return c.cases * c.slotsPerCase;
-}
+export { MAX_REFERRAL_GIFT_SLOTS };
 
 /**
- * Összes Slot a csomagban (Eset × Slot/Eset alsó határ).
- * Basic 1×2=2 · Pro 2×4=8 · Enterprise 5×8=40.
+ * Összes Slot a csomagban (Eset × Slot/Eset alsó határ) — PLANS_CONFIG.
  */
 export const BASE_SCENARIO_SLOTS: Record<SlotTierId, number> = {
-  starter: totalSlotsForTier("starter"),
-  pro: totalSlotsForTier("pro"),
-  expert: totalSlotsForTier("expert"),
-  campus: 5,
-  local: 8,
+  starter: totalSlots(PLANS_CONFIG.starter),
+  pro: totalSlots(PLANS_CONFIG.pro),
+  expert: totalSlots(PLANS_CONFIG.expert),
+  campus: totalSlots(PLANS_CONFIG.campus),
+  local: totalSlots(PLANS_CONFIG.local),
 };
 
 /** Egységár × db (JIT) — nincs mélykedvezmény, ami aláásná a Pro/Enterprise margót. */

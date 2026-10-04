@@ -45,18 +45,18 @@ export function StrategyCasePanel(props: {
 
   return (
     <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 basis-[12rem]">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {kahn ? t("panel.kahnTitle") : t("panel.stratTitle")}
           </p>
-          <h3 className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-foreground">
+          <h3 className="mt-0.5 inline-flex flex-wrap items-center gap-1 text-sm font-semibold text-foreground">
             {caseTitle(cse.id, locale) ?? cse.title}
             {kahn ? <HelpIcon kbId="lesson-kahn" title={t("panel.kahnHelp")} /> : null}
           </h3>
-          <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
+          <p className="mt-1 text-[12px] leading-snug text-muted-foreground break-words">{phaseHint}</p>
         </div>
-        <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground">
+        <span className="inline-flex max-w-full min-w-[8rem] flex-wrap items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground break-words">
           {kahn ? `Működő üzem → ${props.inheritedFrom}` : `${MASTER_BASELINE_LABEL} → ${props.inheritedFrom}`}
         </span>
       </div>
@@ -68,15 +68,15 @@ export function StrategyCasePanel(props: {
         </>
       ) : null}
       {(props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
-      <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+      <ul className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
         {props.signals.map((s) => (
-          <li key={s.tone} className="rounded-lg border border-border/50 bg-background/40 p-2.5">
-            <div className="flex items-center justify-between gap-2">
+          <li key={s.tone} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
             </div>
-            <p className="mt-2 text-[12px] font-medium text-foreground">{s.title}</p>
-            <p className="mt-0.5 font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{s.detail}</p>
+            <p className="mt-2 text-[12px] font-medium text-foreground break-words">{s.title}</p>
+            <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{s.detail}</p>
           </li>
         ))}
       </ul>

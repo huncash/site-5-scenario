@@ -129,13 +129,13 @@ export function GuidedTourBanner(props: {
 
       {collapsed ? null : (
         <>
-          <ol className="mt-3 grid gap-2 sm:grid-cols-3">
+          <ol className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
             {KAHN_TOUR_STEPS.map((step, idx) => (
-              <li key={step.id} className="rounded-lg border border-border/50 bg-background/50 p-2.5">
+              <li key={step.id} className="min-w-0 rounded-lg border border-border/50 bg-background/50 p-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("kahnGuide.stepLabel", { n: String(idx + 1) })}
                 </p>
-                <h3 className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground">
+                <h3 className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground break-words">
                   {hu ? step.titleHu : step.titleEn}
                 </h3>
                 <button
@@ -149,24 +149,24 @@ export function GuidedTourBanner(props: {
             ))}
           </ol>
 
-          <dl className="mt-3 grid gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-border/40 bg-background/40 p-2">
-              <dt className="text-[11px] font-semibold text-foreground">
+          <dl className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
+            <div className="min-w-0 rounded-lg border border-border/40 bg-background/40 p-2">
+              <dt className="text-[11px] font-semibold text-foreground break-words">
                 {hu ? KAHN_JARGON.runway.termHu : KAHN_JARGON.runway.termEn}
               </dt>
-              <dd className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+              <dd className="mt-0.5 text-[11px] leading-snug text-muted-foreground break-words">
                 {hu ? KAHN_JARGON.runway.exactHu : KAHN_JARGON.runway.exactEn}
               </dd>
             </div>
-            <div className="rounded-lg border border-border/40 bg-background/40 p-2">
-              <dt className="text-[11px] font-semibold text-foreground">
+            <div className="min-w-0 rounded-lg border border-border/40 bg-background/40 p-2">
+              <dt className="text-[11px] font-semibold text-foreground break-words">
                 {hu ? KAHN_JARGON.stopLoss.termHu : KAHN_JARGON.stopLoss.termEn}
               </dt>
-              <dd className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+              <dd className="mt-0.5 text-[11px] leading-snug text-muted-foreground break-words">
                 {hu ? KAHN_JARGON.stopLoss.exactHu : KAHN_JARGON.stopLoss.exactEn}
               </dd>
             </div>
-            <div className="rounded-lg border border-border/40 bg-background/40 p-2">
+            <div className="min-w-0 rounded-lg border border-border/40 bg-background/40 p-2">
               <dt className="text-[11px] font-semibold text-foreground">
                 {hu ? KAHN_JARGON.penalty.termHu : KAHN_JARGON.penalty.termEn}
               </dt>

@@ -105,13 +105,15 @@ function SignalCards({ signals }: { signals: IndustrySignal[] }) {
   };
   if (!signals.length) return null;
   return (
-    <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+    <ul className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
       {signals.map((s) => (
-        <li key={s.tone} className="rounded-lg border border-border/50 bg-background/40 p-2.5">
-          <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
-          <p className="mt-2 text-[12px] font-medium text-foreground">{s.title}</p>
-          <p className="mt-0.5 font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{s.detail}</p>
+        <li key={s.tone} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
+          </div>
+          <p className="mt-2 text-[12px] font-medium text-foreground break-words">{s.title}</p>
+          <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
+          <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{s.detail}</p>
         </li>
       ))}
     </ul>

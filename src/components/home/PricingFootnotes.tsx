@@ -1,6 +1,6 @@
 import { supportPublicOrigin } from "@/lib/support";
 
-/** Árazás / mátrix alatti fogalom-lábjegyzetek — a UI-ban csak elsődleges kifejezések. */
+/** Árazás / mátrix alatti fogalom-lábjegyzetek — sorrend: Case → Slot → P-R-O → Seat / Guest. */
 export function PricingFootnotes(props: { className?: string }) {
   const faqHref = `${supportPublicOrigin()}/gyik#faq-slot`;
   return (
@@ -12,7 +12,11 @@ export function PricingFootnotes(props: { className?: string }) {
       }
     >
       <p>
-        <span className="font-medium text-emerald-400">* Slot:</span> A Case-en belüli elkülönített
+        <span className="font-medium text-emerald-400">* Case:</span> A komplett, elmentett döntési
+        és szimulációs modell.
+      </p>
+      <p>
+        <span className="font-medium text-emerald-400">** Slot:</span> A Case-en belüli elkülönített
         adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt. Lásd még:{" "}
         <a href={faqHref} className="underline hover:text-emerald-300">
           Fogalmi GYIK
@@ -20,16 +24,13 @@ export function PricingFootnotes(props: { className?: string }) {
         .
       </p>
       <p>
-        <span className="font-medium text-emerald-400">** Case:</span> A komplett, elmentett döntési
-        és szimulációs modell.
-      </p>
-      <p>
         <span className="font-medium text-emerald-400">*** P-R-O Szcenárió:</span> Pesszimista ·
-        Realista · Optimista — a három párhuzamos görbe minden Slotban.
+        Realista · Optimista — a három egyidejűleg futó szimulációs görbe minden Slotban.
       </p>
       <p>
         <span className="font-medium text-emerald-400">**** Seat / Guest:</span> Seat = szerkesztői
-        fiók; Guest Code Slot = anonim, egyedi vendégkód (1 aktív session / kód; nem fogyaszt Seat-et).
+        fiók (teljes szerkesztési és modelligazítási jogkörrel). Guest = vendégfiók csak olvasói
+        joggal (nézelődő / ellenőrző hozzáférés).
       </p>
     </div>
   );

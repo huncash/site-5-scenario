@@ -1,6 +1,9 @@
 import { Check } from "lucide-react";
+import { useMemo } from "react";
 
 import { PRICING_ALIGN_GRID_FIXED } from "@/components/home/pricingLayout";
+import { buildPricingCompareRows } from "@/config/planCopy";
+import { PLANS_CONFIG } from "@/config/plans";
 import { isCompareAbsent, TIER_CORE, type TierId } from "@/content/pricing/tiers";
 import { useI18n, type MessageKey } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -10,17 +13,6 @@ const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
   pro: "pricing.pro",
   expert: "pricing.expert",
 };
-
-const COMPARE_ROWS: Array<{ feature: MessageKey; starter: MessageKey; pro: MessageKey; expert: MessageKey }> = [
-  { feature: "pricing.cf1", starter: "pricing.cs1", pro: "pricing.cp1", expert: "pricing.ce1" },
-  { feature: "pricing.cf2", starter: "pricing.cs2", pro: "pricing.cp2", expert: "pricing.ce2" },
-  { feature: "pricing.cf3", starter: "pricing.cs3", pro: "pricing.cp3", expert: "pricing.ce3" },
-  { feature: "pricing.cf4", starter: "pricing.cs4", pro: "pricing.cp4", expert: "pricing.ce4" },
-  { feature: "pricing.cf5", starter: "pricing.cs5", pro: "pricing.cp5", expert: "pricing.ce5" },
-  { feature: "pricing.cf6", starter: "pricing.cs6", pro: "pricing.cp6", expert: "pricing.ce6" },
-  { feature: "pricing.cf7", starter: "pricing.cs7", pro: "pricing.cp7", expert: "pricing.ce7" },
-  { feature: "pricing.cf8", starter: "pricing.cs8", pro: "pricing.cp8", expert: "pricing.ce8" },
-];
 
 function CompareValue({ value }: { value: string }) {
   const { t } = useI18n();
@@ -44,7 +36,9 @@ function CompareValue({ value }: { value: string }) {
 }
 
 export function PricingCompareTable() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const rows = useMemo(() => buildPricingCompareRows(locale), [locale]);
+
   return (
     <div className="overflow-x-auto">
       <div className={cn(PRICING_ALIGN_GRID_FIXED, "min-w-[720px] lg:min-w-0")}>
@@ -56,36 +50,38 @@ export function PricingCompareTable() {
             key={tier.id}
             className={cn(
               "px-3 py-2 text-[13px] font-semibold text-foreground lg:px-4",
-              tier.id === "pro" && "rounded-t-xl bg-amber-500/[0.08]",
+              PLANS_CONFIG[tier.id].badge === "recommended" && "rounded-t-xl bg-amber-500/[0.08]",
             )}
           >
             {t(TIER_LABEL_KEY[tier.id])}
-            {tier.badge ? (
+            {PLANS_CONFIG[tier.id].badge === "recommended" ? (
               <span className="ml-1.5 text-[10px] font-medium text-amber-200">{t("pricing.recommended")}</span>
             ) : null}
           </div>
         ))}
 
-        {COMPARE_ROWS.map((row, rowIndex) => (
-          <div key={row.feature} className="contents">
+        {rows.map((row, rowIndex) => (
+          <div key={row.id} className="contents">
             <div
               className={cn(
                 "border-t border-white/10 px-1 py-2.5 text-[12px] font-medium text-foreground lg:px-0",
                 rowIndex === 0 && "font-semibold",
               )}
             >
-              {t(row.feature)}
+              {row.feature}
             </div>
             {(["starter", "pro", "expert"] as const).map((id) => (
               <div
-                key={`${row.feature}:${id}`}
+                key={`${row.id}:${id}`}
                 className={cn(
                   "border-t border-white/10 px-3 py-2.5 text-[12px] leading-snug lg:px-4",
-                  id === "pro" && "bg-amber-500/[0.06]",
-                  rowIndex === COMPARE_ROWS.length - 1 && id === "pro" && "rounded-b-xl",
+                  PLANS_CONFIG[id].badge === "recommended" && "bg-amber-500/[0.06]",
+                  rowIndex === rows.length - 1 &&
+                    PLANS_CONFIG[id].badge === "recommended" &&
+                    "rounded-b-xl",
                 )}
               >
-                <CompareValue value={t(row[id])} />
+                <CompareValue value={row.cells[id]} />
               </div>
             ))}
           </div>

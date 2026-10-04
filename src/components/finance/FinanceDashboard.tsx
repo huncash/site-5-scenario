@@ -5722,7 +5722,7 @@ export function FinanceDashboard({
   const whatIfPanel = whatIf ? (
     <Card className="pdca-tile--wide w-full min-w-0 overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex flex-col gap-2 min-[560px]:flex-row min-[560px]:items-start min-[560px]:justify-between">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <CardTitle className="text-sm font-medium text-slate-200">
               {t("dash.workSim")}
@@ -5765,7 +5765,7 @@ export function FinanceDashboard({
       <CardContent className="grid items-start gap-3">
         {whatIf.kahnMetrics ? (
           <>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
@@ -5806,7 +5806,7 @@ export function FinanceDashboard({
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               <BulletGraph
                 item={{
                   id: "kahn-runway",
@@ -5831,7 +5831,7 @@ export function FinanceDashboard({
           </>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
@@ -5873,7 +5873,7 @@ export function FinanceDashboard({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               <BulletGraph
                 item={{
                   id: "roi",
@@ -6477,7 +6477,7 @@ export function FinanceDashboard({
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-2 gap-3 w-full md:grid-cols-3 xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-3 w-full min-w-0 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
               {timeline6Rows.map((r) => {
                 const [yy, mm] = String(r.month).split("-").map((x) => Number(x));
                 const label = Number.isFinite(yy) && Number.isFinite(mm)
@@ -7252,7 +7252,7 @@ export function FinanceDashboard({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               label="Beszerzés (nettó)"
               value={formatMoney(Math.round(resaleDeals.kpi.purchaseNetSum), CURRENCY)}
@@ -7666,7 +7666,7 @@ export function FinanceDashboard({
                 Min. havi teher: {formatMoney(Math.round(debtFocus.monthlyMinimumSum), CURRENCY)}
               </span>
             </div>
-            <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="mt-2 grid grid-cols-1 gap-2 min-w-0 xl:grid-cols-2">
               <div className="rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
@@ -8037,7 +8037,7 @@ export function FinanceDashboard({
               </LeanTerm>
               <span className="font-mono text-xs text-slate-300">{personalLoans.length} aktív tartozás</span>
             </div>
-            <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="mt-2 grid grid-cols-1 gap-2 min-w-0 xl:grid-cols-2">
               <div className="rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
@@ -9113,7 +9113,7 @@ export function FinanceDashboard({
                           </div>
 
                           {isEditing && (
-                            <div className="mt-2 grid grid-cols-2 gap-2">
+                            <div className="mt-2 grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2">
                               <Select
                                 value={assetEditingLocationId || "__none"}
                                 onValueChange={(v) =>
@@ -9938,7 +9938,7 @@ export function FinanceDashboard({
                         const payable = Math.max(0, vatLedger?.netPosition ?? vatReserve.payable);
                         return (
                           <>
-                            <div className="mt-4 mb-3 grid gap-4 md:grid-cols-2">
+                            <div className="mt-4 mb-3 grid gap-4 grid-cols-1 xl:grid-cols-2">
                               <Card className="border-[color:var(--color-chart-2)]/30 bg-[color:var(--color-chart-2)]/10 border-l-4 border-l-[color:var(--color-chart-2)]">
                                 <CardContent className="p-5">
                                   <div className="flex items-start justify-between gap-2">
@@ -9974,7 +9974,7 @@ export function FinanceDashboard({
                               </Card>
                             </div>
 
-                            <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                            <div className="mb-4 grid gap-4 grid-cols-1 lg:grid-cols-2">
                               <StatCard
                                 label={
                                   <span className="inline-flex items-center gap-2">
@@ -10054,7 +10054,7 @@ export function FinanceDashboard({
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div className="mt-3 grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <div className="rounded-md border bg-background/30 p-3">
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-muted-foreground">Következő 30 nap fix kiadás</span>
@@ -10112,7 +10112,7 @@ export function FinanceDashboard({
                         </div>
                       )}
 
-                      <div className="mb-4 grid gap-4 md:grid-cols-2">
+                      <div className="mb-4 grid gap-4 grid-cols-1 xl:grid-cols-2">
                         <Card className="border-border/60 bg-background/40">
                           <CardContent className="p-4">
                             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -10152,7 +10152,7 @@ export function FinanceDashboard({
                               <Progress value={Math.round(leanInsights.eff * 100)} />
                             </div>
 
-                            <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            <div className="mt-4 grid gap-3 grid-cols-1 xl:grid-cols-2">
                               <div className="rounded-md border border-emerald-500/20 bg-emerald-950/20 p-3">
                                 <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                                   1. Beáramlás
@@ -10304,7 +10304,7 @@ export function FinanceDashboard({
 
                   {whatIf && (
                     <div className="mb-4 rounded-lg border border-border/60 bg-background/40 p-4">
-                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                         <div className="min-w-0">
                           <div className="text-sm font-semibold">What‑If szimulátor (P-R-O forgatókönyvek)</div>
                           <div className="mt-1 text-xs text-muted-foreground">
@@ -11036,7 +11036,7 @@ export function FinanceDashboard({
                             />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label>Típus</Label>
                               <Select
@@ -11070,7 +11070,7 @@ export function FinanceDashboard({
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="rec-next">Következő esedékesség</Label>
                               <Input
@@ -11110,7 +11110,7 @@ export function FinanceDashboard({
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="rec-huf">Nettó (HUF)</Label>
                               <Input
@@ -11133,7 +11133,7 @@ export function FinanceDashboard({
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="rec-eur">Nettó (EUR)</Label>
                               <Input
@@ -11228,7 +11228,7 @@ export function FinanceDashboard({
                             />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label>Típus</Label>
                               <Select
@@ -11274,7 +11274,7 @@ export function FinanceDashboard({
                             </Select>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="oneoff-huf">Nettó (HUF)</Label>
                               <Input
@@ -11297,7 +11297,7 @@ export function FinanceDashboard({
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="oneoff-eur">Nettó (EUR)</Label>
                               <Input
@@ -11405,7 +11405,7 @@ export function FinanceDashboard({
                             </Select>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="usage-huf">Egységár nettó (HUF)</Label>
                               <Input
@@ -11428,7 +11428,7 @@ export function FinanceDashboard({
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor="usage-eur">Egységár nettó (EUR)</Label>
                               <Input
@@ -11894,7 +11894,7 @@ export function FinanceDashboard({
                   </div>
 
                   {leanView && leanInsights && (
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
                       <Card className="border-border/60 bg-background/40">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-2">
@@ -11966,8 +11966,8 @@ export function FinanceDashboard({
 
             {activeSubTab === "inventory" && (
               <section className="w-full grid gap-3">
-                <div className="grid grid-cols-2 gap-8 relative min-h-[600px]">
-                  <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-slate-800 -translate-x-1/2 pointer-events-none" />
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-8 relative min-h-0 xl:min-h-[600px]">
+                  <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-slate-800 xl:block" />
 
                   {/* LEFT COLUMN — DO */}
                   <div className="min-w-0">
@@ -12191,7 +12191,7 @@ export function FinanceDashboard({
                         Erőforrások (Bankszámlák · Költséghelyek · Jármű · HR)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-3 md:grid-cols-2">
+                    <CardContent className="grid gap-3 grid-cols-1 xl:grid-cols-2">
                       <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
                         <div className="text-[11px] text-slate-300">Költséghelyek / raktárak (workspace)</div>
                         <div className="mt-1 text-sm font-semibold text-white tabular-nums">
@@ -12264,7 +12264,7 @@ export function FinanceDashboard({
               (activeWorkspace === "__all" || autoRuleSuggestion.workspaceId === activeWorkspace) ? (
                 <Card className="w-full border border-border/60 bg-background/40">
                   <CardContent className="py-4">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="text-sm text-slate-200">
                         💡 <span className="font-semibold">Szabály létrehozása:</span> Észrevettük, hogy több hasonló
                         tételt (<span className="font-mono">{autoRuleSuggestion.display}</span>) címkézel. Készítesz rá
@@ -12303,8 +12303,8 @@ export function FinanceDashboard({
                   </CardContent>
                 </Card>
               ) : null}
-              <div className="grid grid-cols-2 gap-8 relative min-h-[600px]">
-                <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-slate-800 -translate-x-1/2 pointer-events-none" />
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-8 relative min-h-0 xl:min-h-[600px]">
+                <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-slate-800 xl:block" />
 
                 {/* LEFT COLUMN — DO */}
                 <div className="min-w-0">
@@ -12336,7 +12336,7 @@ export function FinanceDashboard({
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2 lg:grid-cols-3">
                         <div className="rounded-md border border-sky-500/25 bg-sky-950/20 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                             <span>Tételek</span>
@@ -12627,8 +12627,8 @@ export function FinanceDashboard({
 
             {financeVisible && activeSubTab === "deals" && (
             <section className="w-full grid gap-3">
-              <div className="grid grid-cols-2 gap-8 relative min-h-[600px]">
-                <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-slate-800 -translate-x-1/2 pointer-events-none" />
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-8 relative min-h-0 xl:min-h-[600px]">
+                <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-slate-800 xl:block" />
 
                 {/* LEFT COLUMN — DO */}
                 <div className="min-w-0">
@@ -13764,7 +13764,7 @@ function GoalCard({
           </RevealPanel>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 gap-1.5 min-w-0 sm:grid-cols-2">
           <MiniStat
             label={
               <span className="inline-flex items-center">
@@ -14547,7 +14547,7 @@ function TxnDialog({
         </div>
 
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="grid grid-cols-1 gap-4 px-4 pb-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 px-4 pb-4 xl:grid-cols-2">
           {canInternalTransfer && (
             <div className="rounded-lg border bg-[color:var(--color-chart-6)]/5 p-3 md:col-span-2 border-l-4 border-l-[color:var(--color-chart-6)]">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -14578,7 +14578,7 @@ function TxnDialog({
               </div>
 
               {internalOn && internalKind === "member_loan_out" && (
-                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                <div className="mt-3 grid gap-2 grid-cols-1 xl:grid-cols-2">
                   <div className="grid gap-2">
                     <Label>Cél vállalkozás</Label>
                     <Select
@@ -14659,7 +14659,7 @@ function TxnDialog({
               </div>
             )}
 
-            <div className={cn("grid gap-3", businessMode ? "grid-cols-2" : "grid-cols-1")}>
+            <div className={cn("grid gap-3", businessMode ? "grid-cols-1 xl:grid-cols-2" : "grid-cols-1")}>
               <div className="grid gap-2">
                 <Label htmlFor="amount">
                   {businessMode ? (amountMode === "gross" ? "Bruttó összeg (HUF)" : "Nettó összeg (HUF)") : "Összeg"}
@@ -14920,7 +14920,7 @@ function TxnDialog({
             )}
 
           {type !== "saving" ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:col-span-2">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:col-span-2">
               <div className="grid gap-2 md:col-span-2">
                 <Label htmlFor="txn-description">Tétel pontos megnevezése / Leírás</Label>
                 <Input
@@ -14959,7 +14959,7 @@ function TxnDialog({
           )}
 
           {businessMode && type !== "saving" && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               <div className="grid gap-2">
                 <Label>Fizetés módja</Label>
                 <Select
@@ -14996,7 +14996,7 @@ function TxnDialog({
           )}
 
           {businessMode && type !== "saving" && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label>Telephely / raktár (opcionális)</Label>
@@ -15091,7 +15091,7 @@ function TxnDialog({
           )}
 
           {businessMode && type !== "saving" && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               <div className="grid gap-2">
                 <Label>Típus</Label>
                 <Select value={costKind} onValueChange={(v) => setCostKind(v as CostKind)}>
@@ -15138,7 +15138,7 @@ function TxnDialog({
                 </Button>
               </div>
               {isResale && (
-                <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-4 xl:grid-cols-2">
                   <div className="grid gap-2">
                     <Label htmlFor="resale-customer">Vevő / partner</Label>
                     <Input
@@ -15228,7 +15228,7 @@ function TxnDialog({
           )}
 
           {businessMode && type !== "saving" && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label>Leltári eszköz (opcionális)</Label>

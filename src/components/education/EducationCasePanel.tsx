@@ -83,10 +83,10 @@ function MixChart({ points, unit, label }: { points: EducationPoint[]; unit: str
 function KpiTrio({ kpis }: { kpis: EducationKpi[] }) {
   const { t } = useI18n();
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
       {kpis.map((k) => (
-        <div key={k.id} className="rounded-lg border border-border/50 bg-background/40 p-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
+        <div key={k.id} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground break-words">{k.label}</p>
           <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground/80">
             {k.family === "finance"
               ? t("panel.familyFinance")
@@ -96,19 +96,19 @@ function KpiTrio({ kpis }: { kpis: EducationKpi[] }) {
                   ? t("panel.familyEnergy")
                   : t("panel.familyTime")}
           </p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{k.hint}</p>
+          <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{k.hint}</p>
           <dl className="mt-2 grid gap-1 text-[12px]">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone="opt" label="Opt" line />
-              <span className="font-mono tabular-nums">{formatMetric(k.opt, k.unit)}</span>
+              <span className="min-w-[4.5rem] font-mono tabular-nums text-right">{formatMetric(k.opt, k.unit)}</span>
             </div>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone="real" label="Real" line />
-              <span className="font-mono tabular-nums">{formatMetric(k.real, k.unit)}</span>
+              <span className="min-w-[4.5rem] font-mono tabular-nums text-right">{formatMetric(k.real, k.unit)}</span>
             </div>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone="pess" label="Pess" line />
-              <span className="font-mono tabular-nums">{formatMetric(k.pess, k.unit)}</span>
+              <span className="min-w-[4.5rem] font-mono tabular-nums text-right">{formatMetric(k.pess, k.unit)}</span>
             </div>
           </dl>
         </div>

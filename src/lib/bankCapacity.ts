@@ -1,14 +1,13 @@
-import { TIER_CAPACITY, type TierId } from "@/content/pricing/tiers";
-import { isTierId } from "@/content/pricing/tiers";
+import { PLANS_CONFIG, isPublicPlanId, resolvePlanId, type PublicPlanId } from "@/config/plans";
 import { readLicense } from "@/lib/license";
 import { normalizeTierId, type SlotTierId } from "@/lib/scenarioSlots";
 
-/** Bankszámla / Slot korlát a csomagmátrix szerint. */
+export type TierId = PublicPlanId;
+
+/** Bankszámla / Slot korlát — PLANS_CONFIG. */
 export function bankAccountsPerSlot(tier: SlotTierId): number | "unlimited" {
-  if (tier === "campus") return 1;
-  if (tier === "local") return "unlimited";
-  if (!isTierId(tier)) return "unlimited";
-  return TIER_CAPACITY[tier].bankAccountsPerSlot;
+  const planId = resolvePlanId(tier);
+  return PLANS_CONFIG[planId].quotas.bankAccountsPerSlot;
 }
 
 export function resolveBankTier(): SlotTierId {
@@ -31,12 +30,12 @@ export function checkBankAccountsForSlot(usedMapped: number, tier: SlotTierId = 
 export function bankCapacityToast(tier: SlotTierId = resolveBankTier()): string {
   const limit = bankAccountsPerSlot(tier);
   if (limit === "unlimited") {
-    if (tier === "pro") return "Pro: több bankfiók & kivonat csatolható Slot*-onként.";
+    if (tier === "pro") return "Pro: több bankfiók & kivonat csatolható Slot**-onként.";
     return "Enterprise / local: korlátlan banki / könyvelési csatolás.";
   }
-  return `Basic / Campus: legfeljebb ${limit} banki kivonat (számla) / Slot* — bármilyen időszakra (CSV / PDF / XLS).`;
+  return `Basic / Campus: legfeljebb ${limit} banki kivonat (számla) / Slot** — bármilyen időszakra (CSV / PDF / XLS).`;
 }
 
 export function isPublicTierId(v: string): v is TierId {
-  return isTierId(v);
+  return isPublicPlanId(v);
 }

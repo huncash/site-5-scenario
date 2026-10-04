@@ -161,7 +161,7 @@ export function AssetTree({
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 min-w-0 xl:grid-cols-2">
           {nodeRow({
             title: "👤 Magánszemély",
             subtitle: "Központi csomópont — ingatlanok/ingóságok + kapcsolt költségek",

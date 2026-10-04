@@ -3,10 +3,12 @@
  * Zero PII: no email/name — only opaque codes + optional local password on the Guest device.
  */
 
-import { TIER_CAPACITY, isTierId, type TierId } from "@/content/pricing/tiers";
+import { PLANS_CONFIG, isPublicPlanId, type PublicPlanId } from "@/config/plans";
 import { readLicense } from "@/lib/license";
 import { normalizeTierId, type SlotTierId } from "@/lib/scenarioSlots";
 import { sha256Hex } from "@/lib/hash";
+
+type TierId = PublicPlanId;
 
 export type GuestCodeSlot = {
   /** 1-based slot index (#01 …). */
@@ -35,18 +37,18 @@ const CHANNEL = "szcenario-guest-session";
 const EVENT_POOL = "szcenario:guest_slots";
 const EVENT_KICK = "szcenario:guest_session_kick";
 
-/** Unique Guest Code slots per plan (not Seat count) — mirrors TIER_CAPACITY.guests. */
+/** Unique Guest Code slots per plan (not Seat count) — PLANS_CONFIG.guests. */
 export const GUEST_CODE_SLOTS_PER_TIER: Record<TierId, number> = {
-  starter: TIER_CAPACITY.starter.guests,
-  pro: TIER_CAPACITY.pro.guests,
-  expert: TIER_CAPACITY.expert.guests,
+  starter: PLANS_CONFIG.starter.quotas.guests,
+  pro: PLANS_CONFIG.pro.quotas.guests,
+  expert: PLANS_CONFIG.expert.quotas.guests,
 };
 
 export function guestCodeSlotsForTier(tier: SlotTierId): number {
-  if (tier === "campus") return 1;
-  if (tier === "local") return TIER_CAPACITY.expert.guests;
-  if (!isTierId(tier)) return TIER_CAPACITY.starter.guests;
-  return TIER_CAPACITY[tier].guests;
+  if (tier === "campus") return PLANS_CONFIG.campus.quotas.guests;
+  if (tier === "local") return PLANS_CONFIG.local.quotas.guests;
+  if (!isPublicPlanId(tier)) return PLANS_CONFIG.starter.quotas.guests;
+  return PLANS_CONFIG[tier].quotas.guests;
 }
 
 export function resolveGuestTier(): SlotTierId {
@@ -386,7 +388,5 @@ export async function verifyGuestLocalPassword(code: string, password?: string):
 /** Sync marketing capacity numbers (guests field) with code-slot pool. */
 export function guestCapacityNote(tier: TierId): string {
   const n = GUEST_CODE_SLOTS_PER_TIER[tier];
-  const bank = TIER_CAPACITY[tier].bankAccountsPerSlot;
-  void bank;
   return `${n} unique Guest Code slot`;
 }

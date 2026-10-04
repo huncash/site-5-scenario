@@ -64,7 +64,7 @@ export const WHY_FAQ = {
   a: "Igen. A „jó/rossz év” találgatás kevés. Itt kockázati mozgástér-modellezés fut determinisztikus szórás- és hibahatár-számítással, 100%-ban lokális adatszuverenitással — háztartástól a vállalkozásig, a napi működtetésben is.",
 } as const;
 
-/** Funnel / pricing GYIK — fogalomhierarchia (Eset / Slot / P-R-O / Seat / Vendég). */
+/** Funnel / pricing GYIK — fogalomhierarchia (Case / Slot / P-R-O / Seat / Guest). */
 export const CONCEPT_FAQ_ITEMS = CONCEPT_FAQ_HU.items.map((item) => ({
   q: item.question,
   a: item.answer.replace(/\*\*/g, ""),

@@ -63,16 +63,20 @@ export function isViewerReadonly(role: AccessRole = readAccessRole()): boolean {
   return role === ACCESS_ROLE.VIEWER_READONLY;
 }
 
-/** Adatbevitel, módosítás, törlés — olvasónál tiltva. */
+/**
+ * Adatbevitel, módosítás, törlés — olvasónál tiltva.
+ * Csomagszintű jog: `hasPermission` / `usePlanPermissions` (`EDIT_MODELS`).
+ */
 export function canMutateData(role: AccessRole = readAccessRole()): boolean {
   return role === ACCESS_ROLE.OWNER_EDITOR;
 }
 
-/** Nyers JSON/CSV export és szerkezeti konfiguráció — olvasónál tiltva. */
+/** Nyers JSON/CSV export — olvasónál tiltva. Csomag: `EXPORT_RAW`. */
 export function canExportRaw(role: AccessRole = readAccessRole()): boolean {
   return role === ACCESS_ROLE.OWNER_EDITOR;
 }
 
+/** Szerkezeti konfiguráció — olvasónál tiltva. Csomag: `CONFIGURE_STRUCTURE`. */
 export function canConfigureStructure(role: AccessRole = readAccessRole()): boolean {
   return role === ACCESS_ROLE.OWNER_EDITOR;
 }

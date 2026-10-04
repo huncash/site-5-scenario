@@ -24,22 +24,34 @@ export const CONCEPT_FAQ_HU: ConceptFaqSection = {
   category: "Fogalmak & Kapacitások",
   items: [
     {
-      id: "faq-slot",
-      question: "Mi a különbség a Case és a Slot között?",
+      id: "faq-case",
+      question: "Mi a Case?",
       answer:
-        "A **Case** egy komplett, elmentett döntési és szimulációs modell. A **Slot** a Case-en belüli elkülönített adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt. Egy Case-en belül a csomagtól függően több Slot futhat párhuzamosan.",
+        "A **Case** a komplett, elmentett döntési és szimulációs modell.",
+    },
+    {
+      id: "faq-slot",
+      question: "Mi a Slot?",
+      answer:
+        "A **Slot** a Case-en belüli elkülönített adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt. Egy Case-en belül a csomagtól függően több Slot is futhat egyidejűleg.",
     },
     {
       id: "faq-pro",
       question: "Mit jelent a P-R-O Szcenárió?",
       answer:
-        "A **P-R-O Szcenárió** a Pesszimista (🔴), Realista (🔵) és Optimista (🟢) kimenetelek rövidítése. A motor minden Slotban és Case-ben automatikusan ezt a 3 párhuzamos görbét szimulálja, hogy ne csak egyetlen számot láss, hanem a teljes kockázati mozgásteret.",
+        "A **P-R-O Szcenárió** a Pesszimista · Realista · Optimista rövidítése: a három egyidejűleg futó szimulációs görbe minden Slotban — a teljes kockázati mozgástér, nem egyetlen szám.",
     },
     {
       id: "faq-seat",
-      question: "Hogyan működik a Seat és a Guest hozzáférés?",
+      question: "Mi a Seat?",
       answer:
-        "A **Seat** szerkesztői joggal rendelkező fiók. A **Guest** csak olvasható megosztás külső partnereknek, társtulajdonosoknak vagy könyvelőnek — nem fogyaszt Seat-et, és nem írhatja át a modelljeidet.",
+        "A **Seat** szerkesztői fiók (teljes szerkesztési és modelligazítási jogkörrel).",
+    },
+    {
+      id: "faq-guest",
+      question: "Mi a Guest?",
+      answer:
+        "A **Guest** vendégfiók csak olvasói joggal (nézelődő / ellenőrző hozzáférés). Nem fogyaszt Seat-et, és nem írhatja át a modelljeidet.",
     },
   ],
 };
@@ -48,22 +60,34 @@ export const CONCEPT_FAQ_EN: ConceptFaqSection = {
   category: "Concepts & Capacity",
   items: [
     {
-      id: "faq-slot",
-      question: "What is the difference between a Case and a Slot?",
+      id: "faq-case",
+      question: "What is a Case?",
       answer:
-        "A **Case** is a complete, saved decision and simulation model. A **Slot** is a separate data area inside that Case (the top tabs). Types: Personal, Business, Project. Within one Case, several Slots can run in parallel depending on your plan.",
+        "A **Case** is the complete, saved decision and simulation model.",
+    },
+    {
+      id: "faq-slot",
+      question: "What is a Slot?",
+      answer:
+        "A **Slot** is a separate data area inside a Case (the top tabs). Types: Personal, Business, Project. Within one Case, several Slots can run simultaneously depending on your plan.",
     },
     {
       id: "faq-pro",
       question: "What does the P-R-O Scenario mean?",
       answer:
-        "The **P-R-O Scenario** stands for Pessimistic (🔴), Realistic (🔵) and Optimistic (🟢) outcomes. The engine automatically simulates these three parallel curves in every Slot and Case so you see the full risk room to move — not a single number.",
+        "The **P-R-O Scenario** stands for Pessimistic · Realistic · Optimistic: the three simultaneously running simulation curves in every Slot — the full risk room to move, not a single number.",
     },
     {
       id: "faq-seat",
-      question: "How do Seat and Guest access work?",
+      question: "What is a Seat?",
       answer:
-        "A **Seat** is an editor account with write rights. A **Guest** is a read-only pass for external partners, co-owners or an accountant — it does not consume a Seat and cannot change your models.",
+        "A **Seat** is an editor account (full editing and model-alignment rights).",
+    },
+    {
+      id: "faq-guest",
+      question: "What is a Guest?",
+      answer:
+        "A **Guest** is a guest account with read-only access (viewer / auditor). It does not consume a Seat and cannot change your models.",
     },
   ],
 };

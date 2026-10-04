@@ -347,7 +347,7 @@ export function resolveNarrative(storyId: "new-line" | "loan-whatif", path: stri
     runwayMonths: 8,
     beMonth: null,
     lockIn: "A törzs adott. A szálat te viszed.",
-    wow: "Három párhuzamos jövő — nem jóslat, elágazás.",
+    wow: "Három egyidejű jövő — nem jóslat, elágazás.",
   };
 }
 

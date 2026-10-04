@@ -52,14 +52,14 @@ export function KahnPersonalImpact(props: {
             dividend: formatMoney(flow.dividendFrameHuf, "HUF"),
           })}
         </p>
-        <dl className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-          <div className="rounded-md border border-border/40 bg-background/40 p-2">
-            <dt className="text-muted-foreground">{t("kahnGuide.impact.savingsFrame")}</dt>
-            <dd className="font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
+        <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+          <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
+            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
+            <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
           </div>
-          <div className="rounded-md border border-border/40 bg-background/40 p-2">
-            <dt className="text-muted-foreground">{t("kahnGuide.impact.dividendFrame")}</dt>
-            <dd className="font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
+          <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
+            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
+            <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
           </div>
         </dl>
         <button
@@ -89,17 +89,17 @@ export function KahnPersonalImpact(props: {
             savings: formatMoney(flow.savingsDeltaHuf, "HUF"),
           })}
         </p>
-        <dl className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-          <div className="rounded-md border border-emerald-400/30 bg-background/40 p-2">
-            <dt className="text-muted-foreground">{t("kahnGuide.impact.savingsFrame")}</dt>
-            <dd className="font-mono text-emerald-100">
+        <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+          <div className="min-w-0 rounded-md border border-emerald-400/30 bg-background/40 p-2">
+            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
+            <dd className="min-w-[4.5rem] flex flex-wrap gap-1 font-mono text-emerald-100">
               {formatMoney(flow.savingsFrameHuf, "HUF")}{" "}
               <span className="text-emerald-200/80">(+{formatMoney(flow.savingsDeltaHuf, "HUF")})</span>
             </dd>
           </div>
-          <div className="rounded-md border border-emerald-400/30 bg-background/40 p-2">
-            <dt className="text-muted-foreground">{t("kahnGuide.impact.dividendFrame")}</dt>
-            <dd className="font-mono text-emerald-100">
+          <div className="min-w-0 rounded-md border border-emerald-400/30 bg-background/40 p-2">
+            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
+            <dd className="min-w-[4.5rem] flex flex-wrap gap-1 font-mono text-emerald-100">
               {formatMoney(flow.dividendFrameHuf, "HUF")}{" "}
               <span className="text-emerald-200/80">(+{formatMoney(flow.dividendDeltaHuf, "HUF")})</span>
             </dd>
@@ -126,14 +126,14 @@ export function KahnPersonalImpact(props: {
         {t("kahnGuide.impact.realTitle")}
       </p>
       <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{t("kahnGuide.impact.realBody")}</p>
-      <dl className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-        <div className="rounded-md border border-border/40 bg-background/40 p-2">
-          <dt className="text-muted-foreground">{t("kahnGuide.impact.savingsFrame")}</dt>
-          <dd className="font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
+      <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+        <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
+          <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
+          <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
         </div>
-        <div className="rounded-md border border-border/40 bg-background/40 p-2">
-          <dt className="text-muted-foreground">{t("kahnGuide.impact.dividendFrame")}</dt>
-          <dd className="font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
+        <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
+          <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
+          <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
         </div>
       </dl>
       <button

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
 import { RopeSlogan } from "@/components/rope/RopeSlogan";
+import { planAudience, planHighlights, planSlogan } from "@/config/planCopy";
+import { PLANS_CONFIG } from "@/config/plans";
 import { JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
-import { formatHuf, TIER_CORE, TIER_MONTHLY_HUF, yearlyPriceHuf, type TierId } from "@/content/pricing/tiers";
+import { CAMPUS_MONTHLY_HUF, formatHuf, TIER_CORE, yearlyPriceHuf, type TierId } from "@/content/pricing/tiers";
 import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -31,28 +33,11 @@ function PricingRopeHero() {
   );
 }
 
-const TIER_SLOGAN_KEY: Record<TierId, MessageKey> = {
-  starter: "pricing.sloganStarter",
-  pro: "pricing.sloganPro",
-  expert: "pricing.sloganExpert",
-};
-const TIER_AUDIENCE_KEY: Record<TierId, MessageKey> = {
-  starter: "pricing.audienceStarter",
-  pro: "pricing.audiencePro",
-  expert: "pricing.audienceExpert",
-};
 const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
   starter: "pricing.starter",
   pro: "pricing.pro",
   expert: "pricing.expert",
 };
-const TIER_HIGHLIGHTS: Record<TierId, MessageKey[]> = {
-  starter: ["pricing.hs1", "pricing.hs2", "pricing.hs3", "pricing.hs4", "pricing.hs5"],
-  pro: ["pricing.hp1", "pricing.hp2", "pricing.hp3", "pricing.hp4", "pricing.hp5"],
-  expert: ["pricing.he1", "pricing.he2", "pricing.he3", "pricing.he4", "pricing.he5"],
-};
-
-const CAMPUS_MONTHLY_HUF = 1_490;
 
 /** Havi nézet: csak havi díj. Éves: kedvezményes havi átlag + éves egyösszegű. */
 function TierPriceBlock(props: { monthlyHuf: number; interval: BillingInterval; size?: "md" | "lg" }) {
@@ -110,7 +95,8 @@ export function HomePricing(props: { campus?: boolean }) {
       <div className={cn(PRICING_CARDS_GRID, "mt-2")}>
         {TIER_CORE.map((p) => {
           const href = billCheckoutUrl({ tier: p.id, interval });
-          const recommended = p.id === "pro";
+          const plan = PLANS_CONFIG[p.id];
+          const recommended = plan.badge === "recommended";
           return (
             <article
               key={p.id}
@@ -121,20 +107,20 @@ export function HomePricing(props: { campus?: boolean }) {
             >
               <div className="flex flex-wrap items-center gap-1.5">
                 <h3 className="text-sm font-semibold text-foreground">{t(TIER_LABEL_KEY[p.id])}</h3>
-                {p.badge ? <Badge variant={recommended ? "default" : "secondary"}>{t("pricing.recommended")}</Badge> : null}
+                {recommended ? <Badge variant="default">{t("pricing.recommended")}</Badge> : null}
               </div>
-              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{t(TIER_SLOGAN_KEY[p.id])}</p>
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{t(TIER_AUDIENCE_KEY[p.id])}</p>
+              <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{planSlogan(plan, locale)}</p>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{planAudience(plan, locale)}</p>
               <ul className="mt-2 space-y-1 text-[11px] leading-snug text-foreground">
-                {TIER_HIGHLIGHTS[p.id].map((line) => (
+                {planHighlights(plan, locale).map((line) => (
                   <li key={line} className="flex gap-1.5">
                     <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-foreground/70" aria-hidden />
-                    <span>{t(line)}</span>
+                    <span>{line}</span>
                   </li>
                 ))}
               </ul>
               <div className="mt-auto pt-3">
-                <TierPriceBlock monthlyHuf={TIER_MONTHLY_HUF[p.id]} interval={interval} />
+                <TierPriceBlock monthlyHuf={plan.monthlyPriceHuf} interval={interval} />
               </div>
               <Button
                 asChild
@@ -217,9 +203,11 @@ export function HomePricing(props: { campus?: boolean }) {
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("pricing.faq")}</div>
         {(
           [
-            ["faq-slot", "brand.faqCaseSlotQ", "brand.faqCaseSlotA"],
+            ["faq-case", "brand.faqCaseQ", "brand.faqCaseA"],
+            ["faq-slot", "brand.faqSlotQ", "brand.faqSlotA"],
             ["faq-pro", "brand.faqProConceptQ", "brand.faqProConceptA"],
-            ["faq-seat", "brand.faqSeatGuestQ", "brand.faqSeatGuestA"],
+            ["faq-seat", "brand.faqSeatQ", "brand.faqSeatA"],
+            ["faq-guest", "brand.faqGuestQ", "brand.faqGuestA"],
             ["faq-case-reset", "brand.faqCaseResetQ", "brand.faqCaseResetA"],
             [undefined, "brand.faqWhyQ", "brand.faqWhyA"],
             [undefined, "brand.faqProQ", "brand.faqProA"],
