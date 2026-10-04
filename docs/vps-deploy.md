@@ -4,7 +4,12 @@
 GitHub repo: `site-5-scenario`. VPS: `/var/www/szcenario`, PM2 `szcenario`, port **5100**.  
 Bill: **5110**, support/docs/blog: ugyanaz a **5100** static-origin (Host → `sites/*`), local support: **5120**, signaling: **5130**.
 
-Aldomain nginx: `deploy/nginx/szcenario.subdomains.conf` — `support` / `docs` / `blog` / `app` → `:5100`.  
+Aldomain nginx:
+- `deploy/nginx/szcenario.conf` (kanonikus HTTPS) — `bill.szcenario.hu` → **:5110**; apex / `*.szcenario.hu` → **:5100**
+- `deploy/nginx/szcenario.http-first.conf` — ugyanaz port-szétválasztás HTTP-n (cert előtt)
+- `deploy/nginx/szcenario.subdomains.conf` — named `support` / `docs` / `blog` / `app` → `:5100`
+
+Exact `bill.*` mindig megelőzi a `*.szcenario.hu` wildcardot → nincs offlinebiztonsag.hu fallback.  
 Cloudflare / DNS: ezeknek a VPS-re kell mutatniuk (ne idegen Next.js originre), különben `/ticket` 404 marad.
 
 A site-1–4 menete: DNS → GitHub repo + `VPS_SSH_KEY` → `main` push → Actions (nginx/PM2).  
@@ -62,18 +67,23 @@ chmod 600 /var/www/szcenario/shared/.env.production
 chown deploy:deploy /var/www/szcenario/shared/.env.production
 ```
 
-A `szcenario.http-first.conf` / `szcenario.conf` a repo `deploy/nginx/` alatt van. Rooton, cert után:
+A `szcenario.http-first.conf` / `szcenario.conf` a repo `deploy/nginx/` alatt van. Rooton:
 
 ```bash
-# a fájlokat a VPS-re a repo/scp vagy kézi másolás után:
+# HTTP port-szétválasztás (bill→5110, minden más→5100) — másold a http-first tartalmat:
+# /etc/nginx/sites-available/szcenario.hu
 ln -sf /etc/nginx/sites-available/szcenario.hu /etc/nginx/sites-enabled/szcenario.hu
-certbot certonly --webroot -w /var/www/letsencrypt \
-  -d szcenario.hu -d www.szcenario.hu \
-  --non-interactive --agree-tos -m sales@adp-top.hu
+nginx -t && systemctl reload nginx
+
+# Cert (apex + www + bill). Named aldomainekhez told meg: -d support… -d app…
+sudo certbot --nginx -d szcenario.hu -d www.szcenario.hu -d bill.szcenario.hu
+
+# Cert után a kanonikus HTTPS: szcenario.conf tartalma → sites-available/szcenario.hu
 nginx -t && systemctl reload nginx
 ```
 
-Ha nem emlékszel, honnan nyitottad a rootot a site-4-nél: írd meg (PuTTY / atlasz Shell / WSL) — arra adjuk a másolást. Windows `ssh -i` jegyzettömbből **nem** a bevált út.
+Wildcard `*.szcenario.hu` SSL-hez DNS-01 (Cloudflare API) kell; 1–2 aldomainnél elég a `-d` bővítés.  
+Windows `ssh -i` jegyzettömbből **nem** a bevált út.
 
 ---
 
