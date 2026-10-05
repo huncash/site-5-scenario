@@ -35,6 +35,8 @@ export function parseSupportPath(pathname: string): { embed: boolean; slug: Supp
   return { embed: false, slug: path.replace(/^\//, "") };
 }
 
+import { applyViewPrefsToSearch, withViewPrefs } from "@/lib/viewPrefs";
+
 export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; lang?: string }): string {
   const mount = supportMountPrefix();
   const inner = opts?.embed
@@ -45,18 +47,19 @@ export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; la
       ? `/${slug}`
       : "/";
   const base = inner === "/" ? mount || "/" : `${mount}${inner}`;
-  if (!opts?.lang) return base;
-  const url = new URL(base, "https://support.local");
-  url.searchParams.set("lang", opts.lang);
-  return `${url.pathname}${url.search}`;
+  let href = base;
+  if (opts?.lang) {
+    const url = new URL(base, "https://support.local");
+    url.searchParams.set("lang", opts.lang);
+    href = `${url.pathname}${url.search}`;
+  }
+  if (typeof window === "undefined") return href;
+  return withViewPrefs(href);
 }
 
 export function navigateTo(path: string) {
   const url = new URL(path, window.location.origin);
-  if (window.location.search) {
-    const lang = new URLSearchParams(window.location.search).get("lang");
-    if (lang && !url.searchParams.has("lang")) url.searchParams.set("lang", lang);
-  }
+  applyViewPrefsToSearch(url);
   window.history.pushState({}, "", `${url.pathname}${url.search}`);
   window.dispatchEvent(new PopStateEvent("popstate"));
 }

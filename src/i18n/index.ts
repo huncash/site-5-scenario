@@ -23,6 +23,7 @@ import {
   type DisplayCurrency,
   type Locale,
 } from "@/i18n/locale";
+import { consumeViewPrefsFromLocation, persistViewPrefs } from "@/lib/viewPrefs";
 import { getHufPerEur, MNB_RATE_EVENT, refreshMnbEurRate } from "@/lib/mnbRate";
 
 export type { Locale, DisplayCurrency } from "@/i18n/locale";
@@ -78,10 +79,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [fxRate, setFxRate] = useState(getHufPerEur);
 
   useLayoutEffect(() => {
-    const initial = readClientLocale();
-    setLocaleState(initial);
-    applyHtmlLang(initial);
-    persistLocale(initial);
+    const prefs = consumeViewPrefsFromLocation();
+    setLocaleState(prefs.locale);
+    applyHtmlLang(prefs.locale);
+    persistLocale(prefs.locale);
   }, []);
 
   useEffect(() => {

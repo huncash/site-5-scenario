@@ -286,11 +286,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     return [
       {
         id: "basic",
-        title: "Solo (Basic)",
+        title: "Basic",
         priceLine: "€199 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €149 (−25%) · Y3 €119 (−40%) · Y4+ free updates for life",
         detail:
-          "Solo is for one decision-maker: one concurrently active project (Active Case), three active scenario slots, one editor seat and one guest. Inactive data can be overwritten freely. Computation stays on your device.",
+          "Basic is for one decision-maker: one concurrently active Case, three active slots, one editor seat and one guest. Inactive data can be overwritten freely. Computation stays on your device.",
         bullets: [
           "1 Active Case · 3 Active Slots · 1 Seat + 1 Guest",
           "Unlimited overwrite of inactive slots — no archive fee",
@@ -316,7 +316,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€799 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ free updates for life",
         detail:
-          "Enterprise covers team seats, multi-project capacity, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control.",
+          "Enterprise covers team seats, multiple parallel Active Cases, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control.",
         bullets: [
           "5 Active Cases · 4 Active Slots each · 3 Seats + 20 Guests",
           "Automated accounting/bank-statement import + Sensor / Edge data feed",
@@ -328,11 +328,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
   return [
     {
       id: "basic",
-      title: "Solo (Basic)",
+      title: "Basic",
       priceLine: "199 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 149 000 Ft (−25%) · 3. év 119 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "Solo egy döntéshozónak: egyidejűleg egy aktív projekt (Aktív Case), három aktív szcenárió slot, egy szerkesztő és egy vendég. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad.",
+        "Basic egy döntéshozónak: egyidejűleg egy Aktív Case, három aktív slot, egy szerkesztő és egy vendég. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad.",
       bullets: [
         "1 Aktív Case · 3 Aktív Slot · 1 Seat + 1 Guest",
         "Inaktív slot korlátlan felülírása — nincs archív díj",
@@ -358,7 +358,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "799 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "Az Enterprise csapat-seateket, több párhuzamos projektet, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad.",
+        "Az Enterprise csapat-seateket, több párhuzamos Case-t, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad.",
       bullets: [
         "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
         "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",

@@ -21,6 +21,7 @@
     "bill:dev": "tsx watch --tsconfig bill/tsconfig.json bill/server/index.ts",
     "bill:start": "tsx --tsconfig bill/tsconfig.json bill/server/index.ts",
     "bill:build": "vite build --config bill/vite.config.ts",
+    "dev:sites": "node scripts/dev-sites.mjs",
     "support:dev": "vite --config support/vite.config.ts --port 5120",
     "support:start": "vite preview --config support/vite.config.ts --port 5120",
     "support:build": "vite build --config support/vite.config.ts",

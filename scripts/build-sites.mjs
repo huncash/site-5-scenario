@@ -93,15 +93,17 @@ writePlaceholder(
   "Blog — hamarosan. A termékhírek és esettanulmányok ide kerülnek.",
 );
 
-const billSrc = path.join(ROOT, "sites", "bill", "index.html");
-if (!existsSync(billSrc)) {
-  console.error("[build-sites] hiányzik sites/bill/index.html");
+console.log("[build-sites] bill:build");
+run("npm", ["run", "bill:build"]);
+const billDist = path.join(ROOT, "bill", "dist");
+if (!existsSync(path.join(billDist, "index.html"))) {
+  console.error("[build-sites] bill/dist/index.html hiányzik");
   process.exit(1);
 }
 const billDest = path.join(SITES, "bill");
 rmSync(billDest, { recursive: true, force: true });
-ensureDir(billDest);
-cpSync(billSrc, path.join(billDest, "index.html"));
+ensureDir(SITES);
+cpSync(billDist, billDest, { recursive: true });
 console.log("[build-sites] → sites/bill");
 
 for (const site of ["support", "docs", "blog", "bill"]) {

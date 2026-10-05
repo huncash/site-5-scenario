@@ -1,11 +1,11 @@
+import { planPriceHuf } from "@/config/plans";
 import type { TierId } from "@/content/pricing/tiers";
-import { TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
 import type { CampaignId, CampaignUtm } from "@/lib/campaignFunnels";
 
 export type BillingInterval = "yearly" | "monthly";
 export type PayMethod = "wise" | "hu_transfer";
 
-export const DEFAULT_BILLING_INTERVAL: BillingInterval = "monthly";
+export const DEFAULT_BILLING_INTERVAL: BillingInterval = "yearly";
 const INTERVAL_KEY = "ui:billingInterval";
 export const BILLING_INTERVAL_EVENT = "szcenario:billing_interval";
 
@@ -55,8 +55,8 @@ export type ActivationTicket = {
 
 /** Örökös listaár (egyszeri) — interval legacy, nincs havi átszámítás. */
 export function chargeHuf(tierId: TierId, _interval: BillingInterval): number {
-  void yearlyPriceHuf;
-  return TIER_MONTHLY_HUF[tierId] ?? 0;
+  void _interval;
+  return planPriceHuf(tierId);
 }
 
 export function readActivationTicket(): ActivationTicket | null {

@@ -1,3 +1,4 @@
+import { applyViewPrefsToSearch } from "@/lib/viewPrefs";
 import { applyAttributionSearchParams, type CampaignUtm } from "@/lib/campaignFunnels";
 import { readCampaignAttribution } from "@/lib/campaignSession";
 import { readClientLocale } from "@/i18n/locale";
@@ -32,6 +33,7 @@ export type BillCheckoutSearch = {
   slotPack: string;
   addon: string;
   country: string;
+  partnerKind: "b2c" | "b2b" | "";
   thanks: boolean;
   order: string;
   lang: string | null;
@@ -45,12 +47,13 @@ export function readBillCheckoutSearch(search = ""): BillCheckoutSearch {
   return {
     tier,
     hasCheckoutIntent: Boolean(tier),
-    interval: q.get("interval") === "yearly" ? "yearly" : "monthly",
+    interval: q.get("interval") === "monthly" ? "monthly" : "yearly",
     ref: q.get("ref") ?? "",
     referral: q.get("referral") ?? "",
     slotPack: q.get("slotPack") ?? "",
     addon: q.get("addon") ?? "",
     country: (q.get("country") ?? "").toUpperCase(),
+    partnerKind: q.get("partnerKind") === "b2b" || q.get("partnerKind") === "b2c" ? q.get("partnerKind") : "",
     thanks: q.get("thanks") === "1",
     order: q.get("order") ?? "",
     lang: q.get("lang") ?? q.get("locale"),
@@ -97,6 +100,7 @@ export function billCheckoutUrl(opts: {
   /** JIT egység-modul: case_plus_1 | slot_plus_1 | seat_plus_1 | guest_plus_1 | edge_sensor */
   addon?: string;
   country?: string;
+  partnerKind?: "b2c" | "b2b";
   utm?: CampaignUtm;
   hostname?: string;
   pathname?: string;
@@ -114,6 +118,7 @@ export function billCheckoutUrl(opts: {
   if (pendingReferral) url.searchParams.set("referral", pendingReferral.toUpperCase());
   if (opts.slotPack) url.searchParams.set("slotPack", opts.slotPack);
   if (opts.addon) url.searchParams.set("addon", opts.addon);
+  if (opts.partnerKind) url.searchParams.set("partnerKind", opts.partnerKind);
   const stored = typeof window !== "undefined" ? readCampaignAttribution() : null;
   applyAttributionSearchParams(
     url,
@@ -121,5 +126,6 @@ export function billCheckoutUrl(opts: {
     opts.ref ? { ref: opts.ref } : undefined,
   );
   url.searchParams.set("lang", readClientLocale());
+  applyViewPrefsToSearch(url);
   return url.toString();
 }

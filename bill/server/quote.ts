@@ -1,7 +1,26 @@
-import { MONTHLY_HUF, yearlyPriceHuf, type BillInterval, type BillTier } from "./catalog.ts";
+import {
+  addonNetForTier,
+  chargeHuf,
+  invoicePackageName,
+  isJitAddonId,
+  isSlotPackId,
+  JIT_ADDON_LABELS,
+  SLOT_PACK_LABELS,
+  slotPackAllowedForTier,
+  slotPackNetForInterval,
+  type BillInterval,
+  type BillTier,
+} from "./catalog.ts";
 import { resolveVat, splitVat, type VatDecision } from "./vat.ts";
 
 export type MoneySplit = { net: number; vat: number; gross: number };
+
+export type QuoteLine = {
+  name: string;
+  quantity: number;
+  unit: string;
+  netUnitPrice: number;
+};
 
 export type PackageQuote = {
   vat: VatDecision;
@@ -13,26 +32,62 @@ export type PackageQuote = {
   monthly: MoneySplit;
   monthly12: MoneySplit;
   saveNet: number;
+  lines: QuoteLine[];
 };
+
+export function packageLines(
+  tier: BillTier,
+  interval: BillInterval,
+  extras: { addon?: string; slotPack?: string } = {},
+): QuoteLine[] {
+  const lines: QuoteLine[] = [
+    {
+      name: invoicePackageName(tier, interval),
+      quantity: 1,
+      unit: "db",
+      netUnitPrice: chargeHuf(tier, interval),
+    },
+  ];
+  const addon = extras.addon;
+  const slotPack = extras.slotPack;
+  if (addon && isJitAddonId(addon) && addon !== slotPack) {
+    lines.push({
+      name: `Szcenárió — ${JIT_ADDON_LABELS[addon]}`,
+      quantity: 1,
+      unit: "db",
+      netUnitPrice: addonNetForTier(addon, tier),
+    });
+  }
+  if (slotPack && isSlotPackId(slotPack) && slotPackAllowedForTier(tier)) {
+    lines.push({
+      name: `Szcenárió — ${SLOT_PACK_LABELS[slotPack]}`,
+      quantity: 1,
+      unit: "db",
+      netUnitPrice: slotPackNetForInterval(slotPack, interval),
+    });
+  }
+  return lines;
+}
 
 export function quotePackage(
   tier: BillTier,
   interval: BillInterval,
-  input: { country?: string; taxId?: string },
+  input: { country?: string; taxId?: string; addon?: string; slotPack?: string },
 ): PackageQuote {
   const vat = resolveVat(input);
-  const monthlyNet = MONTHLY_HUF[tier];
-  const yearlyNet = yearlyPriceHuf(monthlyNet);
-  const dueNet = interval === "yearly" ? yearlyNet : monthlyNet;
+  const lines = packageLines(tier, interval, input);
+  const dueNet = lines.reduce((sum, line) => sum + line.netUnitPrice * line.quantity, 0);
+  const packageNet = chargeHuf(tier, interval);
   return {
     vat,
-    monthlyNet,
-    yearlyNet,
+    monthlyNet: packageNet,
+    yearlyNet: packageNet,
     dueNet,
     due: splitVat(dueNet, vat.rate),
-    yearly: splitVat(yearlyNet, vat.rate),
-    monthly: splitVat(monthlyNet, vat.rate),
-    monthly12: splitVat(monthlyNet * 12, vat.rate),
-    saveNet: monthlyNet * 12 - yearlyNet,
+    yearly: splitVat(packageNet, vat.rate),
+    monthly: splitVat(packageNet, vat.rate),
+    monthly12: splitVat(packageNet, vat.rate),
+    saveNet: 0,
+    lines,
   };
 }

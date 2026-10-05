@@ -8,15 +8,13 @@ import {
   type ReactNode,
 } from "react";
 
+import { consumeViewPrefsFromLocation } from "@/lib/viewPrefs";
 import {
   applyHtmlAppearance,
   cyclePalette as nextPalette,
   DEFAULT_A11Y,
   DEFAULT_PALETTE,
   DEFAULT_THEME,
-  loadUiA11y,
-  loadUiPalette,
-  loadUiTheme,
   PALETTE_LABELS,
   readClientA11y,
   readClientPalette,
@@ -49,22 +47,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [a11y, setA11yState] = useState<boolean>(readClientA11y);
 
   useLayoutEffect(() => {
-    const initialTheme = readClientTheme();
-    const initialPalette = readClientPalette();
-    const initialA11y = readClientA11y();
+    const fromUrl = consumeViewPrefsFromLocation();
+    const initialTheme = fromUrl.theme ?? readClientTheme();
+    const initialPalette = fromUrl.palette ?? readClientPalette();
+    const initialA11y = fromUrl.a11y ?? readClientA11y();
     setThemeState(initialTheme);
     setPaletteState(initialPalette);
     setA11yState(initialA11y);
     applyHtmlAppearance(initialTheme, initialPalette, initialA11y);
-    void saveUiPalette(initialPalette);
-    void Promise.all([loadUiTheme(), loadUiPalette(), loadUiA11y()]).then(
-      ([nextTheme, nextPalette, nextA11y]) => {
-        setThemeState(nextTheme);
-        setPaletteState(nextPalette);
-        setA11yState(nextA11y);
-        applyHtmlAppearance(nextTheme, nextPalette, nextA11y);
-      },
-    );
   }, []);
 
   const setTheme = useCallback(

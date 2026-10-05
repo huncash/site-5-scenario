@@ -15,7 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
 import { BillTestSurface } from "@/components/BillTestSurface";
-import { SiteKindTestPage } from "@/components/SiteKindTestPage";
+import { SupportSurface } from "@/components/SupportSurface";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
 import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
@@ -25,6 +25,14 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { PrivacyBanner } from "@/components/legal/PrivacyBanner";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LocaleProvider, useI18n } from "@/i18n";
+import {
+  currentSiteHost,
+  readBootSiteKind,
+  resolveSiteHost,
+  SITE_KIND_BOOT_SCRIPT,
+  type SiteHostKind,
+} from "@/lib/siteSurface";
+import { VIEW_PREFS_BOOT_SCRIPT } from "@/lib/viewPrefs";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
 import {
   currentSiteHost,
@@ -168,17 +176,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       </div>
     );
   },
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
-});
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="hu" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: VIEW_PREFS_BOOT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SITE_KIND_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
@@ -251,6 +249,15 @@ function RootComponent() {
       <LocaleProvider>
       <ThemeProvider>
         <VaultProvider>
+          <FeatureComingSoonProvider>
+            <SupportEmbedProvider>
+              <OnboardingTourProvider>
+                {!siteReady ? (
+                  <SurfacePending />
+                ) : isBill ? (
+                  <BillTestSurface />
+                ) : isSupport ? (
+                  <SupportSurface />
           <FeatureComingSoonProvider>
             <SupportEmbedProvider>
               <OnboardingTourProvider>

@@ -1,3 +1,4 @@
+import { persistViewPrefs } from "@/lib/viewPrefs";
 import { getMeshRepository } from "@/lib/mesh/meshRepository";
 import type { UiPalette, UiTheme } from "@/lib/mesh/schema";
 

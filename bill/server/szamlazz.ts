@@ -1,5 +1,9 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { billEnv } from "./env.ts";
-import { tierLabel } from "./catalog.ts";
+import { invoicePackageName, tierLabel } from "./catalog.ts";
 import type { InvoiceLine, Order } from "./store.ts";
 import { countryLabel } from "./vat.ts";
 
@@ -10,6 +14,10 @@ export type SzamlazzKind = "dijbekero" | "szamla";
 export type SzamlazzResult = {
   number?: string;
   error?: string;
+  pdfBase64?: string;
+  pdfUrl?: string;
+  buyerAccountUrl?: string;
+  sandbox?: boolean;
 };
 
 export type BuiltLine = {
@@ -86,10 +94,9 @@ export function linesFromOrder(order: Order): BuiltLine[] {
   const rate = vatPercent(vat);
   const net = order.netHuf ?? (rate > 0 ? Math.round(order.amountHuf / (1 + rate / 100)) : order.amountHuf);
   const vatAmount = Math.round((net * rate) / 100);
-  const interval = order.interval === "yearly" ? "1 év" : "1 hó";
   return [
     {
-      name: `Szcenárió — ${tierLabel(order.tier)} (${interval})`,
+      name: invoicePackageName(order.tier, order.interval),
       quantity: 1,
       unit: "db",
       netUnitPrice: net,
@@ -122,7 +129,7 @@ export function buildSzamlazzXml(order: Order, kind: SzamlazzKind = "szamla"): s
   const a = splitAddress(order.buyer.address, order.buyer.zip, order.buyer.city);
   const lines = linesFromOrder(order);
   const due = kind === "dijbekero" ? addDays(8) : today();
-  const sendEmail = Boolean(order.buyer.email);
+  const sendEmail = Boolean(order.buyer.email) && !billEnv.szamlazzSandbox;
   const sellerEmail = billEnv.szamlaFeleszoEmail;
   const dijbekero = kind === "dijbekero";
   const refProforma = !dijbekero && order.proformaNumber ? order.proformaNumber : "";
@@ -131,7 +138,7 @@ export function buildSzamlazzXml(order: Order, kind: SzamlazzKind = "szamla"): s
   <beallitasok>
     <szamlaagentkulcs>${xmlEscape(billEnv.szamlazzAgentKey)}</szamlaagentkulcs>
     <eszamla>true</eszamla>
-    <szamlaLetoltes>false</szamlaLetoltes>
+    <szamlaLetoltes>true</szamlaLetoltes>
     <valaszVerzio>2</valaszVerzio>
   </beallitasok>
   <fejlec>
@@ -141,7 +148,7 @@ export function buildSzamlazzXml(order: Order, kind: SzamlazzKind = "szamla"): s
     <fizmod>${order.payMethod === "hu_transfer" ? "Átutalás" : "Bankkártya"}</fizmod>
     <penznem>HUF</penznem>
     <szamlaNyelve>hu</szamlaNyelve>
-    <megjegyzes>${xmlEscape(`Szcenárió ${tierLabel(order.tier)} · ${order.id}${order.transferCode ? ` · ${order.transferCode}` : ""}`)}</megjegyzes>
+    <megjegyzes>${xmlEscape(`Szcenárió ${tierLabel(order.tier)} · ${order.id}${order.transferCode ? ` · ${order.transferCode}` : ""}${billEnv.szamlazzSandbox ? " · SANDBOX" : ""}`)}</megjegyzes>
     <rendelesSzam>${xmlEscape(order.id)}</rendelesSzam>
     <dijbekeroSzamlaszam>${xmlEscape(refProforma)}</dijbekeroSzamlaszam>
     <elolegszamla>false</elolegszamla>
@@ -173,37 +180,120 @@ ${lines.map(tetelXml).join("\n")}
 `;
 }
 
-function parseAgentReply(text: string, headers: Headers): SzamlazzResult {
-  const fromHeader = headers.get("szlahu_szamlaszam")?.trim();
-  const num =
-    fromHeader ||
-    text.match(/<szamlaszam>([^<]+)<\/szamlaszam>/i)?.[1]?.trim();
-  const failed =
-    /<sikeres>\s*false\s*<\/sikeres>/i.test(text) ||
-    /<hibakod>/i.test(text);
-  if (failed) {
-    const hiba =
-      text.match(/<hibauzenet>([^<]+)<\/hibauzenet>/i)?.[1] ??
-      text.match(/<hiba>([^<]+)<\/hiba>/i)?.[1] ??
-      "Számlázz.hu hiba";
-    return { error: hiba, number: num };
+function decodeXmlText(raw: string): string {
+  return raw
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .trim();
+}
+
+function headerText(headers: Headers, name: string): string {
+  const raw = headers.get(name);
+  if (!raw) return "";
+  try {
+    return decodeURIComponent(raw.replace(/\+/g, " ")).trim();
+  } catch {
+    return raw.trim();
   }
-  if (num) return { number: num };
+}
+
+function xmlTag(text: string, tag: string): string {
+  const m = text.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "i"));
+  return m ? decodeXmlText(m[1]) : "";
+}
+
+export function parseAgentReply(text: string, headers: Headers = new Headers()): SzamlazzResult {
+  const headerErr = headerText(headers, "szlahu_error");
+  const headerCode = headerText(headers, "szlahu_error_code");
+  const num =
+    headerText(headers, "szlahu_szamlaszam") ||
+    xmlTag(text, "szamlaszam") ||
+    text.match(/xmlagentresponse=DONE;([^\s;<]+)/i)?.[1]?.trim();
+  const pdfMatch = text.match(/<pdf>([\s\S]*?)<\/pdf>/i)?.[1]?.replace(/\s+/g, "") || undefined;
+  const buyerAccountUrl =
+    headerText(headers, "szlahu_vevoifiokurl") ||
+    xmlTag(text, "vevoifiokurl") ||
+    xmlTag(text, "szamlanetolink") ||
+    undefined;
+  const failedXml = /<sikeres>\s*false\s*<\/sikeres>/i.test(text);
+  const errBody = text.match(/\[ERR\]\s*([^\r\n]+)/)?.[1]?.trim();
+  if (failedXml || headerCode || headerErr || errBody) {
+    const hiba =
+      headerErr ||
+      xmlTag(text, "hibauzenet") ||
+      xmlTag(text, "hiba") ||
+      errBody ||
+      "Számlázz.hu hiba";
+    return { error: hiba, number: num, pdfBase64: pdfMatch, pdfUrl: buyerAccountUrl, buyerAccountUrl };
+  }
+  if (num) return { number: num, pdfBase64: pdfMatch, pdfUrl: buyerAccountUrl, buyerAccountUrl };
+  if (text.includes("<html") || text.includes("<!DOCTYPE")) {
+    return { error: "Számlázz.hu HTML választ adott (Agent-kulcs / jogosultság)." };
+  }
   return { error: "Számlázz.hu nem adott vissza bizonylatszámot." };
 }
 
+const PROFORMA_DIR = fileURLToPath(new URL("../data/proformas", import.meta.url));
+
+export function proformaPdfPath(orderId: string): string {
+  return path.join(PROFORMA_DIR, `${orderId}.pdf`);
+}
+
+export async function saveProformaPdf(orderId: string, pdfBase64: string): Promise<string | undefined> {
+  const buf = Buffer.from(pdfBase64.replace(/\s+/g, ""), "base64");
+  if (buf.length < 5 || buf.subarray(0, 4).toString("latin1") !== "%PDF") return undefined;
+  await mkdir(PROFORMA_DIR, { recursive: true });
+  await writeFile(proformaPdfPath(orderId), buf);
+  return `/api/billing/proforma/${encodeURIComponent(orderId)}`;
+}
+
 async function postAgent(xml: string): Promise<SzamlazzResult> {
-  if (!billEnv.szamlazzAgentKey) return { error: "Számlázz.hu Agent kulcs hiányzik." };
   const form = new FormData();
-  form.set("action-xmlagentxmlfile", new Blob([xml], { type: "text/xml" }), "szamla.xml");
+  form.set("action-xmlagentxmlfile", new Blob([xml], { type: "text/xml" }), "xmlszamla.xml");
   const res = await fetch(AGENT_URL, { method: "POST", body: form });
-  const text = await res.text();
-  if (!res.ok) return { error: `Számlázz.hu ${res.status}` };
+  const buf = Buffer.from(await res.arrayBuffer());
+  const text = buf.toString("utf8");
+  const ct = res.headers.get("content-type") ?? "";
+  if (!res.ok) {
+    const parsed = parseAgentReply(text, res.headers);
+    return { error: parsed.error || `Számlázz.hu ${res.status}` };
+  }
+  if (ct.includes("pdf") || text.startsWith("%PDF")) {
+    const parsed = parseAgentReply(text, res.headers);
+    const number = parsed.number || res.headers.get("szlahu_szamlaszam")?.trim();
+    if (!number) return { error: "Számlázz.hu nem adott vissza bizonylatszámot." };
+    return {
+      number,
+      pdfBase64: buf.toString("base64"),
+      pdfUrl: parsed.buyerAccountUrl,
+      buyerAccountUrl: parsed.buyerAccountUrl,
+    };
+  }
   return parseAgentReply(text, res.headers);
 }
 
+function mockProforma(order: Order): SzamlazzResult {
+  const token = order.id.replace(/-/g, "").slice(0, 10).toUpperCase();
+  return {
+    number: `DB-TEST-${token}`,
+    sandbox: true,
+  };
+}
+
 export async function issueSzamlazzDocument(order: Order, kind: SzamlazzKind): Promise<SzamlazzResult> {
-  return postAgent(buildSzamlazzXml(order, kind));
+  if (!billEnv.szamlazzAgentKey) {
+    if (billEnv.szamlazzSandbox) return mockProforma(order);
+    return { error: "Számlázz.hu Agent kulcs hiányzik (SZAMLAZZ_AGENT_KEY)." };
+  }
+  const issued = await postAgent(buildSzamlazzXml(order, kind));
+  if (issued.pdfBase64) {
+    const local = await saveProformaPdf(order.id, issued.pdfBase64);
+    if (local && !issued.pdfUrl) issued.pdfUrl = local;
+  }
+  if (billEnv.szamlazzSandbox) return { ...issued, sandbox: true };
+  return issued;
 }
 
 export async function issueSzamlazzProforma(order: Order): Promise<SzamlazzResult> {

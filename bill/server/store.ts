@@ -48,6 +48,8 @@ export type Order = {
   providerRef?: string;
   invoiceNumber?: string;
   proformaNumber?: string;
+  pdfUrl?: string;
+  addon?: string;
   lines?: InvoiceLine[];
   /** Saját ajánlói kód (ezt mások használják). */
   referralCode?: string;

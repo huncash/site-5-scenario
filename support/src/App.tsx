@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SiteKindTestPage } from "@/components/SiteKindTestPage";
-import { LangSwitch, useSiteLocale, type Locale } from "@/i18n/miniLocale";
+import { SupportSurface } from "@/components/SupportSurface";
+import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
+import { useI18n } from "@/i18n";
+import { LangSwitch } from "@/i18n/miniLocale";
 import { lessonBySlug } from "./content";
 import {
   localizeLesson,
@@ -15,6 +17,7 @@ import {
 } from "./copy";
 import { Markdown } from "./markdown";
 import { navigateTo, parseSupportPath, pathOf, supportHref } from "./router";
+import type { Locale } from "@/i18n/locale";
 
 /** Egyszerű **félkövér** a GYIK válaszokban. */
 function RichAnswer({ text }: { text: string }) {
@@ -222,7 +225,7 @@ function PricingPage({ locale }: { locale: Locale }) {
       <p>{t.pricingLead}</p>
 
       <nav className="nav" aria-label={t.pricingNav}>
-        <a href="#basic">{t.pricingTocPlans}: Solo</a>
+        <a href="#basic">{t.pricingTocPlans}: Basic</a>
         <a href="#pro">Pro</a>
         <a href="#enterprise">Enterprise</a>
         <a href="#tiered-loyalty">{t.pricingTocLoyalty}</a>
@@ -324,8 +327,19 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
   );
 }
 
+function TipsPage({ locale }: { locale: Locale }) {
+  const t = supportCopy(locale);
+  return (
+    <>
+      <h1>{t.tips}</h1>
+      <KahnBonbon locale={locale} />
+      <Items items={supportTips(locale)} />
+    </>
+  );
+}
+
 export function App() {
-  const { locale, toggleLocale } = useSiteLocale();
+  const { locale, toggleLocale } = useI18n();
   const t = supportCopy(locale);
   const [path, setPath] = useState(pathOf);
   const [ticketUnlocked, setTicketUnlocked] = useState(false);
@@ -345,7 +359,7 @@ export function App() {
 
   const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
   if (!embed && slug === "home") {
-    return <SiteKindTestPage kind="support" />;
+    return <SupportSurface localNav />;
   }
 
   const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
@@ -355,61 +369,28 @@ export function App() {
   let body: ReactNode = null;
   if (slug === "home") {
     body = <SelfServeHome locale={locale} embed={embed} />;
-  } else if (slug === "tippek") {
-    body = (
-      <>
-        <h1>{t.tips}</h1>
-        <Items items={supportTips(locale)} />
-        {!embed ? (
-          <p className="note" style={{ marginTop: 16 }}>
-            <a href={supportHref("home", { lang: locale })}>{t.backHome}</a>
-          </p>
-        ) : null}
-      </>
-    );
   } else if (slug === "gyik") {
-    body = (
-      <>
-        <h1>{t.faqTitle}</h1>
-        <KahnBonbon locale={locale} />
-        <FaqSearch locale={locale} />
-        <button
-          type="button"
-          className="ticket-cta"
-          onClick={() => navigateTo(supportHref("ticket", { embed, lang: locale }))}
-        >
-          {t.noTicketCta}
-        </button>
-      </>
-    );
-  } else if (slug === "ticket") {
-    body = (
-      <>
-        <h1>{t.ticketTitle}</h1>
-        {ticketUnlocked ? (
-          <TicketForm locale={locale} />
-        ) : (
-          <TicketGuard locale={locale} embed={embed} onUnlock={() => setTicketUnlocked(true)} />
-        )}
-      </>
-    );
+    body = <FaqSearch locale={locale} />;
   } else if (slug === "pricing") {
     body = <PricingPage locale={locale} />;
+  } else if (slug === "ticket") {
+    body = ticketUnlocked ? (
+      <>
+        <h1>{t.ticketTitle}</h1>
+        <TicketForm locale={locale} />
+      </>
+    ) : (
+      <TicketGuard locale={locale} embed={embed} onUnlock={() => setTicketUnlocked(true)} />
+    );
+  } else if (slug === "tippek") {
+    body = <TipsPage locale={locale} />;
   } else if (lesson) {
     body = (
-      <>
-        {lesson.markdown ? null : <h1>{lesson.title}</h1>}
-        {lesson.youtubeId ? <YouTube id={lesson.youtubeId} title={lesson.title} empty={t.noVideo} /> : null}
+      <article className="article">
+        <h1>{lesson.title}</h1>
         {lesson.markdown ? <Markdown source={lesson.body} /> : <p>{lesson.body}</p>}
-      </>
-    );
-  } else if (slug === "kb/kahn-rand") {
-    const k = supportKahn(locale);
-    body = (
-      <>
-        <h1>{k.title}</h1>
-        <KahnBonbon locale={locale} />
-      </>
+        <YouTube id={lesson.youtubeId ?? ""} title={lesson.title} empty={t.noVideo} />
+      </article>
     );
   } else if (slug.startsWith("kb/")) {
     body = (
@@ -435,8 +416,13 @@ export function App() {
   return (
     <main className={wrap}>
       <div className="top">
-        <div className="brand">{t.brand}</div>
-        <LangSwitch locale={locale} onToggle={toggleLocale} />
+        <a className="brand" href={supportHref("home", { embed, lang: locale })}>
+          {t.brand}
+        </a>
+        <div className="flex items-center gap-2">
+          {embed ? null : <ViewSettingsMenu />}
+          <LangSwitch locale={locale} onToggle={toggleLocale} />
+        </div>
       </div>
       {body}
       {embed ? null : <SiteFooter inline />}

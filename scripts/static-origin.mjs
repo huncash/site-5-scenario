@@ -3,7 +3,7 @@
  * Host header alapján: support/docs/blog → sites/<key>, egyébként main.
  * SPA fallback: ismeretlen HTML útvonal → az adott site index.html-je (pl. /ticket).
  */
-import { createServer } from "node:http";
+import { createServer, request as httpRequest } from "node:http";
 import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";

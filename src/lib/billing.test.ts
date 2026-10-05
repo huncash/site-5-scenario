@@ -49,14 +49,27 @@ describe("billing origins", () => {
   });
 
   it("reads funnel query into the billing form", () => {
-    const q = readBillCheckoutSearch("?tier=pro&interval=yearly&lang=hu&addon=slot_plus_1&ref=kampany");
+    const q = readBillCheckoutSearch(
+      "?tier=pro&interval=yearly&lang=hu&addon=slot_plus_1&ref=kampany&partnerKind=b2b",
+    );
     expect(q.hasCheckoutIntent).toBe(true);
     expect(q.tier).toBe("pro");
     expect(q.interval).toBe("yearly");
     expect(q.lang).toBe("hu");
     expect(q.addon).toBe("slot_plus_1");
     expect(q.ref).toBe("kampany");
+    expect(q.partnerKind).toBe("b2b");
     expect(readBillCheckoutSearch("").hasCheckoutIntent).toBe(false);
     expect(readBillCheckoutSearch("tier=starter&interval=monthly").interval).toBe("monthly");
+    expect(readBillCheckoutSearch("tier=pro").interval).toBe("yearly");
+    expect(
+      billCheckoutUrl({
+        tier: "expert",
+        interval: "yearly",
+        partnerKind: "b2c",
+        hostname: "szcenario.hu",
+        pathname: "/",
+      }),
+    ).toContain("partnerKind=b2c");
   });
 });

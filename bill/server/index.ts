@@ -9,21 +9,21 @@ import { barionConfigured, createBarionPayment } from "./barion.ts";
 import {
   isBillInterval,
   isBillTier,
+  isJitAddonId,
   isSlotPackId,
   slotPackAllowedForTier,
-  SLOT_PACK_HUF,
-  SLOT_PACK_LABELS,
   tierLabel,
   type BillInterval,
   type BillTier,
 } from "./catalog.ts";
-import { billEnv } from "./env.ts";
+import { buyerFromCheckout } from "./checkoutReady.ts";
+import { billEnv, isLiveBilling, liveBillingError, liveBillingMissingKeys } from "./env.ts";
 import { quotePackage } from "./quote.ts";
 import { activeReferralGiftSlots, ensureOrderReferralCode } from "./referral.ts";
-import { createStripeCheckout, stripeConfigured } from "./stripe.ts";
+import { stripeConfigured } from "./stripe.ts";
 import { createOrder, getOrder, getOrderByLicenseToken, newTransferCode, updateOrder, type Buyer, type InvoiceLine, type Order, type PayMethod } from "./store.ts";
-import { grossFromLines, issueSzamlazzProforma } from "./szamlazz.ts";
-import { countryFromTaxId, SELLER_COUNTRY, splitVat } from "./vat.ts";
+import { grossFromLines, issueSzamlazzProforma, proformaPdfPath } from "./szamlazz.ts";
+import { countryFromTaxId, SELLER_COUNTRY } from "./vat.ts";
 import { lookupCompany } from "./vies.ts";
 import { handleBillingWebhook } from "./webhooks.ts";
 
@@ -55,8 +55,8 @@ async function readJson(req: Request): Promise<Record<string, unknown>> {
 function inferTier(name: string): BillTier {
   const n = name.toLowerCase();
   if (n.includes("campus") || n.includes("hallgató")) return "campus";
-  if (n.includes("enterprise") || n.includes("nagyvállalat") || n.includes("nagyvallalat")) return "expert";
-  if (n.includes("basic") || n.includes("alap")) return "starter";
+  if (n.includes("enterprise") || n.includes("nagyvállalat") || n.includes("nagyvallalat") || n.includes("csapat")) return "expert";
+  if (n.includes("solo") || n.includes("starter") || n.includes("basic") || n.includes("alap")) return "starter";
   return "pro";
 }
 
@@ -87,6 +87,8 @@ function transferPayload(order: Order) {
     code: order.transferCode,
     label: tierLabel(order.tier),
     proformaNumber: order.proformaNumber,
+    pdfUrl: order.pdfUrl,
+    buyerAccountUrl: order.pdfUrl?.startsWith("https://") ? order.pdfUrl : undefined,
   };
 }
 
@@ -98,14 +100,28 @@ function parseVatField(raw: unknown, fallback: number): number | string | { erro
   return n;
 }
 
-async function attachProforma(order: Order): Promise<Order> {
-  if (order.proformaNumber) return order;
+async function attachProforma(order: Order): Promise<{ order: Order; issued: Awaited<ReturnType<typeof issueSzamlazzProforma>> }> {
+  if (order.proformaNumber) {
+    return { order, issued: { number: order.proformaNumber, pdfUrl: order.pdfUrl } };
+  }
   const issued = await issueSzamlazzProforma(order);
   if (!issued.number) {
     console.warn("[bill] dijbekero skip/fail", order.id, issued.error);
-    return order;
+    return { order, issued };
   }
-  return (await updateOrder(order.id, { proformaNumber: issued.number })) ?? order;
+  const pdfUrl = issued.buyerAccountUrl || issued.pdfUrl;
+  const next =
+    (await updateOrder(order.id, { proformaNumber: issued.number, pdfUrl })) ?? order;
+  return { order: next, issued: { ...issued, pdfUrl } };
+}
+
+function refuseAgent(): Response | null {
+  if (billEnv.szamlazzSandbox) return null;
+  if (billEnv.szamlazzAgentKey) return null;
+  return Response.json(
+    { ok: false, error: "Számlázz.hu Agent kulcs hiányzik (SZAMLAZZ_AGENT_KEY)." },
+    { status: 503 },
+  );
 }
 
 function invoiceLinesFrom(raw: unknown): InvoiceLine[] | string {
@@ -149,27 +165,10 @@ function buyerFromStructured(raw: unknown): Buyer | string {
   return { name, address, zip, city, country, taxId, email };
 }
 
-function buyerFrom(body: Record<string, unknown>): Buyer | string {
-  const name = String(body.name ?? "").trim();
-  const address = String(body.address ?? "").trim();
-  const email = String(body.email ?? "").trim();
-  const taxId = String(body.taxId ?? "").trim();
-  const country = String(body.country ?? "").trim() || countryFromTaxId(taxId) || undefined;
-  const rawKind = String(body.partnerKind ?? "").toLowerCase();
-  let partnerKind: Buyer["partnerKind"] = rawKind === "b2b" || rawKind === "b2c" ? rawKind : undefined;
-  if (!partnerKind) partnerKind = taxId.replace(/[\s./-]/g, "").length >= 8 ? "b2b" : "b2c";
-  if (!name || !address || !email) return "Név, cím és e-mail kell.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Az e-mail formája hibás.";
-  if (partnerKind === "b2b" && taxId.replace(/[\s./-]/g, "").length < 8) {
-    return "Céges vásárláskor az adószám megadása kötelező.";
-  }
-  if (partnerKind === "b2c" && body.immediateConsent !== true && body.immediateConsent !== "true") {
-    return "Fogyasztói vásárláskor az azonnali teljesítéshez való hozzájárulás kötelező.";
-  }
-  if (body.aszfAccepted !== true && body.aszfAccepted !== "true") {
-    return "Az ÁSZF és az adatvédelmi tájékoztató elfogadása kötelező.";
-  }
-  return { name, address, email, taxId, country, partnerKind };
+function refuseLiveKeys(): Response | null {
+  const error = liveBillingError();
+  if (!error) return null;
+  return Response.json({ ok: false, error, missingKeys: liveBillingMissingKeys() }, { status: 503 });
 }
 
 async function handleApi(req: Request): Promise<Response> {
@@ -257,6 +256,10 @@ async function handleApi(req: Request): Promise<Response> {
   }
 
   if (req.method === "POST" && p === "/api/billing/dijbekero") {
+    const live = refuseLiveKeys();
+    if (live) return live;
+    const agent = refuseAgent();
+    if (agent) return agent;
     const body = await readJson(req);
     const buyer = buyerFromStructured(body.buyer);
     if (typeof buyer === "string") return Response.json({ ok: false, error: buyer }, { status: 400 });
@@ -303,18 +306,32 @@ async function handleApi(req: Request): Promise<Response> {
     }
 
     const before = order.proformaNumber;
-    order = await attachProforma(order);
+    const attached = await attachProforma(order);
+    order = attached.order;
+    if (!order.proformaNumber && !billEnv.szamlazzSandbox) {
+      return Response.json(
+        { ok: false, orderId: order.id, error: attached.issued.error || "A díjbekérő kiállítása sikertelen." },
+        { status: 503 },
+      );
+    }
     return Response.json({
       ok: true,
       orderId: order.id,
       proformaNumber: order.proformaNumber,
+      pdfUrl: attached.issued.pdfUrl,
+      pdfBase64: attached.issued.pdfBase64,
+      sandbox: attached.issued.sandbox || billEnv.szamlazzSandbox,
       issued: Boolean(order.proformaNumber && order.proformaNumber !== before),
       transfer: transferPayload(order),
-      warning: order.proformaNumber ? undefined : "A díjbekérő Agent-hívás nem sikerült; a rendelés megvan, az átutalás ettől függetlenül elindítható.",
+      warning: order.proformaNumber ? undefined : attached.issued.error || "A díjbekérő Agent-hívás nem sikerült; a rendelés megvan, az átutalás ettől függetlenül elindítható.",
     });
   }
 
   if (req.method === "POST" && p === "/api/billing/checkout") {
+    const live = refuseLiveKeys();
+    if (live) return live;
+    const agent = refuseAgent();
+    if (agent) return agent;
     const body = await readJson(req);
     const tier = body.tier;
     const interval = body.interval;
@@ -322,32 +339,43 @@ async function handleApi(req: Request): Promise<Response> {
     if (!isBillTier(tier) || !isBillInterval(interval)) {
       return Response.json({ ok: false, error: "Ismeretlen csomag vagy gyakoriság." }, { status: 400 });
     }
-    if (pay !== "stripe" && pay !== "barion" && pay !== "hu_transfer") {
+    if (pay !== "barion" && pay !== "hu_transfer") {
       return Response.json({ ok: false, error: "Ismeretlen fizetési mód." }, { status: 400 });
     }
-    const buyer = buyerFrom(body);
+    if (pay === "barion" && !barionConfigured()) {
+      return Response.json({ ok: false, error: "Barion nincs bekötve (BARION_POS_KEY)." }, { status: 503 });
+    }
+    const buyer = buyerFromCheckout(body);
     if (typeof buyer === "string") return Response.json({ ok: false, error: buyer }, { status: 400 });
 
-    const quote = quotePackage(tier, interval, { country: buyer.country, taxId: buyer.taxId });
+    const addon = typeof body.addon === "string" && isJitAddonId(body.addon) ? body.addon : undefined;
+    const slotPack =
+      typeof body.slotPack === "string" && isSlotPackId(body.slotPack) && slotPackAllowedForTier(tier)
+        ? body.slotPack
+        : undefined;
+    const quote = quotePackage(tier, interval, {
+      country: buyer.country,
+      taxId: buyer.taxId,
+      addon,
+      slotPack,
+    });
     buyer.country = quote.vat.country;
     const amountHuf = quote.due.gross;
-    const intervalLabel = interval === "yearly" ? "1 év" : "1 hó";
-    const lines: InvoiceLine[] = [
-      {
-        name: `Szcenárió — ${tierLabel(tier)} (${intervalLabel})`,
-        quantity: 1,
-        unit: "db",
-        netUnitPrice: quote.dueNet,
-        vat: quote.vat.vatCode,
-      },
-    ];
+    const lines: InvoiceLine[] = quote.lines.map((line) => ({
+      name: line.name,
+      quantity: line.quantity,
+      unit: line.unit,
+      netUnitPrice: line.netUnitPrice,
+      vat: quote.vat.vatCode,
+    }));
     const payMethod = pay as PayMethod;
     let order = await createOrder({
       status: payMethod === "hu_transfer" ? "awaiting_transfer" : "pending",
       tier,
       interval,
       ref: typeof body.ref === "string" ? body.ref : undefined,
-      slotPack: typeof body.slotPack === "string" && isSlotPackId(body.slotPack) ? body.slotPack : undefined,
+      slotPack,
+      addon,
       amountHuf,
       netHuf: quote.dueNet,
       vatRate: quote.vat.rate,
@@ -361,21 +389,33 @@ async function handleApi(req: Request): Promise<Response> {
     });
 
     if (payMethod === "hu_transfer") {
-      order = await attachProforma(order);
+      const attached = await attachProforma(order);
+      order = attached.order;
+      if (!order.proformaNumber && !billEnv.szamlazzSandbox) {
+        return Response.json(
+          { ok: false, orderId: order.id, error: attached.issued.error || "A díjbekérő kiállítása sikertelen." },
+          { status: 503 },
+        );
+      }
       return Response.json({
         ok: true,
         orderId: order.id,
         method: "hu_transfer",
         proformaNumber: order.proformaNumber,
-        transfer: transferPayload(order),
+        pdfUrl: attached.issued.pdfUrl,
+        pdfBase64: attached.issued.pdfBase64,
+        buyerAccountUrl: attached.issued.buyerAccountUrl,
+        sandbox: attached.issued.sandbox || billEnv.szamlazzSandbox,
+        warning: order.proformaNumber
+          ? undefined
+          : attached.issued.error || "A díjbekérő Agent-hívás nem sikerült; a rendelés megvan, az átutalás ettől függetlenül elindítható.",
+        transfer: {
+          ...transferPayload(order),
+          pdfUrl: attached.issued.pdfUrl,
+          pdfBase64: attached.issued.pdfBase64,
+          buyerAccountUrl: attached.issued.buyerAccountUrl,
+        },
       });
-    }
-
-    if (payMethod === "stripe") {
-      const session = await createStripeCheckout(order);
-      if ("error" in session) return Response.json({ ok: false, orderId: order.id, error: session.error }, { status: 503 });
-      await updateOrder(order.id, { providerRef: session.url });
-      return Response.json({ ok: true, orderId: order.id, hostedUrl: session.url });
     }
 
     const session = await createBarionPayment(order);
@@ -413,13 +453,40 @@ async function handleApi(req: Request): Promise<Response> {
     });
   }
 
+  if (req.method === "GET" && p.startsWith("/api/billing/proforma/")) {
+    const id = decodeURIComponent(p.slice("/api/billing/proforma/".length).replace(/\/+$/, ""));
+    const email = (url.searchParams.get("email") ?? "").trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      return Response.json({ ok: false, error: "email_required" }, { status: 400 });
+    }
+    const order = (await getOrder(id)) ?? (await getOrderByLicenseToken(id));
+    if (!order) return Response.json({ ok: false }, { status: 404 });
+    if ((order.buyer.email ?? "").trim().toLowerCase() !== email) {
+      return Response.json({ ok: false, error: "mismatch" }, { status: 403 });
+    }
+    const pdf = await readFile(proformaPdfPath(order.id)).catch(() => null);
+    if (!pdf?.length) return Response.json({ ok: false, error: "pdf_missing" }, { status: 404 });
+    const name = encodeURIComponent(order.proformaNumber || order.id);
+    return new Response(pdf, {
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition": `attachment; filename="dijbekero-${name}.pdf"`,
+      },
+    });
+  }
+
   if (req.method === "GET" && p === "/api/billing/quote") {
     const tier = url.searchParams.get("tier");
     const interval = url.searchParams.get("interval") === "monthly" ? "monthly" : "yearly";
     const country = url.searchParams.get("country") || SELLER_COUNTRY;
     const taxId = url.searchParams.get("taxId") ?? "";
     if (!isBillTier(tier)) return Response.json({ ok: false, error: "Ismeretlen csomag." }, { status: 400 });
-    const q = quotePackage(tier, interval, { country, taxId });
+    const q = quotePackage(tier, interval, {
+      country,
+      taxId,
+      addon: url.searchParams.get("addon") || undefined,
+      slotPack: url.searchParams.get("slotPack") || undefined,
+    });
     return Response.json({
       ok: true,
       country: q.vat.country,
@@ -434,11 +501,23 @@ async function handleApi(req: Request): Promise<Response> {
   }
 
   if (req.method === "GET" && p === "/api/billing/config") {
+    const missingKeys = liveBillingMissingKeys();
+    const agentMissing = !billEnv.szamlazzSandbox && !billEnv.szamlazzAgentKey;
+    const error =
+      liveBillingError() ??
+      (agentMissing ? "Számlázz.hu Agent kulcs hiányzik (SZAMLAZZ_AGENT_KEY)." : undefined);
     return Response.json({
       stripe: stripeConfigured(),
       barion: barionConfigured(),
       transfer: true,
-    });
+      sandbox: billEnv.szamlazzSandbox,
+      szamlazz: Boolean(billEnv.szamlazzAgentKey),
+      live: isLiveBilling() || !billEnv.szamlazzSandbox,
+      missingKeys: agentMissing && !missingKeys.includes("SZAMLAZZ_AGENT_KEY")
+        ? [...missingKeys, "SZAMLAZZ_AGENT_KEY"]
+        : missingKeys,
+      error,
+    }, { status: liveBillingError() ? 503 : 200 });
   }
 
   return Response.json({ ok: false, error: "not found" }, { status: 404 });
@@ -515,6 +594,10 @@ async function start() {
 
   server.listen(billEnv.port, "0.0.0.0", () => {
     console.log(`[bill] listening on ${billEnv.port} · ${billEnv.publicUrl}`);
+    const missing = liveBillingMissingKeys();
+    if (missing.length) {
+      console.error(`[bill] ÉLES KULCSOK HIÁNYOZNAK: ${missing.join(", ")}`);
+    }
   });
 }
 

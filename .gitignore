@@ -36,4 +36,5 @@ local_backups/
 
 # Billing module local store / build
 bill/data/*.json
+bill/data/proformas
 bill/dist

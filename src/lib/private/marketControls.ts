@@ -201,7 +201,7 @@ export type MatrixRow = {
 export const MARKET_CONTROL_MATRIX: readonly MatrixRow[] = [
   {
     tier: "starter",
-    label: "Starter (Solo)",
+    label: "Basic",
     saasMonthlyHuf: { min: 7_500, max: 15_000 },
     saasNote: "$20–$40 / hó",
     perpetualOnceHuf: { min: 22_000, max: 62_000 },

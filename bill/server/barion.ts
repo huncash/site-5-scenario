@@ -7,7 +7,7 @@ export function barionConfigured(): boolean {
 }
 
 export async function createBarionPayment(order: Order): Promise<{ url: string; paymentId?: string } | { error: string }> {
-  if (!billEnv.barionPosKey) return { error: "Barion nincs bekötve (BARION_POSKEY)." };
+  if (!billEnv.barionPosKey) return { error: "Barion nincs bekötve (BARION_POS_KEY)." };
   const payload = {
     POSKey: billEnv.barionPosKey,
     PaymentType: "Immediate",

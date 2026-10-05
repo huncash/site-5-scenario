@@ -16,7 +16,7 @@ import { BASE_SCENARIO_SLOTS } from "@/lib/scenarioSlots";
 import { TIER_CAPACITY, TIER_MONTHLY_HUF } from "@/content/pricing/tiers";
 
 describe("PLANS_CONFIG perpetual model", () => {
-  it("exposes Solo / Pro / Enterprise with original package sizes", () => {
+  it("exposes Basic / Pro / Enterprise with original package sizes", () => {
     expect(getPublicPlans().map((p) => p.id)).toEqual(["starter", "pro", "expert"]);
     expect(PLANS_CONFIG.starter.priceHuf).toBe(199_000);
     expect(PLANS_CONFIG.starter.quotas).toMatchObject({
@@ -77,8 +77,15 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(pro).toHaveLength(4);
     expect(ent).toHaveLength(4);
     expect(starter.some((h) => /−25%|hűség|örökélet/i.test(h))).toBe(false);
+    expect(starter.join(" ")).not.toMatch(/projekt|szcenárió/i);
+    expect(starter[0]).toBe("1 aktív case");
+    expect(starter[1]).toBe("3 aktív slot");
+    expect(pro[0]).toBe("2 párhuzamos aktív case");
+    expect(pro[1]).toBe("3 aktív slot case-enként");
+    expect(ent[0]).toBe("5 aktív case");
+    expect(ent[1]).toBe("4 aktív slot case-enként");
     expect(pro.some((h) => /CAMT\.053|bankkivonat/i.test(h))).toBe(true);
-    expect(ent.some((h) => /Edge|Szenzoros/i.test(h))).toBe(true);
+    expect(ent.some((h) => /könyvelési|bankkivonat/i.test(h))).toBe(true);
     const slogan = planSlogan(PLANS_CONFIG.starter, "hu");
     expect(slogan).toContain("1");
     expect(slogan).toContain("3");

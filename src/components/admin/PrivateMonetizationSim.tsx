@@ -351,7 +351,7 @@ export function PrivateMonetizationSim() {
           variant="secondary"
           onClick={() => setPerp((s) => ({ ...s, perpetualPrice: OURS_SOLO_PERPETUAL_HUF }))}
         >
-          Solo listaárunk (199 e Ft)
+          Basic listaárunk (199 e Ft)
         </Button>
         <Button
           type="button"

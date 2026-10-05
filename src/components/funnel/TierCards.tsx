@@ -1,12 +1,6 @@
 import type { TierId, TierOffer } from "@/content/pricing/tiers";
-import {
-  formatHuf,
-  PRICING_IOT_NOTE,
-  PRICING_NET_NOTE,
-  TIER_COMPARE_ROWS,
-  TIER_MONTHLY_HUF,
-  yearlyPriceHuf,
-} from "@/content/pricing/tiers";
+import { formatHuf, PRICING_IOT_NOTE, PRICING_NET_NOTE, TIER_COMPARE_ROWS } from "@/content/pricing/tiers";
+import { getPlan } from "@/config/plans";
 import { PricingFootnotes } from "@/components/home/PricingFootnotes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -15,7 +15,7 @@ export type QuotaCount = number | "unlimited";
 
 /** Egyidejűleg aktív (concurrent) munkaterület-keretek. */
 export type PlanQuotas = {
-  /** Egyidejűleg aktív Case-ek (projektek) száma. */
+  /** Egyidejűleg aktív Case-ek (esetek) száma. */
   cases: QuotaCount;
   /** Egyidejűleg aktív Slotok Case-enként. */
   slotsPerCase: number;
@@ -184,7 +184,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
   starter: {
     id: "starter",
     public: true,
-    label: "Solo",
+    label: "Basic",
     licenseModel: "perpetual",
     customPricing: false,
     priceHuf: LOYALTY_STARTER.year1.huf,

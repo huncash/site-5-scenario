@@ -1,33 +1,50 @@
+/**
+ * Számlázási katalógus — SSOT: `src/config/plans.ts`.
+ * Nincs külön tesztár / tesztnév.
+ */
+import {
+  JIT_ADDON_PRICES,
+  PLANS_CONFIG,
+  YEARLY_DISCOUNT_PCT,
+  jitAddonPriceForPlan,
+  type JitAddonId as PlanJitAddonId,
+  type PlanId,
+} from "../../src/config/plans.ts";
+
 export type BillTier = "starter" | "pro" | "expert" | "campus";
 export type BillInterval = "yearly" | "monthly";
 export type SlotPackId = "slot_plus_1" | "slot_plus_3" | "slot_plus_5";
-
-const MONTHLY_HUF: Record<BillTier, number> = {
-  starter: 8_900,
-  pro: 24_420,
-  expert: 59_000,
-  campus: 1_490,
-};
+export type JitAddonId = PlanJitAddonId;
 
 const LABELS: Record<BillTier, string> = {
-  starter: "Basic",
-  pro: "Pro",
-  expert: "Enterprise",
-  campus: "Hallgatói / Campus",
+  starter: PLANS_CONFIG.starter.label,
+  pro: PLANS_CONFIG.pro.label,
+  expert: PLANS_CONFIG.expert.label,
+  campus: PLANS_CONFIG.campus.label,
 };
 
-const SLOT_UNIT_HUF = 2_900;
+/** Nettó Ft — perpetual 1. évi licenc; campusnál havi token. */
+export const PACKAGE_NET_HUF: Record<BillTier, number> = {
+  starter: PLANS_CONFIG.starter.priceHuf,
+  pro: PLANS_CONFIG.pro.priceHuf,
+  expert: PLANS_CONFIG.expert.priceHuf,
+  campus: PLANS_CONFIG.campus.monthlyPriceHuf,
+};
 
-/** Nettó Ft / hó — egységár × db (JIT), yearly a fő csomag kedvezményével. */
+/** @deprecated Alias a kliens kompatibilitáshoz — valós csomagár, nem havi SaaS. */
+export const MONTHLY_HUF = PACKAGE_NET_HUF;
+
+const SLOT_UNIT_HUF = JIT_ADDON_PRICES.slot_plus_1;
+
 export const SLOT_PACK_HUF: Record<SlotPackId, number> = {
-  slot_plus_1: SLOT_UNIT_HUF * 1,
+  slot_plus_1: SLOT_UNIT_HUF,
   slot_plus_3: SLOT_UNIT_HUF * 3,
   slot_plus_5: SLOT_UNIT_HUF * 5,
 };
 
-export function slotPackNetForInterval(packId: SlotPackId, interval: BillInterval): number {
-  const m = SLOT_PACK_HUF[packId];
-  return interval === "yearly" ? yearlyPriceHuf(m) : m;
+export function slotPackNetForInterval(packId: SlotPackId, _interval: BillInterval): number {
+  void _interval;
+  return SLOT_PACK_HUF[packId];
 }
 
 export const SLOT_PACK_SLOTS: Record<SlotPackId, number> = {
@@ -37,41 +54,38 @@ export const SLOT_PACK_SLOTS: Record<SlotPackId, number> = {
 };
 
 export const SLOT_PACK_LABELS: Record<SlotPackId, string> = {
-  slot_plus_1: "+1 Extra Slot",
-  slot_plus_3: "+3 Extra Slot",
-  slot_plus_5: "+5 Extra Slot",
+  slot_plus_1: "+1 Extra Aktív Slot",
+  slot_plus_3: "+3 Extra Aktív Slot",
+  slot_plus_5: "+5 Extra Aktív Slot",
 };
 
-/** JIT egység-modulok (Case / Slot / Seat / Guest). */
-export type JitAddonId = "case_plus_1" | "slot_plus_1" | "seat_plus_1" | "guest_plus_1";
-
-export const JIT_ADDON_HUF: Record<JitAddonId, number> = {
-  case_plus_1: 4_900,
-  slot_plus_1: 2_900,
-  seat_plus_1: 6_900,
-  guest_plus_1: 1_200,
-};
+export const JIT_ADDON_HUF: Record<JitAddonId, number> = { ...JIT_ADDON_PRICES };
 
 export const JIT_ADDON_LABELS: Record<JitAddonId, string> = {
-  case_plus_1: "+1 Extra Case",
-  slot_plus_1: "+1 Extra Slot",
-  seat_plus_1: "+1 Extra Seat",
+  case_plus_1: "+1 Extra Aktív Case",
+  slot_plus_1: "+1 Extra Aktív Slot",
+  seat_plus_1: "+1 Extra Szerkesztő Seat",
   guest_plus_1: "+1 Extra Guest",
+  edge_sensor: "Szenzoros / Edge adatgyűjtő modul",
 };
 
 export function isJitAddonId(v: unknown): v is JitAddonId {
-  return v === "case_plus_1" || v === "slot_plus_1" || v === "seat_plus_1" || v === "guest_plus_1";
+  return (
+    v === "case_plus_1" ||
+    v === "slot_plus_1" ||
+    v === "seat_plus_1" ||
+    v === "guest_plus_1" ||
+    v === "edge_sensor"
+  );
 }
+
 export function isSlotPackId(v: unknown): v is SlotPackId {
   return v === "slot_plus_1" || v === "slot_plus_3" || v === "slot_plus_5";
 }
 
-/** Campus / zárt oktatás: slot-mátrix kizárva. */
 export function slotPackAllowedForTier(tier: BillTier): boolean {
   return tier !== "campus";
 }
-
-const YEARLY_DISCOUNT_PCT = 15;
 
 export function isBillTier(v: unknown): v is BillTier {
   return v === "starter" || v === "pro" || v === "expert" || v === "campus";
@@ -81,21 +95,37 @@ export function isBillInterval(v: unknown): v is BillInterval {
   return v === "yearly" || v === "monthly";
 }
 
+/** Perpetual: passthrough. Campus yearly: 12× havi. */
 export function yearlyPriceHuf(monthlyHuf: number): number {
-  return Math.round(monthlyHuf * 12 * (1 - YEARLY_DISCOUNT_PCT / 100));
+  return monthlyHuf * 12;
 }
 
 export function chargeHuf(tier: BillTier, interval: BillInterval): number {
-  const m = MONTHLY_HUF[tier];
-  return interval === "yearly" ? yearlyPriceHuf(m) : m;
+  if (tier === "campus") {
+    const monthly = PLANS_CONFIG.campus.monthlyPriceHuf;
+    return interval === "yearly" ? yearlyPriceHuf(monthly) : monthly;
+  }
+  return PACKAGE_NET_HUF[tier];
 }
 
 export function tierLabel(tier: BillTier): string {
   return LABELS[tier];
 }
 
+export function invoicePackageName(tier: BillTier, interval: BillInterval): string {
+  if (tier === "campus") {
+    const span = interval === "yearly" ? "12 hó" : "1 hó";
+    return `Szcenárió — ${LABELS.campus} (${span})`;
+  }
+  return `Szcenárió — ${LABELS[tier]} (örökös licenc, 1. év)`;
+}
+
+export function addonNetForTier(addon: JitAddonId, tier: BillTier): number {
+  return jitAddonPriceForPlan(addon, tier as PlanId);
+}
+
 export function formatHuf(n: number): string {
   return `${new Intl.NumberFormat("hu-HU").format(n)} Ft`;
 }
 
-export { MONTHLY_HUF, YEARLY_DISCOUNT_PCT };
+export { YEARLY_DISCOUNT_PCT };

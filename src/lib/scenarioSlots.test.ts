@@ -25,7 +25,7 @@ describe("scenarioSlots", () => {
     let ledger = emptySlotLedger("starter");
     ledger = addPurchasedPack(ledger, "slot_plus_3");
     ledger = addPermanentBonus(ledger, 1);
-    // Solo: 1 Case × 3 Slot = 3 + pack(3) + gift(1)
+    // Basic: 1 Case × 3 Slot = 3 + pack(3) + gift(1)
     expect(totalScenarioSlots(ledger)).toBe(3 + 3 + 1);
     ledger = addPermanentBonus(ledger, MAX_REFERRAL_GIFT_SLOTS);
     expect(ledger.permanentBonus).toBe(MAX_REFERRAL_GIFT_SLOTS);

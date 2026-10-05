@@ -111,12 +111,12 @@ export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
   }
   if (plan.id === "pro") {
     return locale === "en"
-      ? "Automated bank statement & transaction import (CAMT.053, CSV, XML). Need more than 2 concurrent projects? Extra active Case module (+€49 perpetual)."
-      : "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML). 2-nél több párhuzamos projekthez: Extra aktív Case modul (+49 000 Ft / örökös).";
+      ? "Automated bank statement & transaction import (CAMT.053, CSV, XML). Need more than 2 concurrent cases? Extra active Case module (+€49 perpetual)."
+      : "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML). 2-nél több párhuzamos case-hez: Extra aktív Case modul (+49 000 Ft / örökös).";
   }
   return locale === "en"
-    ? "1 active project, 3 active scenario slots (P-R-O base paths)."
-    : "1 aktív projekt, 3 aktív szcenárió slot (P-R-O alappályák).";
+    ? "1 active case, 3 active slots (P-R-O base paths)."
+    : "1 aktív case, 3 aktív slot (P-R-O alappályák).";
 }
 
 /** Teljes highlight lista (összehasonlító tábla / legacy). */
@@ -133,14 +133,14 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
   if (plan.id === "starter") {
     return L
       ? [
-          "1 active project",
-          "3 active scenario slots",
+          "1 active case",
+          "3 active slots",
           "1 editor seat",
           "Unlimited import & overwrite",
         ]
       : [
-          "1 aktív projekt",
-          "3 aktív szcenárió slot",
+          "1 aktív case",
+          "3 aktív slot",
           "1 szerkesztői hely",
           "Korlátlan import és felülírás",
         ];
@@ -148,14 +148,14 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
   if (plan.id === "pro") {
     return L
       ? [
-          "2 parallel active projects",
-          "3 active scenario slots each",
+          "2 parallel active cases",
+          "3 active slots each",
           "1 editor + 5 guests",
           "Automated bank statement & transaction import (CAMT.053, CSV, XML)",
         ]
       : [
-          "2 párhuzamos aktív projekt",
-          "3 aktív szcenárió slot projektenként",
+          "2 párhuzamos aktív case",
+          "3 aktív slot case-enként",
           "1 szerkesztő + 5 vendég",
           "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)",
         ];
@@ -163,14 +163,14 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
   if (plan.id === "expert") {
     return L
       ? [
-          "5 active projects",
-          "4 active scenario slots each",
+          "5 active cases",
+          "4 active slots each",
           "3 editors + 20 guests",
           "Automated accounting / bank-statement import",
         ]
       : [
-          "5 aktív projekt",
-          "4 aktív szcenárió slot projektenként",
+          "5 aktív case",
+          "4 aktív slot case-enként",
           "3 szerkesztő + 20 vendég",
           "Automatizált könyvelési/bankkivonat import",
         ];
@@ -296,12 +296,12 @@ export function capacityTipHu(): string {
   const s = PLANS_CONFIG.starter.quotas;
   const p = PLANS_CONFIG.pro.quotas;
   const e = PLANS_CONFIG.expert.quotas;
-  return `A keret az egyidejűleg aktív Case-ekre és Slotokra vonatkozik (nem a felhalmozott adatokra). Case-enként párhuzamosan futható Aktív Slot**: Solo ${s.slotsPerCase}, Pro ${p.slotsPerCase}, Enterprise ${e.slotsPerCase} — bővíthető JIT modullal. Inaktív munkaterület törölhető / felülírható díj nélkül.`;
+  return `A keret az egyidejűleg aktív Case-ekre és Slotokra vonatkozik (nem a felhalmozott adatokra). Case-enként párhuzamosan futható Aktív Slot**: Basic ${s.slotsPerCase}, Pro ${p.slotsPerCase}, Enterprise ${e.slotsPerCase} — bővíthető JIT modullal. Inaktív munkaterület törölhető / felülírható díj nélkül.`;
 }
 
 export function seatGuestCapacityTipHu(): string {
   const s = PLANS_CONFIG.starter.quotas;
   const p = PLANS_CONFIG.pro.quotas;
   const e = PLANS_CONFIG.expert.quotas;
-  return `Solo: ${s.seats} Seat + ${s.guests} Guest · Pro: ${p.seats} Seat + ${p.guests} Guest · Enterprise: ${e.seats} Seat + ${e.guests} Guest.`;
+  return `Basic: ${s.seats} Seat + ${s.guests} Guest · Pro: ${p.seats} Seat + ${p.guests} Guest · Enterprise: ${e.seats} Seat + ${e.guests} Guest.`;
 }

@@ -4,26 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Szcenárió — support</title>
-    <script>
-      (function () {
-        var d = document.documentElement;
-        var l = "hu";
-        try {
-          var q = new URLSearchParams(location.search);
-          var raw = q.get("lang") || q.get("locale");
-          if (raw === "en" || raw === "hu") l = raw;
-          else if (localStorage.getItem("szcenario_locale") === "en") l = "en";
-        } catch (e) {}
-        var c = l === "en" ? "EUR" : "HUF";
-        d.lang = l;
-        d.setAttribute("data-locale", l);
-        d.setAttribute("data-currency", c);
-        try {
-          localStorage.setItem("szcenario_locale", l);
-          localStorage.setItem("szcenario_currency", c);
-        } catch (e) {}
-      })();
-    </script>
+    <script src="../src/lib/viewPrefsBoot.js"></script>
     <meta name="theme-color" content="#0b1220" />
   </head>
   <body>
