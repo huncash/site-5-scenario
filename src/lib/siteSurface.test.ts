@@ -22,6 +22,7 @@ describe("siteSurface footer visibility", () => {
     expect(resolveSiteHost("docs.szcenario.hu")).toBe("docs");
     expect(resolveSiteHost("blog.szcenario.hu")).toBe("blog");
     expect(resolveSiteHost("app.szcenario.hu")).toBe("app");
+    expect(resolveSiteHost("school.szcenario.hu")).toBe("school");
     expect(resolveSiteHost("app.example.test")).toBe("app");
   });
 
@@ -33,6 +34,7 @@ describe("siteSurface footer visibility", () => {
     expect(resolveSiteHost("szcenario.hu", "", "/support/pricing")).toBe("support");
     expect(resolveSiteHost("localhost", "", "/docs")).toBe("docs");
     expect(resolveSiteHost("localhost", "", "/blog")).toBe("blog");
+    expect(resolveSiteHost("localhost", "", "/school")).toBe("school");
   });
 
   it("currentSiteHost uses hostname + pathname, never a port", () => {
@@ -43,6 +45,7 @@ describe("siteSurface footer visibility", () => {
     expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/" })).toBe("main");
     expect(SITE_KIND_BOOT_SCRIPT).toContain("data-site-kind");
     expect(SITE_KIND_BOOT_SCRIPT).toContain("bill.szcenario.hu");
+    expect(SITE_KIND_BOOT_SCRIPT).toContain("school.szcenario.hu");
     expect(SITE_KIND_BOOT_SCRIPT).not.toMatch(/:\d{3,}/);
   });
 
@@ -55,7 +58,8 @@ describe("siteSurface footer visibility", () => {
     expect(shouldShowSiteFooter({ hostname: "szcenario.hu", pathname: "/bcp" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "bill.szcenario.hu", pathname: "/" })).toBe(true);
     expect(shouldShowSiteFooter({ hostname: "localhost", pathname: "/bill" })).toBe(true);
-    expect(shouldShowSiteFooter({ hostname: "support.szcenario.hu", pathname: "/" })).toBe(true);
+    expect(shouldShowSiteFooter({ hostname: "school.szcenario.hu", pathname: "/" })).toBe(true);
+    expect(shouldShowSiteFooter({ hostname: "localhost", pathname: "/school" })).toBe(true);
   });
 
   it("hides footer on app host, dashboard and workspace routes", () => {

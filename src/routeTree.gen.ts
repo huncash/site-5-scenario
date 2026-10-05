@@ -26,6 +26,7 @@ import { Route as MakroRouteImport } from './routes/makro'
 import { Route as OktatasRouteImport } from './routes/oktatas'
 import { Route as ReferencesRouteImport } from './routes/references'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as SchoolRouteImport } from './routes/school'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as StrategiaRouteImport } from './routes/strategia'
@@ -129,6 +130,11 @@ const ReferencesRoute = ReferencesRouteImport.update({
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolRoute = SchoolRouteImport.update({
+  id: '/school',
+  path: '/school',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/oktatas': typeof OktatasRoute
   '/references': typeof ReferencesRoute
   '/report': typeof ReportRoute
+  '/school': typeof SchoolRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/oktatas': typeof OktatasRoute
   '/references': typeof ReferencesRoute
   '/report': typeof ReportRoute
+  '/school': typeof SchoolRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/oktatas': typeof OktatasRoute
   '/references': typeof ReferencesRoute
   '/report': typeof ReportRoute
+  '/school': typeof SchoolRoute
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
@@ -367,6 +376,7 @@ export interface FileRouteTypes {
     | '/oktatas'
     | '/references'
     | '/report'
+    | '/school'
     | '/settings'
     | '/stats'
     | '/strategia'
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/oktatas'
     | '/references'
     | '/report'
+    | '/school'
     | '/settings'
     | '/stats'
     | '/strategia'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/oktatas'
     | '/references'
     | '/report'
+    | '/school'
     | '/settings'
     | '/stats'
     | '/strategia'
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   OktatasRoute: typeof OktatasRoute
   ReferencesRoute: typeof ReferencesRoute
   ReportRoute: typeof ReportRoute
+  SchoolRoute: typeof SchoolRoute
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
   StrategiaRoute: typeof StrategiaRoute
@@ -622,6 +635,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school': {
+      id: '/school'
+      path: '/school'
+      fullPath: '/school'
+      preLoaderRoute: typeof SchoolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -778,6 +798,7 @@ const rootRouteChildren: RootRouteChildren = {
   OktatasRoute: OktatasRoute,
   ReferencesRoute: ReferencesRoute,
   ReportRoute: ReportRoute,
+  SchoolRoute: SchoolRoute,
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
   StrategiaRoute: StrategiaRoute,

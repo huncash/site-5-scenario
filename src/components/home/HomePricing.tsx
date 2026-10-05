@@ -1,7 +1,11 @@
+import { useState } from "react";
+
+import { DesktopAppPanel } from "@/components/desktop/DesktopAppPanel";
 import { AddonPriceLine } from "@/components/home/AddonPriceLine";
 import { PricingCompareTable } from "@/components/home/PricingCompareTable";
 import { PricingFootnotes } from "@/components/home/PricingFootnotes";
 import { PRICING_CARDS_GRID } from "@/components/home/pricingLayout";
+import { EnterpriseInquiryDialog } from "@/components/pricing/EnterpriseInquiryDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
@@ -13,6 +17,7 @@ import { PUBLIC_JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
 import { CAMPUS_MONTHLY_HUF, formatHuf, TIER_CORE, type TierId } from "@/content/pricing/tiers";
 import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
+import { isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { supportPricingHref, type SupportPricingAnchor } from "@/lib/support";
 import { useI18n, type MessageKey } from "@/i18n";
@@ -65,6 +70,7 @@ export function HomePricing(props: { campus?: boolean }) {
   const { t, locale } = useI18n();
   const marketingVat = resolveVat({ country: SELLER_COUNTRY });
   const checkoutInterval: BillingInterval = "yearly";
+  const [enterpriseOpen, setEnterpriseOpen] = useState(false);
 
   return (
     <section id="pricing" className="scroll-mt-24">
@@ -106,6 +112,11 @@ export function HomePricing(props: { campus?: boolean }) {
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-base font-semibold text-foreground">{t(TIER_LABEL_KEY[p.id])}</h3>
                 {recommended ? <Badge variant="default">{t("pricing.recommended")}</Badge> : null}
+                {isEnterprisePlanId(p.id) ? (
+                  <Badge variant="outline" className="text-[10px] font-medium">
+                    {t("pricing.enterpriseBadge")}
+                  </Badge>
+                ) : null}
               </div>
 
               <div className="mt-3">
@@ -121,24 +132,35 @@ export function HomePricing(props: { campus?: boolean }) {
                 ))}
               </ul>
 
-              <Button
-                asChild
-                className={cn(
-                  "mt-5 h-9 text-[13px]",
-                  recommended ? "btn-cta" : "border-white/35 bg-transparent text-foreground",
-                )}
-                variant={recommended ? "default" : "outline"}
-              >
-                <a
-                  href={billCheckoutUrl({ tier: p.id, interval: checkoutInterval })}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.location.assign(billCheckoutUrl({ tier: p.id, interval: checkoutInterval }));
-                  }}
+              {isEnterprisePlanId(p.id) ? (
+                <Button
+                  type="button"
+                  className="mt-5 h-9 border-white/35 bg-transparent text-[13px] text-foreground"
+                  variant="outline"
+                  onClick={() => setEnterpriseOpen(true)}
                 >
-                  {t("pricing.order")}
-                </a>
-              </Button>
+                  {t("pricing.enterpriseCta")}
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className={cn(
+                    "mt-5 h-9 text-[13px]",
+                    recommended ? "btn-cta" : "border-white/35 bg-transparent text-foreground",
+                  )}
+                  variant={recommended ? "default" : "outline"}
+                >
+                  <a
+                    href={billCheckoutUrl({ tier: p.id, interval: checkoutInterval })}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.assign(billCheckoutUrl({ tier: p.id, interval: checkoutInterval }));
+                    }}
+                  >
+                    {t("pricing.order")}
+                  </a>
+                </Button>
+              )}
 
               <a
                 href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
@@ -151,6 +173,10 @@ export function HomePricing(props: { campus?: boolean }) {
         })}
       </div>
 
+      <div className="mt-6">
+        <DesktopAppPanel />
+      </div>
+
       <details className="mt-4 rounded-xl border border-border/50 bg-card/40 px-4 py-3">
         <summary className="cursor-pointer text-[13px] font-medium text-foreground">
           {t("pricing.compareToggle")}
@@ -160,6 +186,8 @@ export function HomePricing(props: { campus?: boolean }) {
         </div>
         <PricingFootnotes className="mt-4 space-y-1 border-t border-slate-800 pt-3 text-xs text-slate-400" />
       </details>
+
+      <EnterpriseInquiryDialog open={enterpriseOpen} onOpenChange={setEnterpriseOpen} />
 
       <details className="mt-3 rounded-xl border border-border/50 bg-card/40 px-4 py-3">
         <summary className="cursor-pointer text-[13px] font-medium text-foreground">

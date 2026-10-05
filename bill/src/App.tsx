@@ -29,6 +29,7 @@ import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { SiteFooter } from "@/components/SiteFooter";
 import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
+import { enterpriseInquiryMailto, ENTERPRISE_SELF_SERVE_CHECKOUT, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { mainPublicOrigin } from "@/lib/siteSurface";
 import { withViewPrefs } from "@/lib/viewPrefs";
@@ -510,6 +511,32 @@ export function BillingCheckout() {
     );
   }
 
+  if (hasCheckoutIntent && isEnterprisePlanId(tier) && !ENTERPRISE_SELF_SERVE_CHECKOUT) {
+    const expertPlan = getPlan("expert");
+    return (
+      <div className="wrap">
+        {top}
+        <h1>{t.expert}</h1>
+        <p className="muted">{t.enterpriseBadge}</p>
+        <p>
+          {locale === "en" && expertPlan.priceEur > 0
+            ? `€${expertPlan.priceEur.toLocaleString("en-IE")}`
+            : `${expertPlan.priceHuf.toLocaleString("hu-HU")} Ft`}{" "}
+          · {t.enterpriseInquiryLead}
+        </p>
+        <p className="home-plans" style={{ marginTop: 16 }}>
+          <a className="btn primary" href={enterpriseInquiryMailto({ locale })}>
+            {t.enterpriseCta}
+          </a>
+          <a className="btn" href={pricingHref}>
+            {t.homePricingCta}
+          </a>
+        </p>
+        <SiteFooter inline />
+      </div>
+    );
+  }
+
   if (portal) {
     return (
       <div className="wrap">
@@ -639,8 +666,8 @@ export function BillingCheckout() {
           <a className="btn primary" href={withViewPrefs("/?tier=pro&interval=yearly")}>
             {t.homePickPro}
           </a>
-          <a className="btn" href={withViewPrefs("/?tier=expert&interval=yearly")}>
-            {t.homePickExpert}
+          <a className="btn" href={enterpriseInquiryMailto({ locale })}>
+            {t.homePickExpert} — {t.enterpriseCta}
           </a>
         </div>
         <p className="muted" style={{ marginTop: 20 }}>

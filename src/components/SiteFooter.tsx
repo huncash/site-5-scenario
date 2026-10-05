@@ -18,6 +18,7 @@ import {
   type HomeMode,
 } from "@/lib/siteSurface";
 import { supportPublicOrigin } from "@/lib/support";
+import { schoolPublicHref } from "@/lib/school";
 
 const FOOTER_HOST = "[data-site-footer-host]";
 const DASH_SURFACE = '[data-site-surface="dashboard"]';
@@ -73,6 +74,7 @@ type FooterLink = {
   href?: string;
   label: string;
   soon?: boolean;
+  quiet?: boolean;
   /** Support → tippek/GYIK: egy sor, kattintásra nyílik. */
   nest?: Array<{ href: string; label: string }>;
 };
@@ -134,7 +136,9 @@ function FooterCol({
                 <span className="site-footer-soon-mark"> · {soonTitle}</span>
               </span>
             ) : (
-              <a href={l.href}>{l.label}</a>
+              <a href={l.href} className={l.quiet ? "site-footer-quiet" : undefined}>
+                {l.label}
+              </a>
             )}
           </li>
         ))}
@@ -166,8 +170,12 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const productLinks = [
     { href: scenariosHref, label: t("footer.scenarios") },
     { href: typesHref, label: t("footer.types") },
-    { href: pricingHref, label: t("footer.pricing") },
-    { href: billHome, label: t("footer.bill") },
+    ...(kind === "school"
+      ? []
+      : [
+          { href: pricingHref, label: t("footer.pricing") },
+          { href: billHome, label: t("footer.bill") },
+        ]),
   ];
   const aboutLinks: FooterLink[] = [
     {
@@ -180,6 +188,7 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
     { href: aboutHref, label: t("footer.aboutUs") },
     { href: aszfHref, label: t("footer.terms") },
     { href: gdprHref, label: t("footer.gdpr") },
+    { href: schoolPublicHref(loc.hostname, loc.pathname), label: t("footer.school"), quiet: true },
   ];
 
   return (

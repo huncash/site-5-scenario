@@ -35,7 +35,7 @@ import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { useI18n } from "@/i18n";
 import { demoSerialFromId } from "@/lib/coreCases";
 import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
-import { publicScenarioKindGroups } from "@/lib/scenarioCatalog";
+import { isStartableScenarioKind, publicScenarioKindGroups, scenarioKindOf } from "@/lib/scenarioCatalog";
 import {
   LAST_PROFILE_KEY,
   dedupeAllDemoProfiles,
@@ -43,6 +43,8 @@ import {
   enterDemoSegment,
 } from "@/lib/demoSession";
 import { GuestLoginCard } from "@/components/access/GuestLoginCard";
+import { isSchoolHost, isSchoolVerified, markSchoolSession } from "@/lib/school";
+import { applySchoolCampusLicense } from "@/lib/schoolLicense";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -92,12 +94,17 @@ function LoginPage() {
   }, [state]);
 
   const handleDemoLogin = async (segmentId: DemoSegmentId) => {
+    if (!isStartableScenarioKind(scenarioKindOf(segmentId))) return;
     if (demoInFlightRef.current) return;
     demoInFlightRef.current = true;
     setBusy(true);
     setDemoBusyId(segmentId);
     setError(null);
     try {
+      if (isSchoolHost()) {
+        markSchoolSession();
+        if (isSchoolVerified()) applySchoolCampusLicense();
+      }
       await enterDemoSegment(segmentId, { unlockById, createProfile });
       try {
         window.localStorage.setItem("szcenario_home_mode", "dashboard");
@@ -446,6 +453,8 @@ function LoginPage() {
                     variant="login"
                     disabled={busy}
                     busyId={demoBusyId}
+                    defaultOpenKinds={["economic"]}
+                    allowedKinds={isSchoolHost() ? ["economic"] : undefined}
                     onSelect={(id) => void handleDemoLogin(id)}
                   />
                 </div>

@@ -16,6 +16,7 @@ import {
   Users,
   Wallet,
   Keyboard,
+  Monitor,
 } from "lucide-react";
 
 import {
@@ -42,6 +43,7 @@ import { toast } from "sonner";
 import { isDemoProfileName, writeScenarioDoorStep } from "@/lib/demoSession";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { DesktopAppPanel } from "@/components/desktop/DesktopAppPanel";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +85,7 @@ export function ProfileHeader({
   const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
   const [kbOpen, setKbOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [desktopOpen, setDesktopOpen] = useState(false);
   const [omni, setOmni] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
   const unlocked = state.status === "unlocked" ? state : null;
@@ -450,6 +453,10 @@ export function ProfileHeader({
                         <QrCode className="mr-2 h-4 w-4" />
                         {t("chrome.addDevice")}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setDesktopOpen(true)}>
+                        <Monitor className="mr-2 h-4 w-4" />
+                        {t("chrome.desktopApp")}
+                      </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
@@ -603,6 +610,14 @@ export function ProfileHeader({
                 </div>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={desktopOpen} onOpenChange={setDesktopOpen}>
+          <DialogContent className="max-w-3xl border-border bg-card text-foreground shadow-2xl">
+            <DialogTitle className="text-lg font-semibold text-foreground">{t("chrome.desktopApp")}</DialogTitle>
+            <DialogDescription className="sr-only">{t("desktop.lead")}</DialogDescription>
+            <DesktopAppPanel compact />
           </DialogContent>
         </Dialog>
       </div>

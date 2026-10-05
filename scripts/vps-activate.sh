@@ -111,7 +111,7 @@ point_nginx_5100() {
   echo "  sudo sed -i 's/127\\.0\\.0\\.1:4100/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
   echo "  sudo sed -i 's/127\\.0\\.0\\.1:5110/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
   echo "  sudo nginx -t && sudo systemctl reload nginx"
-  echo "  curl -sS -H 'Host: bill.szcenario.hu' http://127.0.0.1:5100/ | head"
+  echo "  curl -sS -H 'Host: school.szcenario.hu' http://127.0.0.1:5100/ | head"
   return 0
 }
 
@@ -214,6 +214,9 @@ if ! curl -fsS --max-time 8 "http://127.0.0.1:${PORT}/version.json" | tee /tmp/v
   exit 1
 fi
 grep -q "$SHA" /tmp/version.json
+
+echo ">> school Host probe"
+curl -sS -D- --max-time 8 -H "Host: school.szcenario.hu" "http://127.0.0.1:${PORT}/" | head -n 16 || true
 
 echo ">> nginx → 5100"
 point_nginx_5100

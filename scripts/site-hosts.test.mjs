@@ -14,5 +14,9 @@ describe("site-hosts", () => {
     expect(resolveSiteRoot("support", "/var/www/szcenario/.output/public")).toBe(
       "/var/www/szcenario/.output/public/sites/support",
     );
+    expect(resolveSiteKey("school.szcenario.hu")).toBe("school");
+    expect(resolveSiteRoot("school", "/var/www/szcenario/.output/public")).toBe(
+      "/var/www/szcenario/.output/public",
+    );
   });
 });

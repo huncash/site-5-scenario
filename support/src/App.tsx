@@ -4,6 +4,7 @@ import { SupportSurface } from "@/components/SupportSurface";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
 import { LangSwitch } from "@/i18n/miniLocale";
+import { enterpriseInquiryMailto } from "@/lib/enterpriseSchedule";
 import { lessonBySlug } from "./content";
 import {
   localizeLesson,
@@ -247,6 +248,17 @@ function PricingPage({ locale }: { locale: Locale }) {
                 <li key={line}>{line}</li>
               ))}
             </ul>
+            {tier.id === "enterprise" ? (
+              <p style={{ margin: "10px 0 0" }}>
+                <span className="note">{t.pricingEnterpriseBadge}</span>
+                <span className="note" style={{ display: "block", marginTop: 6 }}>
+                  {t.pricingEnterpriseInquiryLead}
+                </span>
+                <a className="ticket-cta" href={enterpriseInquiryMailto({ locale })} style={{ display: "inline-block", marginTop: 8 }}>
+                  {t.pricingEnterpriseCta}
+                </a>
+              </p>
+            ) : null}
           </article>
         ))}
       </div>

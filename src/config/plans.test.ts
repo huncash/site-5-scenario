@@ -66,6 +66,8 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(BASE_SCENARIO_SLOTS.starter).toBe(3);
     expect(BASE_SCENARIO_SLOTS.pro).toBe(6);
     expect(BASE_SCENARIO_SLOTS.expert).toBe(20);
+    expect(PLANS_CONFIG.campus.quotas).toMatchObject({ cases: 1, slotsPerCase: 2 });
+    expect(totalSlots(PLANS_CONFIG.campus)).toBe(2);
     expect(totalSlots(PLANS_CONFIG.pro)).toBe(6);
   });
 
@@ -82,8 +84,8 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(starter[1]).toBe("3 aktív slot");
     expect(pro[0]).toBe("2 párhuzamos aktív case");
     expect(pro[1]).toBe("3 aktív slot case-enként");
-    expect(ent[0]).toBe("5 aktív case");
-    expect(ent[1]).toBe("4 aktív slot case-enként");
+    expect(ent[0]).toBe("5 Aktív Case");
+    expect(ent[1]).toBe("4 Aktív Slot / Case");
     expect(pro.some((h) => /CAMT\.053|bankkivonat/i.test(h))).toBe(true);
     expect(ent.some((h) => /könyvelési|bankkivonat/i.test(h))).toBe(true);
     const slogan = planSlogan(PLANS_CONFIG.starter, "hu");
@@ -93,6 +95,11 @@ describe("PLANS_CONFIG perpetual model", () => {
     const cases = rows.find((r) => r.id === "cases");
     expect(cases?.cells.pro).toBe(formatQuota(2));
     expect(cases?.cells.expert).toBe("5");
+    const desktop = rows.find((r) => r.id === "desktop");
+    expect(desktop?.feature).toBe("Asztali alkalmazás");
+    expect(desktop?.cells.pro).toMatch(/Pro Desktop/);
+    expect(desktop?.cells.expert).toMatch(/Bővítő modul \/ Előkészítés alatt/);
+    expect(desktop?.cells.expert).not.toMatch(/szcenárió/i);
   });
 
   it("gates permissions by role and version window", () => {

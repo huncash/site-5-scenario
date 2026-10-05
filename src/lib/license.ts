@@ -7,6 +7,7 @@ import {
   revokeAllReferralCredits,
   writeReferralCode,
 } from "@/lib/referral";
+import { isSchoolHost } from "@/lib/school";
 import {
   addPurchasedPack,
   emptySlotLedger,
@@ -44,6 +45,17 @@ export type LicenseEntitlement = {
 
 const KEY = "szcenario_license_v1";
 const LEDGER_KEY = "szcenario_slot_ledger_v1";
+export const LICENSE_CHANGE_EVENT = "szcenario:license";
+
+function emitLicenseChange(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(LICENSE_CHANGE_EVENT));
+}
+
+function clampSchoolEntitlement(e: LicenseEntitlement): LicenseEntitlement {
+  if (!isSchoolHost()) return e;
+  return { ...e, tier: "campus", slotPacks: [], permanentSlots: 0 };
+}
 
 export function readLicense(): LicenseEntitlement | null {
   try {
@@ -51,16 +63,18 @@ export function readLicense(): LicenseEntitlement | null {
     if (!raw) return null;
     const t = JSON.parse(raw) as LicenseEntitlement;
     if (!t?.token) return null;
-    return t;
+    return clampSchoolEntitlement(t);
   } catch {
     return null;
   }
 }
 
 export function writeLicense(e: LicenseEntitlement): void {
-  localStorage.setItem(KEY, JSON.stringify(e));
-  if (e.referralCode) writeReferralCode(e.referralCode);
-  syncLedgerFromLicense(e);
+  const next = clampSchoolEntitlement(e);
+  localStorage.setItem(KEY, JSON.stringify(next));
+  if (next.referralCode) writeReferralCode(next.referralCode);
+  syncLedgerFromLicense(next);
+  emitLicenseChange();
 }
 
 export function clearLicense(): void {
@@ -69,6 +83,7 @@ export function clearLicense(): void {
   } catch {
     // ignore
   }
+  emitLicenseChange();
 }
 
 export function hasWorkspaceAccess(): boolean {
@@ -89,6 +104,7 @@ export function isAppWorkspaceHost(): boolean {
 }
 
 export function readSlotLedger(): SlotLedger {
+  if (isSchoolHost()) return emptySlotLedger("campus");
   try {
     const raw = localStorage.getItem(LEDGER_KEY);
     if (raw) {
@@ -104,7 +120,8 @@ export function readSlotLedger(): SlotLedger {
 }
 
 export function writeSlotLedger(ledger: SlotLedger): void {
-  localStorage.setItem(LEDGER_KEY, JSON.stringify(ledger));
+  const next = isSchoolHost() ? emptySlotLedger("campus") : ledger;
+  localStorage.setItem(LEDGER_KEY, JSON.stringify(next));
   window.dispatchEvent(new Event("szcenario:slot_ledger"));
 }
 
@@ -192,6 +209,7 @@ export async function verifyBillLicense(token: string): Promise<LicenseEntitleme
 }
 
 export function recordLocalSlotPackPurchase(packId: SlotPackId): SlotLedger {
+  if (isSchoolHost()) return readSlotLedger();
   const ledger = addPurchasedPack(readSlotLedger(), packId, 1);
   writeSlotLedger(ledger);
   const lic = readLicense();

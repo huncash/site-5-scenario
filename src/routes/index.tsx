@@ -5,6 +5,8 @@ import { AppLicenseGate } from "@/components/AppLicenseGate";
 import { ScenarioDoor } from "@/components/ScenarioDoor";
 import { useI18n } from "@/i18n";
 import { hasWorkspaceAccess, isAppWorkspaceHost, isLocalDevHost } from "@/lib/license";
+import { isSchoolHost, isSchoolVerified } from "@/lib/school";
+import { SchoolSurface } from "@/components/school/SchoolSurface";
 import { useVault } from "@/lib/vault";
 
 const FinanceDashboard = lazy(() =>
@@ -45,7 +47,8 @@ function VaultGate() {
   const [homeMode, setHomeMode] = useState<HomeMode>(() => readHomeMode());
   const [licenseTick, setLicenseTick] = useState(0);
   const appHost = typeof window !== "undefined" && isAppWorkspaceHost();
-  const licensed = hasWorkspaceAccess() || isLocalDevHost();
+  const schoolHost = typeof window !== "undefined" && isSchoolHost();
+  const licensed = hasWorkspaceAccess() || (isLocalDevHost() && !schoolHost);
 
   useEffect(() => {
     setHomeMode(readHomeMode());
@@ -60,6 +63,22 @@ function VaultGate() {
   }, []);
 
   if (state.status === "loading") return <Loading />;
+
+  if (schoolHost) {
+    if (homeMode === "dashboard" && state.status === "unlocked" && isSchoolVerified()) {
+      return (
+        <Suspense fallback={<Loading />}>
+          <FinanceDashboard
+            key={`${locale}:${fxRate}`}
+            vaultKey={state.key}
+            profileId={state.profile.id}
+            profileName={state.profile.name}
+          />
+        </Suspense>
+      );
+    }
+    return <SchoolSurface />;
+  }
 
   const dashboard =
     state.status === "unlocked" ? (

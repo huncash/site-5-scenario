@@ -1,6 +1,6 @@
 /**
  * Lightweight static origin for .output/public (+ aldomain site rootok).
- * Host header alapján: support/docs/blog → sites/<key>, egyébként main.
+ * Host header alapján: support/docs/blog → sites/<key>, school/app → main root.
  * SPA fallback: ismeretlen HTML útvonal → az adott site index.html-je (pl. /ticket).
  */
 import { createServer, request as httpRequest } from "node:http";

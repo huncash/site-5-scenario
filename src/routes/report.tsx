@@ -13,6 +13,7 @@ import { useVault } from "@/lib/vault";
 import { decryptJSON } from "@/lib/crypto";
 import { categoryLabel, formatMoney, type Transaction } from "@/lib/finance";
 import { computeQuarterLockedVat } from "@/lib/financeCore";
+import { isSchoolHost, SCHOOL_WATERMARK } from "@/lib/school";
 
 export const Route = createFileRoute("/report")({
   component: ReportPage,
@@ -147,6 +148,11 @@ function ReportPage() {
             Nyomtatás / PDF mentése
           </Button>
         </div>
+        {isSchoolHost() ? (
+          <p className="school-print-stamp mt-4 rounded-md border border-border/70 bg-background px-3 py-2 text-sm font-semibold tracking-wide text-foreground">
+            {SCHOOL_WATERMARK}
+          </p>
+        ) : null}
 
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <Card className="print-card">

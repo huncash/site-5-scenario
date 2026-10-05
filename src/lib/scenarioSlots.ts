@@ -3,6 +3,7 @@
 import { MAX_REFERRAL_GIFT_SLOTS, PLANS_CONFIG, totalSlots, yearlyPriceHuf } from "@/config/plans";
 import { slotPackPriceFromUnit } from "@/content/pricing/addons";
 import type { BillingInterval } from "@/lib/funnelOrder";
+import { isSchoolHost } from "@/lib/school";
 
 export type PublicTierId = "starter" | "pro" | "expert";
 export type SlotTierId = PublicTierId | "campus" | "local";
@@ -75,7 +76,9 @@ export function slotPackNetForInterval(oneTimeNetHuf: number, _interval: Billing
 
 /** Campus / zárt oktatási keret: bővítő mátrix ki van zárva. */
 export function slotExpansionAllowed(tier: SlotTierId): boolean {
-  return tier !== "campus";
+  if (tier === "campus") return false;
+  if (typeof window !== "undefined" && isSchoolHost()) return false;
+  return true;
 }
 
 export function publicSlotPacksForTier(tier: SlotTierId): SlotPack[] {

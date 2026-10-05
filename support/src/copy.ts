@@ -71,6 +71,10 @@ const hu = {
   pricingLocalTitle: "Lokális bankkivonat-import & Edge (#local-import)",
   pricingLocalBody:
     "A bankkivonat- és tranzakcióimport (CAMT.053, CSV, XML) 100%-ban a saját eszközödön fut: az adat nem kötelezően felhőbe kerül, a számítás adat-szuverén. A Szenzoros / Edge adatgyűjtő modul helyi / edge források bekötésére való — szintén off-grid fókusszal, nem központi telemetriával. A megvásárolt verzió hardverhez kötött helyi licenc: örökös fallback jog a megvásárolt motorverzióra.",
+  pricingEnterpriseBadge: "Későbbi időpontban érhető el",
+  pricingEnterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
+  pricingEnterpriseInquiryLead:
+    "Az Enterprise csomag előjegyzésre érhető el. Az ár és a kapacitás (Aktív Case / Aktív Slot) tájékoztató értékhorgony. Nincs önkiszolgáló checkout.",
 };
 
 const en: typeof hu = {
@@ -132,6 +136,10 @@ const en: typeof hu = {
   pricingLocalTitle: "Local bank-statement import & Edge (#local-import)",
   pricingLocalBody:
     "Bank-statement and transaction import (CAMT.053, CSV, XML) runs 100% on your device: data is not required to leave for a cloud, computation stays data-sovereign. The Sensor / Edge collector module connects local/edge sources — off-grid focused, not central telemetry. The purchased version is a device-bound local license with a perpetual fallback right to that engine version.",
+  pricingEnterpriseBadge: "Available at a later date",
+  pricingEnterpriseCta: "Contact / request a quote",
+  pricingEnterpriseInquiryLead:
+    "The Enterprise plan is available on waitlist. Price and capacity (Active Case / Active Slot) stay visible as a value anchor. There is no self-serve checkout.",
 };
 
 const TIPS_EN = [
@@ -303,10 +311,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€399 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €299 (−25%) · Y3 €239 (−40%) · Y4+ free updates for life",
         detail:
-          "Pro adds a second parallel Active Case and automated local bank-statement import (CAMT.053, CSV, XML) — see #local-import. Capacity is still concurrent-active only; extras are perpetual add-ons.",
+          "Pro adds a second parallel Active Case and automated local bank-statement import (CAMT.053, CSV, XML) — see #local-import. Capacity is still concurrent-active only; extras are perpetual add-ons. Pro Desktop (Windows / macOS) is the packed desktop client for an active Pro license.",
         bullets: [
           "2 Active Cases · 3 Active Slots each · 1 Seat + 5 Guests",
           "Automated bank statement & transaction import (CAMT.053, CSV, XML)",
+          "Pro Desktop App · Windows / macOS (active Pro license)",
           "Extra Active Case add-on: +€49 perpetual",
         ],
       },
@@ -316,10 +325,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€799 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ free updates for life",
         detail:
-          "Enterprise covers team seats, multiple parallel Active Cases, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control.",
+          "Enterprise covers team seats, multiple parallel Active Cases, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control. Enterprise Desktop is an add-on module in preparation and does not block or delay the web launch. The plan is available at a later date — no self-serve checkout; request a quote.",
         bullets: [
           "5 Active Cases · 4 Active Slots each · 3 Seats + 20 Guests",
           "Automated accounting/bank-statement import + Sensor / Edge data feed",
+          "Enterprise Desktop: add-on module / in preparation — does not block the web launch",
           "Add-ons: Case · Slot · Seat · Edge (perpetual modules)",
         ],
       },
@@ -345,10 +355,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "399 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 299 000 Ft (−25%) · 3. év 239 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "A Pro második párhuzamos Aktív Case-t és automatizált, helyi bankkivonat-importot ad (CAMT.053, CSV, XML) — lásd #local-import. A keret továbbra is az egyidejűleg aktív munkaterületekre vonatkozik; a bővítők örökös modulok.",
+        "A Pro második párhuzamos Aktív Case-t és automatizált, helyi bankkivonat-importot ad (CAMT.053, CSV, XML) — lásd #local-import. A keret továbbra is az egyidejűleg aktív munkaterületekre vonatkozik; a bővítők örökös modulok. A Pro Desktop (Windows / macOS) az aktív Pro licenchez tartozó csomagolt asztali kliens.",
       bullets: [
         "2 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 5 Guest",
         "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)",
+        "Pro Desktop App · Windows / macOS (aktív Pro licenc)",
         "Extra Aktív Case modul: +49 000 Ft örökös",
       ],
     },
@@ -358,10 +369,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "799 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "Az Enterprise csapat-seateket, több párhuzamos Case-t, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad.",
+        "Az Enterprise csapat-seateket, több párhuzamos Aktív Case-t, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad. Az Enterprise Desktop bővítő modul előkészítés alatt van; a webes Case/Slot indítást nem blokkolja és nem késlelteti. A csomag későbbi időpontban érhető el — nincs önkiszolgáló checkout, ajánlatkérés kell.",
       bullets: [
         "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
         "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",
+        "Enterprise Desktop: Bővítő modul / Előkészítés alatt — a webes indítást nem érinti",
         "Bővítők: Case · Slot · Seat · Edge (örökös modulok)",
       ],
     },

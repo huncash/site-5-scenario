@@ -3,7 +3,7 @@ export const MAIN_ORIGIN_PROD = "https://szcenario.hu";
 export const HOME_MODE_KEY = "szcenario_home_mode";
 export const HOME_MODE_EVENT = "szcenario:home_mode";
 
-export type SiteHostKind = "main" | "bill" | "support" | "docs" | "blog" | "app";
+export type SiteHostKind = "main" | "bill" | "support" | "docs" | "blog" | "app" | "school";
 export type HomeMode = "door" | "dashboard";
 
 const WORKSPACE_PREFIXES = [
@@ -31,6 +31,7 @@ export function resolveSiteHost(hostname: string, _port = "", pathname = ""): Si
   const h = hostname.toLowerCase();
   const path = normalizePath(pathname);
   if (h === "app.szcenario.hu" || h.startsWith("app.")) return "app";
+  if (h === "school.szcenario.hu" || h.startsWith("school.") || isPathPrefix(path, "/school")) return "school";
   if (h === "bill.szcenario.hu" || h.startsWith("bill.") || isPathPrefix(path, "/bill")) return "bill";
   if (h === "support.szcenario.hu" || h.startsWith("support.") || isPathPrefix(path, "/support")) return "support";
   if (h === "docs.szcenario.hu" || h.startsWith("docs.") || isPathPrefix(path, "/docs")) return "docs";
@@ -60,7 +61,7 @@ export function isWorkspacePath(pathname: string): boolean {
 
 export function isPublicMarketingPath(pathname: string): boolean {
   const path = normalizePath(pathname);
-  if (path === "/" || path === "/about" || path === "/gdpr" || path === "/aszf" || path === "/login") return true;
+  if (path === "/" || path === "/about" || path === "/gdpr" || path === "/aszf" || path === "/login" || path === "/school") return true;
   if (path.startsWith("/f/")) return true;
   return path === "/bcp" || path === "/oktatas" || path === "/strategia" || path === "/kozosseg" || path === "/makro";
 }
@@ -75,6 +76,11 @@ export function shouldShowSiteFooter(opts: {
   if (opts.embed) return false;
   const kind = resolveSiteHost(opts.hostname, opts.port, opts.pathname);
   if (kind === "app") return false;
+  if (kind === "school") {
+    if (isWorkspacePath(opts.pathname)) return false;
+    if (normalizePath(opts.pathname) === "/" && (opts.homeMode ?? "door") === "dashboard") return false;
+    return true;
+  }
   if (kind === "bill" || kind === "support" || kind === "docs" || kind === "blog") {
     return !normalizePath(opts.pathname).startsWith("/embed");
   }
@@ -111,7 +117,7 @@ export const SITE_KIND_DATA_ATTR = "data-site-kind";
 
 /** Head boot: hostname + pathname → data-site-kind, port nélkül. */
 export const SITE_KIND_BOOT_SCRIPT =
-  '(function(){try{var h=location.hostname.toLowerCase();var p=(location.pathname||"/").replace(/\\/+$/,"")||"/";var k="main";if(h==="app.szcenario.hu"||h.indexOf("app.")===0)k="app";else if(h==="bill.szcenario.hu"||h.indexOf("bill.")===0||p==="/bill"||p.indexOf("/bill/")===0)k="bill";else if(h==="support.szcenario.hu"||h.indexOf("support.")===0||p==="/support"||p.indexOf("/support/")===0)k="support";else if(h==="docs.szcenario.hu"||h.indexOf("docs.")===0||p==="/docs"||p.indexOf("/docs/")===0)k="docs";else if(h==="blog.szcenario.hu"||h.indexOf("blog.")===0||p==="/blog"||p.indexOf("/blog/")===0)k="blog";document.documentElement.setAttribute("data-site-kind",k);}catch(e){}})();';
+  '(function(){try{var h=location.hostname.toLowerCase();var p=(location.pathname||"/").replace(/\\/+$/,"")||"/";var k="main";if(h==="app.szcenario.hu"||h.indexOf("app.")===0)k="app";else if(h==="school.szcenario.hu"||h.indexOf("school.")===0||p==="/school"||p.indexOf("/school/")===0)k="school";else if(h==="bill.szcenario.hu"||h.indexOf("bill.")===0||p==="/bill"||p.indexOf("/bill/")===0)k="bill";else if(h==="support.szcenario.hu"||h.indexOf("support.")===0||p==="/support"||p.indexOf("/support/")===0)k="support";else if(h==="docs.szcenario.hu"||h.indexOf("docs.")===0||p==="/docs"||p.indexOf("/docs/")===0)k="docs";else if(h==="blog.szcenario.hu"||h.indexOf("blog.")===0||p==="/blog"||p.indexOf("/blog/")===0)k="blog";document.documentElement.setAttribute("data-site-kind",k);}catch(e){}})();';
 
 export function readBootSiteKind(): SiteHostKind | null {
   if (typeof document === "undefined") return null;
@@ -122,7 +128,8 @@ export function readBootSiteKind(): SiteHostKind | null {
     raw === "support" ||
     raw === "docs" ||
     raw === "blog" ||
-    raw === "app"
+    raw === "app" ||
+    raw === "school"
   ) {
     return raw;
   }

@@ -1745,6 +1745,11 @@ html[data-accessibility="active"] body {
   color: var(--text-main, var(--foreground));
   text-decoration: underline;
 }
+.site-footer-quiet {
+  font-size: 0.75rem !important;
+  opacity: 0.7;
+  letter-spacing: 0.01em;
+}
 .site-footer-bottom {
   border-top: 1px solid var(--card-border, var(--border));
   padding: 0.7rem 0 1.15rem;
@@ -2267,6 +2272,36 @@ html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
   }
 }
 
+.school-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  overflow: hidden;
+}
+.school-watermark-grid {
+  position: absolute;
+  inset: -20%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rem 2rem;
+  transform: rotate(-28deg);
+}
+.school-watermark-mark {
+  display: block;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--foreground, #0f172a) 18%, transparent);
+  white-space: nowrap;
+  user-select: none;
+}
+.school-print-stamp {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 @media print {
   :root {
     color-scheme: light;
@@ -2289,5 +2324,19 @@ html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
     background: white !important;
     color: black !important;
     border: 1px solid #ddd !important;
+  }
+  .school-watermark {
+    position: fixed;
+    inset: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .school-watermark-mark {
+    color: rgba(15, 23, 42, 0.22) !important;
+  }
+  .school-print-stamp {
+    color: black !important;
+    background: white !important;
+    border: 1px solid #111 !important;
   }
 }

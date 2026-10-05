@@ -24,6 +24,8 @@ import { LeanCommandPalette } from "@/components/LeanCommandPalette";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PrivacyBanner } from "@/components/legal/PrivacyBanner";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SchoolWatermark } from "@/components/school/SchoolWatermark";
+import { SchoolSurface } from "@/components/school/SchoolSurface";
 import { LocaleProvider, useI18n } from "@/i18n";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
 import {
@@ -33,6 +35,7 @@ import {
   SITE_KIND_BOOT_SCRIPT,
   type SiteHostKind,
 } from "@/lib/siteSurface";
+import { isSchoolHost, isSchoolVerified, SCHOOL_PROOF_EVENT } from "@/lib/school";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import { VIEW_PREFS_BOOT_SCRIPT } from "@/lib/viewPrefs";
 
@@ -225,9 +228,22 @@ function useSiteKind(): { kind: SiteHostKind; ready: boolean } {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const { kind: siteKind, ready: siteReady } = useSiteKind();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isBill = siteKind === "bill";
   const isSupport = siteKind === "support";
   const dedicated = isBill || isSupport;
+  const [schoolOk, setSchoolOk] = useState(() => typeof window === "undefined" || !isSchoolHost() || isSchoolVerified());
+
+  useEffect(() => {
+    const sync = () => setSchoolOk(!isSchoolHost() || isSchoolVerified());
+    sync();
+    window.addEventListener("storage", sync);
+    window.addEventListener(SCHOOL_PROOF_EVENT, sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener(SCHOOL_PROOF_EVENT, sync);
+    };
+  }, [siteKind, pathname]);
 
   useEffect(() => {
     void import("@/lib/campaignSession").then((m) => m.captureCampaignFromLocation({ doorStep: false }));
@@ -262,10 +278,13 @@ function RootComponent() {
                   <BillTestSurface />
                 ) : isSupport ? (
                   <SupportSurface />
+                ) : !schoolOk ? (
+                  <SchoolSurface />
                 ) : (
                   <Outlet />
                 )}
                 {dedicated ? null : <RootFooter />}
+                <SchoolWatermark />
                 {dedicated ? null : <PrivacyBanner />}
                 {dedicated ? null : <LeanCommandPalette />}
                 {dedicated ? null : <HoverCoachTooltip />}

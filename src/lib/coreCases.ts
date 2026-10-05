@@ -123,6 +123,10 @@ export type DemoCatalogKindGroup = {
   industries: DemoCatalogIndustryBucket[];
 };
 
+export function scenarioKindOf(id: DemoSegmentId): DemoCatalogKind {
+  return catalogPlacement(id).kind;
+}
+
 function catalogPlacement(id: DemoSegmentId): { kind: DemoCatalogKind; industry: DemoCatalogIndustry } {
   if (isEducationSegment(id)) return { kind: "education", industry: "education" };
   if (isResilienceSegment(id)) {

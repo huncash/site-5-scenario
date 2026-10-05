@@ -4,6 +4,7 @@
  */
 import {
   groupPublicDemoSegments,
+  scenarioKindOf,
   type DemoCatalogIndustry,
   type DemoCatalogKind,
   type DemoCatalogKindGroup,
@@ -11,6 +12,14 @@ import {
 import type { MessageKey } from "@/i18n";
 
 export type { DemoCatalogIndustry, DemoCatalogKind, DemoCatalogKindGroup };
+export { scenarioKindOf };
+
+/** Csak ez a motor indulhat a választóból / vezérlőpultról. */
+export const CORE_SCENARIO_KIND: DemoCatalogKind = "economic";
+
+export function isStartableScenarioKind(kind: string): boolean {
+  return kind === CORE_SCENARIO_KIND;
+}
 
 /** Elérhető fő fajták (van legalább egy nyilvános demó). */
 export const AVAILABLE_SCENARIO_KINDS: DemoCatalogKind[] = [

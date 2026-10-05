@@ -12,6 +12,7 @@ import {
   type PublicPlanId,
   type QuotaCount,
 } from "@/config/plans";
+import { COMPARE_ADDON_MARK } from "@/lib/desktopApp";
 import type { Locale } from "@/i18n/locale";
 
 export type CompareCell = string;
@@ -163,14 +164,14 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
   if (plan.id === "expert") {
     return L
       ? [
-          "5 active cases",
-          "4 active slots each",
+          "5 Active Cases",
+          "4 Active Slots / Case",
           "3 editors + 20 guests",
           "Automated accounting / bank-statement import",
         ]
       : [
-          "5 aktív case",
-          "4 aktív slot case-enként",
+          "5 Aktív Case",
+          "4 Aktív Slot / Case",
           "3 szerkesztő + 20 vendég",
           "Automatizált könyvelési/bankkivonat import",
         ];
@@ -250,6 +251,15 @@ export function buildPricingCompareRows(locale: Locale = "hu"): PricingCompareRo
         starter: bankCompare(byId.starter.features.bankImport, locale),
         pro: bankCompare(byId.pro.features.bankImport, locale),
         expert: bankCompare(byId.expert.features.bankImport, locale),
+      },
+    },
+    {
+      id: "desktop",
+      feature: L ? "Desktop App" : "Asztali alkalmazás",
+      cells: {
+        starter: "–",
+        pro: L ? "Pro Desktop · Windows / macOS" : "Pro Desktop · Windows / macOS",
+        expert: `${COMPARE_ADDON_MARK}${L ? "Add-on module / In preparation" : "Bővítő modul / Előkészítés alatt"}`,
       },
     },
     {

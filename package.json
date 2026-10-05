@@ -28,6 +28,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest",
     "test:run": "vitest run",
+    "dns:school": "node scripts/cloudflare-school-dns.mjs",
     "desktop:dev": "npx --yes @tauri-apps/cli@2 dev --config desktop/src-tauri/tauri.conf.json",
     "desktop:build": "npx --yes @tauri-apps/cli@2 build --config desktop/src-tauri/tauri.conf.json"
   },

@@ -5,8 +5,11 @@ import { PRICING_ALIGN_GRID_FIXED } from "@/components/home/pricingLayout";
 import { buildPricingCompareRows, loyaltyBaseRuleSentence } from "@/config/planCopy";
 import { PLANS_CONFIG } from "@/config/plans";
 import { isCompareAbsent, TIER_CORE, type TierId } from "@/content/pricing/tiers";
-import { supportPricingHref } from "@/lib/support";
+import { Badge } from "@/components/ui/badge";
+import { COMPARE_ADDON_MARK } from "@/lib/desktopApp";
+import { isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import { useI18n, type MessageKey } from "@/i18n";
+import { supportPricingHref } from "@/lib/support";
 import { cn } from "@/lib/utils";
 
 const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
@@ -17,6 +20,13 @@ const TIER_LABEL_KEY: Record<TierId, MessageKey> = {
 
 function CompareValue({ value }: { value: string }) {
   const { t } = useI18n();
+  if (value.startsWith(COMPARE_ADDON_MARK)) {
+    return (
+      <Badge variant="outline" className="text-[10px] font-medium">
+        {value.slice(COMPARE_ADDON_MARK.length)}
+      </Badge>
+    );
+  }
   if (isCompareAbsent(value)) {
     return (
       <span className="text-muted-foreground" title={t("pricing.notInTier")}>
@@ -59,6 +69,13 @@ export function PricingCompareTable() {
               {t(TIER_LABEL_KEY[tier.id])}
               {PLANS_CONFIG[tier.id].badge === "recommended" ? (
                 <span className="ml-1.5 text-[10px] font-medium text-amber-200">{t("pricing.recommended")}</span>
+              ) : null}
+              {isEnterprisePlanId(tier.id) ? (
+                <span className="ml-1.5 inline-flex">
+                  <Badge variant="outline" className="text-[10px] font-medium">
+                    {t("pricing.enterpriseBadge")}
+                  </Badge>
+                </span>
               ) : null}
             </div>
           ))}

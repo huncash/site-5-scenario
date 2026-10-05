@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { PlayCircle } from "lucide-react";
 
+import { AddonModuleDialog } from "@/components/cases/AddonModuleDialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { demoSerialFromId, type DemoSegmentId } from "@/lib/demoCatalog";
 import { demoCaseSlotCount } from "@/lib/demoCaseSlots";
 import type { DemoCatalogIndustry, DemoCatalogKind } from "@/lib/coreCases";
 import {
+  isStartableScenarioKind,
   publicScenarioKindGroups,
   SCENARIO_INDUSTRY_TITLE_KEY,
   SCENARIO_KIND_ACCENT,
@@ -23,8 +25,10 @@ type Props = {
   busyId?: DemoSegmentId | null;
   disabled?: boolean;
   onSelect: (id: DemoSegmentId) => void;
-  /** Nyitott kategóriák; alapból mind. */
+  /** Nyitott kategóriák; alapból csak a Gazdasági Szcenárió Motor. */
   defaultOpenKinds?: DemoCatalogKind[];
+  /** Csak ezek a kind-ek; school: kizárólag economic. */
+  allowedKinds?: DemoCatalogKind[];
   className?: string;
 };
 
@@ -34,12 +38,18 @@ export function HierarchicalCaseChooser({
   disabled = false,
   onSelect,
   defaultOpenKinds,
+  allowedKinds,
   className,
 }: Props) {
   const { t, locale } = useI18n();
-  const groups = useMemo(() => publicScenarioKindGroups(), []);
-  const openDefault = defaultOpenKinds ?? groups.map((g) => g.kind);
+  const groups = useMemo(() => {
+    const all = publicScenarioKindGroups();
+    if (!allowedKinds?.length) return all;
+    return all.filter((g) => allowedKinds.includes(g.kind));
+  }, [allowedKinds]);
+  const openDefault = defaultOpenKinds ?? ["economic"];
   const [industryByKind, setIndustryByKind] = useState<Partial<Record<DemoCatalogKind, DemoCatalogIndustry | "all">>>({});
+  const [addonTitle, setAddonTitle] = useState<string | null>(null);
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -49,6 +59,8 @@ export function HierarchicalCaseChooser({
           const buckets =
             filter === "all" ? group.industries : group.industries.filter((b) => b.industry === filter);
           const titleKey = variant === "login" ? SCENARIO_KIND_TITLE_KEY[group.kind] : SCENARIO_KIND_CARD_TITLE_KEY[group.kind];
+          const startable = isStartableScenarioKind(group.kind);
+          const kindTitle = t(titleKey);
 
           return (
             <AccordionItem
@@ -61,7 +73,15 @@ export function HierarchicalCaseChooser({
             >
               <AccordionTrigger className="py-3 hover:no-underline">
                 <div className="min-w-0 pr-3 text-left">
-                  <div className="text-sm font-semibold text-foreground">{t(titleKey)}</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-sm font-semibold text-foreground">{kindTitle}</div>
+                    <Badge
+                      variant={startable ? "secondary" : "outline"}
+                      className="text-[10px] font-medium"
+                    >
+                      {startable ? t("door.coreBadge") : t("door.addonBadge")}
+                    </Badge>
+                  </div>
                   {variant === "door" ? (
                     <p className="mt-1 text-[12px] font-normal leading-snug text-muted-foreground">
                       {t(SCENARIO_KIND_BLURB_KEY[group.kind])}
@@ -106,16 +126,24 @@ export function HierarchicalCaseChooser({
                               size="sm"
                               className="h-auto w-full justify-start gap-2 whitespace-normal px-3 py-2.5 text-left"
                               disabled={disabled || busyId !== null}
-                              onClick={() => onSelect(s.id)}
+                              onClick={() => {
+                                if (startable) onSelect(s.id);
+                                else setAddonTitle(kindTitle);
+                              }}
                               title={caseBlurb(s.id, locale) ?? s.blurb}
                             >
-                              <PlayCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                              {startable ? <PlayCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : null}
                               <span className="min-w-0 flex-1">
                                 <span className="flex flex-wrap items-center gap-2">
                                   <span className="text-xs font-medium text-foreground">{label}</span>
                                   <Badge variant="outline" className="text-[10px] font-medium tabular-nums">
                                     {t("door.slotCount", { n: slots })}
                                   </Badge>
+                                  {startable ? null : (
+                                    <Badge variant="outline" className="text-[10px] font-medium">
+                                      {t("door.addonBadge")}
+                                    </Badge>
+                                  )}
                                 </span>
                                 {variant === "door" ? (
                                   <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
@@ -138,6 +166,13 @@ export function HierarchicalCaseChooser({
           );
         })}
       </Accordion>
+      <AddonModuleDialog
+        open={addonTitle !== null}
+        title={addonTitle ?? ""}
+        onOpenChange={(next) => {
+          if (!next) setAddonTitle(null);
+        }}
+      />
     </div>
   );
 }

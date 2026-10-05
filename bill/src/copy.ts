@@ -104,6 +104,10 @@ const hu = {
   pro: "Pro Szcenárió",
   expert: "Enterprise & Csapatok",
   campusTier: "Campus",
+  enterpriseBadge: "Későbbi időpontban érhető el",
+  enterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
+  enterpriseInquiryLead:
+    "Az Enterprise csomag előjegyzésre érhető el. Az ár és a kapacitás (Aktív Case / Aktív Slot) tájékoztató értékhorgony. Nincs önkiszolgáló checkout.",
 };
 
 const en: typeof hu = {
@@ -210,6 +214,10 @@ const en: typeof hu = {
   pro: "Pro Szcenárió",
   expert: "Enterprise & Csapatok",
   campusTier: "Campus",
+  enterpriseBadge: "Available at a later date",
+  enterpriseCta: "Contact / request a quote",
+  enterpriseInquiryLead:
+    "The Enterprise plan is available on waitlist. Price and capacity (Active Case / Active Slot) stay visible as a value anchor. There is no self-serve checkout.",
 };
 
 export function billCopy(locale: Locale) {

@@ -3,12 +3,12 @@
  * A böngésző oldali párja: src/lib/siteSurface.ts
  */
 
-export const SITE_KEYS = ["main", "support", "docs", "blog", "bill", "app"];
+export const SITE_KEYS = ["main", "support", "docs", "blog", "bill", "app", "school"];
 
 /**
  * @param {string} hostname
  * @param {string | number} [port]
- * @returns {"main" | "support" | "docs" | "blog" | "bill" | "app"}
+ * @returns {"main" | "support" | "docs" | "blog" | "bill" | "app" | "school"}
  */
 export function resolveSiteKey(hostname, port = "") {
   const h = String(hostname || "")
@@ -18,6 +18,7 @@ export function resolveSiteKey(hostname, port = "") {
   const p = String(port || "");
 
   if (h === "app.szcenario.hu" || h.startsWith("app.")) return "app";
+  if (h === "school.szcenario.hu" || h.startsWith("school.")) return "school";
   if (h === "bill.szcenario.hu" || h.startsWith("bill.") || (isLocal(h) && p === "5110")) return "bill";
   if (h === "support.szcenario.hu" || h.startsWith("support.") || (isLocal(h) && p === "5120")) {
     return "support";
@@ -36,7 +37,7 @@ export function resolveSiteKey(hostname, port = "") {
  * @param {string} mainRoot absolute path to .output/public
  */
 export function resolveSiteRoot(siteKey, mainRoot) {
-  if (!siteKey || siteKey === "main" || siteKey === "app") {
+  if (!siteKey || siteKey === "main" || siteKey === "app" || siteKey === "school") {
     return mainRoot;
   }
   return `${String(mainRoot).replace(/[/\\]+$/, "")}/sites/${siteKey}`;

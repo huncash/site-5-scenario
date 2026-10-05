@@ -255,7 +255,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
     includedUpdateYears: 0,
     annualMaintenanceHuf: null,
     loyaltyLadder: null,
-    quotas: { cases: 1, slotsPerCase: 5, seats: 1, guests: 1, bankAccountsPerSlot: 1 },
+    quotas: { cases: 1, slotsPerCase: 2, seats: 1, guests: 1, bankAccountsPerSlot: 1 },
     features: {
       ...PUBLIC_FEATURES_BASE,
       canManageGuests: true,
