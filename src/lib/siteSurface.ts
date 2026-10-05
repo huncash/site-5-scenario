@@ -18,18 +18,23 @@ const WORKSPACE_PREFIXES = [
   "/login/activate",
 ];
 
-function isLocalHost(hostname: string): boolean {
-  return /^(localhost|127\.0\.0\.1)$/.test(hostname);
+function hostOf(hostname?: string): string {
+  return (hostname ?? (typeof window !== "undefined" ? window.location.hostname : "")).toLowerCase();
 }
 
-export function resolveSiteHost(hostname: string, port = ""): SiteHostKind {
+function isPathPrefix(path: string, prefix: string): boolean {
+  return path === prefix || path.startsWith(`${prefix}/`);
+}
+
+/** Felület: subdomain vagy útvonal — soha nem belső port. */
+export function resolveSiteHost(hostname: string, _port = "", pathname = ""): SiteHostKind {
   const h = hostname.toLowerCase();
-  const p = String(port);
+  const path = normalizePath(pathname);
   if (h === "app.szcenario.hu" || h.startsWith("app.")) return "app";
-  if (h === "bill.szcenario.hu" || h.startsWith("bill.") || (isLocalHost(h) && p === "5110")) return "bill";
-  if (h === "support.szcenario.hu" || h.startsWith("support.") || (isLocalHost(h) && p === "5120")) return "support";
-  if (h === "docs.szcenario.hu" || h.startsWith("docs.") || (isLocalHost(h) && p === "5121")) return "docs";
-  if (h === "blog.szcenario.hu" || h.startsWith("blog.") || (isLocalHost(h) && p === "5122")) return "blog";
+  if (h === "bill.szcenario.hu" || h.startsWith("bill.") || isPathPrefix(path, "/bill")) return "bill";
+  if (h === "support.szcenario.hu" || h.startsWith("support.") || isPathPrefix(path, "/support")) return "support";
+  if (h === "docs.szcenario.hu" || h.startsWith("docs.") || isPathPrefix(path, "/docs")) return "docs";
+  if (h === "blog.szcenario.hu" || h.startsWith("blog.") || isPathPrefix(path, "/blog")) return "blog";
   return "main";
 }
 
@@ -68,7 +73,7 @@ export function shouldShowSiteFooter(opts: {
   embed?: boolean;
 }): boolean {
   if (opts.embed) return false;
-  const kind = resolveSiteHost(opts.hostname, opts.port);
+  const kind = resolveSiteHost(opts.hostname, opts.port, opts.pathname);
   if (kind === "app") return false;
   if (kind === "bill" || kind === "support" || kind === "docs" || kind === "blog") {
     return !normalizePath(opts.pathname).startsWith("/embed");
@@ -78,9 +83,11 @@ export function shouldShowSiteFooter(opts: {
   return isPublicMarketingPath(opts.pathname);
 }
 
-export function mainPublicOrigin(hostname?: string, port?: string): string {
-  const h = hostname ?? (typeof window !== "undefined" ? window.location.hostname : "");
-  if (isLocalHost(h)) return "http://localhost:5100";
+export function mainPublicOrigin(hostname?: string, _port?: string): string {
+  const h = hostOf(hostname);
+  if ((h === "szcenario.hu" || h === "www.szcenario.hu") && typeof window !== "undefined") {
+    if (window.location.hostname.toLowerCase() === h) return window.location.origin;
+  }
   return MAIN_ORIGIN_PROD;
 }
 
@@ -93,4 +100,9 @@ export function currentLocation(): { hostname: string; port: string; pathname: s
     port: window.location.port,
     pathname: window.location.pathname,
   };
+}
+
+/** Aktuális felület: hostname + pathname, port nélkül. */
+export function currentSiteHost(loc = currentLocation()): SiteHostKind {
+  return resolveSiteHost(loc.hostname, "", loc.pathname);
 }

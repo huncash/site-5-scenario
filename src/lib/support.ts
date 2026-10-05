@@ -7,9 +7,17 @@ export const SUPPORT_SLA =
 
 export type SupportLayer = "tippek" | "gyik" | "ticket";
 
-export function supportPublicOrigin(): string {
-  if (typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
-    return "http://localhost:5120";
+export function supportPublicOrigin(hostname?: string, pathname?: string): string {
+  const h = (hostname ?? (typeof window !== "undefined" ? window.location.hostname : "")).toLowerCase();
+  const path = (pathname ?? (typeof window !== "undefined" ? window.location.pathname : "")).replace(/\/+$/, "") || "/";
+  if (h === "support.szcenario.hu" || h.startsWith("support.")) {
+    if (typeof window !== "undefined" && window.location.hostname.toLowerCase() === h) {
+      return window.location.origin;
+    }
+    return SUPPORT_ORIGIN_PROD;
+  }
+  if (path === "/support" || path.startsWith("/support/")) {
+    return typeof window !== "undefined" ? window.location.origin : SUPPORT_ORIGIN_PROD;
   }
   return SUPPORT_ORIGIN_PROD;
 }

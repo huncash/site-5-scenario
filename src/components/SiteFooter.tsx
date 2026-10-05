@@ -146,7 +146,7 @@ function FooterCol({
 const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const loc = currentLocation();
-  const kind = resolveSiteHost(loc.hostname, loc.port);
+  const kind = resolveSiteHost(loc.hostname, loc.port, loc.pathname);
   const home = mainPublicOrigin(loc.hostname, loc.port);
   const support = supportPublicOrigin();
   const billHome = kind === "bill" ? "/" : `${billPublicOrigin()}/`;

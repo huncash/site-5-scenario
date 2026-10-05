@@ -36,17 +36,13 @@ function slotsLabel(slotsPerCase: number, locale: Locale): string {
 
 function bankHighlight(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
-    if (mode === "api") {
-      return "Automated accounting/bank-statement import + Sensor / Edge data feed";
-    }
+    if (mode === "api") return "Automated accounting / bank-statement import";
     if (mode === "multi") {
       return "Automated bank statement & transaction import (CAMT.053, CSV, XML)";
     }
     return "Bank statement import for any period / Slot**";
   }
-  if (mode === "api") {
-    return "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés";
-  }
+  if (mode === "api") return "Automatizált könyvelési/bankkivonat import";
   if (mode === "multi") {
     return "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)";
   }
@@ -55,20 +51,12 @@ function bankHighlight(mode: BankImportMode, locale: Locale): string {
 
 function bankCompare(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
-    if (mode === "api") {
-      return "✓ Accounting/bank import + Sensor / Edge feed";
-    }
-    if (mode === "multi") {
-      return "✓ CAMT.053 / CSV / XML statement import";
-    }
+    if (mode === "api") return "✓ Accounting / bank-statement import";
+    if (mode === "multi") return "✓ CAMT.053 / CSV / XML statement import";
     return "✓ Statement import / Slot** (any period)";
   }
-  if (mode === "api") {
-    return "✓ Könyvelési/bankkivonat import + Szenzoros / Edge";
-  }
-  if (mode === "multi") {
-    return "✓ CAMT.053 / CSV / XML bankkivonat import";
-  }
+  if (mode === "api") return "✓ Könyvelési/bankkivonat import";
+  if (mode === "multi") return "✓ CAMT.053 / CSV / XML bankkivonat import";
   return "✓ Kivonat import / Slot** (bármilyen időszakra)";
 }
 
@@ -87,9 +75,17 @@ export function loyaltyLadderLine(plan: PlanConfig, locale: Locale = "hu"): stri
   const L = plan.loyaltyLadder;
   if (!L) return null;
   if (locale === "en") {
-    return `Y2: €${L.year2.eur} (−25%) · Y3: €${L.year3.eur} (−40%) · Y4+: Lifetime Free Upgrades`;
+    return `Y2: €${L.year2.eur} (75% of Y1) · Y3: €${L.year3.eur} (60% of Y1) · Y4+: free`;
   }
-  return `2. év: ${L.year2.huf.toLocaleString("hu-HU")} Ft (−25%) · 3. év: ${L.year3.huf.toLocaleString("hu-HU")} Ft (−40%) · 4. évtől: örökélet frissítés`;
+  return `2. év: ${L.year2.huf.toLocaleString("hu-HU")} Ft (alapár 75%) · 3. év: ${L.year3.huf.toLocaleString("hu-HU")} Ft (alapár 60%) · 4. évtől: 0 Ft`;
+}
+
+/** Összehasonlító tábla / Support SSOT mondat — kedvezmény mindig az 1. évi alapárból. */
+export function loyaltyBaseRuleSentence(locale: Locale = "hu"): string {
+  if (locale === "en") {
+    return "Year 2 and Year 3 update discounts are always calculated from the full Year-1 license price (Year 2: 75% of the base price, Year 3: 60% of the base price). From Year 4 onward, updates are permanently free.";
+  }
+  return "A 2. és 3. évi frissítési kedvezmények minden esetben az 1. évi teljes licencárból számítandók (2. év: az alapár 75%-a, 3. év: az alapár 60%-a). A 4. évtől a frissítések véglegesen díjmentessé válnak.";
 }
 
 export function planSlogan(plan: PlanConfig, locale: Locale = "hu"): string {
@@ -110,8 +106,8 @@ export function planSlogan(plan: PlanConfig, locale: Locale = "hu"): string {
 export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
   if (plan.id === "expert") {
     return locale === "en"
-      ? "Automated accounting/bank-statement import + Sensor / Edge data feed, multi-portfolio and organisational BCP audit."
-      : "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés, multi-portfólió és szervezeti BCP audit.";
+      ? "Automated accounting / bank-statement import, multi-portfolio and organisational BCP audit. Sensor / Edge is a separate add-on."
+      : "Automatizált könyvelési/bankkivonat import, multi-portfólió és szervezeti BCP audit. A Szenzoros / Edge külön bővítő modul.";
   }
   if (plan.id === "pro") {
     return locale === "en"
@@ -170,13 +166,13 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
           "5 active projects",
           "4 active scenario slots each",
           "3 editors + 20 guests",
-          "Automated accounting/bank-statement import + Sensor / Edge data feed",
+          "Automated accounting / bank-statement import",
         ]
       : [
           "5 aktív projekt",
           "4 aktív szcenárió slot projektenként",
           "3 szerkesztő + 20 vendég",
-          "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",
+          "Automatizált könyvelési/bankkivonat import",
         ];
   }
   return [

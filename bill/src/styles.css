@@ -56,6 +56,13 @@ html, body, #root { margin: 0; min-height: 100%; background: var(--app-bg); colo
 }
 .login-bar-btn { height: 40px; white-space: nowrap; text-align: center; }
 .login-bar-hint { margin: 0; }
+.home-plans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.home-plans .btn { text-decoration: none; }
 .home-cta {
   color: var(--accent-emerald);
   font-weight: 650;

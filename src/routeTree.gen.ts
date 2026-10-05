@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AszfRouteImport } from './routes/aszf'
 import { Route as BcpRouteImport } from './routes/bcp'
+import { Route as BillRouteImport } from './routes/bill'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as GdprRouteImport } from './routes/gdpr'
@@ -67,6 +68,11 @@ const AszfRoute = AszfRouteImport.update({
 const BcpRoute = BcpRouteImport.update({
   id: '/bcp',
   path: '/bcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillRoute = BillRouteImport.update({
+  id: '/bill',
+  path: '/bill',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
+  '/bill': typeof BillRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/gdpr': typeof GdprRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
+  '/bill': typeof BillRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/gdpr': typeof GdprRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/aszf': typeof AszfRoute
   '/bcp': typeof BcpRoute
+  '/bill': typeof BillRoute
   '/connect': typeof ConnectRoute
   '/devices': typeof DevicesRoute
   '/gdpr': typeof GdprRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/aszf'
     | '/bcp'
+    | '/bill'
     | '/connect'
     | '/devices'
     | '/gdpr'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/aszf'
     | '/bcp'
+    | '/bill'
     | '/connect'
     | '/devices'
     | '/gdpr'
@@ -409,6 +420,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/aszf'
     | '/bcp'
+    | '/bill'
     | '/connect'
     | '/devices'
     | '/gdpr'
@@ -446,6 +458,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   AszfRoute: typeof AszfRoute
   BcpRoute: typeof BcpRoute
+  BillRoute: typeof BillRoute
   ConnectRoute: typeof ConnectRoute
   DevicesRoute: typeof DevicesRoute
   GdprRoute: typeof GdprRoute
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       path: '/bcp'
       fullPath: '/bcp'
       preLoaderRoute: typeof BcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bill': {
+      id: '/bill'
+      path: '/bill'
+      fullPath: '/bill'
+      preLoaderRoute: typeof BillRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect': {
@@ -726,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   AszfRoute: AszfRoute,
   BcpRoute: BcpRoute,
+  BillRoute: BillRoute,
   ConnectRoute: ConnectRoute,
   DevicesRoute: DevicesRoute,
   GdprRoute: GdprRoute,

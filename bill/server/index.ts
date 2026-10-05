@@ -347,6 +347,7 @@ async function handleApi(req: Request): Promise<Response> {
       tier,
       interval,
       ref: typeof body.ref === "string" ? body.ref : undefined,
+      slotPack: typeof body.slotPack === "string" && isSlotPackId(body.slotPack) ? body.slotPack : undefined,
       amountHuf,
       netHuf: quote.dueNet,
       vatRate: quote.vat.rate,

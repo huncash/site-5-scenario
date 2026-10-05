@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -24,7 +24,12 @@ import { PrivacyBanner } from "@/components/legal/PrivacyBanner";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LocaleProvider, useI18n } from "@/i18n";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
+import { currentSiteHost, resolveSiteHost, type SiteHostKind } from "@/lib/siteSurface";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
+
+const BillingSurface = lazy(() =>
+  import("@/components/BillingSurface").then((m) => ({ default: m.BillingSurface })),
+);
 
 function NotFoundComponent() {
   const { t } = useI18n();
@@ -185,8 +190,33 @@ function RootFooter() {
   return <SiteFooter pathname={pathname} />;
 }
 
+function BillPending() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground">
+      <span className="text-sm tracking-wide">Számlázás…</span>
+    </div>
+  );
+}
+
+function useSiteKind(): SiteHostKind {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [kind, setKind] = useState<SiteHostKind>(() =>
+    typeof window === "undefined"
+      ? resolveSiteHost("", "", pathname)
+      : currentSiteHost(),
+  );
+
+  useEffect(() => {
+    setKind(currentSiteHost());
+  }, [pathname]);
+
+  return kind;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const siteKind = useSiteKind();
+  const isBill = siteKind === "bill";
 
   useEffect(() => {
     void import("@/lib/campaignSession").then((m) => m.captureCampaignFromLocation({ doorStep: false }));
@@ -215,9 +245,14 @@ function RootComponent() {
           <FeatureComingSoonProvider>
             <SupportEmbedProvider>
               <OnboardingTourProvider>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-                <RootFooter />
+                {isBill ? (
+                  <Suspense fallback={<BillPending />}>
+                    <BillingSurface />
+                  </Suspense>
+                ) : (
+                  <Outlet />
+                )}
+                {isBill ? null : <RootFooter />}
                 <PrivacyBanner />
                 <LeanCommandPalette />
                 <HoverCoachTooltip />

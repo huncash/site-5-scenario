@@ -12,7 +12,7 @@ export function PrivacyBanner() {
 
   useEffect(() => {
     const loc = currentLocation();
-    const kind = resolveSiteHost(loc.hostname, loc.port);
+    const kind = resolveSiteHost(loc.hostname, loc.port, loc.pathname);
     if (kind === "app") return;
     if (loc.pathname.startsWith("/embed")) return;
     if (hasGdprAcknowledged()) return;

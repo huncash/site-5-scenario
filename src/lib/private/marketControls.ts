@@ -3,6 +3,8 @@
  * Csak localhost `/admin/monetization-sim` — nem része a publikus katalógusnak.
  */
 
+import { loyaltyFeesFromYear1Huf } from "@/config/plans";
+
 export type MarketTier = "starter" | "pro" | "enterprise";
 
 export type SaasPriceBand = {
@@ -243,14 +245,16 @@ export const SAAS_CONTROL_SEAT_MONTHLY_HUF = 92_000;
 
 /** Szimulátor örökös kontroll: a mi Pro / Enterprise listaárunk. */
 export const OURS_PRO_PERPETUAL_HUF = 399_000;
-/** Pro hűség 2. év. */
-export const OURS_PRO_MAINTENANCE_HUF = 299_000;
-export const OURS_PRO_Y3_HUF = 239_000;
+const OURS_PRO_LOYALTY = loyaltyFeesFromYear1Huf(OURS_PRO_PERPETUAL_HUF);
+/** Pro hűség 2. év = 1. évi alapár 75%-a. */
+export const OURS_PRO_MAINTENANCE_HUF = OURS_PRO_LOYALTY.y2;
+export const OURS_PRO_Y3_HUF = OURS_PRO_LOYALTY.y3;
 export const OURS_SOLO_PERPETUAL_HUF = 199_000;
 export const OURS_ENTERPRISE_PERPETUAL_HUF = 799_000;
-/** Enterprise hűség 2. év. */
-export const OURS_ENTERPRISE_MAINTENANCE_HUF = 599_000;
-export const OURS_ENTERPRISE_Y3_HUF = 479_000;
+const OURS_ENT_LOYALTY = loyaltyFeesFromYear1Huf(OURS_ENTERPRISE_PERPETUAL_HUF);
+/** Enterprise hűség 2. év = 1. évi alapár 75%-a. */
+export const OURS_ENTERPRISE_MAINTENANCE_HUF = OURS_ENT_LOYALTY.y2;
+export const OURS_ENTERPRISE_Y3_HUF = OURS_ENT_LOYALTY.y3;
 
 /** Örökös Pro piaci középsáv (JetBrains / TablePlus sáv összefoglaló). */
 export const PERPETUAL_MARKET_PRO_MID_HUF = 200_000;

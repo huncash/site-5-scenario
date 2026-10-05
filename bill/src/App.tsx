@@ -12,6 +12,7 @@ import {
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
 import { SiteFooter } from "@/components/SiteFooter";
+import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { mainPublicOrigin } from "@/lib/siteSurface";
@@ -197,22 +198,21 @@ export function App() {
   const { locale, toggleLocale } = useSiteLocale();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);
-  const q = useMemo(() => new URLSearchParams(window.location.search), []);
-  const tierParam = q.get("tier");
-  const hasCheckoutIntent = Boolean(tierParam);
-  const tier = tierParam ?? "pro";
-  const ref = q.get("ref") ?? "";
-  const thanks = q.get("thanks") === "1";
-  const orderQ = q.get("order") ?? "";
+  const q = useMemo(() => readBillCheckoutSearch(billSearchFromLocation()), []);
+  const hasCheckoutIntent = q.hasCheckoutIntent;
+  const tier = q.tier ?? "pro";
+  const ref = q.ref;
+  const slotPack = q.slotPack;
+  const addon = q.addon;
+  const thanks = q.thanks;
+  const orderQ = q.order;
   const pricingHref = `${mainPublicOrigin()}/#csomagok`;
 
-  const [interval, setInterval] = useState<BillingInterval>(
-    () => (q.get("interval") === "yearly" ? "yearly" : "monthly"),
-  );
+  const [interval, setInterval] = useState<BillingInterval>(() => q.interval);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [taxId, setTaxId] = useState("");
-  const [country, setCountry] = useState((q.get("country") || SELLER_COUNTRY).toUpperCase());
+  const [country, setCountry] = useState(q.country || SELLER_COUNTRY);
   const [email, setEmail] = useState("");
   const [buyerKind, setBuyerKind] = useState<"b2c" | "b2b">("b2c");
   const [immediateConsent, setImmediateConsent] = useState(false);
@@ -339,6 +339,8 @@ export function App() {
           tier,
           interval,
           ref: ref || undefined,
+          slotPack: slotPack || undefined,
+          addon: addon || undefined,
           payMethod,
           partnerKind: effectiveKind,
           immediateConsent: effectiveKind === "b2c" ? immediateConsent : undefined,
@@ -478,6 +480,20 @@ export function App() {
         <h1>{t.homeTitle}</h1>
         <p className="muted">{t.homeLead}</p>
         <LoginBar t={t} onOpened={openPortal} />
+        <p className="muted" style={{ marginTop: 20 }}>
+          {t.homePickLead}
+        </p>
+        <div className="home-plans">
+          <a className="btn" href="?tier=starter&interval=yearly">
+            {t.homePickStarter}
+          </a>
+          <a className="btn primary" href="?tier=pro&interval=yearly">
+            {t.homePickPro}
+          </a>
+          <a className="btn" href="?tier=expert&interval=yearly">
+            {t.homePickExpert}
+          </a>
+        </div>
         <p className="muted" style={{ marginTop: 20 }}>
           <a className="home-cta" href={pricingHref}>
             {t.homePricingCta}
@@ -659,3 +675,5 @@ export function App() {
     </div>
   );
 }
+
+export { App as BillingView };

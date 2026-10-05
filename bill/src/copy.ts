@@ -6,6 +6,10 @@ const hu = {
   homeLead:
     "Meglévő rendeléshez add meg a rendelési azonosítót (vagy SZC-kódot) és a megrendelő e-mailt. Új csomaghoz a főoldal árlistája vezet ide.",
   homePricingCta: "Csomagok a főoldalon",
+  homePickLead: "Vagy válassz csomagot itt — a számlázási űrlap a kiválasztott tervvel nyílik.",
+  homePickStarter: "Basic",
+  homePickPro: "Pro",
+  homePickExpert: "Enterprise",
   loginTitle: "Rendelés megnyitása",
   loginToken: "Rendelésazonosító vagy SZC-kód",
   loginTokenPh: "pl. SZC-… vagy rendelés-UUID",
@@ -99,6 +103,10 @@ const en: typeof hu = {
   homeLead:
     "For an existing order enter the order id (or SZC code) and the buyer e-mail. New packages start from the main pricing list.",
   homePricingCta: "Packages on the main site",
+  homePickLead: "Or pick a plan here — checkout opens with that package.",
+  homePickStarter: "Basic",
+  homePickPro: "Pro",
+  homePickExpert: "Enterprise",
   loginTitle: "Open order",
   loginToken: "Order id or SZC code",
   loginTokenPh: "e.g. SZC-… or order UUID",

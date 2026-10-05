@@ -49,8 +49,8 @@ export type MoneyPair = { huf: number; eur: number };
 
 /**
  * 3 éves lépcsőzetes hűség (Tiered Loyalty Perpetual).
- * 1. év = vásárlás (örökös fallback a megvásárolt verzióra),
- * 2–3. év = csökkenő frissítési díj, 4. évtől Lifetime Free Upgrades.
+ * Kedvezmény mindig az 1. évi alapárhoz viszonyított fix arány (nem kamatos):
+ * Y1 = 100%, Y2 = 75% (−25%), Y3 = 60% (−40%), Y4+ = 0.
  */
 export type LoyaltyLadder = {
   year1: MoneyPair;
@@ -58,6 +58,44 @@ export type LoyaltyLadder = {
   year3: MoneyPair;
   lifetimeFreeFromYear: 4;
 };
+
+/** Az 1. évi alapár hányada — SSOT a hűségdíjakhoz. */
+export const LOYALTY_SHARE_OF_YEAR1 = {
+  year1: 1,
+  year2: 0.75,
+  year3: 0.6,
+  year4Plus: 0,
+} as const;
+
+/** Hűség Ft: legközelebbi 1000 Ft (199k→149k / 119k). */
+export function roundLoyaltyHuf(n: number): number {
+  return Math.round(n / 1000) * 1000;
+}
+
+/** Y2 / Y3 frissítési díj az 1. évi alapárból (fix %, nem halmozott). */
+export function loyaltyFeesFromYear1Huf(year1Huf: number): { y2: number; y3: number; y4: 0 } {
+  return {
+    y2: roundLoyaltyHuf(year1Huf * LOYALTY_SHARE_OF_YEAR1.year2),
+    y3: roundLoyaltyHuf(year1Huf * LOYALTY_SHARE_OF_YEAR1.year3),
+    y4: 0,
+  };
+}
+
+export function buildLoyaltyLadder(year1: MoneyPair): LoyaltyLadder {
+  const fees = loyaltyFeesFromYear1Huf(year1.huf);
+  return {
+    year1,
+    year2: {
+      huf: fees.y2,
+      eur: Math.round(year1.eur * LOYALTY_SHARE_OF_YEAR1.year2),
+    },
+    year3: {
+      huf: fees.y3,
+      eur: Math.round(year1.eur * LOYALTY_SHARE_OF_YEAR1.year3),
+    },
+    lifetimeFreeFromYear: 4,
+  };
+}
 
 export type PlanConfig = {
   id: PlanId;
@@ -138,26 +176,9 @@ const PUBLIC_FEATURES_BASE = {
   dedicatedOfflineIntegration: false,
 } as const;
 
-const LOYALTY_STARTER: LoyaltyLadder = {
-  year1: { huf: 199_000, eur: 199 },
-  year2: { huf: 149_000, eur: 149 },
-  year3: { huf: 119_000, eur: 119 },
-  lifetimeFreeFromYear: 4,
-};
-
-const LOYALTY_PRO: LoyaltyLadder = {
-  year1: { huf: 399_000, eur: 399 },
-  year2: { huf: 299_000, eur: 299 },
-  year3: { huf: 239_000, eur: 239 },
-  lifetimeFreeFromYear: 4,
-};
-
-const LOYALTY_ENTERPRISE: LoyaltyLadder = {
-  year1: { huf: 799_000, eur: 799 },
-  year2: { huf: 599_000, eur: 599 },
-  year3: { huf: 479_000, eur: 479 },
-  lifetimeFreeFromYear: 4,
-};
+const LOYALTY_STARTER = buildLoyaltyLadder({ huf: 199_000, eur: 199 });
+const LOYALTY_PRO = buildLoyaltyLadder({ huf: 399_000, eur: 399 });
+const LOYALTY_ENTERPRISE = buildLoyaltyLadder({ huf: 799_000, eur: 799 });
 
 export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
   starter: {

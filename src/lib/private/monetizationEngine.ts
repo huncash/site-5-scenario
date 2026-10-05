@@ -1,3 +1,4 @@
+import { loyaltyFeesFromYear1Huf } from "@/config/plans";
 import {
   PRIVATE_MONETIZATION_CASE,
   type EnterpriseSliderState,
