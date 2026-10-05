@@ -106,3 +106,25 @@ export function currentLocation(): { hostname: string; port: string; pathname: s
 export function currentSiteHost(loc = currentLocation()): SiteHostKind {
   return resolveSiteHost(loc.hostname, "", loc.pathname);
 }
+
+export const SITE_KIND_DATA_ATTR = "data-site-kind";
+
+/** Head boot: hostname + pathname → data-site-kind, port nélkül. */
+export const SITE_KIND_BOOT_SCRIPT =
+  '(function(){try{var h=location.hostname.toLowerCase();var p=(location.pathname||"/").replace(/\\/+$/,"")||"/";var k="main";if(h==="app.szcenario.hu"||h.indexOf("app.")===0)k="app";else if(h==="bill.szcenario.hu"||h.indexOf("bill.")===0||p==="/bill"||p.indexOf("/bill/")===0)k="bill";else if(h==="support.szcenario.hu"||h.indexOf("support.")===0||p==="/support"||p.indexOf("/support/")===0)k="support";else if(h==="docs.szcenario.hu"||h.indexOf("docs.")===0||p==="/docs"||p.indexOf("/docs/")===0)k="docs";else if(h==="blog.szcenario.hu"||h.indexOf("blog.")===0||p==="/blog"||p.indexOf("/blog/")===0)k="blog";document.documentElement.setAttribute("data-site-kind",k);}catch(e){}})();';
+
+export function readBootSiteKind(): SiteHostKind | null {
+  if (typeof document === "undefined") return null;
+  const raw = document.documentElement.getAttribute(SITE_KIND_DATA_ATTR);
+  if (
+    raw === "main" ||
+    raw === "bill" ||
+    raw === "support" ||
+    raw === "docs" ||
+    raw === "blog" ||
+    raw === "app"
+  ) {
+    return raw;
+  }
+  return null;
+}

@@ -2,10 +2,10 @@
 
 **Forrásmappa:** `C:\Users\patri\DEVELOPMENT\dev\fuszer-platform\vendor\mesh-data-manager-fuszer`  
 GitHub repo: `site-5-scenario`. VPS: `/var/www/szcenario`, PM2 `szcenario`, port **5100**.  
-Bill: **5110**, support/docs/blog: ugyanaz a **5100** static-origin (Host → `sites/*`), local support: **5120**, signaling: **5130**.
+Bill / support / docs / blog: ugyanaz a **5100** static-origin (Host → `sites/bill` tesztoldal, `sites/support`, …). Local support: **5120**, signaling: **5130**.
 
 Aldomain nginx:
-- `deploy/nginx/szcenario.conf` (kanonikus HTTPS) — `bill.szcenario.hu` → **:5110**; apex / `*.szcenario.hu` → **:5100**
+- `deploy/nginx/szcenario.conf` (kanonikus HTTPS) — `bill.szcenario.hu` és apex / `*.szcenario.hu` → **:5100**
 - `deploy/nginx/szcenario.http-first.conf` — ugyanaz port-szétválasztás HTTP-n (cert előtt)
 - `deploy/nginx/szcenario.subdomains.conf` — named `support` / `docs` / `blog` / `app` → `:5100`
 

@@ -36,7 +36,7 @@ export function resolveSiteKey(hostname, port = "") {
  * @param {string} mainRoot absolute path to .output/public
  */
 export function resolveSiteRoot(siteKey, mainRoot) {
-  if (!siteKey || siteKey === "main" || siteKey === "app" || siteKey === "bill") {
+  if (!siteKey || siteKey === "main" || siteKey === "app") {
     return mainRoot;
   }
   return `${String(mainRoot).replace(/[/\\]+$/, "")}/sites/${siteKey}`;

@@ -12,7 +12,7 @@ import {
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SiteKindProbe } from "@/components/SiteKindProbe";
+import { SiteKindTestPage } from "@/components/SiteKindTestPage";
 import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -196,6 +196,10 @@ function LoginBar({
 }
 
 export function App() {
+  return <SiteKindTestPage kind="bill" />;
+}
+
+function BillingCheckout() {
   const { locale, toggleLocale } = useSiteLocale();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);
@@ -371,17 +375,14 @@ export function App() {
   };
 
   const top = (
-    <>
-      <div className="top">
-        <a className="brand" href="/">
-          {t.brand}
-        </a>
-        <div className="top-right">
-          <LangSwitch locale={locale} onToggle={toggleLocale} />
-        </div>
+    <div className="top">
+      <a className="brand" href="/">
+        {t.brand}
+      </a>
+      <div className="top-right">
+        <LangSwitch locale={locale} onToggle={toggleLocale} />
       </div>
-      <SiteKindProbe kind="bill" search={billSearchFromLocation()} />
-    </>
+    </div>
   );
 
   if (thanks) {

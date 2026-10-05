@@ -8,6 +8,7 @@ import {
   currentSiteHost,
   resolveSiteHost,
   shouldShowSiteFooter,
+  SITE_KIND_BOOT_SCRIPT,
 } from "@/lib/siteSurface";
 import { SUPPORT_ORIGIN_PROD, supportPublicOrigin } from "@/lib/support";
 
@@ -40,6 +41,9 @@ describe("siteSurface footer visibility", () => {
     expect(currentSiteHost({ hostname: "support.szcenario.hu", port: "5120", pathname: "/" })).toBe("support");
     expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/support" })).toBe("support");
     expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/" })).toBe("main");
+    expect(SITE_KIND_BOOT_SCRIPT).toContain("data-site-kind");
+    expect(SITE_KIND_BOOT_SCRIPT).toContain("bill.szcenario.hu");
+    expect(SITE_KIND_BOOT_SCRIPT).not.toMatch(/:\d{3,}/);
   });
 
   it("shows footer on the main door, about, funnels, bill and support", () => {

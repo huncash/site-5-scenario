@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SiteKindProbe } from "@/components/SiteKindProbe";
+import { SiteKindTestPage } from "@/components/SiteKindTestPage";
 import { LangSwitch, useSiteLocale, type Locale } from "@/i18n/miniLocale";
 import { lessonBySlug } from "./content";
 import {
@@ -344,6 +344,9 @@ export function App() {
   }, []);
 
   const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
+  if (!embed && slug === "home") {
+    return <SiteKindTestPage kind="support" />;
+  }
 
   const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
   const lesson = rawLesson ? localizeLesson(locale, rawLesson) : null;
@@ -435,7 +438,6 @@ export function App() {
         <div className="brand">{t.brand}</div>
         <LangSwitch locale={locale} onToggle={toggleLocale} />
       </div>
-      {embed ? null : <SiteKindProbe kind="support" />}
       {body}
       {embed ? null : <SiteFooter inline />}
     </main>

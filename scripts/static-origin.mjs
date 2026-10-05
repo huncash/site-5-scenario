@@ -258,6 +258,6 @@ server.on("error", (error) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[static-origin] ${HOST}:${PORT} → ${MAIN_ROOT}`);
-  console.log(`[static-origin] sites: support/docs/blog under ${path.join(MAIN_ROOT, "sites")}`);
+  console.log(`[static-origin] sites: bill/support/docs/blog under ${path.join(MAIN_ROOT, "sites")}`);
   console.log(`[static-origin] build-id.txt=${existsSync(path.join(MAIN_ROOT, "build-id.txt"))}`);
 });

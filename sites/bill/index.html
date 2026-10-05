@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aldomain teszt — bill</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; min-height: 100dvh; background: #111827; color: #fde68a;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      main { padding: 32px 20px 48px; }
+      .mark { display: inline-block; margin-bottom: 16px; padding: 4px 10px;
+        border: 2px solid #facc15; background: #facc15; color: #111827;
+        font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+      h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 6vw, 3rem); color: #fefce8; letter-spacing: -0.03em; }
+      .lead { margin: 0 0 28px; max-width: 36rem; font-size: 16px; }
+      .strip { max-width: 45rem; padding: 18px; border: 3px solid #facc15; background: #1f2937; }
+      .ok { margin: 0; font-size: 18px; font-weight: 800; color: #4ade80; }
+      .meta { margin: 12px 0 0; font-size: 13px; color: #e5e7eb; word-break: break-all; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .chip { padding: 4px 8px; background: #111827; border: 1px solid #facc15; color: #fde68a; font-size: 12px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main data-site-kind-test="bill">
+      <div class="mark">aldomain teszt oldal</div>
+      <h1>bill.szcenario.hu</h1>
+      <p class="lead">Ez egy dedikált aldomain-teszt nyitóoldal — nem a főoldal, nem a számlázás, nem a support tudástár.</p>
+      <section class="strip" role="status">
+        <p class="ok">SUCCESS: bill.szcenario.hu aktív - Billing & Checkout Origin</p>
+        <p class="meta">kind=bill · host=<span id="host">—</span> · path=<span id="path">—</span></p>
+        <div class="chips" id="chips"></div>
+      </section>
+    </main>
+    <script>
+      document.getElementById("host").textContent = location.hostname;
+      document.getElementById("path").textContent = location.pathname;
+      var chips = document.getElementById("chips");
+      var pairs = Array.from(new URLSearchParams(location.search).entries());
+      if (!pairs.length) {
+        chips.innerHTML = '<span class="chip">query=(üres)</span>';
+      } else {
+        chips.innerHTML = pairs.map(function (p) {
+          return '<span class="chip">' + p[0] + "=" + p[1] + "</span>";
+        }).join("");
+      }
+    </script>
+  </body>
+</html>

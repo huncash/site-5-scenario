@@ -90,13 +90,14 @@ delete_pm2_5100() {
 point_nginx_5100() {
   echo ">> nginx proxy_pass 4100 → 5100"
   local f patched=0
-  if sudo -n grep -rl '127.0.0.1:4100' /etc/nginx >/tmp/nginx-4100.txt 2>/dev/null; then
+  if sudo -n grep -rlE '127.0.0.1:4100|127.0.0.1:5110' /etc/nginx >/tmp/nginx-ports.txt 2>/dev/null; then
     while IFS= read -r f; do
       [ -n "$f" ] || continue
       echo ">> patch $f"
       sudo -n sed -i 's/127\.0\.0\.1:4100/127.0.0.1:5100/g' "$f"
+      sudo -n sed -i 's/127\.0\.0\.1:5110/127.0.0.1:5100/g' "$f"
       patched=1
-    done < /tmp/nginx-4100.txt
+    done < /tmp/nginx-ports.txt
   fi
   if [ "$patched" -eq 1 ]; then
     sudo -n nginx -t
@@ -108,8 +109,9 @@ point_nginx_5100() {
   echo ">> nginx: a deploy user nem irhatja /etc/nginx-et"
   echo "ROOT, EGYSZER:"
   echo "  sudo sed -i 's/127\\.0\\.0\\.1:4100/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
+  echo "  sudo sed -i 's/127\\.0\\.0\\.1:5110/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
   echo "  sudo nginx -t && sudo systemctl reload nginx"
-  echo "  curl -sS https://szcenario.hu/build-id.txt"
+  echo "  curl -sS -H 'Host: bill.szcenario.hu' http://127.0.0.1:5100/ | head"
   return 0
 }
 

@@ -21,6 +21,11 @@ describe("siteKindProbe", () => {
     expect(SUPPORT_KIND_SUCCESS).not.toMatch(/:\d+/);
   });
 
+  it("test landing copy is not an existing product page", () => {
+    expect(BILL_KIND_SUCCESS).toContain("bill.szcenario.hu");
+    expect(SUPPORT_KIND_SUCCESS).toContain("support.szcenario.hu");
+  });
+
   it("lists funnel query pairs for the bill probe", () => {
     const pairs = listSearchPairs("?tier=pro&interval=yearly&lang=hu");
     expect(pairs).toEqual([

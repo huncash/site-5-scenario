@@ -8,12 +8,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
+import { SiteKindTestPage } from "@/components/SiteKindTestPage";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
 import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
@@ -24,15 +25,14 @@ import { PrivacyBanner } from "@/components/legal/PrivacyBanner";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LocaleProvider, useI18n } from "@/i18n";
 import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
-import { currentSiteHost, resolveSiteHost, type SiteHostKind } from "@/lib/siteSurface";
+import {
+  currentSiteHost,
+  readBootSiteKind,
+  resolveSiteHost,
+  SITE_KIND_BOOT_SCRIPT,
+  type SiteHostKind,
+} from "@/lib/siteSurface";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
-
-const BillingSurface = lazy(() =>
-  import("@/components/BillingSurface").then((m) => ({ default: m.BillingSurface })),
-);
-const SupportSurface = lazy(() =>
-  import("@/components/SupportSurface").then((m) => ({ default: m.SupportSurface })),
-);
 
 function NotFoundComponent() {
   const { t } = useI18n();
@@ -178,6 +178,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SITE_KIND_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -193,32 +194,34 @@ function RootFooter() {
   return <SiteFooter pathname={pathname} />;
 }
 
-function SurfacePending({ label }: { label: string }) {
+function SurfacePending() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground">
-      <span className="text-sm tracking-wide">{label}</span>
+    <div className="flex min-h-dvh items-center justify-center bg-[#111827] px-4 font-mono text-[#facc15]">
+      <span className="text-sm tracking-wide">Aldomain teszt…</span>
     </div>
   );
 }
 
-function useSiteKind(): SiteHostKind {
+function useSiteKind(): { kind: SiteHostKind; ready: boolean } {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const [kind, setKind] = useState<SiteHostKind>(() =>
-    typeof window === "undefined"
-      ? resolveSiteHost("", "", pathname)
-      : currentSiteHost(),
-  );
+  const [kind, setKind] = useState<SiteHostKind | null>(() => {
+    const boot = readBootSiteKind();
+    if (boot) return boot;
+    if (typeof window !== "undefined") return currentSiteHost();
+    const fromPath = resolveSiteHost("", "", pathname);
+    return fromPath === "main" ? null : fromPath;
+  });
 
   useEffect(() => {
     setKind(currentSiteHost());
   }, [pathname]);
 
-  return kind;
+  return { kind: kind ?? "main", ready: kind !== null };
 }
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const siteKind = useSiteKind();
+  const { kind: siteKind, ready: siteReady } = useSiteKind();
   const isBill = siteKind === "bill";
   const isSupport = siteKind === "support";
   const dedicated = isBill || isSupport;
@@ -250,22 +253,20 @@ function RootComponent() {
           <FeatureComingSoonProvider>
             <SupportEmbedProvider>
               <OnboardingTourProvider>
-                {isBill ? (
-                  <Suspense fallback={<SurfacePending label="Számlázás…" />}>
-                    <BillingSurface />
-                  </Suspense>
+                {!siteReady ? (
+                  <SurfacePending />
+                ) : isBill ? (
+                  <SiteKindTestPage kind="bill" />
                 ) : isSupport ? (
-                  <Suspense fallback={<SurfacePending label="Támogatás…" />}>
-                    <SupportSurface />
-                  </Suspense>
+                  <SiteKindTestPage kind="support" />
                 ) : (
                   <Outlet />
                 )}
                 {dedicated ? null : <RootFooter />}
-                <PrivacyBanner />
-                <LeanCommandPalette />
-                <HoverCoachTooltip />
-                <Toaster richColors closeButton position="top-center" />
+                {dedicated ? null : <PrivacyBanner />}
+                {dedicated ? null : <LeanCommandPalette />}
+                {dedicated ? null : <HoverCoachTooltip />}
+                {dedicated ? null : <Toaster richColors closeButton position="top-center" />}
               </OnboardingTourProvider>
             </SupportEmbedProvider>
           </FeatureComingSoonProvider>
