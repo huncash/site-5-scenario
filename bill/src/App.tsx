@@ -235,7 +235,7 @@ export function App() {
   );
 }
 
-function BillingCheckout() {
+export function BillingCheckout() {
   const { locale } = useI18n();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);

@@ -44,6 +44,7 @@ export function readBillCheckoutSearch(search = ""): BillCheckoutSearch {
   const raw = search.startsWith("?") ? search.slice(1) : search;
   const q = new URLSearchParams(raw);
   const tier = q.get("tier");
+  const partnerKindRaw = q.get("partnerKind");
   return {
     tier,
     hasCheckoutIntent: Boolean(tier),
@@ -53,7 +54,7 @@ export function readBillCheckoutSearch(search = ""): BillCheckoutSearch {
     slotPack: q.get("slotPack") ?? "",
     addon: q.get("addon") ?? "",
     country: (q.get("country") ?? "").toUpperCase(),
-    partnerKind: q.get("partnerKind") === "b2b" || q.get("partnerKind") === "b2c" ? q.get("partnerKind") : "",
+    partnerKind: partnerKindRaw === "b2b" || partnerKindRaw === "b2c" ? partnerKindRaw : "",
     thanks: q.get("thanks") === "1",
     order: q.get("order") ?? "",
     lang: q.get("lang") ?? q.get("locale"),
