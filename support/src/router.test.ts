@@ -10,6 +10,12 @@ describe("support router", () => {
     expect(parseSupportPath("/embed")).toEqual({ embed: true, slug: "home" });
   });
 
+  it("strips /support mount without ports", () => {
+    expect(parseSupportPath("/support")).toEqual({ embed: false, slug: "home" });
+    expect(parseSupportPath("/support/pricing")).toEqual({ embed: false, slug: "pricing" });
+    expect(parseSupportPath("/support/embed/gyik")).toEqual({ embed: true, slug: "gyik" });
+  });
+
   it("builds hrefs", () => {
     expect(supportHref("ticket")).toBe("/ticket");
     expect(supportHref("ticket", { embed: true, lang: "hu" })).toBe("/embed/ticket?lang=hu");

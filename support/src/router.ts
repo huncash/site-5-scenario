@@ -13,8 +13,22 @@ export function pathOf(pathname = typeof window !== "undefined" ? window.locatio
   return pathname.replace(/\/+$/, "") || "/";
 }
 
-export function parseSupportPath(pathname: string): { embed: boolean; slug: SupportSlug } {
+/** /support vagy /support/* → support SPA gyökér (hostname nélkül, port nélkül). */
+export function stripSupportMount(pathname: string): string {
   const path = pathOf(pathname);
+  if (path === "/support") return "/";
+  if (path.startsWith("/support/")) return path.slice("/support".length) || "/";
+  return path;
+}
+
+export function supportMountPrefix(pathname?: string): string {
+  const path = pathOf(pathname ?? (typeof window !== "undefined" ? window.location.pathname : "/"));
+  if (path === "/support" || path.startsWith("/support/")) return "/support";
+  return "";
+}
+
+export function parseSupportPath(pathname: string): { embed: boolean; slug: SupportSlug } {
+  const path = stripSupportMount(pathname);
   const embed = path === "/embed" || path.startsWith("/embed/");
   if (path === "/" || path === "/embed") return { embed, slug: "home" };
   if (path.startsWith("/embed/")) return { embed: true, slug: path.slice("/embed/".length) };
@@ -22,7 +36,15 @@ export function parseSupportPath(pathname: string): { embed: boolean; slug: Supp
 }
 
 export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; lang?: string }): string {
-  const base = opts?.embed ? (slug && slug !== "home" ? `/embed/${slug}` : "/embed") : slug && slug !== "home" ? `/${slug}` : "/";
+  const mount = supportMountPrefix();
+  const inner = opts?.embed
+    ? slug && slug !== "home"
+      ? `/embed/${slug}`
+      : "/embed"
+    : slug && slug !== "home"
+      ? `/${slug}`
+      : "/";
+  const base = inner === "/" ? mount || "/" : `${mount}${inner}`;
   if (!opts?.lang) return base;
   const url = new URL(base, "https://support.local");
   url.searchParams.set("lang", opts.lang);

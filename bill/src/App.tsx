@@ -12,6 +12,7 @@ import {
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteKindProbe } from "@/components/SiteKindProbe";
 import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -370,14 +371,17 @@ export function App() {
   };
 
   const top = (
-    <div className="top">
-      <a className="brand" href="/">
-        {t.brand}
-      </a>
-      <div className="top-right">
-        <LangSwitch locale={locale} onToggle={toggleLocale} />
+    <>
+      <div className="top">
+        <a className="brand" href="/">
+          {t.brand}
+        </a>
+        <div className="top-right">
+          <LangSwitch locale={locale} onToggle={toggleLocale} />
+        </div>
       </div>
-    </div>
+      <SiteKindProbe kind="bill" search={billSearchFromLocation()} />
+    </>
   );
 
   if (thanks) {

@@ -37,6 +37,8 @@ describe("siteSurface footer visibility", () => {
   it("currentSiteHost uses hostname + pathname, never a port", () => {
     expect(currentSiteHost({ hostname: "bill.szcenario.hu", port: "5110", pathname: "/" })).toBe("bill");
     expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/bill" })).toBe("bill");
+    expect(currentSiteHost({ hostname: "support.szcenario.hu", port: "5120", pathname: "/" })).toBe("support");
+    expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/support" })).toBe("support");
     expect(currentSiteHost({ hostname: "szcenario.hu", port: "5100", pathname: "/" })).toBe("main");
   });
 

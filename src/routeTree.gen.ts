@@ -29,6 +29,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as StrategiaRouteImport } from './routes/strategia'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TicketRouteImport } from './routes/ticket'
 import { Route as AdminMonetizationSimRouteImport } from './routes/admin/monetization-sim'
 import { Route as LoginActivateRouteImport } from './routes/login_.activate'
@@ -145,6 +146,11 @@ const StrategiaRoute = StrategiaRouteImport.update({
   path: '/strategia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketRoute = TicketRouteImport.update({
   id: '/ticket',
   path: '/ticket',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/support': typeof SupportRoute
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login/activate': typeof LoginActivateRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/support': typeof SupportRoute
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login/activate': typeof LoginActivateRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
+  '/support': typeof SupportRoute
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login_/activate': typeof LoginActivateRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login/activate'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login/activate'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/stats'
     | '/strategia'
+    | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login_/activate'
@@ -473,6 +485,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
   StrategiaRoute: typeof StrategiaRoute
+  SupportRoute: typeof SupportRoute
   TicketRoute: typeof TicketRoute
   AdminMonetizationSimRoute: typeof AdminMonetizationSimRoute
   LoginActivateRoute: typeof LoginActivateRoute
@@ -632,6 +645,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StrategiaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ticket': {
       id: '/ticket'
       path: '/ticket'
@@ -761,6 +781,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
   StrategiaRoute: StrategiaRoute,
+  SupportRoute: SupportRoute,
   TicketRoute: TicketRoute,
   AdminMonetizationSimRoute: AdminMonetizationSimRoute,
   LoginActivateRoute: LoginActivateRoute,

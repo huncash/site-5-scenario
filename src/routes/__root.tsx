@@ -30,6 +30,9 @@ import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 const BillingSurface = lazy(() =>
   import("@/components/BillingSurface").then((m) => ({ default: m.BillingSurface })),
 );
+const SupportSurface = lazy(() =>
+  import("@/components/SupportSurface").then((m) => ({ default: m.SupportSurface })),
+);
 
 function NotFoundComponent() {
   const { t } = useI18n();
@@ -190,10 +193,10 @@ function RootFooter() {
   return <SiteFooter pathname={pathname} />;
 }
 
-function BillPending() {
+function SurfacePending({ label }: { label: string }) {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground">
-      <span className="text-sm tracking-wide">Számlázás…</span>
+      <span className="text-sm tracking-wide">{label}</span>
     </div>
   );
 }
@@ -217,6 +220,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const siteKind = useSiteKind();
   const isBill = siteKind === "bill";
+  const isSupport = siteKind === "support";
+  const dedicated = isBill || isSupport;
 
   useEffect(() => {
     void import("@/lib/campaignSession").then((m) => m.captureCampaignFromLocation({ doorStep: false }));
@@ -246,13 +251,17 @@ function RootComponent() {
             <SupportEmbedProvider>
               <OnboardingTourProvider>
                 {isBill ? (
-                  <Suspense fallback={<BillPending />}>
+                  <Suspense fallback={<SurfacePending label="Számlázás…" />}>
                     <BillingSurface />
+                  </Suspense>
+                ) : isSupport ? (
+                  <Suspense fallback={<SurfacePending label="Támogatás…" />}>
+                    <SupportSurface />
                   </Suspense>
                 ) : (
                   <Outlet />
                 )}
-                {isBill ? null : <RootFooter />}
+                {dedicated ? null : <RootFooter />}
                 <PrivacyBanner />
                 <LeanCommandPalette />
                 <HoverCoachTooltip />

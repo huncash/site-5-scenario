@@ -5,6 +5,8 @@
     "bill/src/**/*.ts",
     "bill/src/**/*.tsx",
     "bill/server/catalog.ts",
+    "support/src/**/*.ts",
+    "support/src/**/*.tsx",
     "vite.config.ts",
     "eslint.config.js"
   ],
