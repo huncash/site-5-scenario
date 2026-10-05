@@ -51,6 +51,7 @@ jobs:
           test -f .output/public/sites/bill/index.html
           grep -q "Billing · Checkout" .output/public/sites/bill/index.html
           grep -q "Checkout Origin" .output/public/sites/bill/index.html
+          grep -q "Szcenárió — fizetés" .output/public/sites/bill/index.html
           test -f scripts/static-origin.mjs
           test -f scripts/site-hosts.mjs
           echo "Built SHA ${{ github.sha }}"
