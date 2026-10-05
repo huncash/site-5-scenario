@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
+import { BillTestSurface } from "@/components/BillTestSurface";
 import { SiteKindTestPage } from "@/components/SiteKindTestPage";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
@@ -256,7 +257,7 @@ function RootComponent() {
                 {!siteReady ? (
                   <SurfacePending />
                 ) : isBill ? (
-                  <SiteKindTestPage kind="bill" />
+                  <BillTestSurface />
                 ) : isSupport ? (
                   <SiteKindTestPage kind="support" />
                 ) : (

@@ -1,5 +1,5 @@
 export const BILL_KIND_SUCCESS =
-  "SUCCESS: bill.szcenario.hu aktív - Billing & Checkout Origin";
+  "SUCCESS: bill.szcenario.hu aktív — Billing & Checkout Origin";
 export const SUPPORT_KIND_SUCCESS =
   "SUCCESS: support.szcenario.hu aktív - Knowledge Hub & Decision Tree";
 

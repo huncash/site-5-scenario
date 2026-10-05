@@ -21,9 +21,12 @@ describe("siteKindProbe", () => {
     expect(SUPPORT_KIND_SUCCESS).not.toMatch(/:\d+/);
   });
 
-  it("test landing copy is not an existing product page", () => {
+  it("bill copy is checkout, not support", () => {
     expect(BILL_KIND_SUCCESS).toContain("bill.szcenario.hu");
+    expect(BILL_KIND_SUCCESS).toContain("Billing & Checkout Origin");
+    expect(BILL_KIND_SUCCESS).not.toContain("Knowledge Hub");
     expect(SUPPORT_KIND_SUCCESS).toContain("support.szcenario.hu");
+    expect(SUPPORT_KIND_SUCCESS).toContain("Knowledge Hub");
   });
 
   it("lists funnel query pairs for the bill probe", () => {

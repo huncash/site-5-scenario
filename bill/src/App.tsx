@@ -12,7 +12,7 @@ import {
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SiteKindTestPage } from "@/components/SiteKindTestPage";
+import { BillTestSurface } from "@/components/BillTestSurface";
 import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -196,7 +196,7 @@ function LoginBar({
 }
 
 export function App() {
-  return <SiteKindTestPage kind="bill" />;
+  return <BillTestSurface />;
 }
 
 function BillingCheckout() {

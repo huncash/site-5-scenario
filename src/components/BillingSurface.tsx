@@ -1,6 +1,6 @@
-import { SiteKindTestPage } from "@/components/SiteKindTestPage";
+import { BillTestSurface } from "@/components/BillTestSurface";
 
-/** bill.szcenario.hu vagy /bill — dedikált aldomain teszt nyitóoldal. */
+/** bill.szcenario.hu vagy /bill — csak a számlázási teszt-nyitó. */
 export function BillingSurface() {
-  return <SiteKindTestPage kind="bill" />;
+  return <BillTestSurface />;
 }
