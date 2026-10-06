@@ -54,7 +54,8 @@ describe("opl", () => {
 
   it("resolves by path", () => {
     expect(oplByPath("lecke-cashflow-logika")?.id).toBe("lecke-cashflow");
-    expect(oplByPath("lecke-dash-runway")?.titleHu).toMatch(/runway/i);
+    expect(oplByPath("lecke-dash-horizont")?.titleHu).toMatch(/6 \/ 12 \/ 24/);
+    expect(oplByPath("lecke-dash-horizont")?.steps.every((s) => Boolean(s.image?.src))).toBe(true);
     expect(oplByPath("lecke-motor-jit")?.titleHu).toMatch(/JIT/i);
     expect(oplByPath("nincs")).toBeNull();
   });

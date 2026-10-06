@@ -151,7 +151,9 @@ import { WorkspacePanels, WorkspaceTabs, type PdcaMode } from "@/components/Work
 import { ConsistencyLampCard, DataLineage } from "@/components/DataLineage";
 import { SectionSettingsGear } from "@/components/SectionSettingsGear";
 import { MudaHeatmap } from "@/components/MudaHeatmap";
+import { CollapsibleCard, RevealToggle } from "@/components/lean-viz/CollapsibleCard";
 import { RevealPanel } from "@/components/lean-viz/RevealPanel";
+import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
 import {
   BulletGraph,
   ChartChrome,
@@ -647,7 +649,11 @@ export function FinanceDashboard({
   const [auditDayIso, setAuditDayIso] = useState<string | null>(null);
   type LedgerFilter = "all" | "income" | "expense" | "saving_transfer" | "liability_planned";
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
-  const [ledgerCollapsed, setLedgerCollapsed] = useState(false);
+  const cashflowBlock = useDashboardBlockOpen("cashflow", true);
+  const tartozasokBlock = useDashboardBlockOpen("tartozasok", true);
+  const idovonalBlock = useDashboardBlockOpen("idovonal-6ho", true);
+  const tetelekBlock = useDashboardBlockOpen("tetelek", true);
+  const ledgerCollapsed = !tetelekBlock.isOpen;
   type CashflowChannelFilter = "all" | "card" | "transfer" | "bank" | "other";
   const [cashflowChannelFilter, setCashflowChannelFilter] = useState<CashflowChannelFilter>("all");
   const [cashflowQuickPage, setCashflowQuickPage] = useState(1);
@@ -5900,6 +5906,7 @@ export function FinanceDashboard({
 
         <div className="viz-split">
           <ChartChrome
+            blockId="halmozott"
             title={
               <span className="inline-flex items-center gap-1">
                 Halmozott eredmény
@@ -5926,6 +5933,7 @@ export function FinanceDashboard({
 
         <div className="viz-split">
           <ChartChrome
+            blockId="eredmeny"
             title="Eredménylevezetés"
             span={vizSpan}
             onSpan={onVizSpan}
@@ -6167,13 +6175,17 @@ export function FinanceDashboard({
     <Card className="card-table relative w-full">
       <CardHeader className="flex flex-row items-start justify-between pb-1.5">
         <div className="min-w-0">
-          <CardTitle
-            className="flex items-center text-sm font-medium text-muted-foreground"
-            data-exact="Tartozások — fennálló hitelek és kötelezettségek, következő részlettel."
-          >
-            Tartozások / Kötelezettségek
-            <HelpIcon kbId="loans-liabilities" />
-          </CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={tartozasokBlock.isOpen} onClick={tartozasokBlock.toggle} />
+            <CardTitle
+              className="flex items-center text-sm font-medium text-muted-foreground"
+              data-exact="Tartozások — fennálló hitelek és kötelezettségek, következő részlettel."
+            >
+              Tartozások / Kötelezettségek
+              <HelpIcon kbId="loans-liabilities" />
+            </CardTitle>
+          </div>
+          {tartozasokBlock.isOpen ? (
           <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
             <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 font-medium", debtBuffer.cls)} title={debtBuffer.label}>
               {debtBuffer.icon} puffer
@@ -6183,6 +6195,7 @@ export function FinanceDashboard({
               {formatMoney(Math.round(debtBuffer.outstanding), CURRENCY)}
             </span>
           </div>
+          ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <SectionSettingsGear onClick={() => jumpToReferences("debts", undefined, activeWorkspace)} />
@@ -6199,6 +6212,7 @@ export function FinanceDashboard({
           </Button>
         </div>
       </CardHeader>
+      {tartozasokBlock.isOpen ? (
       <CardContent className="space-y-3">
         <div className="grid gap-2 sm:grid-cols-3">
           <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
@@ -6250,6 +6264,7 @@ export function FinanceDashboard({
           </ul>
         )}
       </CardContent>
+      ) : null}
     </Card>
   );
 
@@ -6258,16 +6273,20 @@ export function FinanceDashboard({
       <Card className="pdca-tile--wide relative overflow-hidden">
         <CardHeader className="pb-1.5 pr-3">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle
-              className="text-sm font-medium text-slate-200"
-              title={`Cashflow — ${workspaceDisplayName(activeWorkspace)}`}
-              data-exact="pénzáramlás — havi bevétel, kiadás, kassza."
-            >
-              Cashflow — {workspaceDisplayName(activeWorkspace)}
-            </CardTitle>
+            <div className="flex min-w-0 items-center gap-2">
+              <RevealToggle open={cashflowBlock.isOpen} onClick={cashflowBlock.toggle} />
+              <CardTitle
+                className="text-sm font-medium text-slate-200"
+                title={`Cashflow — ${workspaceDisplayName(activeWorkspace)}`}
+                data-exact="pénzáramlás — havi bevétel, kiadás, kassza."
+              >
+                Cashflow — {workspaceDisplayName(activeWorkspace)}
+              </CardTitle>
+            </div>
             <SectionSettingsGear onClick={() => jumpToReferences("bank", undefined, activeWorkspace)} />
           </div>
         </CardHeader>
+        {cashflowBlock.isOpen ? (
         <CardContent className="pdca-mini-grid">
           {activeWorkspace === "__all" && sumMetrics ? (
             <>
@@ -6423,6 +6442,7 @@ export function FinanceDashboard({
           <div className="col-span-full w-full pt-2">
             {leanBuilt.links.length ? (
               <ChartChrome
+                blockId="penzaramlas"
                 title="Pénzáramlás"
                 span={vizSpan}
                 onSpan={onVizSpan}
@@ -6441,6 +6461,7 @@ export function FinanceDashboard({
             ) : null}
             <div className="viz-split">
               <ChartChrome
+                blockId="hoterkep"
                 title="Kivétel-hőtérkép"
                 span={vizSpan}
                 onSpan={onVizSpan}
@@ -6464,18 +6485,23 @@ export function FinanceDashboard({
             </div>
           </div>
         </CardContent>
+        ) : null}
       </Card>
 
       {viewMode === "full" ? (
         <Card className="card-kpi w-full border border-border/60 bg-background/30">
           <CardHeader className="pb-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">6 hónapos idővonal</CardTitle>
+              <div className="flex min-w-0 items-center gap-2">
+                <RevealToggle open={idovonalBlock.isOpen} onClick={idovonalBlock.toggle} />
+                <CardTitle className="text-sm font-medium text-muted-foreground">6 hónapos idővonal</CardTitle>
+              </div>
               <Badge variant="secondary" className="text-[10px]" title="Kattints egy hónapra a részletekhez">
                 {timeline6Rows.length} hónap
               </Badge>
             </div>
           </CardHeader>
+          {idovonalBlock.isOpen ? (
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 gap-3 w-full min-w-0 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
               {timeline6Rows.map((r) => {
@@ -6531,6 +6557,7 @@ export function FinanceDashboard({
               })}
             </div>
           </CardContent>
+          ) : null}
         </Card>
       ) : null}
 
@@ -6938,7 +6965,7 @@ export function FinanceDashboard({
             ledgerCollapsed ? "text-amber-200" : "",
           )}
           style={{ clipPath: "polygon(100% 0%, 0% 0%, 100% 100%)" }}
-          onClick={() => setLedgerCollapsed((v) => !v)}
+          onClick={() => tetelekBlock.toggle()}
           aria-label={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
           title={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
         >
@@ -7377,8 +7404,9 @@ export function FinanceDashboard({
               });
               const rate = k.mudaRate;
               return (
-                <>
-                  <div className="flex items-center justify-between gap-3">
+                <CollapsibleCard
+                  id="kaizen"
+                  title={
                     <LeanTerm
                       className="text-xs uppercase tracking-wide text-emerald-200/90"
                       title="Kaizen"
@@ -7386,16 +7414,18 @@ export function FinanceDashboard({
                     >
                       Kaizen — heti/havi audit
                     </LeanTerm>
-                    {rate ? (
+                  }
+                  headerRight={
+                    rate ? (
                       <span className="font-mono text-xs text-emerald-100">
                         MUDA: {formatMoney(Math.round(rate.currentMonthMuda), CURRENCY)} · 3h átlag:{" "}
                         {formatMoney(Math.round(rate.prev3AvgMuda), CURRENCY)}
                       </span>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </div>
-
+                    )
+                  }
+                >
                   {rate ? (
                     <div className="mt-2 rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                       <LeanTerm
@@ -7478,14 +7508,16 @@ export function FinanceDashboard({
                       )}
                     </div>
                   </div>
-                </>
+                </CollapsibleCard>
               );
             })()}
           </div>
         ) : null}
 
-        <div className="rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3">
-          <div className="flex items-center justify-between gap-3">
+        <CollapsibleCard
+          id="valosag-sokk"
+          className="rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3"
+          title={
             <LeanTerm
               className="text-xs uppercase tracking-wide text-emerald-200/90"
               title="Pénzügyi Valóság-Sokk"
@@ -7493,13 +7525,16 @@ export function FinanceDashboard({
             >
               Pénzügyi Valóság-Sokk
             </LeanTerm>
+          }
+          headerRight={
             <span
               className="font-mono text-xs text-emerald-100"
               data-exact={`Szükséglet ${mirrorSummary.needsPct.toFixed(0)}% · vágy ${mirrorSummary.wantsPct.toFixed(0)}% · befektetés ${mirrorSummary.investPct.toFixed(0)}%`}
             >
               {mirrorSummary.totalOut > 0 ? `${mirrorSummary.needsPct.toFixed(0)}/${mirrorSummary.wantsPct.toFixed(0)}/${mirrorSummary.investPct.toFixed(0)}%` : "—"}
             </span>
-          </div>
+          }
+        >
           <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
             <div
               className="rounded-md border border-slate-700/60 bg-slate-900/40 p-2"
@@ -7642,7 +7677,7 @@ export function FinanceDashboard({
               </div>
             ) : null}
           </div>
-        </div>
+        </CollapsibleCard>
         <div className="viz-split">
           <MudaHeatmap
             txns={txns}
@@ -7652,8 +7687,10 @@ export function FinanceDashboard({
           />
         </div>
         {activeLoans.length > 0 ? (
-          <div className="viz-split rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3">
-            <div className="flex items-center justify-between gap-3">
+          <CollapsibleCard
+            id="adossag-helyreallitas"
+            className="viz-split rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3"
+            title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-emerald-200/90"
                 title="Adósság-helyreállítás"
@@ -7662,10 +7699,13 @@ export function FinanceDashboard({
               >
                 Adósság-helyreállítás
               </LeanTerm>
+            }
+            headerRight={
               <span className="font-mono text-xs text-slate-300">
                 Min. havi teher: {formatMoney(Math.round(debtFocus.monthlyMinimumSum), CURRENCY)}
               </span>
-            </div>
+            }
+          >
             <div className="mt-2 grid grid-cols-1 gap-2 min-w-0 xl:grid-cols-2">
               <div className="rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                 <LeanTerm
@@ -7714,12 +7754,14 @@ export function FinanceDashboard({
                 </div>
               </div>
             </div>
-          </div>
+          </CollapsibleCard>
         ) : null}
 
         {bridge ? (
-          <div className="rounded-lg border border-slate-700/60 bg-slate-900/30 p-3">
-            <div className="flex items-center justify-between gap-3">
+          <CollapsibleCard
+            id="magan-uzleti-hid"
+            className="rounded-lg border border-slate-700/60 bg-slate-900/30 p-3"
+            title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-slate-200"
                 title="Magán ↔ üzleti híd"
@@ -7727,10 +7769,13 @@ export function FinanceDashboard({
               >
                 Magán ↔ üzleti híd
               </LeanTerm>
+            }
+            headerRight={
               <span className="font-mono text-xs text-slate-300">
                 Magán szabad: {formatMoney(Math.round(bridge.personalFree), CURRENCY)}
               </span>
-            </div>
+            }
+          >
             <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
@@ -7788,12 +7833,14 @@ export function FinanceDashboard({
             <div className="mt-2 text-[11px] text-slate-400">
               Csatornák (válassz 1-et): tagi hitel visszafizetés / osztalék / bér.
             </div>
-          </div>
+          </CollapsibleCard>
         ) : null}
 
         {multiYear ? (
-          <div className="rounded-lg border border-slate-700/60 bg-slate-900/30 p-3">
-            <div className="flex items-center justify-between gap-3">
+          <CollapsibleCard
+            id="tobbeves-tukor"
+            className="rounded-lg border border-slate-700/60 bg-slate-900/30 p-3"
+            title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-slate-200"
                 title="Többéves tükör"
@@ -7801,10 +7848,13 @@ export function FinanceDashboard({
               >
                 Többéves tükör (3 év)
               </LeanTerm>
+            }
+            headerRight={
               <span className="font-mono text-xs text-slate-300">
                 Fix baseline: {formatMoney(Math.round(multiYear.baselineFixNeedMonthly), CURRENCY)}/hó
               </span>
-            </div>
+            }
+          >
             <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
@@ -7858,7 +7908,7 @@ export function FinanceDashboard({
               Lean forgatókönyv: <span className="font-mono text-slate-100">{formatMoney(Math.round(multiYear.annualizedMuda), CURRENCY)}</span>{" "}
               /év felszabadul, ha a pazarlást lenullázod.
             </div>
-          </div>
+          </CollapsibleCard>
         ) : null}
         <div className="flex items-center justify-between">
           <LeanTerm
@@ -7893,6 +7943,7 @@ export function FinanceDashboard({
           <Card className="w-full">
             <CardContent className="grid items-start gap-3 pt-2.5">
               <ChartChrome
+                blockId="eredmeny"
                 title={
                   <LeanTerm
                     title="Eredménylevezetés"
@@ -7917,6 +7968,7 @@ export function FinanceDashboard({
               </ChartChrome>
               <div className="viz-split">
                 <ChartChrome
+                  blockId="havi-sorozat"
                   title="Havi bevétel, kiadás és megtakarítás"
                   span={vizSpan}
                   onSpan={onVizSpan}
@@ -7951,6 +8003,7 @@ export function FinanceDashboard({
                 <EmptyBlock>Még nincs rögzített áramlás.</EmptyBlock>
               ) : (
                 <ChartChrome
+                  blockId="penzaramlas"
                   title={
                     <LeanTerm
                       title="Pénzáramlás"
@@ -7976,6 +8029,7 @@ export function FinanceDashboard({
               )}
               <div className="viz-split">
                 <ChartChrome
+                  blockId="hoterkep"
                   title="Kivétel-hőtérkép"
                   span={vizSpan}
                   onSpan={onVizSpan}

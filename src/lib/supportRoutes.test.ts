@@ -30,7 +30,7 @@ describe("supportRoutes", () => {
     expect(searchSupportLessons("want").some((l) => l.path.includes("szukseglet"))).toBe(true);
     expect(searchSupportLessons("cashflow").some((l) => l.path === "lecke-cashflow-logika")).toBe(true);
     expect(searchSupportLessons("runway").some((l) => l.path === "kahn-strategiai-elagazas")).toBe(true);
-    expect(searchSupportLessons("runway").some((l) => l.path === "lecke-dash-runway")).toBe(true);
+    expect(searchSupportLessons("12 hónap").some((l) => l.path === "lecke-dash-horizont")).toBe(true);
     expect(canonicalizeSupportSlug("dash-kpi-sav")).toBe("lecke-dash-kpi-sav");
     expect(canonicalizeSupportSlug("motor-jit")).toBe("lecke-motor-jit");
     expect(searchSupportLessons("dokk").some((l) => l.path === "lecke-motor-dokk")).toBe(true);

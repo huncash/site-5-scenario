@@ -1,0 +1,29 @@
+import { describe, expect, it } from "vitest";
+
+import { InMemoryDataStore } from "@/lib/mesh/dataStore";
+import { createMeshRepository } from "@/lib/mesh/meshRepository";
+import type { MeshSchema } from "@/lib/mesh/schema";
+import {
+  readDashboardBlockOpen,
+  resolveDashboardBlockOpen,
+  writeDashboardBlockOpen,
+} from "@/lib/dashboardBlocks";
+
+describe("dashboardBlocks", () => {
+  it("defaults when nothing is saved", () => {
+    expect(resolveDashboardBlockOpen(undefined, true)).toBe(true);
+    expect(resolveDashboardBlockOpen(undefined, false)).toBe(false);
+  });
+
+  it("uses the stored open flag", () => {
+    expect(resolveDashboardBlockOpen({ id: "penzaramlas", open: false }, true)).toBe(false);
+    expect(resolveDashboardBlockOpen({ id: "hoterkep", open: true }, false)).toBe(true);
+  });
+
+  it("persists through MeshRepository", async () => {
+    const repo = createMeshRepository(new InMemoryDataStore<MeshSchema>());
+    expect(await readDashboardBlockOpen(repo, "penzaramlas", true)).toBe(true);
+    await writeDashboardBlockOpen(repo, "penzaramlas", false);
+    expect(await readDashboardBlockOpen(repo, "penzaramlas", true)).toBe(false);
+  });
+});

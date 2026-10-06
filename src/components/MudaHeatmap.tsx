@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { LeanTerm } from "@/components/HelpIcon";
+import { RevealToggle } from "@/components/lean-viz/CollapsibleCard";
+import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
 import { cn } from "@/lib/utils";
 import { categoryLabel, formatMoney, txnDayIso, type Transaction } from "@/lib/finance";
 
@@ -61,6 +63,8 @@ export function MudaHeatmap({
   selectedDayIso,
   onSelectDay,
   amountOf,
+  blockId = "muda-heatmap",
+  defaultOpen = true,
 }: {
   txns: Transaction[];
   className?: string;
@@ -68,7 +72,10 @@ export function MudaHeatmap({
   selectedDayIso?: string | null;
   onSelectDay?: (dayIso: string | null) => void;
   amountOf?: (t: Transaction) => number;
+  blockId?: string;
+  defaultOpen?: boolean;
 }) {
+  const { isOpen, toggle } = useDashboardBlockOpen(blockId, defaultOpen);
   const [cursorMonth, setCursorMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -151,13 +158,16 @@ export function MudaHeatmap({
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <LeanTerm
-          className="text-xs uppercase tracking-wide text-emerald-200/90"
-          title={title}
-          exact="A nap színe a napi kiadás. Rózsaszín pont = vágy, piros pont = veszteség."
-        >
-          {title}
-        </LeanTerm>
+        <div className="flex min-w-0 items-center gap-2">
+          <RevealToggle open={isOpen} onClick={toggle} />
+          <LeanTerm
+            className="text-xs uppercase tracking-wide text-emerald-200/90"
+            title={title}
+            exact="A nap színe a napi kiadás. Rózsaszín pont = vágy, piros pont = veszteség."
+          >
+            {title}
+          </LeanTerm>
+        </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -185,6 +195,8 @@ export function MudaHeatmap({
         </div>
       </div>
 
+      {isOpen ? (
+      <>
       <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-slate-300">
         <div className="flex items-center gap-1" data-exact="A cella zöldje a napi összes kiadás nagysága a hónap maximumához képest.">
           <span className="inline-block h-2.5 w-3.5 rounded-sm bg-emerald-400/40 a11y-pat-dots" /> költési intenzitás
@@ -315,6 +327,8 @@ export function MudaHeatmap({
       ) : (
         <p className="mt-2 text-[10px] text-slate-500">Vidd fölé vagy kattints egy napra: kiírja a dátumot és az összegeket.</p>
       )}
+      </>
+      ) : null}
     </div>
   );
 }

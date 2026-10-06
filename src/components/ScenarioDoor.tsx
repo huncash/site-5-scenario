@@ -427,25 +427,32 @@ export function ScenarioDoor() {
 
 function HomeProductShots() {
   const { t } = useI18n();
+  const shots = [
+    {
+      src: "/product-shots/horizon-6-cashflow.webp",
+      caption: t("brand.shotHorizon6Cash"),
+    },
+    {
+      src: "/product-shots/horizon-6-heatmap.webp",
+      caption: t("brand.shotHorizon6Heat"),
+    },
+    {
+      src: "/product-shots/horizon-12-heatmap.webp",
+      caption: t("brand.shotHorizon12Heat"),
+    },
+  ];
   return (
     <section className="space-y-4">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("brand.programTitle")}</div>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("brand.programBody")}</p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-5">
-        <ProductFrame className="lg:col-span-3" caption={t("brand.shotPlanDo")}>
-          <PdcaShot />
-        </ProductFrame>
-        <ProductFrame className="lg:col-span-2" caption={t("brand.shotCashflow")}>
-          <CashflowShot />
-        </ProductFrame>
-        <ProductFrame className="lg:col-span-2" caption={t("brand.shotSpaces")}>
-          <WorkspaceShot />
-        </ProductFrame>
-        <ProductFrame className="lg:col-span-3" caption={t("brand.shotItems")}>
-          <ItemsShot />
-        </ProductFrame>
+      <div className="grid gap-4 md:grid-cols-3">
+        {shots.map((shot) => (
+          <ProductFrame key={shot.src} caption={shot.caption}>
+            <img src={shot.src} alt={shot.caption} className="h-full w-full object-cover object-top" />
+          </ProductFrame>
+        ))}
       </div>
     </section>
   );
@@ -468,146 +475,11 @@ function ProductFrame({
         <span className="h-2 w-2 rounded-full bg-white/12" />
         <span className="ml-2 truncate text-[10px] text-muted-foreground">szcenario.hu</span>
       </div>
-      <div className="aspect-[16/10] p-3" aria-hidden>
+      <div className="aspect-[16/10] bg-slate-950" aria-hidden>
         {children}
       </div>
       <figcaption className="border-t border-white/10 px-3 py-2 text-[12px] text-muted-foreground">{caption}</figcaption>
     </figure>
-  );
-}
-
-function ShotLabel({ children }: { children: ReactNode }) {
-  return (
-    <span className="rounded-md bg-slate-950/90 px-1.5 py-0.5 text-[9px] font-medium text-slate-200 shadow-sm">
-      {children}
-    </span>
-  );
-}
-
-function PdcaShot() {
-  const { t } = useI18n();
-  return (
-    <div className="grid h-full grid-cols-2 gap-2 rounded-lg bg-[var(--app-bg)] p-2">
-      <div className="flex flex-col rounded-md border border-amber-300/30 bg-amber-500/[0.06] p-2">
-        <div className="text-[9px] font-semibold uppercase tracking-wider text-amber-200/80">PLAN</div>
-        <div className="mt-2 flex items-end justify-between gap-3">
-          <div className="space-y-1">
-            <ShotLabel>1,2 M</ShotLabel>
-            <ShotLabel>0,8 M</ShotLabel>
-          </div>
-            <div className="flex items-end gap-1">
-            <div className="h-12 w-5 rounded-sm bg-emerald-700/55 a11y-pat-diagonal" />
-            <div className="h-8 w-5 rounded-sm bg-sky-400/60 a11y-pat-dots" />
-          </div>
-        </div>
-        <div className="mt-auto space-y-1.5 pt-3">
-          <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
-            <div className="h-full w-2/3 bg-amber-300/80 a11y-pat-h-stripe" />
-          </div>
-          <div className="grid grid-cols-3 gap-1">
-            <div className="h-8 rounded bg-slate-900/70" />
-            <div className="h-8 rounded bg-slate-900/50" />
-            <div className="h-8 rounded bg-slate-900/70" />
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-col rounded-md border border-cyan-300/30 bg-cyan-500/[0.06] p-2">
-        <div className="text-[9px] font-semibold uppercase tracking-wider text-cyan-200/80">DO</div>
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400">{t("brand.shotCashNet")}</span>
-            <ShotLabel>−120 e</ShotLabel>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400">{t("brand.shotDebt")}</span>
-            <ShotLabel>2,4 M</ShotLabel>
-          </div>
-        </div>
-        <div className="mt-auto grid grid-cols-2 gap-1 pt-3">
-          <div className="h-10 rounded border border-white/5 bg-slate-900/70" />
-          <div className="h-10 rounded border border-white/5 bg-slate-900/50" />
-          <div className="col-span-2 h-8 rounded border border-white/5 bg-slate-900/40" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CashflowShot() {
-  const { t } = useI18n();
-  const bars = [28, 46, 38, 62, 54, 71];
-  return (
-    <div className="flex h-full flex-col rounded-lg bg-[var(--app-bg)] p-2">
-      <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">{t("brand.shotCumulative")}</div>
-      <div className="relative mt-2 min-h-0 flex-1">
-        <div className="absolute inset-0 flex items-end gap-1.5">
-          {bars.map((h, i) => (
-            <div key={i} className="flex h-full min-w-0 flex-1 flex-col justify-end">
-              <div className="relative w-full" style={{ height: `${h}%` }}>
-                <span className="absolute inset-x-0 -top-5 flex justify-center">
-                  <ShotLabel>{h}%</ShotLabel>
-                </span>
-                <div className={`h-full w-full rounded-sm bg-cyan-400/70 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots", "a11y-pat-h-stripe", "a11y-pat-v-stripe", "a11y-pat-diagonal"][i]}`} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WorkspaceShot() {
-  const { t } = useI18n();
-  const tabs = [t("chrome.personal"), t("chrome.business"), t("chrome.project")];
-  return (
-    <div className="flex h-full flex-col rounded-lg bg-[var(--app-bg)] p-2">
-      <div className="flex gap-1">
-        {tabs.map((x, i) => (
-          <div
-            key={x}
-            className={`rounded-md px-2 py-1 text-[10px] ${i === 1 ? "bg-white/10 text-slate-100" : "text-slate-500"}`}
-          >
-            {x}
-          </div>
-        ))}
-      </div>
-      <div className="mt-2 grid flex-1 grid-cols-2 gap-2">
-        <div className="rounded-md border border-white/5 bg-slate-900/60" />
-        <div className="rounded-md border border-white/5 bg-slate-900/40" />
-      </div>
-      <div className="mt-2 flex justify-around rounded-md border border-white/5 bg-slate-900/50 py-1 text-[9px] text-slate-400">
-        <span>{t("dash.cashflow")}</span>
-        <span className="text-cyan-200">{t("dash.items")}</span>
-        <span>{t("dash.deals")}</span>
-        <span>{t("dash.inventory")}</span>
-      </div>
-    </div>
-  );
-}
-
-function ItemsShot() {
-  const { t } = useI18n();
-  const rows = [
-    { n: t("brand.shotInput"), v: "420 e", w: "70%" },
-    { n: t("brand.shotWage"), v: "310 e", w: "52%" },
-    { n: t("brand.shotUtility"), v: "180 e", w: "34%" },
-  ];
-  return (
-    <div className="flex h-full flex-col gap-2 rounded-lg bg-[var(--app-bg)] p-2">
-      {rows.map((r, i) => (
-        <div key={r.n} className="flex items-center gap-2">
-          <div className="w-16 shrink-0 text-[10px] text-slate-400">{r.n}</div>
-          <div className="relative h-5 flex-1 rounded-sm bg-slate-800">
-            <div
-              className={`h-full rounded-sm bg-emerald-700/45 ${["a11y-pat-diagonal", "a11y-pat-checker", "a11y-pat-dots"][i]}`}
-              style={{ width: r.w }}
-            />
-          </div>
-          <ShotLabel>{r.v}</ShotLabel>
-        </div>
-      ))}
-    </div>
   );
 }
 

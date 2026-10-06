@@ -14,10 +14,16 @@ export type UiPrefs = {
   a11y?: boolean;
 };
 
+export type DashboardBlock = {
+  id: string;
+  open: boolean;
+};
+
 export type MeshSchema = {
   transactions: StoreDefinition<string, Transaction>;
   devices: StoreDefinition<string, MeshDevice>;
   logs: StoreDefinition<string, MeshLogEntry>;
   pairingSessions: StoreDefinition<string, PairingSession>;
   prefs: StoreDefinition<string, UiPrefs>;
+  dashboardBlocks: StoreDefinition<string, DashboardBlock>;
 };

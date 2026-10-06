@@ -1,6 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { HelpIcon } from "@/components/HelpIcon";
+import { RevealToggle } from "@/components/lean-viz/CollapsibleCard";
+import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
 import { currencyUnit } from "@/i18n/currency";
 import { formatMoney } from "@/lib/finance";
 import {
@@ -155,16 +157,7 @@ export function ChartLegendSwatch({
 export const VIZ_SPANS = [6, 12, 24] as const;
 export type VizSpan = (typeof VIZ_SPANS)[number];
 
-export function ChartChrome({
-  title,
-  legend,
-  span,
-  onSpan,
-  onPrev,
-  onNext,
-  windowLabel,
-  children,
-}: {
+type ChartChromeProps = {
   title: ReactNode;
   legend?: ReactNode;
   span?: VizSpan;
@@ -173,11 +166,29 @@ export function ChartChrome({
   onNext?: () => void;
   windowLabel?: string;
   children: ReactNode;
-}) {
+  blockId?: string;
+  defaultOpen?: boolean;
+};
+
+function ChartChromeFrame({
+  title,
+  legend,
+  span,
+  onSpan,
+  onPrev,
+  onNext,
+  windowLabel,
+  children,
+  isOpen,
+  onToggle,
+}: ChartChromeProps & { isOpen: boolean; onToggle?: () => void }) {
   return (
     <section className="min-w-0 w-full">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h3 className="text-sm font-medium leading-snug text-slate-200">{title}</h3>
+        <div className="flex min-w-0 items-start gap-2">
+          {onToggle ? <RevealToggle open={isOpen} onClick={onToggle} /> : null}
+          <h3 className="text-sm font-medium leading-snug text-slate-200">{title}</h3>
+        </div>
         {onSpan && onPrev && onNext ? (
           <div className="flex flex-wrap items-center gap-1">
             <button
@@ -219,10 +230,30 @@ export function ChartChrome({
           </div>
         ) : null}
       </div>
-      {legend ? <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">{legend}</div> : null}
-      <div className="mt-2 min-w-0">{children}</div>
+      {isOpen ? (
+        <>
+          {legend ? <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">{legend}</div> : null}
+          <div className="mt-2 min-w-0">{children}</div>
+        </>
+      ) : null}
     </section>
   );
+}
+
+function ChartChromePersisted({
+  blockId,
+  defaultOpen = true,
+  ...rest
+}: ChartChromeProps & { blockId: string }) {
+  const { isOpen, toggle } = useDashboardBlockOpen(blockId, defaultOpen);
+  return <ChartChromeFrame {...rest} isOpen={isOpen} onToggle={toggle} />;
+}
+
+export function ChartChrome(props: ChartChromeProps) {
+  if (props.blockId) {
+    return <ChartChromePersisted {...props} blockId={props.blockId} />;
+  }
+  return <ChartChromeFrame {...props} isOpen />;
 }
 
 export function ChartFrame(props: {

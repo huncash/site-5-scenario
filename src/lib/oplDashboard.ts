@@ -9,6 +9,7 @@ function step(
   actionEn: string,
   captionHu: string,
   captionEn: string,
+  src?: string,
 ): OplStep {
   return {
     id,
@@ -16,7 +17,13 @@ function step(
     titleEn,
     actionHu,
     actionEn,
-    image: { captionHu, captionEn },
+    image: {
+      captionHu,
+      captionEn,
+      ...(src
+        ? { src, altHu: captionHu, altEn: captionEn }
+        : {}),
+    },
   };
 }
 
@@ -739,6 +746,53 @@ export const DASH_OPL_LESSONS: OplLesson[] = [
       step("s1", "Slot", "Slot", "Válts Magán vagy Vállalkozás fülre. Szumma tilt.", "Switch to Personal or Business. Szumma blocks it.", "Import a Slot fülön", "Import on a Slot tab"),
       step("s2", "Fájl", "File", "Az XML gomb a helyi kivonatot kéri.", "The XML button asks for the local extract.", "XML kivonat gomb", "XML extract button"),
       step("s3", "ÁFA", "VAT", "HU sornál a motor számol. A gyanúst nézd át.", "On HU lines the engine computes. Review the flagged.", "Import ÁFA felülvizsgálat", "Import VAT review"),
+    ],
+  }),
+  dash({
+    slug: "horizont",
+    categoryHu: "Tételek",
+    categoryEn: "Ledger",
+    titleHu: "6 / 12 / 24 hónap nézet",
+    titleEn: "6 / 12 / 24 month view",
+    whyHu: "A 6, 12, 24 hónap gomb nem új adat. Ugyanaz a tétel, más ablak.",
+    whyEn: "The 6, 12, 24 month button is not new data. Same posting, different window.",
+    jargon: ["cashflow", "runway", "slot"],
+    keywords: ["6 hónap", "12 hónap", "24 hónap", "horizont", "hőtérkép", "tételek"],
+    deepDiveHu:
+      "A horizont gomb a kártya tetején van: 6, 12, 24 hónap. Nem tölt új fájlt, nem más Case. Ugyanaz a bisztró, ugyanazok a sorok. 6 hónapnál a hőtérkép májustól októberig sűrű: kevés oszlop, a közelmúlt. 12 hónapnál novemberig nyílik: több oszlop, ugyanaz a tétel vékonyabb sávban. A 24 hónap ugyanígy — hosszabb ablak, nem más igazság. Előbb a gomb, aztán a tábla. Ha a mintázat 12-nél ritkul, az a ritka hónap, nem a hiba.",
+    deepDiveEn:
+      "The horizon control sits on the card: 6, 12, 24 months. It does not load a new file or another Case. Same bistro, same rows. At 6 months the heatmap is dense from May to October: few columns, the recent past. At 12 months it opens back to November: more columns, the same posting in a thinner band. 24 months works the same — a longer window, not a different truth. Button first, then the table. If the pattern thins at 12, that is a sparse month, not a bug.",
+    steps: [
+      step(
+        "s1",
+        "Gomb",
+        "Button",
+        "A kártyán a 6, 12, 24 gomb. Előbb a horizont, aztán a tábla.",
+        "The 6, 12, 24 button is on the card. Horizon first, then the table.",
+        "Cashflow kártya, 6 hónap gomb",
+        "Cashflow card, 6-month button",
+        "/opl-frames/horizon-6-cashflow.webp",
+      ),
+      step(
+        "s2",
+        "6 hónap",
+        "6 months",
+        "6 hónap: májustól októberig, kevés oszlop. A közelmúlt.",
+        "6 months: May to October, few columns. The recent past.",
+        "Hőtérkép 6 hónap — sűrű közelmúlt",
+        "Heatmap 6 months — dense recent past",
+        "/opl-frames/horizon-6-heatmap.webp",
+      ),
+      step(
+        "s3",
+        "12 hónap",
+        "12 months",
+        "12 hónap: novembertől októberig, több oszlop. Ugyanaz a sor.",
+        "12 months: November to October, more columns. Same row.",
+        "Hőtérkép 12 hónap — hosszabb ablak",
+        "Heatmap 12 months — longer window",
+        "/opl-frames/horizon-12-heatmap.webp",
+      ),
     ],
   }),
 ];
