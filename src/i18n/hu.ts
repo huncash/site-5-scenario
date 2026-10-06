@@ -874,7 +874,7 @@ export const hu = {
     resilCheck: "CHECK: ResourceRunway, EnergyAutonomy, TTR — a motor fizikai korlátot is visz.",
     resilAct: "ACT: protokoll — redundancia, local-first, helyi ellátás, készlet.",
     resilEyebrow: "BCP · Működési reziliencia · Strategic foresight",
-    kahnPlan: "PLAN: 1) hitel vagy saját tartalék, 2) olcsó+kötbéres vagy drága+rugalmas, 3) melyik kimenetre kötsz pénzt.",
+    kahnPlan: "Kattints: hitel vagy organikus — a PRO kimenet élőben számol.",
     kahnCheck: "CHECK: mennyibe kerül bővíteni, mennyibe várni, mennyibe kiszállni a rossz ágon. Elágazás, nem jövendölés.",
     kahnAct: "ACT: egy utat viszel, vagy tartalékot tartasz. Rossz ágon ≥4 hó tartalék, árrés ≥12%.",
     stratPlan: "PLAN: a core törzs adott. Itt csak a döntés rétegét mozgatod.",
@@ -898,9 +898,8 @@ export const hu = {
     familyTime: "Idő",
   },
   kahnGuide: {
-    bannerTitle: "Oktatói panel — Kahn esettanulmány",
-    bannerLead:
-      "Három fül egy reakciós lánc: Alapműködés (Core) → Projekt/Kapacitás → Személyes/Háztartás. A PRO-ág váltása azonnal újraszámolja a Magán kereteket.",
+    bannerTitle: "Core · Projekt · Magán",
+    bannerLead: "Core → Projekt → Magán.",
     expand: "Kinyit",
     collapse: "Összecsuk",
     hideForever: "Elrejtés",

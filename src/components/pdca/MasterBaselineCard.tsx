@@ -1,3 +1,4 @@
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { MASTER_BASELINE_LABEL, type MasterBaselineContext } from "@/lib/masterBaseline";
 import { formatHuf } from "@/content/pricing/tiers";
 
@@ -17,41 +18,49 @@ export function MasterBaselineCard(props: { context: MasterBaselineContext; spec
   const { context: ctx, specificHint } = props;
   const chips = resourceLines(ctx);
   return (
-    <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <CollapsibleCard
+      id="master-baseline"
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span>
+          <span className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             {MASTER_BASELINE_LABEL}
-          </p>
-          <h3 className="mt-0.5 text-sm font-semibold text-foreground">{ctx.orgLabel}</h3>
-          <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{ctx.sizeHint}</p>
-        </div>
-        {ctx.inheritedFrom ? (
-          <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground">
+          </span>
+          <span className="mt-0.5 block text-sm font-semibold text-[var(--text-main)]">{ctx.orgLabel}</span>
+        </span>
+      }
+      headerRight={
+        ctx.inheritedFrom ? (
+          <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-[var(--text-main)]">
             örökölt ← {ctx.inheritedFrom}
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground">
+          <span className="inline-flex items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-[var(--text-main)]">
             törzs
           </span>
-        )}
-      </div>
+        )
+      }
+    >
       {chips.length ? (
         <ul className="mt-2 flex flex-wrap gap-1.5">
           {chips.map((c) => (
             <li
               key={c}
-              className="inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-foreground"
+              className="inline-flex rounded-md border border-border/50 bg-background px-1.5 py-0.5 text-[11px] text-[var(--text-main)]"
             >
               {c}
             </li>
           ))}
         </ul>
       ) : null}
-      <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-        {specificHint ??
-          "A törzs adott. Itt csak a szcenárió-specifikus változót mozgatod — méretet és kiinduló készletet nem kell újra megadni."}
-      </p>
-    </section>
+      <DetailFold id="master-baseline-size" text={ctx.sizeHint} />
+      <DetailFold
+        id="master-baseline-hint"
+        text={
+          specificHint ??
+          "A törzs adott. Itt csak a szcenárió-specifikus változót mozgatod — méretet és kiinduló készletet nem kell újra megadni."
+        }
+      />
+    </CollapsibleCard>
   );
 }

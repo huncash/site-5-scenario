@@ -25,6 +25,16 @@ describe("dashboardBlocks", () => {
     expect(resolveDashboardBlockOpen({ id: "halmozott", open: true }, false)).toBe(true);
   });
 
+  it("keeps the KPI bar closed until the user opens it", () => {
+    expect(resolveDashboardBlockOpen(undefined, false)).toBe(false);
+    expect(resolveDashboardBlockOpen({ id: "kpi-quick-bar", open: true }, false)).toBe(true);
+  });
+
+  it("keeps PDCA section frames open until the user closes them", () => {
+    expect(resolveDashboardBlockOpen(undefined, true)).toBe(true);
+    expect(resolveDashboardBlockOpen({ id: "pdca-plan", open: false }, true)).toBe(false);
+  });
+
   it("persists through MeshRepository", async () => {
     const repo = createMeshRepository(new InMemoryDataStore<MeshSchema>());
     expect(await readDashboardBlockOpen(repo, "penzaramlas", true)).toBe(true);

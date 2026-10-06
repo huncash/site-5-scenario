@@ -30,27 +30,6 @@ export const KAHN_JARGON = {
   penalty: jargon("penalty"),
 } as const;
 
-export const KAHN_TOUR_STEPS = [
-  {
-    id: "core" as const,
-    sphere: "core" as KahnSphere,
-    titleHu: "A törzs külön van a kockázatos projekttől.",
-    titleEn: "The trunk stays separate from the risky project.",
-  },
-  {
-    id: "project" as const,
-    sphere: "project" as KahnSphere,
-    titleHu: "Itt rakod a sávokat és a vészféket (Stop-loss).",
-    titleEn: "Here you set the bands and the brake (Stop-loss).",
-  },
-  {
-    id: "personal" as const,
-    sphere: "personal" as KahnSphere,
-    titleHu: "A döntés a családi kasszát is viszi.",
-    titleEn: "The decision also moves the family till.",
-  },
-] as const;
-
 export type KahnPersonalFlow = {
   scenario: KahnImpactScenario;
   /** Havi osztalék / kivét keret a választott ágon. */

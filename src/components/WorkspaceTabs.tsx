@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Folder } from "lucide-react";
 
 import { LeanTerm } from "@/components/HelpIcon";
+import { CollapsibleSection } from "@/components/lean-viz/CollapsibleCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -284,23 +285,33 @@ export function WorkspacePanels({
 
           {/* LEFT COLUMN */}
           <section className="pdca-col">
-            <div className="shrink-0 text-[11px] font-semibold uppercase tracking-wider">
-              <LeanTerm className={headerLeftCls} exact={phaseExact(leftPhase)} title={headerLeft}>
-                {headerLeft}
-              </LeanTerm>
-            </div>
-            <div className="grid min-h-0 w-full items-start gap-1.5">{leftContent}</div>
+            <CollapsibleSection
+              id={`pdca-${leftPhase.toLowerCase()}`}
+              titleClassName="text-[11px] font-semibold uppercase tracking-wider"
+              title={
+                <LeanTerm className={headerLeftCls} exact={phaseExact(leftPhase)} title={headerLeft}>
+                  {headerLeft}
+                </LeanTerm>
+              }
+            >
+              <div className="grid min-h-0 w-full items-start gap-1.5">{leftContent}</div>
+            </CollapsibleSection>
           </section>
 
           {/* RIGHT COLUMN */}
           {!isFull ? (
             <section className="pdca-col">
-              <div className="shrink-0 text-left text-[11px] font-semibold uppercase tracking-wider">
-                <LeanTerm className={headerRightCls} exact={phaseExact(rightPhase)} title={headerRight}>
-                  {headerRight}
-                </LeanTerm>
-              </div>
-              <div className="grid min-h-0 w-full items-start gap-1.5">{rightContent}</div>
+              <CollapsibleSection
+                id={`pdca-${rightPhase.toLowerCase()}`}
+                titleClassName="text-[11px] font-semibold uppercase tracking-wider"
+                title={
+                  <LeanTerm className={headerRightCls} exact={phaseExact(rightPhase)} title={headerRight}>
+                    {headerRight}
+                  </LeanTerm>
+                }
+              >
+                <div className="grid min-h-0 w-full items-start gap-1.5">{rightContent}</div>
+              </CollapsibleSection>
             </section>
           ) : null}
         </div>

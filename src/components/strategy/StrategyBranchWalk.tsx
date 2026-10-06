@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import {
   chooseAt,
@@ -34,27 +35,26 @@ export function StrategyBranchWalk(props: { storyId: "new-line" | "loan-whatif" 
       <ol className="crisis-tl">
         {steps.map(({ step, picked }, idx) => (
           <li key={step.id} className="crisis-tl-fork">
-            <div className="crisis-tl-hour">
-              <span className="surv-label-chip">{step.month}. hó</span>
-            </div>
             <p className="crisis-tl-q">{step.question}</p>
             <ul className="crisis-tl-choices">
               {step.choices.map((c) => {
                 const on = picked?.id === c.id;
                 return (
                   <li key={c.id}>
-                    <button
-                      type="button"
-                      className={`crisis-tl-btn crisis-tl-${c.tone}${on ? " is-on" : ""}`}
-                      aria-pressed={on}
-                      onClick={() => setPath(chooseAt(path, idx, c.id))}
-                    >
-                      <span className="crisis-tl-btn-head">
-                        <ChartLegendSwatch tone={c.tone} label={TONE_LABEL[c.tone]} line />
-                        <span className="surv-label-chip">{c.label}</span>
-                      </span>
-                      <span className="crisis-tl-effect">{c.lead}</span>
-                    </button>
+                    <div className={`crisis-tl-btn crisis-tl-${c.tone}${on ? " is-on" : ""}`}>
+                      <button
+                        type="button"
+                        className="kahn-pick"
+                        aria-pressed={on}
+                        onClick={() => setPath(chooseAt(path, idx, c.id))}
+                      >
+                        <span className="crisis-tl-btn-head">
+                          <ChartLegendSwatch tone={c.tone} label={TONE_LABEL[c.tone]} line />
+                          <span className="surv-label-chip">{c.label}</span>
+                        </span>
+                      </button>
+                      <DetailFold id={`narr-${props.storyId}-${step.id}-${c.id}`} text={c.lead} />
+                    </div>
                   </li>
                 );
               })}
@@ -81,8 +81,8 @@ export function StrategyBranchWalk(props: { storyId: "new-line" | "loan-whatif" 
             <dd>{climax.beMonth == null ? "horizonton túl" : `${climax.beMonth}. hó`}</dd>
           </div>
         </dl>
-        <p className="narr-climax-lock">{climax.lockIn}</p>
-        <p className="narr-climax-wow">{climax.wow}</p>
+        <DetailFold id={`narr-${props.storyId}-lock`} text={climax.lockIn} />
+        <DetailFold id={`narr-${props.storyId}-wow`} text={climax.wow} />
       </aside>
     </div>
   );

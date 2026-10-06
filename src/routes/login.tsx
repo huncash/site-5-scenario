@@ -156,7 +156,7 @@ function LoginPage() {
     if (state.status === "unlocked") return;
     const n = Number(demo);
     const byNum =
-      Number.isInteger(n) && n >= 1 && n <= 18
+      Number.isInteger(n) && n >= 1 && n <= 21
         ? (publicScenarioKindGroups()
             .flatMap((g) => g.industries.flatMap((b) => b.segments))
             .find((s) => demoSerialFromId(s.id) === n)?.id ?? null)

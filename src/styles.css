@@ -522,8 +522,8 @@ html.light-mode.palette-forest,
   --app-bg: #f5f5f4; /* stone-50 — meleg kőszürke, nem mentazöld */
   --card-bg: #ffffff;
   --card-border: #e7e5e4;
-  --text-main: #1c1917;
-  --text-muted: #57534e;
+  --text-main: #1c1917; /* stone-900 */
+  --text-muted: #44403c; /* stone-700 — másodlagos minimum */
   --dropdown-bg: #ffffff;
   --dropdown-hover: #f5f5f4;
   --accent-emerald: #1b4332;
@@ -550,8 +550,8 @@ html.light-mode.palette-slate,
   --app-bg: #f8fafc; /* slate-50 */
   --card-bg: #ffffff;
   --card-border: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #475569;
+  --text-main: #0f172a; /* slate-900 */
+  --text-muted: #334155; /* slate-700 — másodlagos minimum */
   --dropdown-bg: #ffffff;
   --dropdown-hover: #f1f5f9;
   --accent-emerald: #3d5a80;
@@ -570,8 +570,8 @@ html.light-mode.palette-bronze,
   --app-bg: #fafaf9;
   --card-bg: #ffffff;
   --card-border: #e7e5e4;
-  --text-main: #1c1917;
-  --text-muted: #57534e;
+  --text-main: #1c1917; /* stone-900 */
+  --text-muted: #44403c; /* stone-700 */
   --dropdown-bg: #ffffff;
   --dropdown-hover: #f5f5f4;
   --accent-emerald: #9a7558;
@@ -594,34 +594,74 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
-/* Light dashboard: hardcoded white/slate ink on cards is unreadable */
-html.light .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200):not(button),
-html.light-mode .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200):not(button) {
+/* Light dashboard: primary ink = slate/stone-900; secondary ≥ slate-700. Pastel-on-white banned. */
+html.light .app-shell-main,
+html.light-mode .app-shell-main {
+  color: var(--text-main);
+}
+html.light .app-shell-main .text-muted-foreground,
+html.light-mode .app-shell-main .text-muted-foreground {
+  color: var(--text-muted) !important;
+}
+html.light .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200, .text-gray-50, .text-gray-100, .text-gray-200):not(button),
+html.light-mode .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200, .text-gray-50, .text-gray-100, .text-gray-200):not(button),
+html.light .app-shell-main [class*="text-white/"]:not(button),
+html.light-mode .app-shell-main [class*="text-white/"]:not(button),
+html.light .app-shell-main [class*="text-slate-50"]:not(button),
+html.light .app-shell-main [class*="text-slate-100"]:not(button),
+html.light .app-shell-main [class*="text-slate-200"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-50"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-100"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-200"]:not(button) {
   color: var(--text-main) !important;
 }
-html.light .app-shell-main :is(.text-slate-300, .text-slate-400, .kpi-label),
-html.light-mode .app-shell-main :is(.text-slate-300, .text-slate-400, .kpi-label) {
+html.light .app-shell-main :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-gray-300, .text-gray-400, .text-gray-500, .kpi-label),
+html.light-mode .app-shell-main :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-gray-300, .text-gray-400, .text-gray-500, .kpi-label),
+html.light .app-shell-main [class*="text-slate-300"]:not(button),
+html.light .app-shell-main [class*="text-slate-400"]:not(button),
+html.light .app-shell-main [class*="text-slate-500"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-300"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-400"]:not(button),
+html.light-mode .app-shell-main [class*="text-slate-500"]:not(button) {
   color: var(--text-muted) !important;
 }
 html.light .app-shell-main .kpi-value,
 html.light-mode .app-shell-main .kpi-value {
   color: var(--text-main);
 }
-html.light .app-shell-main :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(button),
-html.light-mode .app-shell-main :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(button) {
+html.light .app-shell-main :is(.text-emerald-100, .text-emerald-200, .text-emerald-300, .text-emerald-400):not(button),
+html.light-mode .app-shell-main :is(.text-emerald-100, .text-emerald-200, .text-emerald-300, .text-emerald-400):not(button),
+html.light .app-shell-main [class*="text-emerald-1"]:not(button),
+html.light .app-shell-main [class*="text-emerald-2"]:not(button),
+html.light-mode .app-shell-main [class*="text-emerald-1"]:not(button),
+html.light-mode .app-shell-main [class*="text-emerald-2"]:not(button) {
   color: #047857 !important;
 }
-html.light .app-shell-main :is(.text-sky-200, .text-sky-300, .text-sky-400):not(button),
-html.light-mode .app-shell-main :is(.text-sky-200, .text-sky-300, .text-sky-400):not(button) {
-  color: #0369a1 !important;
+html.light .app-shell-main :is(.text-sky-100, .text-sky-200, .text-sky-300, .text-sky-400, .text-cyan-200, .text-cyan-300, .text-cyan-400):not(button),
+html.light-mode .app-shell-main :is(.text-sky-100, .text-sky-200, .text-sky-300, .text-sky-400, .text-cyan-200, .text-cyan-300, .text-cyan-400):not(button),
+html.light .app-shell-main [class*="text-cyan-"]:not(button),
+html.light-mode .app-shell-main [class*="text-cyan-"]:not(button) {
+  color: #0e7490 !important;
 }
-html.light .app-shell-main :is(.text-amber-200, .text-amber-300, .text-amber-400):not(button),
-html.light-mode .app-shell-main :is(.text-amber-200, .text-amber-300, .text-amber-400):not(button) {
+html.light .app-shell-main :is(.text-amber-100, .text-amber-200, .text-amber-300, .text-amber-400):not(button),
+html.light-mode .app-shell-main :is(.text-amber-100, .text-amber-200, .text-amber-300, .text-amber-400):not(button),
+html.light .app-shell-main [class*="text-amber-1"]:not(button),
+html.light .app-shell-main [class*="text-amber-2"]:not(button),
+html.light-mode .app-shell-main [class*="text-amber-1"]:not(button),
+html.light-mode .app-shell-main [class*="text-amber-2"]:not(button) {
   color: #b45309 !important;
 }
-html.light .app-shell-main :is(.text-rose-200, .text-rose-300, .text-rose-400):not(button),
-html.light-mode .app-shell-main :is(.text-rose-200, .text-rose-300, .text-rose-400):not(button) {
+html.light .app-shell-main :is(.text-rose-100, .text-rose-200, .text-rose-300, .text-rose-400):not(button),
+html.light-mode .app-shell-main :is(.text-rose-100, .text-rose-200, .text-rose-300, .text-rose-400):not(button),
+html.light .app-shell-main [class*="text-rose-1"]:not(button),
+html.light .app-shell-main [class*="text-rose-2"]:not(button),
+html.light-mode .app-shell-main [class*="text-rose-1"]:not(button),
+html.light-mode .app-shell-main [class*="text-rose-2"]:not(button) {
   color: #be123c !important;
+}
+html.light .app-shell-main :is(.text-indigo-200, .text-indigo-300, .text-indigo-400, .text-violet-200, .text-violet-300, .text-violet-400):not(button),
+html.light-mode .app-shell-main :is(.text-indigo-200, .text-indigo-300, .text-indigo-400, .text-violet-200, .text-violet-300, .text-violet-400):not(button) {
+  color: #4338ca !important;
 }
 
 /* Kormányzati akadálymentes nézet — WCAG AAA / MSZ EN 301 549, sárga–fekete */
@@ -988,7 +1028,7 @@ html.a11y-vision .pro-swatch-opt {
 .kahn-bonbon {
   background: var(--background);
   border: 1px solid var(--border);
-  color: var(--foreground);
+  color: var(--text-main);
 }
 .kahn-case-lead {
   margin: 0 auto;
@@ -998,7 +1038,7 @@ html.a11y-vision .pro-swatch-opt {
   text-align: center;
   font-size: 12px;
   line-height: 1.45;
-  color: var(--muted-foreground);
+  color: var(--text-muted);
 }
 .kahn-nodes {
   display: grid;
@@ -1016,6 +1056,59 @@ html.a11y-vision .pro-swatch-opt {
 .kahn-node {
   border-radius: 0.75rem;
   padding: 0.55rem 0.7rem;
+  color: var(--text-main);
+}
+.kahn-pick {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.kahn-pick:disabled {
+  cursor: not-allowed;
+}
+.kahn-node.is-on {
+  box-shadow: inset 0 0 0 2px var(--accent-color);
+}
+.kahn-node.is-off {
+  opacity: 0.45;
+}
+.kahn-question.is-muted {
+  opacity: 0.55;
+}
+.kahn-pro-metrics {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+}
+.kahn-pro-metrics div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.kahn-pro-metrics dt {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.kahn-pro-metrics dd {
+  margin: 0;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.05rem 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
 }
 .kahn-root {
   margin-inline: auto;
@@ -1030,7 +1123,7 @@ html.a11y-vision .pro-swatch-opt {
   font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted-foreground);
+  color: var(--text-muted);
 }
 .kahn-root-name {
   display: block;
@@ -1246,7 +1339,7 @@ html.a11y-vision .surv-fill.surv-red {
   margin-top: 0.35rem;
   font-size: 11px;
   line-height: 1.35;
-  color: var(--muted-foreground);
+  color: var(--text-muted);
 }
 .crisis-tl-picked {
   margin: 0.45rem 0 0;
@@ -1306,23 +1399,22 @@ html.a11y-vision .surv-fill.surv-red {
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted-foreground);
+  color: var(--text-muted);
 }
 .narr-climax-metrics dd {
   margin: 0.15rem 0 0;
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   font-weight: 650;
-  color: var(--foreground);
+  color: var(--text-main);
 }
 .narr-climax-lock,
 .narr-climax-wow {
   margin: 0.45rem 0 0;
   font-size: 12px;
   line-height: 1.4;
+  color: var(--text-main);
 }
-.narr-climax-lock { color: var(--foreground); }
-.narr-climax-wow { color: var(--muted-foreground); }
 .narr-tone-opt { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pro-opt) 50%, transparent); }
 .narr-tone-real { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pro-real) 50%, transparent); }
 .narr-tone-pess { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pro-pess) 50%, transparent); }

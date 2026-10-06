@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
+import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HospitalTriageSim } from "@/components/industry/HospitalTriageSim";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
@@ -139,23 +140,28 @@ export function IndustryCasePanel(props: {
           : t("panel.industryCheck");
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {cse.door === "healthcare"
-            ? t("panel.doorHealthcare")
-            : cse.door === "manufacturing"
-              ? t("panel.doorManufacturing")
-              : cse.door === "logistics"
-                ? t("panel.doorLogistics")
-                : t("panel.doorServices")}
-          {cse.kind === "saas" || cse.kind === "supply" || cse.kind === "wms" || cse.kind === "fuel" ? (
-            <HelpIcon kbId="lesson-bcp" title={t("panel.lesson")} />
-          ) : null}
-        </p>
-        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(cse.id, locale) ?? cse.title}</h3>
-        <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
-      </div>
+    <CollapsibleCard
+      id={`industry-${props.phase ?? "check"}`}
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span>
+          <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {cse.door === "healthcare"
+              ? t("panel.doorHealthcare")
+              : cse.door === "manufacturing"
+                ? t("panel.doorManufacturing")
+                : cse.door === "logistics"
+                  ? t("panel.doorLogistics")
+                  : t("panel.doorServices")}
+            {cse.kind === "saas" || cse.kind === "supply" || cse.kind === "wms" || cse.kind === "fuel" ? (
+              <HelpIcon kbId="lesson-bcp" title={t("panel.lesson")} />
+            ) : null}
+          </span>
+          <span className="mt-0.5 block text-sm font-semibold text-foreground">{caseTitle(cse.id, locale) ?? cse.title}</span>
+        </span>
+      }
+    >
+      <p className="text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
       <div className="mt-3 grid gap-3">
         {props.phase === "DO" ? cse.kind === "hospital" ? <HospitalTriageSim /> : <Walk kind={cse.kind} /> : null}
         {cse.kind !== "tax" && cse.kind !== "fuel" ? (
@@ -163,6 +169,6 @@ export function IndustryCasePanel(props: {
         ) : null}
         {whatIf && (props.phase === "CHECK" || props.phase === "ACT") ? <SignalCards signals={whatIf.signals} /> : null}
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

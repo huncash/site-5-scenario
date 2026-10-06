@@ -11,6 +11,7 @@ import {
   type CampaignUtm,
 } from "@/lib/campaignFunnels";
 import { writeScenarioDoorStep } from "@/lib/doorStep";
+import { preferDemoSelectorHome } from "@/lib/demoSelector";
 
 const ATTR_KEY = "ui:campaignAttribution";
 
@@ -69,15 +70,7 @@ export function enterCampaignChooser(id: CampaignId, utm?: CampaignUtm | null) {
     touch: "path",
     utm: defaultUtmForCampaign(id, mergeUtm(same, utm ?? {})),
   });
-  // Köztes lépés kivezetve — a hierarchikus #tipusok nézetre viszünk.
-  writeScenarioDoorStep("type");
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem("szcenario_home_mode");
-    window.dispatchEvent(new Event("szcenario:home_mode"));
-  } catch {
-    /* ignore */
-  }
+  preferDemoSelectorHome();
 }
 
 export function captureCampaignFromLocation(opts?: {

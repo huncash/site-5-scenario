@@ -1,13 +1,17 @@
 import { caseTitle, useI18n } from "@/i18n";
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HelpIcon } from "@/components/HelpIcon";
 import { KahnDecisionTree } from "@/components/strategy/KahnDecisionTree";
 import { StrategyBranchWalk } from "@/components/strategy/StrategyBranchWalk";
+import { StrategyForkMatrix } from "@/components/strategy/StrategyForkMatrix";
 import { formatMoney } from "@/lib/finance";
 import { MASTER_BASELINE_LABEL } from "@/lib/masterBaseline";
 import {
+  isInflationSegment,
   isKahnForkSegment,
   isNewLineSegment,
+  isNewMarketSegment,
   isStrategySegment,
   strategyCaseById,
   type StrategyCaseId,
@@ -31,6 +35,9 @@ export function StrategyCasePanel(props: {
   };
   const kahn = isKahnForkSegment(props.segmentId);
   const newLine = isNewLineSegment(props.segmentId);
+  const inflation = isInflationSegment(props.segmentId);
+  const market = isNewMarketSegment(props.segmentId);
+  const showTree = (kahn || inflation || market) && props.phase !== "DO";
   const phaseHint = kahn
     ? props.phase === "PLAN"
       ? t("panel.kahnPlan")
@@ -44,44 +51,49 @@ export function StrategyCasePanel(props: {
         : t("panel.stratCheck");
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0 flex-1 basis-[12rem]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <CollapsibleCard
+      id={`strategy-${props.phase ?? "check"}`}
+      defaultOpen={showTree}
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span>
+          <span className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             {kahn ? t("panel.kahnTitle") : t("panel.stratTitle")}
-          </p>
-          <h3 className="mt-0.5 inline-flex flex-wrap items-center gap-1 text-sm font-semibold text-foreground">
+          </span>
+          <span className="mt-0.5 inline-flex flex-wrap items-center gap-1 text-sm font-semibold text-[var(--text-main)]">
             {caseTitle(cse.id, locale) ?? cse.title}
             {kahn ? <HelpIcon kbId="lesson-kahn" title={t("panel.kahnHelp")} /> : null}
-          </h3>
-          <p className="mt-1 text-[12px] leading-snug text-muted-foreground break-words">{phaseHint}</p>
-        </div>
-        <span className="inline-flex max-w-full min-w-[8rem] flex-wrap items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground break-words">
+          </span>
+        </span>
+      }
+      headerRight={
+        <span className="inline-flex max-w-full min-w-[8rem] flex-wrap items-center rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-[var(--text-main)] break-words">
           {kahn ? `Működő üzem → ${props.inheritedFrom}` : `${MASTER_BASELINE_LABEL} → ${props.inheritedFrom}`}
         </span>
-      </div>
+      }
+    >
+      {showTree || (newLine && props.phase === "PLAN") ? null : (
+        <p className="text-[12px] leading-snug text-[var(--text-main)] break-words">{phaseHint}</p>
+      )}
       {props.phase === "PLAN" && newLine ? <StrategyBranchWalk storyId="new-line" /> : null}
-      {props.phase === "PLAN" && kahn ? (
-        <>
-          <StrategyBranchWalk storyId="loan-whatif" />
-          <KahnDecisionTree />
-        </>
+      {kahn && showTree ? <KahnDecisionTree /> : null}
+      {inflation && showTree ? <StrategyForkMatrix kind="inflation" caseId={cse.id} /> : null}
+      {market && showTree ? <StrategyForkMatrix kind="market" caseId={cse.id} /> : null}
+      {!showTree && (props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
+        <ul className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
+          {props.signals.map((s) => (
+            <li key={s.tone} className="min-w-0 rounded-lg border border-border/50 bg-background p-2.5">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
+              </div>
+              <p className="mt-2 text-[12px] font-medium text-[var(--text-main)] break-words">{s.title}</p>
+              <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-[var(--text-main)]">{s.metric}</p>
+              <DetailFold id={`strategy-sig-${props.phase}-${s.tone}`} text={s.detail} />
+            </li>
+          ))}
+        </ul>
       ) : null}
-      {(props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
-      <ul className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
-        {props.signals.map((s) => (
-          <li key={s.tone} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
-            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-              <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
-            </div>
-            <p className="mt-2 text-[12px] font-medium text-foreground break-words">{s.title}</p>
-            <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{s.detail}</p>
-          </li>
-        ))}
-      </ul>
-      ) : null}
-    </section>
+    </CollapsibleCard>
   );
 }
 

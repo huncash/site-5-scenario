@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
 
 import { LeanTerm } from "@/components/HelpIcon";
+import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,19 +48,24 @@ export function ActRecommendations({
   emptyHint?: string;
 }) {
   return (
-    <div className="card-module flex flex-col rounded-lg border border-border/60 bg-[var(--card-bg)] p-3">
-      <div className="flex shrink-0 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+    <CollapsibleCard
+      id="act-recommender"
+      className="card-module flex flex-col rounded-lg border border-border/60 bg-[var(--card-bg)] p-3"
+      title={
         <LeanTerm
-          className="text-sm font-medium text-slate-200"
+          className="text-sm font-medium text-[var(--text-main)]"
           title="Smart Recommender"
           exact="okostanácsadó — javaslatok az ellenőrzés jeleiből: kintlévőség, keret, extra költés. Nem parancs."
         >
           Smart Recommender
         </LeanTerm>
+      }
+      headerRight={
         <Badge variant="secondary" className="w-fit text-[10px] text-muted-foreground">
           CHECK → ACT · LEAN_SPEC
         </Badge>
-      </div>
+      }
+    >
       <div className="mt-1 shrink-0 text-[11px] text-muted-foreground">
         Automatikus javaslatok: kintlévőség, büdzsé, logisztika, passzív költségek.
       </div>
@@ -113,7 +119,7 @@ export function ActRecommendations({
           })
         )}
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }
 

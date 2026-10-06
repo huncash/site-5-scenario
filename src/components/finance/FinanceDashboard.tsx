@@ -235,9 +235,10 @@ import {
   KahnProjectStopLossBanner,
   KahnWorkspaceHint,
 } from "@/components/strategy/KahnCaseGuide";
+import { KahnLiveKpis } from "@/components/strategy/KahnLiveKpis";
 import { requestWorkspaceSwitch } from "@/lib/workspaceSwitch";
 import type { KahnGuideWorkspace } from "@/lib/kahnGuide";
-import { KAHN_FOCUS_IDS, KAHN_JARGON } from "@/lib/kahnCrossTab";
+import { KAHN_FOCUS_IDS } from "@/lib/kahnCrossTab";
 
 const CHART_COLORS = [
   "var(--color-chart-1)",
@@ -653,6 +654,12 @@ export function FinanceDashboard({
   const tartozasokBlock = useDashboardBlockOpen("tartozasok", true);
   const idovonalBlock = useDashboardBlockOpen("idovonal-6ho", false);
   const tetelekBlock = useDashboardBlockOpen("tetelek", true);
+  const whatIfBlock = useDashboardBlockOpen("whatif", false);
+  const perselyekBlock = useDashboardBlockOpen("perselyek", false);
+  const tervezettBlock = useDashboardBlockOpen("tervezett", false);
+  const uzletekBlock = useDashboardBlockOpen("uzletek", false);
+  const ugyletlistaBlock = useDashboardBlockOpen("ugyletlista", false);
+  const leltarKezelesBlock = useDashboardBlockOpen("leltar-kezeles", false);
   const ledgerCollapsed = !tetelekBlock.isOpen;
   type CashflowChannelFilter = "all" | "card" | "transfer" | "bank" | "other";
   const [cashflowChannelFilter, setCashflowChannelFilter] = useState<CashflowChannelFilter>("all");
@@ -3581,6 +3588,7 @@ export function FinanceDashboard({
       ],
       strategySignals: strategyWhatIf?.signals ?? [],
       strategyInheritedFrom: strategyWhatIf?.inheritedFrom ?? "",
+      kahnMetrics: strategyWhatIf?.kahnMetrics,
     };
   }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, settings.recurring, t, txns, txnGrossHuf, vizSpan, whatIfScenario]);
 
@@ -5372,18 +5380,22 @@ export function FinanceDashboard({
     savingsByBucket.size > 0 || settings.buckets.length > 0 ? (
       <Card className="relative w-full min-w-0 overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle
-            className="flex min-w-0 items-center text-sm font-medium"
-            data-exact="Megtakarítási alhalmazok — perselyek célra, pufferre vagy ÁFA-ra. Ikonnal célhoz rendelhető."
-          >
-            <span className="truncate">Megtakarítási alhalmazok</span>
-            <HelpIcon kbId="buckets-overview" />
-          </CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={perselyekBlock.isOpen} onClick={perselyekBlock.toggle} />
+            <CardTitle
+              className="flex min-w-0 items-center text-sm font-medium text-[var(--text-main)]"
+              data-exact="Megtakarítási alhalmazok — perselyek célra, pufferre vagy ÁFA-ra. Ikonnal célhoz rendelhető."
+            >
+              <span className="truncate">Megtakarítási alhalmazok</span>
+              <HelpIcon kbId="buckets-overview" />
+            </CardTitle>
+          </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <span className="kpi-value text-xs text-muted-foreground">{formatMoney(totals.savings, CURRENCY)}</span>
             <SectionSettingsGear onClick={() => jumpToReferences("buckets", undefined, activeWorkspace)} />
           </div>
         </CardHeader>
+        {perselyekBlock.isOpen ? (
         <CardContent className="grid gap-2">
           {selectedBucketMulti ? (
             <div className="rounded-lg border border-sky-500/40 bg-sky-950/20 p-3">
@@ -5585,22 +5597,27 @@ export function FinanceDashboard({
             </DialogContent>
           </Dialog>
         </CardContent>
+        ) : null}
       </Card>
     ) : null;
 
   const plannedSimPanel = (
     <Card className="w-full min-w-0 overflow-hidden">
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
-        <CardTitle
-          className="text-sm font-medium text-muted-foreground"
-          data-exact="Tervezett kiadások — ismétlődő, egyszeri és használati tételek a következő 60 napban."
-        >
-          Tervezett kiadások / Projekt szimuláció
-        </CardTitle>
+        <div className="flex min-w-0 items-center gap-2">
+          <RevealToggle open={tervezettBlock.isOpen} onClick={tervezettBlock.toggle} />
+          <CardTitle
+            className="text-sm font-medium text-[var(--text-main)]"
+            data-exact="Tervezett kiadások — ismétlődő, egyszeri és használati tételek a következő 60 napban."
+          >
+            Tervezett kiadások / Projekt szimuláció
+          </CardTitle>
+        </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <Badge variant="secondary" className="text-[10px]">
             PLAN
           </Badge>
+          {tervezettBlock.isOpen ? (
           <div className="text-right leading-tight">
             <div className="text-[10px] text-slate-400">Ismétlődő 60 nap</div>
             <div className="font-mono text-[12px] text-slate-200">
@@ -5611,8 +5628,10 @@ export function FinanceDashboard({
               {formatMoney(Math.round(planned60Sums.total), CURRENCY)}
             </div>
           </div>
+          ) : null}
         </div>
       </CardHeader>
+      {tervezettBlock.isOpen ? (
       <CardContent className="space-y-3 text-xs">
         {(!businessMode || activeWorkspace === "__all") && (
           <div className="text-muted-foreground">Tervezett tételek a vállalkozás/projekt munkatéren aktívak.</div>
@@ -5722,6 +5741,7 @@ export function FinanceDashboard({
           )}
         </div>
       </CardContent>
+      ) : null}
     </Card>
   );
 
@@ -5729,11 +5749,13 @@ export function FinanceDashboard({
     <Card className="pdca-tile--wide w-full min-w-0 overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <CardTitle className="text-sm font-medium text-slate-200">
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={whatIfBlock.isOpen} onClick={whatIfBlock.toggle} />
+            <CardTitle className="text-sm font-medium text-[var(--text-main)]">
               {t("dash.workSim")}
             </CardTitle>
           </div>
+          {whatIfBlock.isOpen ? (
           <div className="flex flex-wrap items-center gap-1 min-[560px]:justify-end">
             <Button
               type="button"
@@ -5766,75 +5788,13 @@ export function FinanceDashboard({
               {t("dash.pessimistic")}
             </Button>
           </div>
+          ) : null}
         </div>
       </CardHeader>
+      {whatIfBlock.isOpen ? (
       <CardContent className="grid items-start gap-3">
-        {whatIf.kahnMetrics ? (
-          <>
-            <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
-              <div className="tile-lift rounded-lg p-2.5">
-                <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title={KAHN_JARGON.runway.termHu}
-                  exact={KAHN_JARGON.runway.exactHu}
-                  summary={KAHN_JARGON.runway.exactHu}
-                >
-                  Runway
-                </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-                  {whatIf.kahnMetrics.worseRunwayMonths} hó
-                </div>
-              </div>
-              <div className="tile-lift rounded-lg p-2.5">
-                <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title={KAHN_JARGON.penalty.termHu}
-                  exact={KAHN_JARGON.penalty.exactHu}
-                  summary={KAHN_JARGON.penalty.exactHu}
-                >
-                  Kötbér vs. Kilépés
-                </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-                  {formatMoney(whatIf.kahnMetrics.exitPenaltyHuf, "HUF")}
-                </div>
-              </div>
-              <div className="tile-lift rounded-lg p-2.5">
-                <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  title={KAHN_JARGON.stopLoss.termHu}
-                  exact={KAHN_JARGON.stopLoss.exactHu}
-                  summary={KAHN_JARGON.stopLoss.exactHu}
-                >
-                  Stop-loss
-                </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
-                  {whatIf.kahnMetrics.decisionDays} nap
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <BulletGraph
-                item={{
-                  id: "kahn-runway",
-                  label: `Tartalékidő a ${whatIf.kahnMetrics.minRunwayMonths} hónapos küszöbhöz`,
-                  actual: whatIf.kahnMetrics.worseRunwayMonths,
-                  target: whatIf.kahnMetrics.minRunwayMonths,
-                  unit: "hó",
-                  hint: "Rosszabb kimenet runwaye. A küszöb a demó célpuffer, nem jóslat.",
-                }}
-              />
-              <BulletGraph
-                item={{
-                  id: "kahn-exit",
-                  label: "Kilépési ár az opciódíjhoz képest",
-                  actual: Math.round(whatIf.kahnMetrics.exitPenaltyHuf / 1000),
-                  target: Math.round(whatIf.kahnMetrics.optionFeeHuf / 1000),
-                  unit: "eFt",
-                  hint: "Olcsó szerződés kilépése vs. az opció nyitva tartásának díja — ezer forintban.",
-                }}
-              />
-            </div>
-          </>
+        {isKahnForkSegment(demoSegmentId) ? (
+          <KahnLiveKpis />
         ) : (
           <>
             <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
@@ -5951,6 +5911,7 @@ export function FinanceDashboard({
           </ChartChrome>
         </div>
       </CardContent>
+      ) : null}
     </Card>
   ) : null;
 
@@ -6017,7 +5978,7 @@ export function FinanceDashboard({
           context={inheritedBaseline}
           specificHint={
             kahnDemo
-              ? "A működő üzem számai adottak — nem kell újra megadni. Itt csak a bővítési döntést mozgatod."
+              ? "A törzs adott. Itt a bővítési döntést mozgatod."
               : undefined
           }
         />
@@ -6060,8 +6021,8 @@ export function FinanceDashboard({
       {resiliencePanel("PLAN")}
       {educationPanel("PLAN")}
       {industryPanel("PLAN")}
-      {/* Kahn PLAN: fa a strategyPanel-en; KPI/grafikon CHECK-en. */}
-      {kahnDemo ? null : whatIfPanel}
+      {/* Stratégia PLAN: mátrix a strategyPanel-en; KPI/grafikon CHECK-en. */}
+      {isStrategySegment(demoSegmentId) ? null : whatIfPanel}
       <>
       <GoalCard
         goal={activeGoal}
@@ -6958,40 +6919,20 @@ export function FinanceDashboard({
   const lockedDoLedger = (
     <div className="pdca-module-stack w-full min-w-0">
       <Card className="pdca-tile--wide relative w-full overflow-hidden">
-        <button
-          type="button"
-          className={cn(
-            "absolute right-0 top-0 z-20 h-8 w-8 text-slate-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70",
-            ledgerCollapsed ? "text-amber-200" : "",
-          )}
-          style={{ clipPath: "polygon(100% 0%, 0% 0%, 100% 100%)" }}
-          onClick={() => tetelekBlock.toggle()}
-          aria-label={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
-          title={ledgerCollapsed ? "Tételek felfedése" : "Tételek elrejtése"}
-        >
-          <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <polygon points="100,0 0,0 100,100" fill="var(--card-bg)" fillOpacity="0.78" />
-            <polyline points="0,0 100,100" stroke="var(--card-border)" strokeWidth="4" fill="none" />
-          </svg>
-          <span className="relative z-10 block">
-            {ledgerCollapsed ? (
-              <Plus className="absolute right-1 top-1 h-3.5 w-3.5" aria-hidden="true" />
-            ) : (
-              <Minus className="absolute right-1 top-1 h-3.5 w-3.5" aria-hidden="true" />
-            )}
-          </span>
-        </button>
         <CardHeader className="pb-1.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle
-              className="flex items-center text-sm font-medium text-muted-foreground"
-              data-exact="Tételek — a napló: bevétel, kiadás, átvezetés. Kattints egy sorra a részlethez."
-            >
-              {businessMode && activeWorkspace !== "__all"
-                ? `Tételek — ${workspaceDisplayName(activeWorkspace)}`
-                : "Tételek"}
-              <HelpIcon kbId="ledger-overview" />
-            </CardTitle>
+            <div className="flex min-w-0 items-center gap-2">
+              <RevealToggle open={tetelekBlock.isOpen} onClick={tetelekBlock.toggle} />
+              <CardTitle
+                className="flex items-center text-sm font-medium text-[var(--text-main)]"
+                data-exact="Tételek — a napló: bevétel, kiadás, átvezetés. Kattints egy sorra a részlethez."
+              >
+                {businessMode && activeWorkspace !== "__all"
+                  ? `Tételek — ${workspaceDisplayName(activeWorkspace)}`
+                  : "Tételek"}
+                <HelpIcon kbId="ledger-overview" />
+              </CardTitle>
+            </div>
             <div className="flex w-full max-w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
               {isVisitorDemo ? null : activeWorkspace === "personal" ? (
                 <>
@@ -7267,10 +7208,13 @@ export function FinanceDashboard({
     <div className="pdca-module-stack w-full min-w-0">
       <Card className="relative overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5">
-          <CardTitle className="flex items-center text-sm font-medium text-muted-foreground">
-            Üzletek & Árrés
-            <HelpIcon kbId="deals-overview" />
-          </CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={uzletekBlock.isOpen} onClick={uzletekBlock.toggle} />
+            <CardTitle className="flex items-center text-sm font-medium text-[var(--text-main)]">
+              Üzletek & Árrés
+              <HelpIcon kbId="deals-overview" />
+            </CardTitle>
+          </div>
           <div className="flex items-center gap-1.5">
             <Badge variant="secondary" className="text-[10px]">
               {resaleDeals.kpi.closedCount}/{resaleDeals.kpi.totalCount} lezárt
@@ -7278,6 +7222,7 @@ export function FinanceDashboard({
             <SectionSettingsGear onClick={() => jumpToReferences("partners", undefined, activeWorkspace)} />
           </div>
         </CardHeader>
+        {uzletekBlock.isOpen ? (
         <CardContent>
           <div className="grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
@@ -7298,11 +7243,16 @@ export function FinanceDashboard({
             />
           </div>
         </CardContent>
+        ) : null}
       </Card>
       <Card className="card-table">
         <CardHeader className="pb-1.5">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Ügyletlista</CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={ugyletlistaBlock.isOpen} onClick={ugyletlistaBlock.toggle} />
+            <CardTitle className="text-sm font-medium text-[var(--text-main)]">Ügyletlista</CardTitle>
+          </div>
         </CardHeader>
+        {ugyletlistaBlock.isOpen ? (
         <CardContent className="pt-0">
           {resaleDeals.deals.length === 0 ? (
             <div className="text-sm text-muted-foreground">Még nincs továbbértékesítési ügylet.</div>
@@ -7319,6 +7269,7 @@ export function FinanceDashboard({
             </ul>
           )}
         </CardContent>
+        ) : null}
       </Card>
     </div>
   );
@@ -7337,13 +7288,17 @@ export function FinanceDashboard({
 
       <Card className="border-[color:var(--color-chart-6)]/30 bg-[color:var(--color-chart-6)]/5">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Kezelés — helyek & eszközök
-          </CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={leltarKezelesBlock.isOpen} onClick={leltarKezelesBlock.toggle} />
+            <CardTitle className="text-sm font-medium text-[var(--text-main)]">
+              Kezelés — helyek & eszközök
+            </CardTitle>
+          </div>
           <Badge variant="secondary" className="text-[10px]">
             {locations.length} hely · {assets.length} eszköz
           </Badge>
         </CardHeader>
+        {leltarKezelesBlock.isOpen ? (
         <CardContent className="flex flex-wrap gap-2">
           <Button type="button" size="sm" variant="outline" className="h-8" onClick={() => setLocationsOpen(true)}>
             Helyek beállítása
@@ -7352,6 +7307,7 @@ export function FinanceDashboard({
             Eszközök kezelése
           </Button>
         </CardContent>
+        ) : null}
       </Card>
     </div>
   );
@@ -7388,7 +7344,7 @@ export function FinanceDashboard({
         {resiliencePanel("CHECK")}
         {educationPanel("CHECK")}
         {industryPanel("CHECK")}
-        {kahnDemo ? whatIfPanel : null}
+        {isStrategySegment(demoSegmentId) ? whatIfPanel : null}
         {strategyPanel("CHECK")}
         {surface.showFinanceModules ? (
         <>
@@ -8080,8 +8036,10 @@ export function FinanceDashboard({
         {surface.showFinanceModules ? (
         <>
         {personalLoans.length > 0 ? (
-          <div className="rounded-lg border border-rose-400/20 bg-rose-950/10 p-3">
-            <div className="flex items-center justify-between gap-3">
+          <CollapsibleCard
+            id="act-torlesztes"
+            className="rounded-lg border border-rose-400/20 bg-rose-950/10 p-3"
+            title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-rose-200/90"
                 title="Törlesztési fókusz"
@@ -8089,8 +8047,11 @@ export function FinanceDashboard({
               >
                 Javasolt havi törlesztési fókusz
               </LeanTerm>
+            }
+            headerRight={
               <span className="font-mono text-xs text-slate-300">{personalLoans.length} aktív tartozás</span>
-            </div>
+            }
+          >
             <div className="mt-2 grid grid-cols-1 gap-2 min-w-0 xl:grid-cols-2">
               <div className="rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                 <LeanTerm
@@ -8137,17 +8098,21 @@ export function FinanceDashboard({
                 <span className="font-mono text-emerald-200">{formatMoney(Math.round(bridge.suggestedTransfer), CURRENCY)}</span> (üzleti surplusból)
               </div>
             ) : null}
-          </div>
+          </CollapsibleCard>
         ) : null}
 
-        <div className="grid gap-2">
-          <LeanTerm
-            className="text-xs font-medium text-slate-200"
-            title="Döntési elágazások"
-            exact="Döntési elágazások — három beavatkozás: árazás, extra-költés keret, projekt átütemezés."
-          >
-            Döntési elágazások
-          </LeanTerm>
+        <CollapsibleCard
+          id="act-elagazasok"
+          title={
+            <LeanTerm
+              className="text-xs font-medium text-slate-200"
+              title="Döntési elágazások"
+              exact="Döntési elágazások — három beavatkozás: árazás, extra-költés keret, projekt átütemezés."
+            >
+              Döntési elágazások
+            </LeanTerm>
+          }
+        >
           <div className="grid gap-2 sm:grid-cols-3">
             <Button
               type="button"
@@ -8209,7 +8174,7 @@ export function FinanceDashboard({
               🗓️ Projekt átütemezése
             </Button>
           </div>
-        </div>
+        </CollapsibleCard>
         </>
         ) : null}
 
@@ -10356,7 +10321,7 @@ export function FinanceDashboard({
                     </>
                   )}
 
-                  {whatIf && (
+                  {whatIf && !isStrategySegment(demoSegmentId) && (
                     <div className="mb-4 rounded-lg border border-border/60 bg-background/40 p-4">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                         <div className="min-w-0">
@@ -13690,13 +13655,17 @@ function GoalCard({
   onRemove: (id: string) => void;
   onAdd: (g: { deadline: string; payload: GoalPayload }) => void;
 }) {
+  const celokBlock = useDashboardBlockOpen("celok", false);
   if (!goal) {
     return (
       <Card className="pdca-tile--wide">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Target className="h-4 w-4" /> Célok
-          </CardTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            <RevealToggle open={celokBlock.isOpen} onClick={celokBlock.toggle} />
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-[var(--text-main)]">
+              <Target className="h-4 w-4" /> Célok
+            </CardTitle>
+          </div>
           <GoalDialog
             onSave={onAdd}
             properties={properties}
@@ -13707,9 +13676,11 @@ function GoalCard({
             }
           />
         </CardHeader>
+        {celokBlock.isOpen ? (
         <CardContent>
           <EmptyBlock>Adj hozzá egy célt, hogy lásd a mérföldköveket.</EmptyBlock>
         </CardContent>
+        ) : null}
       </Card>
     );
   }
@@ -13736,13 +13707,16 @@ function GoalCard({
         }}
       />
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle
-          className="flex items-center text-sm font-medium text-slate-300"
-          data-exact="Célok — mennyi van meg, mennyi hiányzik, és havonta mennyit kell félretenni."
-        >
-          <Target className="h-4 w-4" /> Célok
-          <HelpIcon kbId="goals-remaining" />
-        </CardTitle>
+        <div className="flex min-w-0 items-center gap-2">
+          <RevealToggle open={celokBlock.isOpen} onClick={celokBlock.toggle} />
+          <CardTitle
+            className="flex items-center text-sm font-medium text-[var(--text-main)]"
+            data-exact="Célok — mennyi van meg, mennyi hiányzik, és havonta mennyit kell félretenni."
+          >
+            <Target className="h-4 w-4" /> Célok
+            <HelpIcon kbId="goals-remaining" />
+          </CardTitle>
+        </div>
         <div className="flex items-center gap-2">
           {goals.length > 1 && (
             <Select value={goal.id} onValueChange={onSelect}>
@@ -13769,6 +13743,7 @@ function GoalCard({
           />
         </div>
       </CardHeader>
+      {celokBlock.isOpen ? (
       <CardContent className="space-y-2">
         <div>
           <div className="flex items-baseline justify-between gap-2">
@@ -13851,6 +13826,7 @@ function GoalCard({
           <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Cél törlése
         </Button>
       </CardContent>
+      ) : null}
     </Card>
   );
 }

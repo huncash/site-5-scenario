@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildStrategyWhatIf,
+  isInflationSegment,
   isKahnForkSegment,
+  isNewMarketSegment,
   isStrategySegment,
   KAHN_FORK,
   kahnDecisionTree,
+  resolveKahnPlanPro,
   STRATEGY_SEGMENTS,
 } from "./strategyCases";
 
@@ -32,6 +35,8 @@ describe("strategyCases", () => {
   it("recognizes only strategy ids", () => {
     expect(isStrategySegment("demo19_strategy_new_line")).toBe(true);
     expect(isStrategySegment("demo11_strategy_kahn_fork")).toBe(true);
+    expect(isInflationSegment("demo20_strategy_input_inflation")).toBe(true);
+    expect(isNewMarketSegment("demo21_strategy_new_market")).toBe(true);
     expect(isStrategySegment("demo1_multisite_operator")).toBe(false);
   });
 
@@ -63,5 +68,25 @@ describe("strategyCases", () => {
     const pessNet1 = w.chart[1]!.pessimistic - w.chart[0]!.pessimistic;
     const pessNet2 = w.chart[2]!.pessimistic - w.chart[1]!.pessimistic;
     expect(pessNet2).toBeLessThan(pessNet1 - KAHN_FORK.contractA.exitPenaltyHuf * 0.8);
+  });
+
+  it("live PLAN matrix: organic vs loan A vs loan B updates runway, penalty and monthly load", () => {
+    const idle = resolveKahnPlanPro(null, null);
+    expect(idle.every((c) => c.runwayMonths == null && c.exitPenaltyHuf == null)).toBe(true);
+
+    const organic = resolveKahnPlanPro("organic", "cheap");
+    expect(organic.every((c) => c.exitPenaltyHuf === 0)).toBe(true);
+    expect(organic.find((c) => c.tone === "opt")!.monthlyObligationHuf).toBe(KAHN_FORK.organicMonthlyCommitHuf);
+
+    const cheap = resolveKahnPlanPro("loan", "cheap");
+    const flex = resolveKahnPlanPro("loan", "flex");
+    const cheapPess = cheap.find((c) => c.tone === "pess")!;
+    const flexPess = flex.find((c) => c.tone === "pess")!;
+    expect(cheapPess.exitPenaltyHuf).toBe(KAHN_FORK.contractA.exitPenaltyHuf);
+    expect(flexPess.exitPenaltyHuf).toBe(0);
+    expect(cheapPess.runwayMonths).toBe(KAHN_FORK.minRunwayMonths);
+    expect(flexPess.runwayMonths).toBeGreaterThan(cheapPess.runwayMonths!);
+    expect(cheap.find((c) => c.tone === "opt")!.monthlyObligationHuf).toBe(KAHN_FORK.contractA.monthlyInterestHuf);
+    expect(flex.find((c) => c.tone === "opt")!.monthlyObligationHuf).toBe(KAHN_FORK.contractB.monthlyInterestHuf);
   });
 });

@@ -43,33 +43,124 @@ export function RevealToggle({
   );
 }
 
+function CollapsibleFrame({
+  id,
+  title,
+  defaultOpen,
+  children,
+  className,
+  titleClassName,
+  headerRight,
+  exact,
+  as: Tag = "div",
+}: {
+  id: string;
+  title: ReactNode;
+  defaultOpen: boolean;
+  children: ReactNode;
+  className?: string;
+  titleClassName?: string;
+  headerRight?: ReactNode;
+  exact?: string;
+  as?: "div" | "section";
+}) {
+  const { isOpen, toggle } = useDashboardBlockOpen(id, defaultOpen);
+
+  return (
+    <Tag className={cn("min-w-0 w-full", className)}>
+      <div className="mb-1.5 flex flex-wrap items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <RevealToggle open={isOpen} onClick={toggle} exact={exact} />
+          <div className={cn("min-w-0 text-sm font-medium leading-snug text-[var(--text-main)]", titleClassName)}>
+            {title}
+          </div>
+        </div>
+        {headerRight}
+      </div>
+      {isOpen ? <div className="min-w-0">{children}</div> : null}
+    </Tag>
+  );
+}
+
+/** Belső kártya / kimutatás: a cím látszik, a tartalom alapból +. */
 export function CollapsibleCard({
   id,
   title,
   defaultOpen = false,
   children,
   className,
+  titleClassName,
   headerRight,
+  exact,
 }: {
   id: string;
   title: ReactNode;
   defaultOpen?: boolean;
   children: ReactNode;
   className?: string;
+  titleClassName?: string;
   headerRight?: ReactNode;
+  exact?: string;
 }) {
-  const { isOpen, toggle } = useDashboardBlockOpen(id, defaultOpen);
-
   return (
-    <div className={cn("min-w-0 w-full", className)}>
-      <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <RevealToggle open={isOpen} onClick={toggle} />
-          <div className="min-w-0 text-sm font-medium leading-snug text-[var(--text-main)]">{title}</div>
-        </div>
-        {headerRight}
-      </div>
-      {isOpen ? <div className="min-w-0">{children}</div> : null}
+    <CollapsibleFrame
+      id={id}
+      title={title}
+      defaultOpen={defaultOpen}
+      className={className}
+      titleClassName={titleClassName}
+      headerRight={headerRight}
+      exact={exact}
+    >
+      {children}
+    </CollapsibleFrame>
+  );
+}
+
+/** Fő szekció (PLAN/DO/CHECK/ACT): keret nyitva, a belső blokkok külön csukódnak. */
+export function CollapsibleSection({
+  id,
+  title,
+  defaultOpen = true,
+  children,
+  className,
+  titleClassName,
+  headerRight,
+  exact,
+}: {
+  id: string;
+  title: ReactNode;
+  defaultOpen?: boolean;
+  children: ReactNode;
+  className?: string;
+  titleClassName?: string;
+  headerRight?: ReactNode;
+  exact?: string;
+}) {
+  return (
+    <CollapsibleFrame
+      as="section"
+      id={id}
+      title={title}
+      defaultOpen={defaultOpen}
+      className={className}
+      titleClassName={titleClassName}
+      headerRight={headerRight}
+      exact={exact}
+    >
+      {children}
+    </CollapsibleFrame>
+  );
+}
+
+/** Magyarázat: a cím/adat látszik, a szöveg alapból +. */
+export function DetailFold({ id, text }: { id: string; text: string }) {
+  const { isOpen, toggle } = useDashboardBlockOpen(id, false);
+  if (!text) return null;
+  return (
+    <div className="mt-1.5 flex items-start gap-1.5">
+      <RevealToggle open={isOpen} onClick={toggle} />
+      {isOpen ? <p className="min-w-0 text-[11px] leading-snug text-[var(--text-main)]">{text}</p> : null}
     </div>
   );
 }

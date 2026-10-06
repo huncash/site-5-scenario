@@ -28,7 +28,7 @@ function ValsagRezilienciaDemoLoaderPage() {
         window.localStorage.removeItem("szcenario_home_mode");
         window.dispatchEvent(new Event("szcenario:home_mode"));
       }
-      void navigate({ to: "/" });
+      void navigate({ to: "/", hash: "tipusok" });
     } catch (e: unknown) {
       inFlight.current = false;
       setError(e instanceof Error ? e.message : "Nem sikerült megnyitni a reziliencia-eseteket.");

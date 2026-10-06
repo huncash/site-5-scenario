@@ -1,4 +1,5 @@
 import { LeanTerm } from "@/components/HelpIcon";
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { GuidedTourBanner, GuidedTourRestoreChip } from "@/components/strategy/GuidedTourBanner";
 import { useI18n } from "@/i18n";
 import { formatMoney } from "@/lib/finance";
@@ -22,7 +23,11 @@ export function KahnCaseGuide(props: {
   return <GuidedTourBanner {...props} />;
 }
 
-/** Magán fül: optimista megtakarítás/osztalék újraszámolás; pesszimista stop-loss. */
+const ink = "text-[var(--text-main)]";
+const inkMuted = "text-[var(--text-muted)]";
+const linkCls = "font-medium text-[var(--text-main)] underline-offset-2 hover:underline";
+
+/** Magán fül: keretszámok; pesszimista stop-loss nyitva marad. */
 export function KahnPersonalImpact(props: {
   scenario: KahnImpactScenario;
   onGoProject: () => void;
@@ -35,38 +40,35 @@ export function KahnPersonalImpact(props: {
     return (
       <aside
         id={KAHN_FOCUS_IDS.personal}
-        className="rounded-xl border border-rose-400/50 bg-rose-500/12 p-3"
+        className="rounded-xl border border-rose-400/50 bg-background p-3"
         role="alert"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-200">
+        <p className={`text-[11px] font-semibold uppercase tracking-wider ${ink}`}>
           {t("kahnGuide.impact.pessTitle")}
         </p>
-        <p className="mt-1.5 text-[13px] font-medium leading-snug text-foreground">
+        <p className={`mt-1.5 text-[13px] font-medium leading-snug ${ink}`}>
           {hu ? KAHN_STOP_LOSS_ALERT_HU : KAHN_STOP_LOSS_ALERT_EN}
         </p>
-        <p className="mt-2 text-[12px] leading-snug text-muted-foreground">
-          {t("kahnGuide.impact.pessBody", {
+        <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+          <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+            <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.savingsFrame")}</dt>
+            <dd className={`min-w-[4.5rem] font-mono ${ink}`}>{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
+          </div>
+          <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+            <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.dividendFrame")}</dt>
+            <dd className={`min-w-[4.5rem] font-mono ${ink}`}>{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
+          </div>
+        </dl>
+        <DetailFold
+          id="kahn-impact-pess"
+          text={t("kahnGuide.impact.pessBody", {
             pct: String(flow.payCutPct),
             months: String(flow.minRunwayMonths),
             savings: formatMoney(flow.savingsFrameHuf, "HUF"),
             dividend: formatMoney(flow.dividendFrameHuf, "HUF"),
           })}
-        </p>
-        <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
-          <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
-            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
-            <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
-          </div>
-          <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
-            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
-            <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
-          </div>
-        </dl>
-        <button
-          type="button"
-          onClick={props.onGoProject}
-          className="mt-2 text-[11px] font-medium text-rose-200 underline-offset-2 hover:underline"
-        >
+        />
+        <button type="button" onClick={props.onGoProject} className={`mt-2 text-[11px] ${linkCls}`}>
           {t("kahnGuide.impact.backProject")}
         </button>
       </aside>
@@ -75,75 +77,68 @@ export function KahnPersonalImpact(props: {
 
   if (props.scenario === "optimistic") {
     return (
-      <aside
-        id={KAHN_FOCUS_IDS.personal}
-        className="rounded-xl border border-emerald-400/40 bg-emerald-500/10 p-3"
-        role="status"
+      <CollapsibleCard
+        id="kahn-impact-opt"
+        className="rounded-xl border border-border/60 bg-card/80 p-3"
+        title={
+          <span id={KAHN_FOCUS_IDS.personal} className={`text-[11px] font-semibold uppercase tracking-wider ${ink}`}>
+            {t("kahnGuide.impact.optTitle")}
+          </span>
+        }
       >
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-200">
-          {t("kahnGuide.impact.optTitle")}
-        </p>
-        <p className="mt-1 text-[12px] leading-snug text-foreground">
-          {t("kahnGuide.impact.optBody", {
-            amount: formatMoney(flow.dividendDeltaHuf, "HUF"),
-            savings: formatMoney(flow.savingsDeltaHuf, "HUF"),
-          })}
-        </p>
-        <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
-          <div className="min-w-0 rounded-md border border-emerald-400/30 bg-background/40 p-2">
-            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
-            <dd className="min-w-[4.5rem] flex flex-wrap gap-1 font-mono text-emerald-100">
-              {formatMoney(flow.savingsFrameHuf, "HUF")}{" "}
-              <span className="text-emerald-200/80">(+{formatMoney(flow.savingsDeltaHuf, "HUF")})</span>
+        <dl className="grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+          <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+            <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.savingsFrame")}</dt>
+            <dd className={`min-w-[4.5rem] font-mono ${ink}`}>
+              {formatMoney(flow.savingsFrameHuf, "HUF")} (+{formatMoney(flow.savingsDeltaHuf, "HUF")})
             </dd>
           </div>
-          <div className="min-w-0 rounded-md border border-emerald-400/30 bg-background/40 p-2">
-            <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
-            <dd className="min-w-[4.5rem] flex flex-wrap gap-1 font-mono text-emerald-100">
-              {formatMoney(flow.dividendFrameHuf, "HUF")}{" "}
-              <span className="text-emerald-200/80">(+{formatMoney(flow.dividendDeltaHuf, "HUF")})</span>
+          <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+            <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.dividendFrame")}</dt>
+            <dd className={`min-w-[4.5rem] font-mono ${ink}`}>
+              {formatMoney(flow.dividendFrameHuf, "HUF")} (+{formatMoney(flow.dividendDeltaHuf, "HUF")})
             </dd>
           </div>
         </dl>
-        <button
-          type="button"
-          onClick={props.onGoProject}
-          className="mt-2 text-[11px] font-medium text-emerald-200 underline-offset-2 hover:underline"
-        >
+        <DetailFold
+          id="kahn-impact-opt-body"
+          text={t("kahnGuide.impact.optBody", {
+            amount: formatMoney(flow.dividendDeltaHuf, "HUF"),
+            savings: formatMoney(flow.savingsDeltaHuf, "HUF"),
+          })}
+        />
+        <button type="button" onClick={props.onGoProject} className={`mt-2 text-[11px] ${linkCls}`}>
           {t("kahnGuide.impact.backProject")}
         </button>
-      </aside>
+      </CollapsibleCard>
     );
   }
 
   return (
-    <aside
-      id={KAHN_FOCUS_IDS.personal}
-      className="rounded-xl border border-border/50 bg-card/60 p-3"
-      role="status"
+    <CollapsibleCard
+      id="kahn-impact-real"
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span id={KAHN_FOCUS_IDS.personal} className={`text-[11px] font-semibold uppercase tracking-wider ${ink}`}>
+          {t("kahnGuide.impact.realTitle")}
+        </span>
+      }
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {t("kahnGuide.impact.realTitle")}
-      </p>
-      <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{t("kahnGuide.impact.realBody")}</p>
-      <dl className="mt-2 grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
-        <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
-          <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.savingsFrame")}</dt>
-          <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
+      <dl className="grid grid-cols-1 gap-2 text-[11px] min-w-0 lg:grid-cols-2">
+        <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+          <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.savingsFrame")}</dt>
+          <dd className={`min-w-[4.5rem] font-mono ${ink}`}>{formatMoney(flow.savingsFrameHuf, "HUF")}</dd>
         </div>
-        <div className="min-w-0 rounded-md border border-border/40 bg-background/40 p-2">
-          <dt className="text-muted-foreground break-words">{t("kahnGuide.impact.dividendFrame")}</dt>
-          <dd className="min-w-[4.5rem] font-mono text-foreground">{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
+        <div className="min-w-0 rounded-md border border-border/40 bg-background p-2">
+          <dt className={`${inkMuted} break-words`}>{t("kahnGuide.impact.dividendFrame")}</dt>
+          <dd className={`min-w-[4.5rem] font-mono ${ink}`}>{formatMoney(flow.dividendFrameHuf, "HUF")}</dd>
         </div>
       </dl>
-      <button
-        type="button"
-        onClick={props.onGoProject}
-        className="mt-2 text-[11px] font-medium text-foreground underline-offset-2 hover:underline"
-      >
+      <DetailFold id="kahn-impact-real-body" text={t("kahnGuide.impact.realBody")} />
+      <button type="button" onClick={props.onGoProject} className={`mt-2 text-[11px] ${linkCls}`}>
         {t("kahnGuide.impact.backProject")}
       </button>
-    </aside>
+    </CollapsibleCard>
   );
 }
 
@@ -154,20 +149,19 @@ export function KahnWorkspaceHint(props: {
 }) {
   const { t } = useI18n();
   return (
-    <p className="rounded-lg border border-border/40 bg-background/40 px-2.5 py-2 text-[11px] leading-snug text-muted-foreground">
+    <p className={`rounded-lg border border-border/40 bg-background px-2.5 py-2 text-[11px] leading-snug ${ink}`}>
       {props.kind === "business" ? t("kahnGuide.hint.business") : t("kahnGuide.hint.project")}{" "}
-      <button type="button" className="font-medium text-cyan-200 underline-offset-2 hover:underline" onClick={props.onGoOther}>
+      <button type="button" className={linkCls} onClick={props.onGoOther}>
         {props.kind === "business" ? t("kahnGuide.tab.project") : t("kahnGuide.tab.core")}
       </button>
       {" · "}
-      <button type="button" className="font-medium text-cyan-200 underline-offset-2 hover:underline" onClick={props.onGoPersonal}>
+      <button type="button" className={linkCls} onClick={props.onGoPersonal}>
         {t("kahnGuide.tab.personal")}
       </button>
     </p>
   );
 }
 
-/** Projekt fülön: stop-loss korlátozó jelzés a pesszimista ágon. */
 export function KahnProjectStopLossBanner(props: {
   scenario: KahnImpactScenario;
   onGoPersonal: () => void;
@@ -176,8 +170,8 @@ export function KahnProjectStopLossBanner(props: {
   const hu = locale !== "en";
   if (props.scenario !== "pessimistic") return null;
   return (
-    <aside className="rounded-xl border border-rose-400/45 bg-rose-500/10 p-3" role="alert">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-200">
+    <aside className="rounded-xl border border-rose-400/45 bg-background p-3" role="alert">
+      <p className={`text-[11px] font-semibold uppercase tracking-wider ${ink}`}>
         <LeanTerm
           title={hu ? KAHN_JARGON.stopLoss.termHu : KAHN_JARGON.stopLoss.termEn}
           exact={hu ? KAHN_JARGON.stopLoss.exactHu : KAHN_JARGON.stopLoss.exactEn}
@@ -185,21 +179,16 @@ export function KahnProjectStopLossBanner(props: {
           Stop-loss
         </LeanTerm>
       </p>
-      <p className="mt-1.5 text-[13px] font-medium leading-snug text-foreground">
+      <p className={`mt-1.5 text-[13px] font-medium leading-snug ${ink}`}>
         {hu ? KAHN_STOP_LOSS_ALERT_HU : KAHN_STOP_LOSS_ALERT_EN}
       </p>
-      <button
-        type="button"
-        onClick={props.onGoPersonal}
-        className="mt-2 text-[11px] font-medium text-rose-200 underline-offset-2 hover:underline"
-      >
+      <button type="button" onClick={props.onGoPersonal} className={`mt-2 text-[11px] ${linkCls}`}>
         {t("kahnGuide.tab.personal")}
       </button>
     </aside>
   );
 }
 
-/** Core fül: törzs állapot + a projekt ág visszacsatolása. */
 export function KahnCoreLinkStrip(props: {
   scenario: KahnImpactScenario;
   onGoProject: () => void;
@@ -208,29 +197,30 @@ export function KahnCoreLinkStrip(props: {
   const { t } = useI18n();
   const flow = kahnPersonalFlow(props.scenario);
   return (
-    <aside
-      id={KAHN_FOCUS_IDS.core}
+    <CollapsibleCard
+      id="kahn-core-strip"
       className="rounded-xl border border-border/50 bg-card/70 p-3"
-      role="status"
+      title={
+        <span id={KAHN_FOCUS_IDS.core} className={`text-[11px] font-semibold uppercase tracking-wider ${ink}`}>
+          {t("kahnGuide.coreStripTitle")}
+        </span>
+      }
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {t("kahnGuide.coreStripTitle")}
-      </p>
-      <p className="mt-1 text-[12px] leading-snug text-foreground">{t("kahnGuide.coreStripBody")}</p>
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className={`text-[12px] leading-snug ${ink}`}>
         {t("kahnGuide.coreStripLink", {
           scenario: t(`dash.${props.scenario}` as "dash.realistic"),
           dividend: formatMoney(flow.dividendFrameHuf, "HUF"),
         })}
       </p>
+      <DetailFold id="kahn-core-strip-body" text={t("kahnGuide.coreStripBody")} />
       <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
-        <button type="button" className="font-medium text-cyan-200 underline-offset-2 hover:underline" onClick={props.onGoProject}>
+        <button type="button" className={linkCls} onClick={props.onGoProject}>
           {t("kahnGuide.open.project")}
         </button>
-        <button type="button" className="font-medium text-cyan-200 underline-offset-2 hover:underline" onClick={props.onGoPersonal}>
+        <button type="button" className={linkCls} onClick={props.onGoPersonal}>
           {t("kahnGuide.open.personal")}
         </button>
       </div>
-    </aside>
+    </CollapsibleCard>
   );
 }

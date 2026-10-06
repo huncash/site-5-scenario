@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 
 import { LeanTerm } from "@/components/HelpIcon";
+import { RevealToggle } from "@/components/lean-viz/CollapsibleCard";
+import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BusinessAsset, BusinessLocation, Transaction } from "@/lib/finance";
@@ -147,19 +149,24 @@ export function AssetTree({
   const szekhelyLocs = locations.filter((l) => l.kind === "szekhely");
 
   const hasBusinessSide = locations.length > 0 || assets.length > 0 || vehicles.length > 0;
+  const { isOpen, toggle } = useDashboardBlockOpen("vagyon-fa", false);
 
   return (
     <Card className="w-full border border-border/60 bg-background/40">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          <LeanTerm
-            title="Vagyon — fa/halmaz nézet"
-            exact="Vagyonfa — magán és cég eszközei egy fában. A kötés mutatja, melyik tétel melyik eszközhöz tartozik."
-          >
-            Vagyon — fa/halmaz nézet
-          </LeanTerm>
-        </CardTitle>
+        <div className="flex min-w-0 items-center gap-2">
+          <RevealToggle open={isOpen} onClick={toggle} />
+          <CardTitle className="text-sm font-medium text-[var(--text-main)]">
+            <LeanTerm
+              title="Vagyon — fa/halmaz nézet"
+              exact="Vagyonfa — magán és cég eszközei egy fában. A kötés mutatja, melyik tétel melyik eszközhöz tartozik."
+            >
+              Vagyon — fa/halmaz nézet
+            </LeanTerm>
+          </CardTitle>
+        </div>
       </CardHeader>
+      {isOpen ? (
       <CardContent className="grid gap-4">
         <div className="grid grid-cols-1 gap-3 min-w-0 xl:grid-cols-2">
           {nodeRow({
@@ -338,6 +345,7 @@ export function AssetTree({
           a tételekhez. (Ezt később lehet tovább erősíteni explicit “kötés” mezőkkel.)
         </div>
       </CardContent>
+      ) : null}
     </Card>
   );
 }

@@ -3,18 +3,15 @@ import { useMemo } from "react";
 import { DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { formatMoney } from "@/lib/finance";
-import { useKahnPlanPath } from "@/lib/kahnPlanPath";
 import { MASTER_BASELINE_LABEL } from "@/lib/masterBaseline";
-import { cn } from "@/lib/utils";
+import { useStrategyPlanPath } from "@/lib/strategyPlanPath";
 import {
-  kahnDecisionTree,
-  resolveKahnPlanPro,
-  type KahnContractId,
-  type KahnFinancingId,
-  type KahnForkNode,
-  type KahnProLive,
-  type StrategyTone,
-} from "@/lib/strategyCases";
+  resolveStrategyForkPro,
+  strategyForkTree,
+  type StrategyForkKind,
+} from "@/lib/strategyForks";
+import { cn } from "@/lib/utils";
+import type { KahnForkNode, KahnProLive, StrategyTone } from "@/lib/strategyCases";
 
 const TONE_LABEL: Record<StrategyTone, string> = {
   opt: "Optimista",
@@ -22,9 +19,10 @@ const TONE_LABEL: Record<StrategyTone, string> = {
   pess: "Pesszimista",
 };
 
-function metricOrDash(n: number | null, kind: "runway" | "money" | "monthly"): string {
+function metricOrDash(n: number | null, kind: "runway" | "money" | "pct" | "monthly"): string {
   if (n == null) return "—";
   if (kind === "runway") return `${n} hó`;
+  if (kind === "pct") return `${n}%`;
   const money = formatMoney(n, "HUF");
   return kind === "monthly" ? `${money}/hó` : money;
 }
@@ -34,11 +32,13 @@ function ForkChoice({
   selected,
   disabled,
   onSelect,
+  foldId,
 }: {
   node: KahnForkNode;
   selected: boolean;
   disabled?: boolean;
   onSelect: () => void;
+  foldId: string;
 }) {
   return (
     <li>
@@ -56,13 +56,23 @@ function ForkChoice({
           </div>
           <p className="mt-1.5 font-mono text-[11px] tabular-nums text-[var(--text-main)]">{node.amountHint}</p>
         </button>
-        <DetailFold id={`kahn-fork-${node.id}`} text={node.detail} />
+        <DetailFold id={foldId} text={node.detail} />
       </div>
     </li>
   );
 }
 
-function ProLiveCard({ card }: { card: KahnProLive }) {
+function ProLiveCard({
+  card,
+  labels,
+  midKind,
+  foldId,
+}: {
+  card: KahnProLive;
+  labels: [string, string, string];
+  midKind: "money" | "pct";
+  foldId: string;
+}) {
   return (
     <li className={cn("kahn-branch", `kahn-branch-${card.tone}`)}>
       <div className="flex items-center justify-between gap-2">
@@ -71,62 +81,63 @@ function ProLiveCard({ card }: { card: KahnProLive }) {
       </div>
       <dl className="kahn-pro-metrics">
         <div>
-          <dt>Runway</dt>
+          <dt>{labels[0]}</dt>
           <dd>{metricOrDash(card.runwayMonths, "runway")}</dd>
         </div>
         <div>
-          <dt>Kötbér</dt>
-          <dd>{metricOrDash(card.exitPenaltyHuf, "money")}</dd>
+          <dt>{labels[1]}</dt>
+          <dd>{metricOrDash(card.exitPenaltyHuf, midKind)}</dd>
         </div>
         <div>
-          <dt>Havi teher</dt>
+          <dt>{labels[2]}</dt>
           <dd>{metricOrDash(card.monthlyObligationHuf, "monthly")}</dd>
         </div>
       </dl>
-      <DetailFold id={`kahn-pro-${card.tone}`} text={card.strategy} />
+      <DetailFold id={foldId} text={card.strategy} />
     </li>
   );
 }
 
-export function KahnDecisionTree() {
-  const tree = kahnDecisionTree();
-  const { financing, contract, setFinancing, setContract } = useKahnPlanPath();
-  const live = useMemo(() => resolveKahnPlanPro(financing, contract), [financing, contract]);
-  const loanOn = financing === "loan";
-  const organicOn = financing === "organic";
+export function StrategyForkMatrix(props: { kind: StrategyForkKind; caseId: string }) {
+  const tree = strategyForkTree(props.kind);
+  const { primary, secondary, setPrimary, setSecondary } = useStrategyPlanPath(props.caseId);
+  const live = useMemo(
+    () => resolveStrategyForkPro(props.kind, primary, secondary),
+    [props.kind, primary, secondary],
+  );
+  const secondOn = primary === tree.secondaryNeeds;
+  const midKind = props.kind === "inflation" ? "pct" : "money";
 
   return (
-    <div
-      className="kahn-tree"
-      role="group"
-      aria-label="Bisztró döntési mátrix: finanszírozás, konstrukció, élő PRO kimenet"
-    >
+    <div className="kahn-tree" role="group" aria-label="Döntési mátrix: elágazás és élő PRO kimenet">
       <div className="kahn-root">
         <span className="kahn-root-label">{MASTER_BASELINE_LABEL}</span>
         <span className="kahn-root-name">{tree.root}</span>
       </div>
       <div className="kahn-stem" aria-hidden />
-      <p className="kahn-question">{tree.financingQuestion}</p>
+      <p className="kahn-question">{tree.primaryQuestion}</p>
       <ul className="kahn-nodes kahn-nodes-2">
-        {tree.financing.map((n) => (
+        {tree.primary.map((n) => (
           <ForkChoice
             key={n.id}
             node={n}
-            selected={financing === n.id}
-            onSelect={() => setFinancing(n.id as KahnFinancingId)}
+            selected={primary === n.id}
+            onSelect={() => setPrimary(n.id)}
+            foldId={`fork-${props.caseId}-p-${n.id}`}
           />
         ))}
       </ul>
       <div className="kahn-stem" aria-hidden />
-      <p className={cn("kahn-question", organicOn && "is-muted")}>{tree.contractQuestion}</p>
+      <p className={cn("kahn-question", !secondOn && "is-muted")}>{tree.secondaryQuestion}</p>
       <ul className="kahn-nodes kahn-nodes-2">
-        {tree.contracts.map((n) => (
+        {tree.secondary.map((n) => (
           <ForkChoice
             key={n.id}
             node={n}
-            selected={loanOn && contract === n.id}
-            disabled={!loanOn}
-            onSelect={() => setContract(n.id as KahnContractId)}
+            selected={secondOn && secondary === n.id}
+            disabled={!secondOn}
+            onSelect={() => setSecondary(n.id)}
+            foldId={`fork-${props.caseId}-s-${n.id}`}
           />
         ))}
       </ul>
@@ -139,7 +150,13 @@ export function KahnDecisionTree() {
       </div>
       <ul className="kahn-branches">
         {live.map((card) => (
-          <ProLiveCard key={card.tone} card={card} />
+          <ProLiveCard
+            key={card.tone}
+            card={card}
+            labels={tree.metricLabels}
+            midKind={midKind}
+            foldId={`fork-${props.caseId}-pro-${card.tone}`}
+          />
         ))}
       </ul>
     </div>

@@ -24,7 +24,7 @@ function OktatasSzimulacioDemoLoaderPage() {
     setError(null);
     try {
       enterCampaignChooser("oktatas");
-      void navigate({ to: "/" });
+      void navigate({ to: "/", hash: "tipusok" });
     } catch (e: unknown) {
       inFlight.current = false;
       setError(e instanceof Error ? e.message : "Nem sikerült megnyitni a tréning-eseteket.");

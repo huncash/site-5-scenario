@@ -5,6 +5,7 @@ import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
+import { DEMO_SELECTOR_HASH, preferDemoSelectorHome } from "@/lib/demoSelector";
 import { cn } from "@/lib/utils";
 
 export function FunnelShell(props: {
@@ -36,6 +37,11 @@ export function FunnelShell(props: {
           <div className="flex shrink-0 items-center gap-2">
             {rightSlot}
             <ViewSettingsMenu />
+            <Button asChild size="sm" variant="outline" className="h-8 px-3">
+              <Link to="/" hash={DEMO_SELECTOR_HASH} onClick={() => preferDemoSelectorHome()}>
+                {t("door.startDemo")}
+              </Link>
+            </Button>
             <Button asChild size="sm" className="btn-cta h-8 px-3">
               <Link to="/login">{t("chrome.login")}</Link>
             </Button>

@@ -873,7 +873,7 @@ export const en: DeepString<typeof hu> = {
     resilCheck: "CHECK: ResourceRunway, EnergyAutonomy, TTR — the engine also carries a physical limit.",
     resilAct: "ACT: protocol — redundancy, local-first, local supply, stock.",
     resilEyebrow: "BCP · Operational resilience · Strategic foresight",
-    kahnPlan: "PLAN: trunk given. 1) loan or organic, 2) A/B contract, 3) PRO band — which future branch you bind cash to.",
+    kahnPlan: "Click: loan or organic — PRO output recalculates live.",
     kahnCheck: "CHECK: expansion commit, organic option, A-penalty vs B-exit. Not a forecast — a fork.",
     kahnAct: "ACT: stay on a branch, or hold reserve. Stop-loss on the pessimistic band (≥4 mo runway, margin ≥12%).",
     stratPlan: "PLAN: the core trunk is given. Here you only move the decision layer.",
@@ -897,9 +897,8 @@ export const en: DeepString<typeof hu> = {
     familyTime: "Time",
   },
   kahnGuide: {
-    bannerTitle: "Guided tour — Kahn case study",
-    bannerLead:
-      "Three tabs, one reactive chain: Core ops → Project/Capacity → Personal/Household. Switching the PRO path recalculates Personal frames at once.",
+    bannerTitle: "Core · Project · Personal",
+    bannerLead: "Core → Project → Personal.",
     expand: "Expand",
     collapse: "Collapse",
     hideForever: "Hide",

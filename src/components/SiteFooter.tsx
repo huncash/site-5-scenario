@@ -8,6 +8,7 @@ import { RopeSlogan } from "@/components/rope/RopeSlogan";
 import { translate } from "@/i18n";
 import { LOCALE_EVENT, readClientLocale, type Locale } from "@/i18n/locale";
 import { billPublicOrigin } from "@/lib/billing";
+import { DEMO_SELECTOR_HASH } from "@/lib/demoSelector";
 import {
   currentLocation,
   HOME_MODE_EVENT,
@@ -156,8 +157,8 @@ const FooterMarkup = memo(function FooterMarkup({ locale }: { locale: Locale }) 
   const billHome = kind === "bill" ? "/" : `${billPublicOrigin()}/`;
   const mainPath = (path: string) => (kind === "main" ? path : `${home}${path}`);
   const supportPath = (path: string) => (kind === "support" ? path : `${support}${path}`);
-  const scenariosHref = mainPath("/#szcenariok");
-  const typesHref = mainPath("/#tipusok");
+  const scenariosHref = mainPath(`/#${DEMO_SELECTOR_HASH}`);
+  const typesHref = mainPath(`/#${DEMO_SELECTOR_HASH}`);
   const pricingHref = mainPath("/#pricing");
   const aboutHref = mainPath("/about");
   const gdprHref = mainPath("/gdpr");

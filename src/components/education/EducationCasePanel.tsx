@@ -1,6 +1,7 @@
 import { caseTitle, useI18n } from "@/i18n";
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
 import { HelpIcon } from "@/components/HelpIcon";
+import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -146,17 +147,23 @@ export function EducationCasePanel(props: {
           : t("panel.eduOtherCheck");
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {t("panel.eduTitle")}
-          {model.kind === "campus" || model.kind === "cyber" ? (
-            <HelpIcon kbId="lesson-campus" title={t("panel.lesson")} />
-          ) : null}
-        </p>
-        <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</h3>
-        <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
-        {ops ? (
+    <CollapsibleCard
+      id={`education-${props.phase ?? "check"}`}
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span>
+          <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t("panel.eduTitle")}
+            {model.kind === "campus" || model.kind === "cyber" ? (
+              <HelpIcon kbId="lesson-campus" title={t("panel.lesson")} />
+            ) : null}
+          </span>
+          <span className="mt-0.5 block text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</span>
+        </span>
+      }
+    >
+      <p className="text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
+      {ops ? (
           <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-2 text-[11px] leading-snug text-emerald-100/90">
             <span className="font-semibold text-emerald-200/95">
               Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins):{" "}
@@ -166,7 +173,6 @@ export function EducationCasePanel(props: {
             szabad cash-flow-t termel, mint a fix megvalósítási költségek.
           </div>
         ) : null}
-      </div>
       <div className="mt-3 grid gap-3">
         {physical ? (
           <PhysicalOpsPanel segmentId={props.segmentId} baseline={props.baseline} phase={props.phase} />
@@ -207,6 +213,6 @@ export function EducationCasePanel(props: {
           </div>
         ) : null}
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

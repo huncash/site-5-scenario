@@ -1,5 +1,6 @@
 import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
+import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -183,10 +184,12 @@ export function ResilienceCasePanel(props: {
         : t("panel.resilCheck");
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card/80 p-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <CollapsibleCard
+      id={`resilience-${props.phase ?? "check"}`}
+      className="rounded-xl border border-border/60 bg-card/80 p-3"
+      title={
+        <span>
+          <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {t("panel.resilEyebrow")}
             <HelpIcon
               kbId={
@@ -200,11 +203,12 @@ export function ResilienceCasePanel(props: {
               }
               title={t("panel.lesson")}
             />
-          </p>
-          <h3 className="mt-0.5 text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</h3>
-          <p className="mt-1 text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
-        </div>
-      </div>
+          </span>
+          <span className="mt-0.5 block text-sm font-semibold text-foreground">{caseTitle(props.segmentId, locale) ?? model.title}</span>
+        </span>
+      }
+    >
+      <p className="text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
       <div className="mt-3 grid gap-3">
         {model.kind === "macro" ? (
           props.phase === "PLAN" ? (
@@ -245,6 +249,6 @@ export function ResilienceCasePanel(props: {
           </div>
         ) : null}
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

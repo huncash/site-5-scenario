@@ -27,6 +27,7 @@ import { captureCampaignFromLocation, readCampaignId } from "@/lib/campaignSessi
 import { type DemoSegmentId } from "@/lib/demoCatalog";
 import { KAHN_SEGMENT_ID } from "@/lib/coreCases";
 import { writeScenarioDoorStep } from "@/lib/doorStep";
+import { DEMO_SELECTOR_HASH, preferDemoSelectorHome } from "@/lib/demoSelector";
 import { AddonModuleDialog } from "@/components/cases/AddonModuleDialog";
 import {
   isStartableScenarioKind,
@@ -87,7 +88,7 @@ export function ScenarioDoor() {
     } catch {
       setCampus(false);
     }
-    if (window.location.hash === "#tipusok") {
+    if (window.location.hash === `#${DEMO_SELECTOR_HASH}`) {
       window.requestAnimationFrame(() => {
         document.getElementById("tipusok")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -144,6 +145,17 @@ export function ScenarioDoor() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ViewSettingsMenu />
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 px-3"
+              onClick={() => {
+                preferDemoSelectorHome();
+                document.getElementById(DEMO_SELECTOR_HASH)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              {t("door.startDemo")}
+            </Button>
             <Button asChild className="btn-cta h-8 px-3">
               <Link to="/login">{t("chrome.login")}</Link>
             </Button>

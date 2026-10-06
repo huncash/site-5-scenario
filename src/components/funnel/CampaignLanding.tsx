@@ -13,6 +13,7 @@ import { PRICING_HERO } from "@/content/pricing/tiers";
 import { publicSegmentById } from "@/lib/demoCatalog";
 import { CAMPAIGN_PATHS, CAMPAIGN_SEGMENT_IDS, type CampaignId } from "@/lib/campaignFunnels";
 import { captureCampaignFromLocation, enterCampaignChooser } from "@/lib/campaignSession";
+import { DEMO_SELECTOR_HASH } from "@/lib/demoSelector";
 import { caseTitle, useI18n } from "@/i18n";
 
 export function CampaignLanding(props: { campaignId: CampaignId }) {
@@ -34,7 +35,7 @@ export function CampaignLanding(props: { campaignId: CampaignId }) {
 
   const openChooser = () => {
     enterCampaignChooser(campaignId);
-    void navigate({ to: "/", hash: "tipusok" });
+    void navigate({ to: "/", hash: DEMO_SELECTOR_HASH });
   };
 
   return (

@@ -21,6 +21,14 @@ export function isNewLineSegment(id: string | null | undefined): id is "demo19_s
   return id === "demo19_strategy_new_line";
 }
 
+export function isInflationSegment(id: string | null | undefined): id is "demo20_strategy_input_inflation" {
+  return id === "demo20_strategy_input_inflation";
+}
+
+export function isNewMarketSegment(id: string | null | undefined): id is "demo21_strategy_new_market" {
+  return id === "demo21_strategy_new_market";
+}
+
 export function isStrategySegment(id: string | null | undefined): id is StrategyCaseId {
   return STRATEGY_CASE_IDS.includes(id as StrategyCaseId);
 }
@@ -243,6 +251,157 @@ export type KahnDecisionTree = {
   branches: KahnBranch[];
 };
 
+export type KahnFinancingId = "loan" | "organic";
+export type KahnContractId = "cheap" | "flex";
+
+export type KahnProLive = {
+  tone: StrategyTone;
+  label: string;
+  runwayMonths: number | null;
+  exitPenaltyHuf: number | null;
+  monthlyObligationHuf: number | null;
+  strategy: string;
+};
+
+/** Élő PLAN-mátrix: a két fordulat → Bővítés / Tartás / Tartalék mutatói. */
+export function resolveKahnPlanPro(
+  financing: KahnFinancingId | null,
+  contract: KahnContractId | null,
+): KahnProLive[] {
+  const a = KAHN_FORK.contractA;
+  const b = KAHN_FORK.contractB;
+  const empty = (label: string, tone: StrategyTone, strategy: string): KahnProLive => ({
+    tone,
+    label,
+    runwayMonths: null,
+    exitPenaltyHuf: null,
+    monthlyObligationHuf: null,
+    strategy,
+  });
+
+  if (!financing) {
+    return [
+      empty("Bővítés", "opt", "Válassz finanszírozást."),
+      empty("Tartás", "real", "Válassz finanszírozást."),
+      empty("Tartalék", "pess", "Válassz finanszírozást."),
+    ];
+  }
+
+  if (financing === "organic") {
+    return [
+      {
+        tone: "opt",
+        label: "Bővítés",
+        runwayMonths: 7,
+        exitPenaltyHuf: 0,
+        monthlyObligationHuf: KAHN_FORK.organicMonthlyCommitHuf,
+        strategy: "Lassabb kapacitás a törzsből. Nincs kamat.",
+      },
+      {
+        tone: "real",
+        label: "Tartás",
+        runwayMonths: 11,
+        exitPenaltyHuf: 0,
+        monthlyObligationHuf: Math.round(KAHN_FORK.optionFeeHuf / 6),
+        strategy: `Opció ${formatHuf(KAHN_FORK.optionFeeHuf)}. A core ritmusa viszi a házat.`,
+      },
+      {
+        tone: "pess",
+        label: "Tartalék",
+        runwayMonths: 9,
+        exitPenaltyHuf: 0,
+        monthlyObligationHuf: 0,
+        strategy: `Nincs kötbér. Cél ≥${KAHN_FORK.minRunwayMonths} hó runway.`,
+      },
+    ];
+  }
+
+  if (!contract) {
+    return [
+      {
+        tone: "opt",
+        label: "Bővítés",
+        runwayMonths: 8,
+        exitPenaltyHuf: null,
+        monthlyObligationHuf: null,
+        strategy: `Lehívás ${formatHuf(KAHN_FORK.loanDrawHuf)}. Válaszd az A/B konstrukciót.`,
+      },
+      {
+        tone: "real",
+        label: "Tartás",
+        runwayMonths: 6,
+        exitPenaltyHuf: null,
+        monthlyObligationHuf: null,
+        strategy: "Kamat és kötbér a 2. fordulaton dől el.",
+      },
+      {
+        tone: "pess",
+        label: "Tartalék",
+        runwayMonths: 5,
+        exitPenaltyHuf: null,
+        monthlyObligationHuf: null,
+        strategy: "A-n kötbér, B-n csak kamat.",
+      },
+    ];
+  }
+
+  if (contract === "cheap") {
+    return [
+      {
+        tone: "opt",
+        label: "Bővítés",
+        runwayMonths: 8,
+        exitPenaltyHuf: a.exitPenaltyHuf,
+        monthlyObligationHuf: a.monthlyInterestHuf,
+        strategy: "Olcsó kamat, zárt szál — ha a kereslet megjön.",
+      },
+      {
+        tone: "real",
+        label: "Tartás",
+        runwayMonths: 6,
+        exitPenaltyHuf: a.exitPenaltyHuf,
+        monthlyObligationHuf: a.monthlyInterestHuf,
+        strategy: `${a.lockMonths} hó zár. Kilépés kötbéres.`,
+      },
+      {
+        tone: "pess",
+        label: "Tartalék",
+        runwayMonths: KAHN_FORK.minRunwayMonths,
+        exitPenaltyHuf: a.exitPenaltyHuf,
+        monthlyObligationHuf: a.monthlyInterestHuf,
+        strategy: `Kilépés = +${formatHuf(a.exitPenaltyHuf)} kötbér.`,
+      },
+    ];
+  }
+
+  return [
+    {
+      tone: "opt",
+      label: "Bővítés",
+      runwayMonths: 7,
+      exitPenaltyHuf: 0,
+      monthlyObligationHuf: b.monthlyInterestHuf,
+      strategy: "Drágább futás, szabad kilépés.",
+    },
+    {
+      tone: "real",
+      label: "Tartás",
+      runwayMonths: 6,
+      exitPenaltyHuf: 0,
+      monthlyObligationHuf: b.monthlyInterestHuf,
+      strategy: "Előtörlesztés szabad, kötbér 0.",
+    },
+    {
+      tone: "pess",
+      label: "Tartalék",
+      runwayMonths: 6,
+      exitPenaltyHuf: 0,
+      monthlyObligationHuf: b.monthlyInterestHuf,
+      strategy: `Kötbér 0. Cél ≥${KAHN_FORK.minRunwayMonths} hó runway.`,
+    },
+  ];
+}
+
 export function kahnDecisionTree(): KahnDecisionTree {
   const a = KAHN_FORK.contractA;
   const b = KAHN_FORK.contractB;
@@ -262,10 +421,10 @@ export function kahnDecisionTree(): KahnDecisionTree {
       },
       {
         id: "organic",
-        label: "Organikus",
+        label: "Organikus növekedés",
         tone: "real",
         detail: "Nincs kamat, nincs kötbér. A core tartja a házat lassabb ütemben.",
-        amountHint: `${KAHN_FORK.organicCommitMonths}× ${formatHuf(KAHN_FORK.organicMonthlyCommitHuf)}/hó`,
+        amountHint: `${KAHN_FORK.organicCommitMonths}× ${formatHuf(KAHN_FORK.organicMonthlyCommitHuf)}/hó a törzsből`,
       },
     ],
     contractQuestion: "2. fordulat (ha hitel): melyik konstrukció?",

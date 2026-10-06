@@ -117,7 +117,7 @@ function useBoxWidth(min = 280) {
 
 function ChartHoverSlot({ children }: { children?: ReactNode }) {
   return (
-    <p className="mt-1 min-h-[1.25rem] text-[10px] leading-snug text-slate-400" aria-live="polite">
+    <p className="mt-1 min-h-[1.25rem] text-[10px] leading-snug text-[var(--text-muted)]" aria-live="polite">
       {children || "\u00a0"}
     </p>
   );
@@ -136,7 +136,7 @@ export function ChartLegendSwatch({
 }) {
   const fill = color ?? (tone === "pess" ? PRO_PESS : tone === "opt" ? PRO_OPT : tone === "real" ? PRO_REAL : FOCUS);
   return (
-    <span className="inline-flex items-center gap-1.5 text-[10px] leading-snug text-slate-300">
+    <span className="inline-flex items-center gap-1.5 text-[10px] leading-snug text-[var(--text-muted)]">
       <span
         className={cn(
           line && tone
