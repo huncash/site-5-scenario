@@ -229,10 +229,14 @@ function PricingPage({ locale }: { locale: Locale }) {
       <h1>{t.pricingTitle}</h1>
       <p>{t.pricingLead}</p>
 
-      <nav className="nav" aria-label={t.pricingNav}>
-        <a href="#basic">{t.pricingTocPlans}: Basic</a>
+      <nav className="nav" aria-label={t.pricingTocPlans}>
+        <span>{t.pricingTocPlans}:</span>
+        <a href="#basic">Basic</a>
         <a href="#pro">Pro</a>
         <a href="#enterprise">Enterprise</a>
+      </nav>
+      <nav className="nav" aria-label={t.pricingTocModels}>
+        <span>{t.pricingTocModels}:</span>
         <a href="#tiered-loyalty">{t.pricingTocLoyalty}</a>
         <a href="#active-workspaces">{t.pricingTocActive}</a>
         <a href="#workflow">{t.pricingTocWorkflow}</a>
@@ -242,7 +246,7 @@ function PricingPage({ locale }: { locale: Locale }) {
       <div className="section-block">
         {tiers.map((tier) => (
           <article key={tier.id} id={tier.id} className="item scroll-mt-24" style={{ marginBottom: 20 }}>
-            <b>{tier.title}</b>
+            <h2>{tier.title}</h2>
             <p style={{ margin: "6px 0 0" }}>{tier.priceLine}</p>
             <p className="note" style={{ margin: "4px 0 8px" }}>
               {tier.ladder}
@@ -266,10 +270,6 @@ function PricingPage({ locale }: { locale: Locale }) {
             </p>
             {tier.id === "enterprise" ? (
               <p style={{ margin: "10px 0 0" }}>
-                <span className="note">{t.pricingEnterpriseBadge}</span>
-                <span className="note" style={{ display: "block", marginTop: 6 }}>
-                  {t.pricingEnterpriseInquiryLead}
-                </span>
                 <a className="ticket-cta" href={enterpriseInquiryMailto({ locale })} style={{ display: "inline-block", marginTop: 8 }}>
                   {t.pricingEnterpriseCta}
                 </a>
@@ -281,6 +281,11 @@ function PricingPage({ locale }: { locale: Locale }) {
 
       <div className="section-block scroll-mt-24" id="tiered-loyalty">
         <h2>{t.pricingLoyaltyTitle}</h2>
+        <ul>
+          {t.pricingLoyaltyYears.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
         <p>{t.pricingLoyaltyBody}</p>
       </div>
       <div className="section-block scroll-mt-24" id="active-workspaces">
@@ -290,6 +295,7 @@ function PricingPage({ locale }: { locale: Locale }) {
       <div className="section-block scroll-mt-24" id="workflow">
         <h2>{t.pricingWorkflowTitle}</h2>
         <p>{t.pricingWorkflowBody}</p>
+        <p>{t.pricingWorkflowBody2}</p>
       </div>
       <div className="section-block scroll-mt-24" id="local-import">
         <h2>{t.pricingLocalTitle}</h2>

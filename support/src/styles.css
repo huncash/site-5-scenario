@@ -117,6 +117,7 @@ button.lang-btn:not(.view-settings-icon-btn):hover {
 .sla { font-size: 12px; color: var(--text-muted); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; }
 .nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
 .nav a { font-size: 12px; }
+.nav span { font-size: 12px; color: var(--text-muted); align-self: center; }
 .note { font-size: 12px; }
 .bonbon {
   margin: 12px 0 16px;

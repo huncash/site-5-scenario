@@ -70,6 +70,7 @@ describe("pre-flight public promise", () => {
       hu.supportDoor.navIntegrationsLead,
       supportCopy("hu").pricingLocalBody,
       supportCopy("hu").pricingWorkflowBody,
+      supportCopy("hu").pricingWorkflowBody2,
     ].join("\n");
     const operationEn = [
       en.brand.localFirstBody,
@@ -81,6 +82,7 @@ describe("pre-flight public promise", () => {
       en.supportDoor.navIntegrationsLead,
       supportCopy("en").pricingLocalBody,
       supportCopy("en").pricingWorkflowBody,
+      supportCopy("en").pricingWorkflowBody2,
     ].join("\n");
     expect(operationHu).not.toMatch(/Barion/i);
     expect(operationEn).not.toMatch(/Barion/i);
@@ -124,5 +126,23 @@ describe("pre-flight public promise", () => {
     ].join("\n");
     expect(huBlob).not.toMatch(/főoldal csak röviden|pontos keret ide tartozik|nem promózzuk|visszaide/i);
     expect(enBlob).not.toMatch(/homepage stays short|exact frame|not promoted on the homepage|come back here/i);
+  });
+
+  it("states support pricing as a standalone page: no demo aside, no hash crumbs, financial data named", () => {
+    const hu = supportCopy("hu");
+    const workflow = `${hu.pricingWorkflowBody}\n${hu.pricingWorkflowBody2}`;
+    expect(workflow).toMatch(/ellenőrzöl/);
+    expect(workflow).toMatch(/helyi műszerfalon/);
+    expect(workflow).not.toMatch(/demó/i);
+    expect(hu.pricingLocalBody).toMatch(/pénzügyi adataidat se/);
+    expect(hu.pricingLoyaltyTitle).not.toMatch(/#/);
+    expect(hu.pricingActiveTitle).not.toMatch(/#/);
+    expect(hu.pricingWorkflowTitle).not.toMatch(/#/);
+    expect(hu.pricingLocalTitle).not.toMatch(/#/);
+    const blob = supportPricingTiers("hu")
+      .flatMap((t) => [t.detail, t.ladder, ...t.bullets])
+      .join("\n");
+    expect(blob).not.toMatch(/lásd #|see #/i);
+    expect(supportPricingTiers("hu").find((t) => t.id === "pro")?.bullets.join(" ")).toMatch(/2027/);
   });
 });

@@ -58,28 +58,37 @@ const hu = {
   pricingNav: "Árazás",
   pricingTitle: "Csomagok, licenc és helyi adatkezelés",
   pricingLead:
-    "A Basic és a Pro azonnal a böngészőben él, a gépeden. Helyi adat, nincs felhős adatbázis. Itt a csomagok kapacitása, a hűségmodell és a helyi adatkezelés. Az asztali early access 2027 tavaszán jön, a Pro mellé ingyen.",
+    "A Basic és a Pro verzió közvetlenül a te számítógépeden, a böngésződben fut. Minden adat helyben marad, külső felhős adatbázist nem használunk. Az alábbiakban részletesen bemutatjuk a csomagok kapacitásait, a kedvezményes hűségmodellt és a helyi adatkezelés elveit. Az asztali alkalmazás korai hozzáférése 2027 tavaszán érkezik, amelyet a Pro csomag tulajdonosai ingyenesen megkapnak.",
   pricingTocPlans: "Csomagok",
+  pricingTocModels: "Modellek",
   pricingTocLoyalty: "Hűségmodell",
   pricingTocActive: "Aktív munkaterületek",
-  pricingTocLocal: "Lokális import & Edge",
-  pricingTocWorkflow: "Hogyan dolgozol vele",
-  pricingLoyaltyTitle: "3 éves lépcsőzetes hűség (#tiered-loyalty)",
+  pricingTocLocal: "Lokális import",
+  pricingTocWorkflow: "Működési elv",
+  pricingLoyaltyTitle: "Hároméves lépcsőzetes hűségmodell",
+  pricingLoyaltyYears: [
+    "1. év: A belépő listaár 100%-a egyszeri vásárlásként — a megvásárolt verzió véglegesen a tiéd marad.",
+    "2. év: Kedvezményes frissítési díj (−25%).",
+    "3. év: Kedvezményes frissítési díj (−40%).",
+    "4. évtől: Minden jövőbeni frissítés teljesen díjmentes.",
+  ],
   pricingLoyaltyBody:
-    "1. év: a belépő listaár 100%-a (egyszeri vásárlás) — a megvásárolt verzió véglegesen a tiéd marad. 2. év: frissítési díj −25%. 3. év: frissítési díj −40%. A 4. évtől minden jövőbeli frissítés díjmentes. Ha nem újítasz, a megvásárolt verzió továbbra is használható; csak az újabb motorverziókhoz kell a lépcső szerinti frissítés.",
-  pricingActiveTitle: "Aktív Case & Aktív Slot — párhuzamos asztal és fül (#active-workspaces)",
+    "Ha úgy döntesz, hogy nem élsz a frissítési lehetőséggel, a korábban megvásárolt verzió korlátozás nélkül továbbra is használható marad; frissítési díjat kizárólag akkor szükséges fizetni, ha a jövőbeli új motorverziók újdonságait is szeretnéd elérni.",
+  pricingActiveTitle: "Párhuzamos asztalok és fülek (Aktív Case & Slot)",
   pricingActiveBody:
-    "A licenc az egyidejűleg éles (párhuzamosan futó) munkaterületek számát köti — nem a felhalmozott, archív adatok mennyiségét. Inaktív vagy régi Case/Slot szabadon törölhető, felülírható és újratölthető díj nélkül. Fizetni csak akkor kell, ha újabb párhuzamos éles munkaterületet nyitsz (bővítő modul: Extra Aktív Case / Slot / Seat).",
-  pricingLocalTitle: "Lokális bankkivonat-import & Edge (#local-import)",
+    "A licenc az egyidejűleg éles, vagyis párhuzamosan futó munkaterületek számához kötődik, nem pedig a rendszerben felhalmozott, archív adatok mennyiségéhez. A régebbi vagy inaktív esetek és slotok bármikor szabadon törölhetők, felülírhatók vagy újratölthetők extra költségek nélkül. Fizetni kizárólag abban az esetben kell, ha egyszerre több párhuzamos éles munkaterületet szeretnél nyitva tartani (ehhez külön örökös bővítőmodulok állnak rendelkezésre).",
+  pricingLocalTitle: "Lokális bankkivonat-import és Edge",
   pricingLocalBody:
-    "A bankkivonat (CSV, XML) a saját gépeden a Mesh Data Managerbe kerül — kézzel, vagy Proban egy figyelt mappából, amit belépéskor megnéz. Nincs kötelező felhő, nincs külső felhős adatbázis. A fejlesztők soha nem látják és nem gyűjtik. Az opcionális helyi bekötés is nálad marad: nem küldünk használatot. A megvett motor a gépeden él; ha nem frissítesz, a megvett verzió tovább megy.",
-  pricingWorkflowTitle: "A valós munkamenet (#workflow)",
+    "A bankkivonatok (CSV, XML formátumban) kizárólag a saját gépeden, a Mesh Data Manager kerete között dolgozódnak fel — kézi feltöltéssel, vagy a Pro csomagban egy általad megadott figyelt mappából. Nincs kötelező felhőkapcsolat, nincs külső szerveren tárolt adatbázis. A fejlesztők soha nem látják és nem gyűjtik a pénzügyi adataidat se. Az opcionális helyi bekötések szintén nálad maradnak, semmilyen használati statisztikát nem küldünk vissza. A megvásárolt motor a te hardvereden él és dolgozik.",
+  pricingWorkflowTitle: "Így működik a gyakorlatban",
   pricingWorkflowBody:
-    "Először a törzsadat: profil, magán vagyontárgyak, ingatlanok — titkosítva, helyben. Aztán a kivonat a Mesh Data Managerbe: Basicben kézi CSV/XML, Proban figyelt mappa és saját szabály. A helyzetkép ott áll össze: a tételek kategóriába kerülnek, te tervezel, futtatsz, ellenőrizsz, beavatkozol. A pontatlan beolvasást kézzel igazítod — nem mesterséges intelligenciát tanítasz. Vállalkozás és projekt a Pro asztalán. A demók elképzelt minták a motor kipróbálásához; elsőre sűrűnek is szabad lenniük.",
+    "A folyamat logikus lépésekből épül fel. Első lépésként rögzíted a törzsadatokat: a profilodat, a magánvagyontárgyakat és az ingatlanokat, amelyek titkosítva, kizárólag helyben tárolódnak. Ezt követően érkezik meg a bankkivonat a Mesh Data Managerbe: a Basic csomagban kézi CSV vagy XML fájlformátumban, a Pro csomagban pedig figyelt mappából és saját szabályok alapján. A helyzetkép ekkor áll össze: a tételek a megadott szabályok szerint a megfelelő kategóriákba rendeződnek.",
+  pricingWorkflowBody2:
+    "Futtatsz, ellenőrzöl, beavatkozol. A pontatlan beolvasást kézzel igazítod ki — ez a te egyéni preferenciáid finomhangolása, nem pedig mesterséges intelligencia tanítása. A magánélet pénzügyei mellett a vállalkozás és a projektek slotjai egyaránt biztonságosan helyet kapnak a helyi műszerfalon.",
   pricingEnterpriseBadge: "Későbbi időpontban érhető el",
   pricingEnterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
   pricingEnterpriseInquiryLead:
-    "Az Enterprise csomag előjegyzésre érhető el. Az ár és a kapacitás (Aktív Case / Aktív Slot) tájékoztató értékhorgony. Nincs önkiszolgáló checkout.",
+    "Az Enterprise csomag egyedi egyeztetést igényel. Nincs önkiszolgáló checkout.",
   toTierBasic: "Támogatás: Basic",
   toTierPro: "Támogatás: Standard",
   toTierEnterprise: "Támogatás: Priority",
@@ -131,28 +140,37 @@ const en: typeof hu = {
   pricingNav: "Pricing",
   pricingTitle: "Plans, license & local data handling",
   pricingLead:
-    "Basic and Pro start at once in the browser, on your machine. Local data, no cloud database. This page states plan capacity, the loyalty model and local data handling. Desktop early access comes spring 2027, free with Pro.",
+    "Basic and Pro run directly on your computer, in your browser. All data stays local; we do not use an external cloud database. Below we set out plan capacity, the loyalty discount model, and the principles of local data handling. Desktop early access arrives in spring 2027, free for Pro owners.",
   pricingTocPlans: "Plans",
+  pricingTocModels: "Models",
   pricingTocLoyalty: "Loyalty model",
   pricingTocActive: "Active workspaces",
-  pricingTocLocal: "Local import & Edge",
-  pricingTocWorkflow: "How you work with it",
-  pricingLoyaltyTitle: "3-year tiered loyalty (#tiered-loyalty)",
+  pricingTocLocal: "Local import",
+  pricingTocWorkflow: "How it works",
+  pricingLoyaltyTitle: "Three-year tiered loyalty model",
+  pricingLoyaltyYears: [
+    "Year 1: 100% of the entry list price as a one-time purchase — the purchased version stays yours permanently.",
+    "Year 2: discounted update fee (−25%).",
+    "Year 3: discounted update fee (−40%).",
+    "From year 4: every future update is free.",
+  ],
   pricingLoyaltyBody:
-    "Year 1: 100% of the entry list price (one-time purchase) — the purchased version stays yours permanently. Year 2: update fee −25%. Year 3: update fee −40%. From year 4, every future update is free. If you do not renew, the purchased version remains usable; only newer engine versions require the ladder update fee.",
-  pricingActiveTitle: "Active Case & Active Slot — parallel desks and tabs (#active-workspaces)",
+    "If you choose not to take the update, the version you already bought remains fully usable; you pay an update fee only if you also want the new engine versions.",
+  pricingActiveTitle: "Parallel desks and tabs (Active Case & Slot)",
   pricingActiveBody:
-    "The license limits concurrently live (parallel) workspaces — not accumulated archive data. Inactive or old Cases/Slots can be deleted, overwritten and reloaded at no charge. You pay only when you open an additional parallel live workspace (add-on: Extra Active Case / Slot / Seat).",
-  pricingLocalTitle: "Local bank-statement import & Edge (#local-import)",
+    "The license is tied to how many workspaces run live at the same time — not to how much archive data you keep. Older or inactive cases and slots can be deleted, overwritten or reloaded at any time with no extra charge. You pay only if you want several live workspaces open in parallel (perpetual add-on modules cover that).",
+  pricingLocalTitle: "Local bank-statement import and Edge",
   pricingLocalBody:
-    "The bank statement (CSV, XML) goes into Mesh Data Manager on your machine — by hand, or on Pro from a watched folder checked at sign-in. No required cloud, no external cloud database. Developers never see or collect it. Optional local intake stays under your control: we do not send usage. The purchased engine lives on your device; if you do not update, that version still runs.",
-  pricingWorkflowTitle: "The real work sequence (#workflow)",
+    "Bank statements (CSV, XML) are processed only on your own machine, inside Mesh Data Manager — by hand, or on Pro from a watched folder you choose. No required cloud link, no database stored on an external server. Developers never see or collect your financial data either. Optional local hook-ups also stay with you; we send back no usage statistics. The purchased engine lives and works on your hardware.",
+  pricingWorkflowTitle: "How it works in practice",
   pricingWorkflowBody:
-    "First the master data: profile, personal assets, property — encrypted, local. Then the statement into Mesh Data Manager: on Basic by hand (CSV/XML), on Pro a watched folder and your own rule. The picture assembles there: lines fall into categories; you plan, run, check, act. You correct a bad read by hand — you are not training an artificial intelligence. Business and projects sit on Pro. Demos are fictional samples to try the engine; they may feel dense at first.",
+    "The sequence is a set of clear steps. First you record master data: your profile, personal assets and property, stored encrypted and only locally. Then the bank statement arrives in Mesh Data Manager: on Basic as a hand-chosen CSV or XML file, on Pro from a watched folder and your own rules. That is when the picture comes together: lines fall into the right categories under the rules you set.",
+  pricingWorkflowBody2:
+    "You run, check, and act. You correct a bad read by hand — that is fine-tuning your own preferences, not training an artificial intelligence. Beside the finances of private life, business and project slots all sit safely on the local dashboard.",
   pricingEnterpriseBadge: "Available at a later date",
   pricingEnterpriseCta: "Contact / request a quote",
   pricingEnterpriseInquiryLead:
-    "The Enterprise plan is available on waitlist. Price and capacity (Active Case / Active Slot) stay visible as a value anchor. There is no self-serve checkout.",
+    "The Enterprise plan needs a conversation. There is no self-serve checkout.",
   toTierBasic: "Support: Basic",
   toTierPro: "Support: Standard",
   toTierEnterprise: "Support: Priority",
@@ -322,43 +340,48 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     return [
       {
         id: "basic",
-        title: "Basic",
-        priceLine: "€199 year 1 — one-time entry (net list)",
-        ladder: "See #tiered-loyalty · Y2 €149 (−25%) · Y3 €119 (−40%) · Y4+ free updates for life",
+        title: "Basic plan",
+        priceLine: "€199 in year 1 — one-time net list entry.",
+        ladder:
+          "On the loyalty model: year 2 €149 (−25%), year 3 €119 (−40%), and from year 4 updates for life.",
         detail:
-          "Basic is for one decision-maker: one concurrently active Case, three active slots, one editor seat and one guest. Master data, manual entry, file import (CSV, XML) and personal wealth. It starts at once in the browser. Inactive data can be overwritten freely. Computation stays on your device — no cloud database.",
+          "The Basic plan is designed for a single decision-maker: one concurrently active case, three active slots, plus one editor and one guest. It includes full master-data handling, manual entry, file import (CSV, XML) and personal-wealth tracking. The app starts at once in your browser. Inactive data may be overwritten without limit, and all computation runs entirely on your own machine.",
         bullets: [
-          "1 Active Case · 3 Active Slots · 1 Seat + 1 Guest",
-          "Unlimited overwrite of inactive slots — no archive fee",
-          "Three outcome paths (pessimistic / realistic / optimistic) locally",
+          "1 active case · 3 active slots · 1 editor and 1 guest",
+          "Unlimited overwrite of inactive slots — no archive fees",
+          "Three outcome paths (pessimistic, realistic, optimistic) processed locally",
         ],
       },
       {
         id: "pro",
-        title: "Pro (Recommended)",
-        priceLine: "€399 year 1 — one-time entry (net list)",
-        ladder: "See #tiered-loyalty · Y2 €299 (−25%) · Y3 €239 (−40%) · Y4+ free updates for life",
+        title: "Pro plan (Recommended)",
+        priceLine: "€399 in year 1 — one-time net list entry.",
+        ladder:
+          "On the loyalty model: year 2 €299 (−25%), year 3 €239 (−40%), and from year 4 updates for life.",
         detail:
-          "Pro adds a second parallel Active Case, business and project slots, custom rules, a watched folder, and local CSV/XML import — see #local-import. Import stays on your machine. You work in the browser now. Desktop early access comes spring 2027, free with Pro — not a condition of today’s purchase. Capacity is still concurrent-active only; extras are perpetual add-ons.",
+          "The Pro plan already covers a second parallel active case, business and project slots, editing your own rules, watched-folder sync and local CSV/XML import. Processing stays on your machine throughout. The Pro Desktop early-access build arriving in spring 2027 is free with Pro, and is not a condition of using the web app today. The frame applies to desks and tabs open at the same time; extras remain perpetual modules.",
         bullets: [
-          "2 Active Cases · 3 Active Slots each · 1 Seat + 5 Guests",
-          "Local CSV/XML import, watched folder, own rules — on your machine",
-          "Pro Desktop early access · spring 2027 · free with Pro",
-          "Extra Active Case add-on: +€49 perpetual",
+          "2 active cases · 3 active slots per case · 1 editor and 5 guests",
+          "Local CSV/XML import, watched folder and your own rules on your machine",
+          "Pro Desktop early access in spring 2027, free with Pro",
+          "Extra active-case module: +€49 (yours for life)",
+          "Support: Standard level",
         ],
       },
       {
         id: "enterprise",
         title: "Enterprise & Teams",
-        priceLine: "€799 year 1 — one-time entry (net list)",
-        ladder: "See #tiered-loyalty · Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ free updates for life",
+        priceLine: "€799 in year 1 — one-time net list entry.",
+        ladder:
+          "On the loyalty model: year 2 €599 (−25%), year 3 €479 (−40%), and from year 4 updates for life.",
         detail:
-          "Enterprise covers team seats, several parallel Active Cases, local accounting/bank import (CSV, XML) and optional local intake (#local-import). Import stays on your machine. Enterprise Desktop is an add-on in preparation and does not stop the web Case/Slot launch. The plan comes later — no self-serve checkout; ask for a quote.",
+          "The Enterprise plan provides team seats, several parallel active cases, automated accounting and bank-statement import (CSV, XML), and optional local sensor or Edge intake. Imported data stays closed on your machine. The Enterprise Desktop add-on is in preparation and does not affect launching existing web cases and slots. Because this plan needs a conversation, there is no self-serve checkout — please contact us for a quote.",
         bullets: [
-          "5 Active Cases · 4 Active Slots each · 3 Seats + 20 Guests",
-          "Automated accounting/bank-statement import + Sensor / Edge data feed",
-          "Enterprise Desktop: add-on module / in preparation — does not block the web launch",
-          "Add-ons: Case · Slot · Seat · Edge (perpetual modules)",
+          "5 active cases · 4 active slots per case · 3 editors and 20 guests",
+          "Automated accounting/bank-statement import and sensor/Edge intake",
+          "Enterprise Desktop add-on in preparation",
+          "Modular extras: case, slot, editor, Edge",
+          "Support: Priority level",
         ],
       },
     ];
@@ -366,43 +389,48 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
   return [
     {
       id: "basic",
-      title: "Basic",
-      priceLine: "199 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
-      ladder: "Lásd #tiered-loyalty · 2. év 149 000 Ft (−25%) · 3. év 119 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      title: "Basic csomag",
+      priceLine: "199 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      ladder:
+        "A hűségmodell alapján: 2. év 149 000 Ft (−25%), 3. év 119 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
       detail:
-        "Basic egy döntéshozónak: egyidejűleg egy Aktív Case, három aktív slot, egy szerkesztő és egy vendég. Törzsadat, kézi rögzítés, fájl-import (CSV, XML) és magánvagyon. Azonnal a böngészőben indul. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad — nincs felhős adatbázis.",
+        "A Basic csomagot egyetlen döntéshozónak terveztük: egyidejűleg egy aktív esetet, három aktív slotot, valamint egy szerkesztői és egy vendég hozzáférést biztosít. Tartalmazza a teljes törzsadatkezelést, a kézi rögzítést, a fájl-alapú importot (CSV, XML) és a magánvagyon nyomon követését. Az alkalmazás azonnal elindul a böngésződben. Az inaktív adatok korlátozás nélkül, szabadon felülírhatók, a számítások pedig teljes egészében a saját gépeden futnak le.",
       bullets: [
-        "1 Aktív Case · 3 Aktív Slot · 1 Seat + 1 Guest",
-        "Inaktív slot korlátlan felülírása — nincs archív díj",
-        "Három kimeneti pálya (pesszimista / realista / optimista) helyben",
+        "1 aktív eset · 3 aktív slot · 1 szerkesztő és 1 vendég hozzáférés",
+        "Az inaktív slotok korlátlan felülírása — archív díjak nélkül",
+        "Három kimeneti pálya (pesszimista, realista, optimista) helyi feldolgozásban",
       ],
     },
     {
       id: "pro",
-      title: "Pro (Ajánlott)",
-      priceLine: "399 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
-      ladder: "Lásd #tiered-loyalty · 2. év 299 000 Ft (−25%) · 3. év 239 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      title: "Pro csomag (Ajánlott)",
+      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      ladder:
+        "A hűségmodell alapján: 2. év 299 000 Ft (−25%), 3. év 239 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
       detail:
-        "A Pro második párhuzamos Aktív Case-t, vállalkozást és projektet, saját szabályt, figyelt mappát és helyi CSV/XML importot ad — lásd #local-import. Az import a gépeden marad. Most a böngészőben dolgozol. Az asztali early access 2027 tavaszán jön, ingyen a Pro mellé — nem a mostani vásárlás feltétele. A keret továbbra is az egyidejűleg nyitott asztalokra és fülekre vonatkozik; a bővítők örökös modulok.",
+        "A Pro csomag már a második párhuzamos aktív esetet, a vállalkozási és projektslotokat, a saját szabályok szerkesztését, a figyelt mappás szinkront és a helyi CSV/XML importot is biztosítja. Az adatok feldolgozása mindvégig a te gépeden történik. A 2027 tavaszán érkező Pro Desktop early access változat ingyenesen jár a Pro csomag mellé, de ez nem feltétele a jelenlegi webes használatnak. A keretrendszer az egyidejűleg nyitott asztalokra és fülekre vonatkozik; a bővítők örökös modulok maradnak.",
       bullets: [
-        "2 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 5 Guest",
-        "Helyi CSV/XML import, figyelt mappa, saját szabály — a gépeden",
-        "Pro Desktop early access · 2027 tavasz · ingyen a Pro mellé",
-        "Extra Aktív Case modul: +49 000 Ft örökös",
+        "2 aktív eset · 3 aktív slot esetenként · 1 szerkesztő és 5 vendég hozzáférés",
+        "Helyi CSV/XML import, figyelt mappa és saját szabályok a gépeden",
+        "Pro Desktop early access 2027 tavaszán, a Pro csomag mellé ingyen",
+        "Extra aktív eset modul: +49 000 Ft (örökös tulajdon)",
+        "Támogatás: Standard szint",
       ],
     },
     {
       id: "enterprise",
       title: "Enterprise & Csapatok",
-      priceLine: "799 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
-      ladder: "Lásd #tiered-loyalty · 2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
+      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      ladder:
+        "A hűségmodell alapján: 2. év 599 000 Ft (−25%), 3. év 479 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
       detail:
-        "Az Enterprise csapathelyeket, több párhuzamos Aktív Case-t, helyi könyvelési/bankkivonat importot (CSV, XML) és opcionális helyi bekötést ad (#local-import). Az import a gépeden marad. Az Enterprise Desktop bővítő modul készül; a webes Case/Slot indítást nem állítja meg. A csomag később jön — nincs önkiszolgáló checkout, írj ajánlatért.",
+        "Az Enterprise csomag csapathelyeket, több párhuzamos aktív esetet, automatizált könyvelési és bankkivonat-importot (CSV, XML), valamint opcionális helyi érzékelő- vagy Edge-bekötést nyújt. Az importált adatok zártan a gépeden maradnak. Az Enterprise Desktop bővítő modul előkészítés alatt áll, de ez nem befolyásolja a meglévő webes esetek és slotok indítását. Mivel ez a csomag egyedi egyeztetést igényel, nincs önkiszolgáló checkout — kérjük, vedd fel velünk a kapcsolatot az ajánlatért.",
       bullets: [
-        "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
-        "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",
-        "Enterprise Desktop: Bővítő modul / Előkészítés alatt — a webes indítást nem érinti",
-        "Bővítők: Case · Slot · Seat · Edge (örökös modulok)",
+        "5 aktív eset · 4 aktív slot esetenként · 3 szerkesztő és 20 vendég hozzáférés",
+        "Automatizált könyvelési/bankkivonat import és szenzoros/Edge adatgyűjtő bekötés",
+        "Enterprise Desktop bővítő modul előkészítés alatt",
+        "Moduláris bővítési lehetőségek: eset, slot, szerkesztő, Edge",
+        "Támogatás: Priority szint",
       ],
     },
   ];
