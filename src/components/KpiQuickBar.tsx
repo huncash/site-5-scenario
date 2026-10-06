@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 
 import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
 
-export type KpiQuickBarSlot = {
+/** A felső négy szám. Nem Slot — a Slot a Magán / Vállalkozás / Projekt fül. */
+export const KPI_QUICK_TILE_HINT = "egyedi beállítás";
+
+export function kpiQuickTileLabel(n: number): string {
+  return `KPI mutató #${n}`;
+}
+
+export type KpiQuickBarTile = {
   id: number;
   content?: ReactNode;
   label?: string;
@@ -13,7 +20,7 @@ export type KpiQuickBarSlot = {
   comingSoonPurpose?: string;
 };
 
-export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
+export function KpiQuickBar({ tiles }: { tiles?: KpiQuickBarTile[] }) {
   const { openComingSoon } = useFeatureComingSoon();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -39,9 +46,8 @@ export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
     });
   };
 
-  const safe: KpiQuickBarSlot[] = (
-    // Default: 4 slots (compact by default)
-    slots ?? Array.from({ length: 4 }, (_, i) => ({ id: i } satisfies KpiQuickBarSlot))
+  const safe: KpiQuickBarTile[] = (
+    tiles ?? Array.from({ length: 4 }, (_, i) => ({ id: i } satisfies KpiQuickBarTile))
   ).slice(0, 4);
 
   const cellCls =
@@ -50,7 +56,6 @@ export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
   return (
     <div className="mx-auto mb-1 w-full max-w-[98%] shrink-0 px-2 sm:px-3 md:px-4">
       <div className="relative">
-        {/* Always-visible collapse toggle (top-right of the bar) */}
         <button
           type="button"
           onClick={toggleCollapsed}
@@ -63,35 +68,40 @@ export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
 
         {!collapsed ? (
           <div className="grid grid-cols-1 gap-2 pr-9 min-w-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-3">
-            {safe.map((s, idx) => {
-              const hasContent = Boolean(s.content || s.label || s.value);
-              const isPlaceholder = !hasContent || s.comingSoon;
-              const inner = s.content ?? (
-                s.label || s.value ? (
+            {safe.map((tile, idx) => {
+              const n = idx + 1;
+              const title = kpiQuickTileLabel(n);
+              const hasContent = Boolean(tile.content || tile.label || tile.value);
+              const isPlaceholder = !hasContent || tile.comingSoon;
+              const inner = tile.content ?? (
+                tile.label || tile.value ? (
                   <div className="flex flex-col items-center leading-tight">
-                    {s.label ? (
-                      <div className="text-[9px] uppercase tracking-wide text-slate-500">{s.label}</div>
+                    {tile.label ? (
+                      <div className="text-[9px] uppercase tracking-wide text-slate-500">{tile.label}</div>
                     ) : null}
-                    {s.value ? <div className="font-mono text-xs text-slate-300">{s.value}</div> : null}
+                    {tile.value ? <div className="font-mono text-xs text-slate-300">{tile.value}</div> : null}
                   </div>
                 ) : (
-                  <span className="opacity-70">slot {idx + 1}</span>
+                  <div className="flex flex-col items-center leading-tight">
+                    <span className="text-[10px] font-medium text-slate-300">{title}</span>
+                    <span className="text-[9px] text-slate-500">{KPI_QUICK_TILE_HINT}</span>
+                  </div>
                 )
               );
 
               if (isPlaceholder) {
                 return (
                   <button
-                    key={s.id ?? idx}
+                    key={tile.id ?? idx}
                     type="button"
                     className={`${cellCls} hover:border-slate-600 hover:bg-slate-900/70 hover:text-slate-300`}
                     onClick={() =>
                       openComingSoon({
-                        title: s.comingSoonTitle ?? `KPI gyorssáv · slot ${idx + 1}`,
+                        title: tile.comingSoonTitle ?? `${title} — ${KPI_QUICK_TILE_HINT}`,
                         purpose:
-                          s.comingSoonPurpose ??
-                          "Testreszabható KPI csempe a felső gyorssávban. Az adatforrás és a widget konfigurátor előkészítés alatt áll.",
-                        featureId: `kpi.slot_${idx + 1}`,
+                          tile.comingSoonPurpose ??
+                          `${title} — ${KPI_QUICK_TILE_HINT}. A mutató forrása a gépeden lesz. Nem Slot: a Slot a Magán / Vállalkozás / Projekt fül.`,
+                        featureId: `kpi.tile_${n}`,
                       })
                     }
                   >
@@ -101,7 +111,7 @@ export function KpiQuickBar({ slots }: { slots?: KpiQuickBarSlot[] }) {
               }
 
               return (
-                <div key={s.id ?? idx} className={cellCls}>
+                <div key={tile.id ?? idx} className={cellCls}>
                   {inner}
                 </div>
               );

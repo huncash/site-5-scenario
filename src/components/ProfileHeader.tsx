@@ -297,24 +297,9 @@ export function ProfileHeader({
                 viewMode={viewMode ?? "split"}
                 onViewModeChange={onViewModeChange}
                 highlightSplit={highlightViewToggle}
+                onShortcuts={() => setShortcutsOpen(true)}
+                highlightShortcuts={highlightShortcuts}
               />
-
-              {/* Keyboard shortcuts — left of the main menu */}
-              <button
-                type="button"
-                className={cn(
-                  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card/40 text-foreground hover:bg-accent",
-                  highlightShortcuts
-                    ? "border-cyan-300/70 shadow-[0_0_0_3px_rgba(34,211,238,0.22)] ring-2 ring-cyan-300/60 animate-pulse"
-                    : "",
-                )}
-                aria-label={t("chrome.shortcuts")}
-                title={t("chrome.shortcuts")}
-                data-tour-anchor="shortcuts"
-                onClick={() => setShortcutsOpen(true)}
-              >
-                <Keyboard className="h-4 w-4" />
-              </button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

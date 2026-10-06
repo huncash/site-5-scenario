@@ -1276,9 +1276,9 @@ function SettingsPage() {
               <div className="rounded-lg border border-border/60 bg-background/40 p-3">
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="text-sm font-medium">KPI Quick Bar / Gyors mutatók sáv megjelenítése</div>
+                    <div className="text-sm font-medium">KPI mutató #1–#4 megjelenítése</div>
                     <div className="mt-0.5 text-[11px] text-muted-foreground">
-                      A fejléc alatti 4 gyorscsempe: KPI mutató #1–#4 — egyedi beállítás.
+                      A fejléc alatti 4 gyorscsempe: KPI mutató #1–#4 — egyedi beállítás. Nem Slot.
                     </div>
                   </div>
                   <Switch
@@ -1286,9 +1286,9 @@ function SettingsPage() {
                     onCheckedChange={(v) => {
                       const cur = settingsQ.data ?? EMPTY_SETTINGS;
                       const next: CustomSettings = { ...cur, showKpiQuickBar: Boolean(v) };
-                      void saveSettings(next, "KPI Quick Bar beállítás mentve.");
+                      void saveSettings(next, "KPI mutató sáv beállítás mentve.");
                     }}
-                    aria-label="KPI Quick Bar megjelenítése"
+                    aria-label="KPI mutató #1–#4 megjelenítése"
                   />
                 </div>
               </div>

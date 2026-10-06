@@ -11,11 +11,11 @@ export type ConceptFaqSection = {
   items: ConceptFaqItem[];
 };
 
-/** Elsődleges fogalmak (UI): Case / Slot / P-R-O / Seat / Guest. */
+/** Elsődleges fogalmak (UI): Case / Slot / három jövőkép / Seat / Guest. */
 export const CONCEPT_HIERARCHY_HU = {
   case: "Case",
   slot: "Slot",
-  pro: "P-R-O Szcenárió",
+  pro: "Három jövőkép",
   seat: "Seat",
   guest: "Guest",
 } as const;
@@ -37,15 +37,15 @@ export const CONCEPT_FAQ_HU: ConceptFaqSection = {
     },
     {
       id: "faq-pro",
-      question: "Mit jelent a P-R-O Szcenárió?",
+      question: "Mit jelent a három jövőkép?",
       answer:
-        "A **P-R-O** három gomb: Pesszimista, Realista, Optimista — rossz / közepes / jó. Ugyanaz a múlt, három számolás. Nem megmondja a jövőt. Azt mutatja: melyik ágon meddig bírja a kassza.",
+        "Három számolás ugyanarra a múltra: pesszimista, realista, optimista — rossz / közepes / jó. Nem megmondja a jövőt. Azt mutatja: melyik ágon meddig bírja a kassza.",
     },
     {
       id: "faq-seat",
       question: "Mi a Seat?",
       answer:
-        "A **Seat** szerkesztői fiók (teljes szerkesztési és modelligazítási jogkörrel).",
+        "A **Seat** az, aki írhat: tétel, terv, beállítás.",
     },
     {
       id: "faq-guest",
@@ -73,21 +73,21 @@ export const CONCEPT_FAQ_EN: ConceptFaqSection = {
     },
     {
       id: "faq-pro",
-      question: "What does the P-R-O Scenario mean?",
+      question: "What do the three futures mean?",
       answer:
-        "The **P-R-O Scenario** stands for Pessimistic · Realistic · Optimistic: the three simultaneously running simulation curves in every Slot — the full risk room to move, not a single number.",
+        "Three calculations on the same past: pessimistic, realistic, optimistic — bad / mid / good. It does not tell the future. It shows how long the till lasts on each path — the full risk room to move, not a single number.",
     },
     {
       id: "faq-seat",
       question: "What is a Seat?",
       answer:
-        "A **Seat** is an editor account (full editing and model-alignment rights).",
+        "A **Seat** is who can write: postings, plan, settings.",
     },
     {
       id: "faq-guest",
       question: "What is a Guest?",
       answer:
-        "A **Guest** is a guest account with read-only access (viewer / auditor). It does not consume a Seat and cannot change your models.",
+        "A **Guest** only looks. They cannot write and they do not use a Seat place. You can revoke the key any time.",
     },
   ],
 };

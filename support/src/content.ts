@@ -60,7 +60,7 @@ export const LESSONS: Lesson[] = [
       slug: "lecke-02",
       title: "Dashboard kezelés",
       body:
-        "Felső vezérlés, középen a munka, alul a modulok. A fülek a Slot / Munkateret cserélik. A KPI a 4 fő szám; a What-if a P-R-O pályaváltó; a fedezeti pont az első hónap, amikor a választott pálya már nem veszteséges.",
+        "Felső vezérlés, középen a munka, alul a modulok. A fülek a Magán, Vállalkozás és Projekt területeket cserélik. A felső sáv a gyors állapot, a középső a döntés. 0 hónap = elfogyott a levegő: először a kasszát kell megfogni.",
       youtubeId: yt("VITE_YT_LECKE_02"),
     },
     "lecke-02",
@@ -70,7 +70,7 @@ export const LESSONS: Lesson[] = [
       slug: "lecke-want",
       title: "Szükséglet vagy befektetés",
       body:
-        "NEED: kötelező működés (rezsi, bér, anyag). WANT: nem kötelező vágy — a havi keret zárolható. INVESTMENT: később termelő kiadás. A cashflow a tényleges be- és kifelé mozgás; az ÁFA tartalékot ne költsd el; a holtpénz ott áll, a JIT először a 60 napos fedezetet tölti.",
+        "NEED: kötelező működés (rezsi, bér, anyag). WANT: nem kötelező vágy — a havi keret zárolható. INVESTMENT: később termelő kiadás. A cashflow a tényleges be- és kifelé mozgás; az ÁFA tartalékot ne költsd el; a holtpénz ott áll. JIT: először a levegő, utána a persely/játék. 0 hónap = elfogyott a levegő, ACT kell, nem új WANT.",
     },
     "lecke-want",
   ),
@@ -104,7 +104,7 @@ export const LESSONS: Lesson[] = [
     {
       slug: "lecke-05",
       title: "Slot / Munkaterek",
-      body: "Egy Eseten belül a Magán, Vállalkozás és Projekt külön Slot. A felső fülek ezeket cserélik; mindegyikben fut a P-R-O Szcenárió.",
+      body: "Egy Eseten belül a Magán, Vállalkozás és Projekt külön terület. A felső fülek ezeket cserélik; mindegyikben ugyanaz a három jövőkép fut.",
       youtubeId: yt("VITE_YT_LECKE_05"),
     },
     "lecke-05",
@@ -180,9 +180,9 @@ export const THEORY_LESSONS: Lesson[] = [
     {
       slug: "kahn-strategiai-elagazas",
       kbId: "lesson-kahn",
-      title: "Herman Kahn döntési elágazás & szórásmodell (P-R-O)",
+      title: "Herman Kahn döntési elágazás és szórásmodell",
       summary:
-        "Nem jóslat — tartomány. Elágazási pontok, P–R–O sávok és Stop-Loss a cégtörzs védelmére. DEMO 11, local-first.",
+        "Nem jóslat — tartomány. Elágazási pontok, három pálya és tőkevédelmi határ a cégtörzs védelmére. DEMO 11, helyi adat.",
       body: kahnMd,
       markdown: true,
     },
@@ -210,10 +210,10 @@ export function lessonBySlug(slug: string) {
 }
 
 export const KAHN_BONBON = {
-  eyebrow: "Tudástár · P-R-O szórásmodell",
+  eyebrow: "Tudástár · három pálya szórásmodell",
   title: "Herman Kahn döntési elágazás & szórásmodell",
   p1: "Nem jóslat, hanem tartomány: kritikus elágazási pontok (1–2. forduló) és három egyidejűleg futó kimenet — Pesszimista, Realista, Optimista.",
-  p2: "Stop-Loss a pesszimista sávon védi a Core üzemet. Teljes lecke: döntési fa, finanszírozási konstrukció, Cash Runway. DEMO 11, local-first.",
+  p2: "A tőkevédelmi határ a pesszimista sávon védi a törzsüzemet. Teljes lecke: döntési fa, finanszírozási konstrukció, tartalékhónapok. DEMO 11, helyi adat.",
   foot: "Local-first · nincs felhő-adat · nincs használatküldés",
 } as const;
 
@@ -223,7 +223,7 @@ export const TIPS = [
   { q: "Mennyi a válaszidő?", a: "Átlagosan 24 órán belül, írásban." },
   { q: "Hol a videó?", a: "YouTube-on. A saját szerver nem tárol videófájlt." },
   {
-    q: "A PRO-grafikon a jövőt mutatja?",
+    q: "A három pálya grafikonja a jövőt mutatja?",
     a: "Nem. Nem valóság és nem jóslat: a múlt adataidból a lehetséges kimenetelek szórását és a mozgásteret számolja.",
   },
 ];
@@ -242,7 +242,7 @@ export const FAQ_GENERAL: FaqItem[] = [
     a: "Igen, sokkal több. A „jó év / rossz év” csak két statikus szám egy táblázat alján. A Szcenárió viszont egy élő forgatókönyv: megmutatja a döntéseid láncreakcióját és pontos időzítését. Nem azt találgatja, mi lesz év végén, hanem megmutatja, hogy egy váratlan kiadás vagy kieső bevétel pontosan melyik hónapban és napon éri el a kritikus biztonsági határodat — így nem utólag reagálsz, hanem előre látod a mozgásteredet.",
   },
   {
-    q: "Hogyan értelmezzük a Pesszimista – Realista – Optimista (PRO) grafikont?",
+    q: "Hogyan értelmezzük a pesszimista, realista és optimista grafikont?",
     a: "Nem a valóságot és nem jóslatot látsz. A modell a múltbeli adataidból, szezonális mintákból és a beállított paraméterekből rajzol mozgásteret: szórási hibát csökkent, és megmutatja a pesszimista tartalékot vs. az optimista kapacitásigényt.",
   },
 ];

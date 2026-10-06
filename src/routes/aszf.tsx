@@ -3,8 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { ASZF_META, ASZF_SECTIONS_EN, ASZF_SECTIONS_HU } from "@/content/aszf";
 import { useI18n } from "@/i18n";
+import { publicSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/aszf")({
+  head: () => publicSeoHead("aszf"),
   component: AszfPage,
 });
 

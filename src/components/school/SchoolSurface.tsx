@@ -52,6 +52,7 @@ export function SchoolSurface() {
             </li>
             <li>{t("school.capacity")}</li>
             <li>{t("school.engineOnly")}</li>
+            <li>{t("school.desktopNote")}</li>
             <li>{SCHOOL_WATERMARK}</li>
           </ul>
         </div>

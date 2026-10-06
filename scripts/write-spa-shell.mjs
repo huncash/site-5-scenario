@@ -13,6 +13,12 @@ const SERVER = path.resolve(".output/server/index.mjs");
 
 const PAGES = [
   { url: "/", files: ["index.html", "_shell.html"] },
+  { url: "/school", files: ["school/index.html"] },
+  { url: "/gdpr", files: ["gdpr/index.html"] },
+  { url: "/about", files: ["about/index.html"] },
+  { url: "/aszf", files: ["aszf/index.html"] },
+  { url: "/support", files: ["support/index.html"] },
+  { url: "/support/pricing", files: ["support/pricing/index.html"] },
   { url: "/login", files: ["login/index.html"] },
   { url: "/f/adossag-helyreallitas", files: ["f/adossag-helyreallitas/index.html"] },
   { url: "/f/minoseg-koltseg", files: ["f/minoseg-koltseg/index.html"] },

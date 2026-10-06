@@ -545,13 +545,13 @@ const GLOSSARY: Record<GlossaryTermId, GlossaryTerm> = {
     id: "jit",
     hu: {
       term: "JIT",
-      plain: "épp időben — először a levegő, aztán a vágy",
-      exact: "Amíg nincs meg a stabil 60 napos fedezet, a perselytöltés várólistára kerül. Először a biztonsági tartalék.",
+      plain: "épp időben — először a levegő, utána a persely/játék",
+      exact: "Amíg nincs 60 napod, a persely és a játék vár. Először a levegő. 0 hónap = elfogyott a levegő, ACT kell, nem új WANT.",
     },
     en: {
       term: "JIT",
-      plain: "just in time — air first, then the want",
-      exact: "Until you have a solid 60-day cover, filling piggies waits. Safety reserve first.",
+      plain: "just in time — air first, then the piggy / the toy",
+      exact: "Until you have 60 days, the piggy and the toy wait. Air first. 0 months = the air is gone: you need ACT, not a new WANT.",
     },
     supportSlug: "lecke-motor-jit",
     kbId: "cashflow-savings",

@@ -44,4 +44,12 @@ describe("glossary", () => {
     expect(glossaryTooltip("dock")).toMatch(/rakodó/i);
     expect(glossaryCopy("cashflow").plain).toMatch(/pénz/i);
   });
+
+  it("keeps Slot as workspace and KPI as tiles", () => {
+    expect(glossaryCopy("slot").plain).toMatch(/Magán/i);
+    expect(glossaryCopy("kpi").exact).toMatch(/Nem Slot/);
+    expect(glossaryCopy("kpi").exact).toMatch(/egyedi beállítás/);
+    expect(glossaryCopy("jit").plain).toMatch(/persely/);
+    expect(glossaryCopy("runway").exact).toMatch(/ACT kell/);
+  });
 });

@@ -19,7 +19,7 @@ import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
 import { isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
-import { supportPricingHref, type SupportPricingAnchor } from "@/lib/support";
+import { supportPricingHref, supportTierHref, type SupportPricingAnchor } from "@/lib/support";
 import { useI18n, type MessageKey } from "@/i18n";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +43,12 @@ const SUPPORT_PRICING_ANCHOR: Record<PublicPlanId, SupportPricingAnchor> = {
   starter: "basic",
   pro: "pro",
   expert: "enterprise",
+};
+
+const SUPPORT_TIER_LABEL: Record<PublicPlanId, MessageKey> = {
+  starter: "supportDoor.toTierBasic",
+  pro: "supportDoor.toTierPro",
+  expert: "supportDoor.toTierEnterprise",
 };
 
 /** Csak az 1. évi belépőár — Egyszeri díj. */
@@ -164,8 +170,23 @@ export function HomePricing(props: { campus?: boolean }) {
 
               <a
                 href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(e.currentTarget.href);
+                }}
                 className="mt-2 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
+                {t("pricing.moreInfo")}
+              </a>
+              <a
+                href={supportTierHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(e.currentTarget.href);
+                }}
+                className="mt-1 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                {t(SUPPORT_TIER_LABEL[p.id])}
                 {t("pricing.moreInfo")}
               </a>
             </article>

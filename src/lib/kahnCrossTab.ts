@@ -8,10 +8,10 @@ import { KAHN_PESS_PAY_CUT_PCT, kahnOptimisticDividendHuf, type KahnImpactScenar
 export type KahnSphere = "core" | "project" | "personal";
 
 export const KAHN_STOP_LOSS_ALERT_HU =
-  "A megjelölt vészfék-pont (Stop-loss) élesedése a személyes tartalékok védelme érdekében a projekt-finanszírozás azonnali felfüggesztését írja elő.";
+  "A vészfék (Stop-loss) húz: a projekt pénze áll. Először a magán tartalék. 0 hónap = elfogyott a levegő, ACT kell, nem új WANT.";
 
 export const KAHN_STOP_LOSS_ALERT_EN =
-  "Triggering the marked stop-loss point requires an immediate suspension of project financing to protect personal reserves.";
+  "The brake (Stop-loss) is on: project money stops. Personal reserve first. 0 months = the air is gone: you need ACT, not a new WANT.";
 
 function jargon(id: "runway" | "stopLoss" | "penalty") {
   const hu = glossaryCopy(id, "hu");
@@ -34,20 +34,20 @@ export const KAHN_TOUR_STEPS = [
   {
     id: "core" as const,
     sphere: "core" as KahnSphere,
-    titleHu: "A törzs-alapműködés és a kockázatos projektek elkülönítése.",
-    titleEn: "Separating core operations from risky projects.",
+    titleHu: "A törzs külön van a kockázatos projekttől.",
+    titleEn: "The trunk stays separate from the risky project.",
   },
   {
     id: "project" as const,
     sphere: "project" as KahnSphere,
-    titleHu: "A szórási tartományok és a vészfék-pontok (Stop-loss) meghatározása.",
-    titleEn: "Setting spread bands and stop-loss points.",
+    titleHu: "Itt rakod a sávokat és a vészféket (Stop-loss).",
+    titleEn: "Here you set the bands and the brake (Stop-loss).",
   },
   {
     id: "personal" as const,
     sphere: "personal" as KahnSphere,
-    titleHu: "A döntések hatása a személyes és családi vagyoni biztonságra.",
-    titleEn: "How decisions affect personal and family wealth safety.",
+    titleHu: "A döntés a családi kasszát is viszi.",
+    titleEn: "The decision also moves the family till.",
   },
 ] as const;
 

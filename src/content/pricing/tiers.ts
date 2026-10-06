@@ -68,7 +68,7 @@ export const TIER_CORE: TierCore[] = getPublicPlans().map((p) => ({
 }));
 
 export const PRICING_HERO =
-  "Fizess egyszer, használd örökké — 100% off-grid szuverenitás";
+  "Fizess egyszer, használd a gépeden — a számok nálad maradnak";
 
 /** @deprecated Lábjegyzetbe került — ne ismételd a mátrix celláiban. */
 export const PRICING_SEAT_DEF =

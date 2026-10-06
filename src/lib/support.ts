@@ -46,11 +46,38 @@ export type SupportPricingAnchor =
   | "active-workspaces"
   | "local-import";
 
-export function supportPricingHref(anchor: SupportPricingAnchor): string {
-  const url = new URL("/pricing", `${isSupportHost() ? supportPublicOrigin() : SUPPORT_ORIGIN_PROD}/`);
-  url.hash = anchor;
+export type SupportPlanId = "basic" | "pro" | "enterprise";
+
+/** Főoldali /support útvonal — a support aldomainen üres. */
+export function supportMountPrefix(hostname?: string, pathname?: string): string {
+  const h = (hostname ?? (typeof window !== "undefined" ? window.location.hostname : "")).toLowerCase();
+  if (h === "support.szcenario.hu" || h.startsWith("support.")) return "";
+  const path = (pathname ?? (typeof window !== "undefined" ? window.location.pathname : "")).replace(/\/+$/, "") || "/";
+  if (path === "/support" || path.startsWith("/support/")) return "/support";
+  return "";
+}
+
+function supportOriginHref(pathname: string, hash: string): string {
+  const origin = isSupportHost() ? supportPublicOrigin() : SUPPORT_ORIGIN_PROD;
+  const mount = supportMountPrefix();
+  const inner = pathname === "/" ? mount || "/" : `${mount}${pathname}`;
+  const url = new URL(inner, `${origin}/`);
+  if (hash) url.hash = hash;
   applyViewPrefsToSearch(url);
   return url.toString();
+}
+
+export function supportPricingHref(anchor: SupportPricingAnchor): string {
+  return supportOriginHref("/pricing", anchor);
+}
+
+/** Támogatási kártya a support főoldalon — Basic / Standard / Priority. */
+export function supportTierHref(plan: SupportPlanId): string {
+  return supportOriginHref("/", `support-${plan}`);
+}
+
+export function supportTierDomId(plan: SupportPlanId): string {
+  return `support-${plan}`;
 }
 
 export function supportPageUrl(slug: string): string {

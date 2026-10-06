@@ -76,7 +76,7 @@ export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }
   { id: "promote", title: "2. Élesítés & Tagi kölcsön" },
   { id: "loans", title: "3. Hitelek & Kötelezettségek" },
   { id: "cashflow", title: "4. Cashflow & Megtakarítások" },
-  { id: "bank-sync", title: "5. Banki Szinkron & Hash Dedup" },
+  { id: "bank-sync", title: "5. Helyi kivonat-import (CAMT / CSV / XML)" },
   { id: "settings", title: "6. Beállítások & Danger Zone" },
   { id: "scenario", title: "7. P-R-O forgatókönyv & grafikon" },
   { id: "lessons", title: "8. Szcenárió-leckék" },
@@ -91,13 +91,13 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
       "A Case az asztal. A Slot a fül rajta: Magán, Vállalkozás, Projekt — külön kassza.",
     body: `🎯 Fogalom
 - **Case:** az asztal, amin dolgozol.
-- **Slot:** a fül az asztalon (Magán, Vállalkozás, Projekt). A tétel oda esik, amelyik nyitva van.
+- **Slot:** a fül az asztalon (Magán, Vállalkozás, Projekt). A tétel oda esik, amelyik nyitva van. Nem KPI-csempe.
 
 ⚙️ Kapacitás
 - ${capacityTipHu()}
 
 💡 Tip
-- A Slot a fiók. A P-R-O a három világ abban a fiókban: rossz / közepes / jó. Ne keverd a kettőt.`,
+- A Slot a fiók. A P-R-O a három világ abban a fiókban: rossz / közepes / jó. A KPI sáv: KPI mutató #1–#4, egyedi beállítás — az nem Slot.`,
     tags: ["case", "slot", "fogalom", "kapacitás"],
   },
   {
@@ -122,7 +122,7 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "Seat vs Guest",
     summary:
-      "A Seat szerkesztői fiók; a Guest vendégfiók csak olvasói joggal.",
+      "A Seat az, aki írhat; a Guest csak néz.",
     body: `🎯 Fogalom
 - **Seat:** szerkesztői fiók (teljes szerkesztési és modelligazítási jogkörrel).
 - **Guest:** vendégfiók csak olvasói joggal (nézelődő / ellenőrző hozzáférés).
@@ -149,7 +149,7 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
 - Vállalkozás: nettó tárolás + ÁFA logika, cashflow és ÁFA tartalék.
 - Projekt: fázis (Szimuláció / Pilot / Prep) + tétel státusz (tervezett / lekötött / tényleges) → P-R-O Szcenárió.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Kezdd Projekttel, ha még formálódik az ötlet. Ha beérik, egy kattintással „élesítheted” (Promote) új Vállalkozássá vagy csatolhatod meglévőhöz.`,
     tags: ["projekt", "pilot", "szimuláció", "ernyő", "slot", "munkatér"],
   },
@@ -167,7 +167,7 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
 2) Cél: új Vállalkozás vagy csatolás meglévőhöz.
 3) Sunk costs (opcionális): a korábbi ráfordítások átminősíthetők (pl. „Céges előkészítési költség” vagy „Tagi kölcsön”).
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Élesítés előtt nézd át a nagy tételeket (ÁFA kezelés, törlesztések, átvezetések), és csak utána promótáld – így a riportok és tartalékok azonnal „helyükre kerülnek”.`,
     tags: ["promote", "snapshot", "tagi", "sunk"],
   },
@@ -185,7 +185,7 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
 - Havi törlesztő automatikusan beleszámít a fix havi kiadásokba → a céltartalék számítás reálisabb.
 - Lejárat segít időzítési kockázatot és csúcs-terhelést látni.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - A céltartalék célértéket állítsd 3–6 hónapra: ha a fix kiadások változnak (pl. új lízing), azonnal látod a hatását.`,
     tags: ["hitel", "lízing", "törlesztő", "runway"],
   },
@@ -207,7 +207,7 @@ Mentéskor:
 - a fennálló tőke csökken a tőkerésszel,
 - szerkesztéskor a rendszer visszagörgeti a korábbi tőkerész hatását, majd alkalmazza az újat.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha nincs kéznél bontás, hagyd üresen a tőkerészt: a rendszer konzervatívan számol (jó „minimum terv” készítéshez).`,
     tags: ["törlesztés", "tőkerész", "visszagörgetés"],
   },
@@ -241,7 +241,7 @@ Mentéskor:
 - Hátralévő = célösszeg − (általános megtakarítás + a céllal azonos nevű al-perselyek összege).
 - Havi cél = hátralévő / hátralévő hónapok (a cél dátumáig), kerekítve.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Adj a célhoz egy azonos nevű al-perselyt, és onnan vezesd át a félretételt: így tisztán látod, melyik cél mennyit „kapott”.`,
     tags: ["cél", "hátralévő", "havonta", "persely"],
   },
@@ -258,26 +258,25 @@ Mentéskor:
 - Perselyt pozitív tételekhez tudsz társítani (bevétel/megtakarítás), így elkülönített keretet építesz.
 - A kiadások automatikusan csökkentik a valós egyenleget és a cashflow-t, ezért nem „perselyezésre” valók.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha egy kiadásra készülsz (pl. biztosítás, szerviz), csinálj „felkészülési perselyt”, és a bevételeidből vezess át rá havonta egy kis összeget.`,
     tags: ["persely", "kiadás", "szabály"],
   },
   {
-    id: "bank-sync-dedup",
-    category: "bank-sync",
-    title: "Banki szinkron & SHA-256 deduplikáció",
+    id: "local-statement-import",
+    category: "bank",
+    title: "Helyi kivonat-import — ne jöjjön be kétszer ugyanaz",
     summary:
-      "A rendszer SHA-256 hash alapján megjegyzi a beolvasott fájlokat munkaterenként, így elkerülhető a duplikált import – és van felülbírálás is.",
+      "CAMT.053, CSV, XML a gépedről. A rendszer megjegyzi a fájl ujjlenyomatát a Slotra, hogy ne importáld kétszer. A számolás a böngésződben marad.",
     body: `🎯 Mire jó?
-- Hogy gyorsan és magabiztosan tudj importálni: a rendszer segít elkerülni a véletlen dupla beolvasást.
+- Hogy a kivonat a gépedről jöjjön be, ne a felhőből. És ne legyen véletlen dupla tétel.
 
 ⚙️ Hogyan működik?
-- A CSV/XML tartalmából SHA-256 hash készül.
-- A hash workspace-scope: ugyanaz a fájl másik munkatérre importálható.
-- Beállításokban törölhető az import memória (hash lista).
-- Importnál választható a „Force re-import” (dedup figyelmen kívül hagyása).
+- CAMT.053, CSV, XML — vagy ütemezett helyi fájl. A számolás nálad marad.
+- A fájl tartalmából ujjlenyomat készül. Ugyanaz a fájl másik Slotra mehet.
+- Beállításokban törölhető az import-emlékezet. Importnál választható a kényszerített újraolvasás.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha hónapzáráskor több fájlt mozgatgatsz, tarts egy külön „Import” mappát és nevezd egységesen (dátum + számla), így az ellenőrzés gyorsabb.`,
     tags: ["bank", "dedup", "sha256", "force"],
   },
@@ -295,7 +294,7 @@ Mentéskor:
 - Workspace purge: törli az adott munkatér tételeit + import előzményeket (és a kapcsolódó adatokat).
 - Végleges törlés: a munkatér meta is kikerül, és a hozzá tartozó adat is törlődik.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Mielőtt nagy törlést indítasz, készíts egy titkosított mentést – így bármikor visszaállhatsz egy stabil pontra.`,
     tags: ["danger", "purge", "törlés"],
   },
@@ -312,7 +311,7 @@ Mentéskor:
 - A beállítások módosítása „draft” állapotban történik.
 - Csak a „Módosítások mentése” gomb rögzíti véglegesen.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Állíts be egyszerre 1–2 dolgot, ments, és nézd meg a hatást a főképernyőn – így gyorsan kialakul a saját rutinod.`,
     tags: ["autosave", "explicit", "mentés"],
   },
@@ -321,16 +320,16 @@ Mentéskor:
     category: "workspaces",
     title: "„+ Új…” – hogyan válasszak Slot típust?",
     summary:
-      "Magán = személyes, Vállalkozás = éles céges cashflow, Projekt = tervezés/szimuláció. Ezek egy Eseten belüli Slotok. Pilot projekt ernyővállalkozáshoz kapcsolható.",
+      "Magán, Vállalkozás vagy Projekt — egy Case-en belüli új Slot. A KPI sáv ettől külön van.",
     body: `🎯 Mire jó?
-- Hogy a megfelelő „üzemmódot” kapd: más KPI-k, más hangsúly, és gyorsabb döntéshozás — egy Eseten belüli új Slotként.
+- Hogy a megfelelő szemüveget kapd: Magán, Vállalkozás vagy Projekt — egy Case-en belüli új Slotként. A KPI sáv ettől külön van: KPI mutató #1–#4, egyedi beállítás.
 
 ⚙️ Hogyan működik?
 - Magán: személyes költések + megtakarítások (elkölthető keret).
 - Vállalkozás: céges cashflow + ÁFA + jogcímek (vezetői nézet).
 - Projekt: szimuláció/pilot/prep → státuszokkal és P-R-O forgatókönyvvel tervezel.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha nem biztos a konstrukció, indulj Projekttel (🧪 szimulációs szabadság), és csak akkor élesíts, amikor a számok és a folyamat összeállt.`,
     tags: ["új", "slot", "munkatér", "típus"],
   },
@@ -348,7 +347,7 @@ Mentéskor:
 - Pilot: valós futtatás; ernyővállalkozáshoz kapcsolható, és (beállítástól függően) beleszámíthat összesítésekbe.
 - Prep: sunk költségek és előkészítési tételek gyűjtése az élesítéshez.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Pilotnál érdemes hamar beállítani a státusz-rutint (tervezett → lekötött → tényleges), így a fedezeti pont és a céltartalék előrejelzés sokkal tisztább.`,
     tags: ["badge", "pilot", "simulation", "prep"],
   },
@@ -365,7 +364,7 @@ Mentéskor:
 - A felső mini KPI-k a jelenlegi szűrés alapján számolódnak (összesítés).
 - A lista sorai bruttó pénzmozgást mutatnak; business módban nettó/bruttó bontás is látható.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha audit jelleggel nézed: szűrj először „Hitel / Tervezett” vagy „Megtakarítás / Átvezetés” nézetre, így gyorsan elkülönülnek a speciális tételek.`,
     tags: ["tételek", "ledger", "excel", "kpi"],
   },
@@ -380,7 +379,7 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - A darabszám a jelenleg szűrt (látható logikai készlet) elemeit számolja.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha sok tétel van, kezdd a Bevétel/Kiadás szűrőkkel, majd csak utána nézd a részleteket soronként.`,
     tags: ["darabszám", "szűrő", "tételek"],
   },
@@ -396,7 +395,7 @@ Mentéskor:
 - A listában szereplő bevétel típusú tételek összegzése.
 - Business módban nettó tárolás mellett bruttó érték is megjelenhet (megjelenítés/tervezés célból).
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha a bevétel ingadozó, a fix költségeket érdemes a „reális” bevétel alsó sávjához igazítani.`,
     tags: ["bevétel", "cash-in", "kpi"],
   },
@@ -411,8 +410,8 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - A kiadás típusú tételek összegzése a jelenlegi szűrésben.
 
-💡 Pro Tip / Legjobb gyakorlat
-- Ha gyors javulás kell, először a fix/előfizetés jellegű kiadásokat érdemes optimalizálni – ezek hónapról hónapra hatnak.`,
+💡 Tipp
+- Ha gyorsan kell levegő, először a fix, minden hónapban kimenő kiadásokat nyúld — ezek hónapról hónapra viszik a kasszát.`,
     tags: ["kiadás", "cash-out", "kpi"],
   },
   {
@@ -427,7 +426,7 @@ Mentéskor:
 - Megtakarítás/saving típusú tételek összegzése (pozitív félretétel).
 - A persely hozzárendelés segít célokhoz kötni a félretett keretet.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - A félretételt kezeld úgy, mint egy „kötelező kiadást” a hónap elején – így a maradék keret valóban elkölthető.`,
     tags: ["megtakarítás", "persely", "kpi"],
   },
@@ -443,7 +442,7 @@ Mentéskor:
 - A hitelhez kötött törlesztés tételek tőkerészének összegzése.
 - A „tervezett/függő” darabszám segít látni, mennyi tétel még nem tényleges (projekt státuszok).
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha cél a gyors tehercsökkentés: külön kövesd a tőkerészt, és nézd meg, hogyan változik tőle a céltartalék és a szabad keret.`,
     tags: ["hitel", "tőke", "törlesztés"],
   },
@@ -459,7 +458,7 @@ Mentéskor:
 - Az összesített bevétel, kiadás és megtakarítás különbsége.
 - Nettó/bruttó megjelenítés a workspacetől és a beviteli módtól függően.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha az egyenleg negatív, először szűrj ki a nagy egyszeri tételekre (pl. beruházás), és nézd meg a „működési” egyenleget külön.`,
     tags: ["egyenleg", "balance", "kpi"],
   },
@@ -474,7 +473,7 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - A szűrők a listát és a felső KPI összesítést is együtt állítják.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Használd sorrendben: Összes → Kiadás → Hitel/tervezett. Így gyorsan megtalálod, mi a működés és mi a stratégiai tétel.`,
     tags: ["szűrő", "ledger"],
   },
@@ -490,7 +489,7 @@ Mentéskor:
 - A kijelölt tételekre egy művelet fut (törlés / persely / projekt másolat).
 - A rendszer best‑effort kezeli a kapcsolódó logikákat (pl. törlesztés hatások, belső átvezetések).
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Perselyezésnél előbb szűrj Bevétel vagy Megtakarítás nézetre, így a kijelölés „tiszta” és gyors.`,
     tags: ["bulk", "kijelölés", "műveletek"],
   },
@@ -506,7 +505,7 @@ Mentéskor:
 - A célhoz számítjuk az általános megtakarítást + a cél nevével egyező alhalmazokat.
 - Ezekből jön ki a hátralévő és a javasolt havi tempó.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ne csak egy nagy célt tarts: bontsd 2–3 részre (vésztartalék, adó/ÁFA, fejlesztés), így a döntések gyorsabbak.`,
     tags: ["célok", "megtakarítás"],
   },
@@ -521,7 +520,7 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - Haladás % = (gyűjtött / célösszeg) × 100, plafon 100%.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha a határidő közeleg, inkább emeld a havi tempót kicsit, mint hogy a végén egy nagy „ugrást” kelljen finanszírozni.`,
     tags: ["haladás", "progress", "cél"],
   },
@@ -537,7 +536,7 @@ Mentéskor:
 - Alap (általános) megtakarítás + opcionális alhalmazok (pl. „Nyaralás”, „Szerviz”).
 - Célhoz kötésnél a cél nevével egyező alhalmaz beleszámít a cél haladásába.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Hozz létre alhalmazt minden nagyobb, ritkább kiadásra (biztosítás, adó, szerviz). Így a „hirtelen” kiadás valójában tervezett lesz.`,
     tags: ["alhalmaz", "persely", "megtakarítás"],
   },
@@ -554,7 +553,7 @@ Mentéskor:
 - A projekt élesítés (Promote) segít a tervezésből üzletággá/céggé lépni.
 - Pilot/ernyő konszolidációval a projektek hatása megjelenhet a fő cég nézeteiben.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Először a lezárt ügyleteket nézd (valós margin), utána a nyitottakat (pipeline). Így nem keveredik a terv és a tény.`,
     tags: ["üzlet", "árrés", "profit", "konszolidáció", "promote"],
   },
@@ -570,7 +569,7 @@ Mentéskor:
 - Árrés (Ft) = kapcsolt bevétel − beszerzés.
 - Árrés % = árrés / bevétel × 100.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Ha a % alacsony, nem mindig árat kell emelni: sokszor a beszerzési oldalon vagy a járulékos költségeken van a gyors nyereség.`,
     tags: ["árrés", "margin", "profit"],
   },
@@ -585,7 +584,7 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - Snapshot → cél (új business vagy csatolás) → sunk költségek értelmezése.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Promote előtt készíts riportot és nézd meg a break-even/ROI képet – így tudatosabb a döntés az élesítés időzítéséről.`,
     tags: ["promote", "projekt", "élesítés"],
   },
@@ -600,7 +599,7 @@ Mentéskor:
 ⚙️ Hogyan működik?
 - Pilot projektek ernyő business-hez kapcsolhatók; beállítás szerint beleszámíthatnak az összesítésekbe.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Konszolidáció mellett is tartsd külön a projekt státuszokat (terv/lekötött/tény), így nem mosódik össze a pipeline és a tényleges pénzmozgás.`,
     tags: ["ernyő", "konszolidáció", "pilot"],
   },
@@ -620,7 +619,7 @@ ${WHY_BODY}
 
 ${DAILY_OPS_BODY}
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Olvasd a P-R-O görbéket időrendben: nem az év végi összeget keresd, hanem azt a hónapot, amikor a pesszimista szál eléri a Stop-Loss határt.`,
     tags: ["szcenárió", "forgatókönyv", "idővonal", "stop-loss", "márka"],
   },
@@ -635,7 +634,7 @@ ${DAILY_OPS_BODY}
 ⚙️ Hogyan működik?
 ${PRO_ARTICLE_BODY}
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - A grafikont a saját múltad és a beállított paraméterek frissítésével olvasd. Ha egy szoftver „pontos negyedéves bevételt” ígér, az téved.`,
     tags: ["PRO", "pesszimista", "realista", "optimista", "szórás"],
   },
@@ -658,7 +657,7 @@ A Szcenárió engine (DEMO 11 — Bisztró elágazás):
 
 A számítás a te eszközödön marad. Nulla telemetria, nincs felhő-adatbázis.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Akkor lépj előre, ha a pesszimista pálya mellett is megmarad a minimális működési runway — magán és cég együtt.
 
 Teljes lecke: support tudástár → kahn-strategiai-elagazas.`,
@@ -680,7 +679,7 @@ Teljes lecke: support tudástár → kahn-strategiai-elagazas.`,
 
 A teljes lecke a support.szcenario.hu tudástárban (kahn-strategiai-elagazas).
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - A rugalmasabb konstrukció rossz ágon is kilépési mozgásteret ad — először a 🔴 pesszimista sávot olvasd.`,
     tags: ["kahn", "demo11", "bisztró", "P-R-O", "Core", "Stop-Loss", "runway"],
   },
@@ -698,7 +697,7 @@ Három helyzet egy vázon: szennyezett vezetékes víz + lajtoskocsi, áram- és
 
 A teljes lecke a support tudástárban: helyzetlemez, potenciál, lépésről lépésre, kapcsolat a demo12 pályához.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Először a pesszimista 72 órát számold. A kannás kör és a fűtött köbméter a muda, ha üresen megy.`,
     tags: ["közösség", "víz", "LoRa", "melegedő", "demo12"],
   },
@@ -714,7 +713,7 @@ A teljes lecke a support tudástárban: helyzetlemez, potenciál, lépésről l�
 ⚙️ Hogyan működik?
 Blackout, csapvíz-tilalom, mobilnet-kiesés. A demo13 ugyanezt a 72 órás ablakot viszi: Energy Autonomy, Resource Runway, TTR.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - A nyers, a köztes és az ivóvíz három edény. A találkozási pontot járjátok végig nappal.`,
     tags: ["háztartás", "blackout", "ivóvíz", "PMR", "demo13"],
   },
@@ -730,7 +729,7 @@ Blackout, csapvíz-tilalom, mobilnet-kiesés. A demo13 ugyanezt a 72 órás abla
 ⚙️ Hogyan működik?
 demo11 / demo26 a vendor-függés, demo21–24 a lánc és a dokk. A mátrix a szerephez ketőst rendel. A mentés az, amit üres gépre vissza tudsz állítani.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Amit a felhőből olvasol, a kiesésben nincs. Amit a saját gépeden írsz, az a tartalék.`,
     tags: ["BCP", "SaaS", "SMED", "keresztképzés", "demo11"],
   },
@@ -746,7 +745,7 @@ demo11 / demo26 a vendor-függés, demo21–24 a lánc és a dokk. A mátrix a s
 ⚙️ Hogyan működik?
 A demo14 a 2023-as helyi TFR-pillanatképet viszi. A lecke a közelmúltbeli sávot is kirakja. A robot nem TFR-eszköz; a támogatás késleltetett.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Először a rést és a 65+ arányt tedd egymás mellé. Éves CHECK, nem 72 órás.`,
     tags: ["TFR", "demográfia", "foresight", "demo14"],
   },
@@ -762,7 +761,7 @@ A demo14 a 2023-as helyi TFR-pillanatképet viszi. A lecke a közelmúltbeli sá
 ⚙️ Hogyan működik?
 demo18 izolációs idő, demo17 kvóta, demo16 folyamat-audit (veszteségmentesítés) a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
 
-💡 Pro Tip / Legjobb gyakorlat
+💡 Tipp
 - Az izolációt órában méred a riasztástól a leválasztásig. A dobott étel selejt: elhatárolod.`,
     tags: ["oktatás", "campus", "kiber", "hősziget", "demo17", "demo18"],
   },

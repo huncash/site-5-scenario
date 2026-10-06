@@ -3,8 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
 import { useI18n } from "@/i18n";
+import { publicSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
+  head: () => publicSeoHead("about"),
   component: AboutPage,
 });
 

@@ -519,63 +519,69 @@ html.light-mode,
 html.light.palette-forest,
 html.light-mode.palette-forest,
 [data-theme="light-forest"] {
-  --app-bg: #f1f8f4;
+  --app-bg: #f5f5f4; /* stone-50 — meleg kőszürke, nem mentazöld */
   --card-bg: #ffffff;
-  --card-border: #cde5d8;
-  --text-main: #06281c;
-  --text-muted: #4b6258;
+  --card-border: #e7e5e4;
+  --text-main: #1c1917;
+  --text-muted: #57534e;
   --dropdown-bg: #ffffff;
-  --dropdown-hover: #e6f4ec;
-  --accent-emerald: #166534;
-  --accent-hover: #15803d;
-  --accent-pressed: #14532d;
-  --accent-color: #166534;
-  --accent: #166534;
+  --dropdown-hover: #f5f5f4;
+  --accent-emerald: #1b4332;
+  --accent-hover: #2d6a4f;
+  --accent-pressed: #081c15;
+  --accent-color: #1b4332;
+  --accent: #1b4332;
+  --warn-ink: #5c2e32;
+  --warn-border: #d6c6c4;
   --bg-primary: var(--app-bg);
   --bg-card: var(--card-bg);
   --text-primary: var(--text-main);
   --border-color: var(--card-border);
-  --btn-text: #f1f5f9;
+  --btn-text: #f8fafc;
   --muted-foreground: var(--text-muted);
-  --chart-2: #166534;
-  --chart-3: #15803d;
-  --pro-opt: #15803d;
+  --chart-2: #1b4332;
+  --chart-3: #2d6a4f;
+  --pro-opt: #2d6a4f;
 }
 
 html.light.palette-slate,
 html.light-mode.palette-slate,
 [data-theme="light-slate"] {
-  --app-bg: #f8fafc;
+  --app-bg: #f8fafc; /* slate-50 */
   --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --text-main: #111827;
-  --text-muted: #4b5563;
+  --card-border: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #475569;
   --dropdown-bg: #ffffff;
-  --dropdown-hover: #f3f4f6;
-  --accent-emerald: #059669;
-  --accent-hover: #4338ca;
-  --accent-color: #4f46e5;
-  --accent: #4f46e5;
-  --chart-2: #818cf8;
-  --chart-3: #2563eb;
+  --dropdown-hover: #f1f5f9;
+  --accent-emerald: #3d5a80;
+  --accent-hover: #2f4868;
+  --accent-color: #3d5a80;
+  --accent: #3d5a80;
+  --warn-ink: #5c2e32;
+  --warn-border: #d4d4d8;
+  --chart-2: #64748b;
+  --chart-3: #3d5a80;
 }
 
 html.light.palette-bronze,
 html.light-mode.palette-bronze,
 [data-theme="light-bronze"] {
-  --app-bg: #faf6f1;
-  --card-bg: #fffdf9;
-  --card-border: #e8ddd0;
-  --text-main: #1c1410;
-  --text-muted: #6b5b4a;
-  --dropdown-bg: #fffdf9;
-  --dropdown-hover: #f3eae0;
-  --accent-emerald: #059669;
+  --app-bg: #fafaf9;
+  --card-bg: #ffffff;
+  --card-border: #e7e5e4;
+  --text-main: #1c1917;
+  --text-muted: #57534e;
+  --dropdown-bg: #ffffff;
+  --dropdown-hover: #f5f5f4;
+  --accent-emerald: #9a7558;
   --accent-hover: #7c5c45;
   --accent-color: #9a7558;
   --accent: #9a7558;
-  --chart-2: #d4a574;
-  --chart-3: #b08968;
+  --warn-ink: #5c2e32;
+  --warn-border: #d6c6c4;
+  --chart-2: #9a7558;
+  --chart-3: #57534e;
 }
 
 html.light ::-webkit-scrollbar-track {
@@ -1875,7 +1881,7 @@ html.light .door-page [class*="border-white"] {
 }
 
 html.light .door-page [class*="border-amber"] {
-  border-color: #b45309;
+  border-color: #a8a29e;
 }
 
 html.light .door-page .bg-slate-950,
@@ -1885,7 +1891,7 @@ html.light .door-page .bg-slate-900\/70,
 html.light .door-page .bg-slate-900\/60,
 html.light .door-page .bg-slate-900\/50,
 html.light .door-page .bg-slate-900\/40 {
-  background-color: color-mix(in oklch, var(--muted) 80%, var(--background));
+  background-color: var(--card-bg);
 }
 
 html.light .door-page .text-slate-950:not(.btn-demo):not(.bg-cyan-500) {
@@ -2017,6 +2023,62 @@ html.light-mode [class*="border-slate-8"] {
   border-color: var(--card-border);
 }
 
+/* Világos mód: rikító rose/pink kártyakitöltés → fehér kártya, vékony borszürke keret.
+   Sötét módot nem érinti. A rounded-full pötty/ikon megtartja a kontrasztot. */
+html.light,
+html.light-mode {
+  --warn-ink: #5c2e32;
+  --warn-border: #d6c6c4;
+  --destructive: #6b3a3a;
+  --destructive-foreground: #ffffff;
+}
+
+html.light :is(.rounded-xl, .rounded-lg, .rounded-md, .card-kpi, .pdca-frame):not(.rounded-full)[class*="bg-rose"],
+html.light :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-pink"],
+html.light :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-red-9"],
+html.light :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-red-50"],
+html.light-mode :is(.rounded-xl, .rounded-lg, .rounded-md, .card-kpi, .pdca-frame):not(.rounded-full)[class*="bg-rose"],
+html.light-mode :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-pink"],
+html.light-mode :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-red-9"],
+html.light-mode :is(.rounded-xl, .rounded-lg, .rounded-md):not(.rounded-full)[class*="bg-red-50"] {
+  background-color: #ffffff !important;
+  border-color: var(--warn-border) !important;
+  box-shadow: none !important;
+}
+
+html.light [class*="text-rose-"],
+html.light [class*="text-pink-"],
+html.light-mode [class*="text-rose-"],
+html.light-mode [class*="text-pink-"] {
+  color: var(--warn-ink);
+}
+
+html.light .rounded-full[class*="bg-rose"],
+html.light .rounded-full[class*="bg-pink"],
+html.light-mode .rounded-full[class*="bg-rose"],
+html.light-mode .rounded-full[class*="bg-pink"] {
+  background-color: var(--warn-ink);
+}
+
+html.light [class*="border-rose-"],
+html.light [class*="border-pink-"],
+html.light [class*="border-l-rose"],
+html.light [class*="border-l-pink"],
+html.light-mode [class*="border-rose-"],
+html.light-mode [class*="border-pink-"],
+html.light-mode [class*="border-l-rose"],
+html.light-mode [class*="border-l-pink"] {
+  border-color: var(--warn-border);
+}
+
+html.light [class*="border-l-rose"],
+html.light [class*="border-l-pink"],
+html.light-mode [class*="border-l-rose"],
+html.light-mode [class*="border-l-pink"] {
+  border-left-color: var(--warn-ink);
+  border-left-width: 2px;
+}
+
 .view-settings-bar {
   display: inline-flex;
   align-items: center;
@@ -2035,7 +2097,8 @@ html.light-mode [class*="border-slate-8"] {
 }
 
 .settings-trigger-btn,
-.split-view-toggle-btn {
+.split-view-toggle-btn,
+.lang-header-btn {
   display: inline-flex;
   box-sizing: border-box;
   height: 2rem;
@@ -2051,14 +2114,25 @@ html.light-mode [class*="border-slate-8"] {
   cursor: pointer;
 }
 
+.lang-header-btn {
+  width: auto;
+  min-width: 2.25rem;
+  padding: 0 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 .settings-trigger-btn:hover,
-.split-view-toggle-btn:hover {
+.split-view-toggle-btn:hover,
+.lang-header-btn:hover {
   background: var(--bg-card);
   color: var(--text-primary);
 }
 
 .settings-trigger-btn:focus-visible,
-.split-view-toggle-btn:focus-visible {
+.split-view-toggle-btn:focus-visible,
+.lang-header-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 1px var(--accent);
 }
@@ -2075,7 +2149,8 @@ html.light-mode [class*="border-slate-8"] {
   box-shadow: inset 0 0 0 1px var(--accent-color);
 }
 
-.split-view-toggle-btn.is-tour {
+.split-view-toggle-btn.is-tour,
+.view-settings-icon-btn.is-tour {
   box-shadow: 0 0 0 2px var(--accent-color);
 }
 

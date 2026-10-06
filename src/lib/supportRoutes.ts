@@ -39,8 +39,8 @@ const SUPPORT_CORE_LESSON_INDEX: SupportLessonIndex[] = [
     group: "guide",
     titleHu: "Dashboard kezelés",
     titleEn: "Dashboard handling",
-    summaryHu: "Felső vezérlés, középen a munka, alul a modulok. KPI, What-if, P-R-O és a fülek.",
-    summaryEn: "Controls on top, work in the middle, modules below. KPI, What-if, P-R-O and the tabs.",
+    summaryHu: "Felső vezérlés, középen a munka, alul a modulok. Gyors állapot, döntés és a fülek.",
+    summaryEn: "Controls on top, work in the middle, modules below. Quick read, decision and the tabs.",
     keywords: ["dashboard", "kpi", "what-if", "pro", "fedezeti", "három sáv", "anatomy"],
   },
   {

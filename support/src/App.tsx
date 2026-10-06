@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
+import { applyPublicSeo, supportSeoPageFromPath } from "@/lib/seo";
 import { SupportSurface } from "@/components/SupportSurface";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
-import { LangSwitch } from "@/i18n/miniLocale";
 import { enterpriseInquiryMailto } from "@/lib/enterpriseSchedule";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
@@ -21,6 +21,7 @@ import {
 } from "./copy";
 import { Markdown } from "./markdown";
 import { navigateTo, parseSupportPath, pathOf, supportHref } from "./router";
+import "./styles.css";
 import type { Locale } from "@/i18n/locale";
 
 /** Egyszerű **félkövér** a GYIK válaszokban. */
@@ -251,6 +252,17 @@ function PricingPage({ locale }: { locale: Locale }) {
                 <li key={line}>{line}</li>
               ))}
             </ul>
+            <p style={{ margin: "10px 0 0" }}>
+              <a
+                href={`${supportHref("home", { lang: locale })}#support-${tier.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(e.currentTarget.href);
+                }}
+              >
+                {tier.id === "basic" ? t.toTierBasic : tier.id === "pro" ? t.toTierPro : t.toTierEnterprise}
+              </a>
+            </p>
             {tier.id === "enterprise" ? (
               <p style={{ margin: "10px 0 0" }}>
                 <span className="note">{t.pricingEnterpriseBadge}</span>
@@ -346,9 +358,12 @@ export function App() {
   const [path, setPath] = useState(pathOf);
   const [ticketUnlocked, setTicketUnlocked] = useState(false);
 
+  const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
+  const route = useMemo(() => resolveSupportSlug(slug), [slug]);
+
   useEffect(() => {
-    document.title = locale === "en" ? "Szcenárió — support" : "Szcenárió — támogatás";
-  }, [locale]);
+    applyPublicSeo(supportSeoPageFromPath(slug === "home" ? "/support" : `/support/${slug}`));
+  }, [slug]);
 
   useEffect(() => {
     const onPop = () => {
@@ -358,9 +373,6 @@ export function App() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
-
-  const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
-  const route = useMemo(() => resolveSupportSlug(slug), [slug]);
 
   useEffect(() => {
     if (route.kind !== "lesson" || route.slug === route.canonical) return;
@@ -435,7 +447,6 @@ export function App() {
         </a>
         <div className="flex items-center gap-2">
           {embed ? null : <ViewSettingsMenu />}
-          <LangSwitch locale={locale} onToggle={toggleLocale} />
         </div>
       </div>
       {body}

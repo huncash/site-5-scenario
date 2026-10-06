@@ -3,8 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { DATA_CONTROLLER } from "@/content/legal";
 import { useI18n } from "@/i18n";
+import { publicSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/gdpr")({
+  head: () => publicSeoHead("gdpr"),
   component: GdprPage,
 });
 

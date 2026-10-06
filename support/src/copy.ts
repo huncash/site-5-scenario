@@ -23,7 +23,7 @@ const hu = {
   ticketTitle: "Írásos ügyintézés",
   ticketHome: "Írásos jegy",
   lessons: "Tudástár — szcenárió-leckék",
-  lessonsNote: "Részletes elmélet és know-how. A számítás a saját gépeden fut — nincs felhő-adat.",
+  lessonsNote: "A leckék a saját gépeden vannak. Nincs felhő-adat. Kávé mellett is érthető.",
   videos: "Videós segédletek",
   searchPlaceholder: "Keresés a GYIK témái között…",
   searchEmpty: "Nincs találat — próbálj más kulcsszót, vagy nézd a leckéket.",
@@ -57,7 +57,7 @@ const hu = {
   pricingNav: "Árazás",
   pricingTitle: "Csomagok, licenc és helyi adatkezelés",
   pricingLead:
-    "Ez az oldal a hivatalos, részletes forrás (Single Source of Truth). A főoldalon csak rövid összefoglaló van; a pontos szabályok ide tartoznak.",
+    "A Basic és a Pro azonnal a böngészőben él, a gépeden. Helyi adat, nincs felhős adatbázis. Az asztali early access 2027 tavaszán jön, a Pro mellé ingyen. A főoldal csak röviden beszél; a pontos keret ide tartozik.",
   pricingTocPlans: "Csomagok",
   pricingTocLoyalty: "Hűségmodell",
   pricingTocActive: "Aktív munkaterületek",
@@ -65,16 +65,19 @@ const hu = {
   pricingLoyaltyTitle: "3 éves lépcsőzetes hűség (#tiered-loyalty)",
   pricingLoyaltyBody:
     "1. év: a belépő listaár 100%-a (egyszeri vásárlás) — a megvásárolt verzió véglegesen a tiéd marad. 2. év: frissítési díj −25%. 3. év: frissítési díj −40%. A 4. évtől minden jövőbeli frissítés díjmentes. Ha nem újítasz, a megvásárolt verzió továbbra is használható; csak az újabb motorverziókhoz kell a lépcső szerinti frissítés.",
-  pricingActiveTitle: "Aktív Case & Aktív Slot — etikus keret (#active-workspaces)",
+  pricingActiveTitle: "Aktív Case & Aktív Slot — párhuzamos asztal és fül (#active-workspaces)",
   pricingActiveBody:
     "A licenc az egyidejűleg éles (párhuzamosan futó) munkaterületek számát köti — nem a felhalmozott, archív adatok mennyiségét. Inaktív vagy régi Case/Slot szabadon törölhető, felülírható és újratölthető díj nélkül. Fizetni csak akkor kell, ha újabb párhuzamos éles munkaterületet nyitsz (bővítő modul: Extra Aktív Case / Slot / Seat).",
   pricingLocalTitle: "Lokális bankkivonat-import & Edge (#local-import)",
   pricingLocalBody:
-    "A bankkivonat- és tranzakcióimport (CAMT.053, CSV, XML) 100%-ban a saját eszközödön fut: az adat nem kötelezően felhőbe kerül, a számítás adat-szuverén. A Szenzoros / Edge adatgyűjtő modul helyi / edge források bekötésére való — szintén off-grid fókusszal, nem központi telemetriával. A megvásárolt verzió hardverhez kötött helyi licenc: örökös fallback jog a megvásárolt motorverzióra.",
+    "A bankkivonat és a tételek (CAMT.053, CSV, XML, ütemezett helyi fájl) a gépeden futnak. Nincs kötelező felhő, nincs külső felhős adatbázis. Az opcionális helyi bekötés is nálad marad: nem küldünk használatot. A megvett motor a gépeden él; ha nem frissítesz, a megvett verzió tovább megy.",
   pricingEnterpriseBadge: "Későbbi időpontban érhető el",
   pricingEnterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
   pricingEnterpriseInquiryLead:
     "Az Enterprise csomag előjegyzésre érhető el. Az ár és a kapacitás (Aktív Case / Aktív Slot) tájékoztató értékhorgony. Nincs önkiszolgáló checkout.",
+  toTierBasic: "Támogatás: Basic",
+  toTierPro: "Támogatás: Standard",
+  toTierEnterprise: "Támogatás: Priority",
 };
 
 const en: typeof hu = {
@@ -88,7 +91,7 @@ const en: typeof hu = {
   ticketTitle: "Written support",
   ticketHome: "Written ticket",
   lessons: "Knowledge — scenario lessons",
-  lessonsNote: "Theory and know-how. Computation runs on your device — no cloud data.",
+  lessonsNote: "Lessons live on your device. No cloud data. Plain talk, like a colleague over coffee.",
   videos: "Video guides",
   searchPlaceholder: "Search FAQ topics…",
   searchEmpty: "No matches — try another keyword, or browse the lessons.",
@@ -122,7 +125,7 @@ const en: typeof hu = {
   pricingNav: "Pricing",
   pricingTitle: "Plans, license & local data handling",
   pricingLead:
-    "This page is the official detailed source (Single Source of Truth). The homepage stays brief; exact rules live here.",
+    "Basic and Pro start at once in the browser, on your machine. Local data, no cloud database. Desktop early access comes spring 2027, free with Pro. The homepage stays short; this page is the exact frame.",
   pricingTocPlans: "Plans",
   pricingTocLoyalty: "Loyalty model",
   pricingTocActive: "Active workspaces",
@@ -130,16 +133,19 @@ const en: typeof hu = {
   pricingLoyaltyTitle: "3-year tiered loyalty (#tiered-loyalty)",
   pricingLoyaltyBody:
     "Year 1: 100% of the entry list price (one-time purchase) — the purchased version stays yours permanently. Year 2: update fee −25%. Year 3: update fee −40%. From year 4, every future update is free. If you do not renew, the purchased version remains usable; only newer engine versions require the ladder update fee.",
-  pricingActiveTitle: "Active Case & Active Slot — ethical capacity (#active-workspaces)",
+  pricingActiveTitle: "Active Case & Active Slot — parallel desks and tabs (#active-workspaces)",
   pricingActiveBody:
     "The license limits concurrently live (parallel) workspaces — not accumulated archive data. Inactive or old Cases/Slots can be deleted, overwritten and reloaded at no charge. You pay only when you open an additional parallel live workspace (add-on: Extra Active Case / Slot / Seat).",
   pricingLocalTitle: "Local bank-statement import & Edge (#local-import)",
   pricingLocalBody:
-    "Bank-statement and transaction import (CAMT.053, CSV, XML) runs 100% on your device: data is not required to leave for a cloud, computation stays data-sovereign. The Sensor / Edge collector module connects local/edge sources — off-grid focused, not central telemetry. The purchased version is a device-bound local license with a perpetual fallback right to that engine version.",
+    "Bank statement and postings (CAMT.053, CSV, XML, scheduled local files) run on your machine. No required cloud, no external cloud database. Optional local intake stays under your control: we do not send usage. The purchased engine lives on your device; if you do not update, that version still runs.",
   pricingEnterpriseBadge: "Available at a later date",
   pricingEnterpriseCta: "Contact / request a quote",
   pricingEnterpriseInquiryLead:
     "The Enterprise plan is available on waitlist. Price and capacity (Active Case / Active Slot) stay visible as a value anchor. There is no self-serve checkout.",
+  toTierBasic: "Support: Basic",
+  toTierPro: "Support: Standard",
+  toTierEnterprise: "Support: Priority",
 };
 
 const TIPS_EN = [
@@ -148,7 +154,7 @@ const TIPS_EN = [
   { q: "How fast is the reply?", a: "On average within 24 hours, in writing." },
   { q: "Where is the video?", a: "On YouTube. This server does not store video files." },
   {
-    q: "Does the PRO chart show the future?",
+    q: "Does the three-path chart show the future?",
     a: "No. Not reality and not a forecast: it computes the spread of possible outcomes and your room to move from past data.",
   },
 ];
@@ -163,7 +169,7 @@ const FAQ_GENERAL_EN: FaqItem[] = [
     a: "Yes — much more. A “good year / bad year” is just two static numbers at the bottom of a spreadsheet. A Szcenárió is a living storyline: it shows the chain reaction of your decisions and their exact timing. It does not guess what you will have at year-end; it shows which month and day an unexpected cost or lost revenue hits your critical safety bound — so you see your room to move ahead of time, instead of reacting after the fact.",
   },
   {
-    q: "How to read the Pessimistic – Realistic – Optimistic (PRO) chart?",
+    q: "How to read the pessimistic, realistic and optimistic chart?",
     a: "You are not looking at reality or a forecast. The model draws room to move from your past data, seasonal patterns, and set parameters.",
   },
 ];
@@ -184,10 +190,10 @@ function toFaqSection(locale: Locale): FaqSection[] {
 }
 
 const KAHN_EN = {
-  eyebrow: "Knowledge · P-R-O spread model",
+  eyebrow: "Knowledge · three-path spread model",
   title: "Herman Kahn decision fork & spread model",
   p1: "Not a forecast — a range: critical decision nodes (rounds 1–2) and three simultaneously running outcomes — Pessimistic, Realistic, Optimistic.",
-  p2: "Stop-Loss on the pessimistic band protects the core plant. Full lesson: decision tree, financing structure, Cash Runway. DEMO 11, local-first.",
+  p2: "The capital-protection bound on the pessimistic band protects the core plant. Full lesson: decision tree, financing structure, reserve months. DEMO 11, local data.",
   foot: "Local-first · no cloud data · no usage send",
 } as const;
 
@@ -198,11 +204,11 @@ const LESSON_EN: Record<string, { title: string; body: string }> = {
   },
   "lecke-02": {
     title: "Dashboard handling",
-    body: "Controls on top, work in the middle, modules below. The tabs swap the Slot / workspace. KPI is the four headline numbers; What-if switches the P-R-O path; break-even is the first month the chosen path is no longer losing money.",
+    body: "Controls on top, work in the middle, modules below. The tabs swap Personal, Business and Project. The top band is the quick read; the middle is the decision. 0 months = the air is gone: first hold the till.",
   },
   "lecke-want": {
     title: "Need or investment",
-    body: "NEED: required operations (overhead, payroll, materials). WANT: optional desire — the monthly cap can be locked. INVESTMENT: spend that should earn later. Cashflow is the real movement; do not spend the VAT reserve; idle cash just sits; JIT fills the 60-day cover first.",
+    body: "NEED: required operations (overhead, payroll, materials). WANT: optional desire — the monthly cap can be locked. INVESTMENT: spend that should earn later. Cashflow is the real movement; do not spend the VAT reserve; idle cash just sits. JIT: air first, then the piggy / the toy. 0 months = the air is gone: you need ACT, not a new WANT.",
   },
   "lecke-cashflow": {
     title: "Cashflow logic",
@@ -212,7 +218,7 @@ const LESSON_EN: Record<string, { title: string; body: string }> = {
   "lecke-04": { title: "Shortcuts", body: "The keyboard icon opens the list. Save: Ctrl/Cmd+S." },
   "lecke-05": {
     title: "Slots",
-    body: "Inside one Case (Eset), Personal, Business and Project are separate Slots. The top tabs swap them; each runs the P-R-O Scenario.",
+    body: "Inside one Case, Personal, Business and Project are separate rooms. The top tabs swap them; each runs the same three futures.",
   },
   "lecke-06": { title: "Main menu", body: "Save, FAQ and sign-out sit behind the three lines. No phone desk." },
 };
@@ -239,9 +245,9 @@ const THEORY_EN: Record<string, { title: string; summary: string }> = {
     summary: "Analog exam, kWh quota, plastic-free canteen. Student BCP on your own machine.",
   },
   "kahn-strategiai-elagazas": {
-    title: "Herman Kahn decision fork & P-R-O spread model",
+    title: "Herman Kahn decision fork and spread model",
     summary:
-      "Not a forecast — a range. Decision nodes, P–R–O bands and Stop-Loss to protect the core plant. DEMO 11, local-first.",
+      "Not a forecast — a range. Decision nodes, three paths and a capital-protection bound to protect the core plant. DEMO 11, local data.",
   },
 };
 
@@ -306,7 +312,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€199 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €149 (−25%) · Y3 €119 (−40%) · Y4+ free updates for life",
         detail:
-          "Basic is for one decision-maker: one concurrently active Case, three active slots, one editor seat and one guest. Inactive data can be overwritten freely. Computation stays on your device.",
+          "Basic is for one decision-maker: one concurrently active Case, three active slots, one editor seat and one guest. It starts at once in the browser. Inactive data can be overwritten freely. Computation stays on your device — no cloud database.",
         bullets: [
           "1 Active Case · 3 Active Slots · 1 Seat + 1 Guest",
           "Unlimited overwrite of inactive slots — no archive fee",
@@ -319,11 +325,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€399 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €299 (−25%) · Y3 €239 (−40%) · Y4+ free updates for life",
         detail:
-          "Pro adds a second parallel Active Case and automated local bank-statement import (CAMT.053, CSV, XML) — see #local-import. Capacity is still concurrent-active only; extras are perpetual add-ons. Pro Desktop (Windows / macOS) is the packed desktop client for an active Pro license.",
+          "Pro adds a second parallel Active Case and local bank-statement import from files on your machine (CAMT.053, CSV, XML) — see #local-import. Import stays on your machine. You work in the browser now. Desktop early access comes spring 2027, free with Pro — not a condition of today’s purchase. Capacity is still concurrent-active only; extras are perpetual add-ons.",
         bullets: [
           "2 Active Cases · 3 Active Slots each · 1 Seat + 5 Guests",
-          "Automated bank statement & transaction import (CAMT.053, CSV, XML)",
-          "Pro Desktop App · Windows / macOS (active Pro license)",
+          "Local bank statement & posting import (CAMT.053, CSV, XML) — on your machine",
+          "Pro Desktop early access · spring 2027 · free with Pro",
           "Extra Active Case add-on: +€49 perpetual",
         ],
       },
@@ -333,7 +339,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         priceLine: "€799 year 1 — one-time entry (net list)",
         ladder: "See #tiered-loyalty · Y2 €599 (−25%) · Y3 €479 (−40%) · Y4+ free updates for life",
         detail:
-          "Enterprise covers team seats, multiple parallel Active Cases, local accounting/bank import and optional Sensor / Edge feed (#local-import). Not a cloud API product — imports and edge intake stay under your control. Enterprise Desktop is an add-on module in preparation and does not block or delay the web launch. The plan is available at a later date — no self-serve checkout; request a quote.",
+          "Enterprise covers team seats, several parallel Active Cases, local accounting/bank import (CAMT.053, CSV, XML, scheduled files) and optional local intake (#local-import). Import stays on your machine. Enterprise Desktop is an add-on in preparation and does not stop the web Case/Slot launch. The plan comes later — no self-serve checkout; ask for a quote.",
         bullets: [
           "5 Active Cases · 4 Active Slots each · 3 Seats + 20 Guests",
           "Automated accounting/bank-statement import + Sensor / Edge data feed",
@@ -350,7 +356,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "199 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 149 000 Ft (−25%) · 3. év 119 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "Basic egy döntéshozónak: egyidejűleg egy Aktív Case, három aktív slot, egy szerkesztő és egy vendég. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad.",
+        "Basic egy döntéshozónak: egyidejűleg egy Aktív Case, három aktív slot, egy szerkesztő és egy vendég. Azonnal a böngészőben indul. Az inaktív adat szabadon felülírható. A számítás a saját gépeden marad — nincs felhős adatbázis.",
       bullets: [
         "1 Aktív Case · 3 Aktív Slot · 1 Seat + 1 Guest",
         "Inaktív slot korlátlan felülírása — nincs archív díj",
@@ -363,11 +369,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "399 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 299 000 Ft (−25%) · 3. év 239 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "A Pro második párhuzamos Aktív Case-t és automatizált, helyi bankkivonat-importot ad (CAMT.053, CSV, XML) — lásd #local-import. A keret továbbra is az egyidejűleg aktív munkaterületekre vonatkozik; a bővítők örökös modulok. A Pro Desktop (Windows / macOS) az aktív Pro licenchez tartozó csomagolt asztali kliens.",
+        "A Pro második párhuzamos Aktív Case-t és helyi bankkivonat-importot ad a gépedről (CAMT.053, CSV, XML) — lásd #local-import. Az import a gépeden marad. Most a böngészőben dolgozol. Az asztali early access 2027 tavaszán jön, ingyen a Pro mellé — nem a mostani vásárlás feltétele. A keret továbbra is az egyidejűleg nyitott asztalokra és fülekre vonatkozik; a bővítők örökös modulok.",
       bullets: [
         "2 Aktív Case · 3 Aktív Slot / Case · 1 Seat + 5 Guest",
-        "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)",
-        "Pro Desktop App · Windows / macOS (aktív Pro licenc)",
+        "Helyi bankkivonat & tételimport (CAMT.053, CSV, XML) — a gépeden",
+        "Pro Desktop early access · 2027 tavasz · ingyen a Pro mellé",
         "Extra Aktív Case modul: +49 000 Ft örökös",
       ],
     },
@@ -377,7 +383,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       priceLine: "799 000 Ft az 1. évben — egyszeri belépő (nettó listaár)",
       ladder: "Lásd #tiered-loyalty · 2. év 599 000 Ft (−25%) · 3. év 479 000 Ft (−40%) · 4. évtől örökélet frissítés",
       detail:
-        "Az Enterprise csapat-seateket, több párhuzamos Aktív Case-t, helyi könyvelési/bankkivonat importot és opcionális Szenzoros / Edge bekötést ad (#local-import). Nem felhő-API termék: az import és az edge forrás a te kontrollod alatt marad. Az Enterprise Desktop bővítő modul előkészítés alatt van; a webes Case/Slot indítást nem blokkolja és nem késlelteti. A csomag későbbi időpontban érhető el — nincs önkiszolgáló checkout, ajánlatkérés kell.",
+        "Az Enterprise csapathelyeket, több párhuzamos Aktív Case-t, helyi könyvelési/bankkivonat importot (CAMT.053, CSV, XML, ütemezett fájl) és opcionális helyi bekötést ad (#local-import). Az import a gépeden marad. Az Enterprise Desktop bővítő modul készül; a webes Case/Slot indítást nem állítja meg. A csomag később jön — nincs önkiszolgáló checkout, írj ajánlatért.",
       bullets: [
         "5 Aktív Case · 4 Aktív Slot / Case · 3 Seat + 20 Guest",
         "Automatizált könyvelési/bankkivonat import + Szenzoros / Edge adatgyűjtő bekötés",

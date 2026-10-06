@@ -20,3 +20,9 @@
 - A részletes működési, árazási, licencelési és technikai specifikáció hivatalos forrása a Support `/pricing` oldal (`support/src/copy.ts` + `supportPricingHref`).
 - Horgonyok: `#basic` `#pro` `#enterprise` `#tiered-loyalty` `#active-workspaces` `#local-import`.
 - A főoldal és az app felületei csak tömör szöveget mutatnak; részletezéshez a fenti horgonyokra kell linkelni (`src/lib/support.ts` → `supportPricingHref`).
+
+## Nyilvános szövegezés (Public Copy Policy)
+- Főoldal, árazás, support, számlázási tájékoztató: prémium magyar üzleti próza. Tilos a nyers mozaikszó (P-R-O, ACT, WANT mint márka) és a dashboard-zsargon.
+- Barion csak a pénztárban és a számlázási/jogi feltételekben. Szoftver-működés, adatvédelem, import, 3 lépés: Barion tilos.
+- Az app belsejében (workspace, OPL, glossary, hover) a mérnöki gyorsnyelv maradhat, hover magyarázattal.
+- Fájlformátumok (PDF, CSV, CAMT.053, XML) a nyilvános 3 lépésben megengedettek.

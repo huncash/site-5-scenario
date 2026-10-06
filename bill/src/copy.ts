@@ -4,7 +4,7 @@ const hu = {
   brand: "Szcenárió · számlázás",
   homeTitle: "Számlázás",
   homeLead:
-    "Meglévő rendeléshez add meg a rendelési azonosítót (vagy SZC-kódot) és a megrendelő e-mailt. Új csomaghoz a főoldal árlistája vezet ide.",
+    "Meglévő rendeléshez add meg a rendelési azonosítót (vagy SZC-kódot) és a megrendelő e-mailt. A Basic és a Pro azonnal a böngészőben él — nincs asztali telepítő a számlához. Új csomaghoz a főoldal árlistája vezet ide.",
   homePricingCta: "Csomagok a főoldalon",
   homePickLead: "Vagy válassz csomagot itt — a számlázási űrlap a kiválasztott tervvel nyílik.",
   homePickStarter: "Basic",
@@ -114,7 +114,7 @@ const en: typeof hu = {
   brand: "Szcenárió · billing",
   homeTitle: "Billing",
   homeLead:
-    "For an existing order enter the order id (or SZC code) and the buyer e-mail. New packages start from the main pricing list.",
+    "For an existing order enter the order id (or SZC code) and the buyer e-mail. Basic and Pro live in the browser at once — no desktop installer on the invoice. New packages start from the main pricing list.",
   homePricingCta: "Packages on the main site",
   homePickLead: "Or pick a plan here — checkout opens with that package.",
   homePickStarter: "Basic",

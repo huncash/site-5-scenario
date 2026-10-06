@@ -1,5 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { Columns2, Moon, Palette, Settings, Sun } from "lucide-react";
+import { Columns2, Glasses, Keyboard, Moon, Palette, Sun } from "lucide-react";
 
 import { useTheme } from "@/components/ThemeProvider";
 import { localeLabel, paletteName, useI18n } from "@/i18n";
@@ -144,7 +144,7 @@ export function ViewSettingsMenu({
             setOpen((value) => !value);
           }}
         >
-          <Settings className="h-[18px] w-[18px]" aria-hidden="true" />
+          <Glasses className="h-[18px] w-[18px]" aria-hidden="true" />
         </button>
 
         <div

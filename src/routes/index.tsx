@@ -7,6 +7,7 @@ import { useI18n } from "@/i18n";
 import { hasWorkspaceAccess, isAppWorkspaceHost, isLocalDevHost } from "@/lib/license";
 import { isSchoolHost, isSchoolVerified } from "@/lib/school";
 import { SchoolSurface } from "@/components/school/SchoolSurface";
+import { publicSeoHead } from "@/lib/seo";
 import { useVault } from "@/lib/vault";
 
 const FinanceDashboard = lazy(() =>
@@ -14,6 +15,7 @@ const FinanceDashboard = lazy(() =>
 );
 
 export const Route = createFileRoute("/")({
+  head: () => publicSeoHead("home"),
   component: Page,
 });
 

@@ -5,8 +5,10 @@ import type { LicenseEntitlement } from "@/lib/license";
 import {
   canDownloadProDesktop,
   COMPARE_ADDON_MARK,
+  desktopArtifactLooksLive,
   ENTERPRISE_DESKTOP_BLOCKS_WEB,
   PRO_DESKTOP_DOWNLOADS,
+  probeDesktopArtifact,
 } from "@/lib/desktopApp";
 
 function lic(tier: string, status: LicenseEntitlement["status"] = "paid"): LicenseEntitlement {
@@ -43,8 +45,8 @@ describe("desktop app strategy", () => {
     expect(blob).not.toMatch(/szcenárió\s+slot/i);
     expect(blob).not.toMatch(/szcenárió-slot/i);
     expect(hu.desktop.downloadCta).toBe("Desktop App letöltése (Windows / macOS)");
-    expect(hu.desktop.enterpriseBadge).toBe("Bővítő modul / Előkészítés alatt");
-  });
+    expect(hu.desktop.windowsSoon).toMatch(/2027/);
+    expect(hu.desktop.soonTitle).toMatch(/böngészőben/);
 
   it("keeps Windows / macOS artifact paths without a Slot szcenárió prefix", () => {
     expect(PRO_DESKTOP_DOWNLOADS.windows.href).toMatch(/Szcenario-Pro-windows/);

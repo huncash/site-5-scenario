@@ -1,0 +1,13 @@
+---
+description: Nyilvános felületek szövegezése — próza, Barion csak a pénztárban
+globs: src/i18n/**/*.ts,src/content/**/*.ts,src/config/planCopy.ts,support/src/**/*.ts,bill/src/copy.ts
+alwaysApply: true
+---
+
+# Public Copy Policy (Nyilvános Szövegezési Szabályzat)
+
+1. **Zero Jargon a felületeken:** A főoldalon, az árazásnál, a supporton és a számlázási oldalon tilos nyers mozaikszavakkal (pl. P-R-O, API-kódok részletezése a funkciókban) vagy technikai zsargonnal dobálózni.
+2. **Barion csak a pénztárban:** A fizetési szolgáltató (Barion) kizárólag a fizetési feltételeknél és a számlázási tájékoztató jogi részében szerepelhet. A szoftver működési leírásában vagy az adatvédelmi pontokban a Barion nevének előfordulása *szigorúan tilos*.
+3. **Prozai minőség:** Érthető, egzakt, magyar üzleti próza építse fel a bizalmat. Az applikáción belül (a sűrű workspace-ben) megmaradhat a mérnöki gyorsnyelv, de a külső márkán ez nem csúszhat át.
+
+A főoldal 3 lépése a `door.howStep1*`–`howStep3*` kulcsokon él; HU szöveg a felhasználó által rögzített próza.

@@ -34,6 +34,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as TicketRouteImport } from './routes/ticket'
 import { Route as AdminMonetizationSimRouteImport } from './routes/admin/monetization-sim'
 import { Route as LoginActivateRouteImport } from './routes/login_.activate'
+import { Route as SupportSplatRouteImport } from './routes/support.$'
 import { Route as FOktatasSzimulacioIndexRouteImport } from './routes/f/oktatas-szimulacio/index'
 import { Route as FOktatasSzimulacioCheckoutRouteImport } from './routes/f/oktatas-szimulacio/checkout'
 import { Route as FOktatasSzimulacioDemoRouteImport } from './routes/f/oktatas-szimulacio/demo'
@@ -172,6 +173,11 @@ const LoginActivateRoute = LoginActivateRouteImport.update({
   path: '/login/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportSplatRoute = SupportSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => SupportRoute,
+} as any)
 const FOktatasSzimulacioIndexRoute = FOktatasSzimulacioIndexRouteImport.update({
   id: '/f/oktatas-szimulacio/',
   path: '/f/oktatas-szimulacio/',
@@ -260,10 +266,11 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login/activate': typeof LoginActivateRoute
+  '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
@@ -299,10 +306,11 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login/activate': typeof LoginActivateRoute
+  '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
@@ -339,10 +347,11 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
   '/strategia': typeof StrategiaRoute
-  '/support': typeof SupportRoute
+  '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
   '/login_/activate': typeof LoginActivateRoute
+  '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
   '/f/oktatas-szimulacio/demo': typeof FOktatasSzimulacioDemoRoute
   '/f/oktatas-szimulacio/pricing': typeof FOktatasSzimulacioPricingRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login/activate'
+    | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login/activate'
+    | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | '/ticket'
     | '/admin/monetization-sim'
     | '/login_/activate'
+    | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
     | '/f/oktatas-szimulacio/demo'
     | '/f/oktatas-szimulacio/pricing'
@@ -498,7 +510,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
   StrategiaRoute: typeof StrategiaRoute
-  SupportRoute: typeof SupportRoute
+  SupportRoute: typeof SupportRouteWithChildren
   TicketRoute: typeof TicketRoute
   AdminMonetizationSimRoute: typeof AdminMonetizationSimRoute
   LoginActivateRoute: typeof LoginActivateRoute
@@ -693,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support/$': {
+      id: '/support/$'
+      path: '/$'
+      fullPath: '/support/$'
+      preLoaderRoute: typeof SupportSplatRouteImport
+      parentRoute: typeof SupportRoute
+    }
     '/f/oktatas-szimulacio/': {
       id: '/f/oktatas-szimulacio/'
       path: '/f/oktatas-szimulacio'
@@ -780,6 +799,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SupportRouteChildren {
+  SupportSplatRoute: typeof SupportSplatRoute
+}
+
+const SupportRouteChildren: SupportRouteChildren = {
+  SupportSplatRoute: SupportSplatRoute,
+}
+
+const SupportRouteWithChildren =
+  SupportRoute._addFileChildren(SupportRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -802,7 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
   StrategiaRoute: StrategiaRoute,
-  SupportRoute: SupportRoute,
+  SupportRoute: SupportRouteWithChildren,
   TicketRoute: TicketRoute,
   AdminMonetizationSimRoute: AdminMonetizationSimRoute,
   LoginActivateRoute: LoginActivateRoute,

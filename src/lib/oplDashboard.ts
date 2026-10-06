@@ -114,9 +114,9 @@ export const DASH_OPL_LESSONS: OplLesson[] = [
     deepDiveHu:
       "A billentyűzet-ikon a teljes listát mutatja. Mentés: Ctrl/Cmd+S — a vaultba, nem felhőbe. Beviteli mezőben a navigációs rövidítések szándékosan nem futnak, hogy ne írd felül a tételt. Desktopon ez ritmus: kevesebb egér, kevesebb súrlódás. Ha a lista üresnek tűnik, nézd a leírást: csak azok a billentyűk élnek, amikhez van bekötött művelet.",
     deepDiveEn:
-      "The keyboard icon shows the full list. Save: Ctrl/Cmd+S — into the vault, not a cloud. Navigation shortcuts intentionally do not fire inside an input, so you do not overwrite a posting. On desktop this is rhythm: less mouse, less friction. If the list looks empty, read the copy: only keys with a wired action are live.",
+      "In the view (glasses) menu the keyboard icon shows the full list. Save: Ctrl/Cmd+S — into the vault, not a cloud. Navigation shortcuts intentionally do not fire inside an input, so you do not overwrite a posting. On desktop this is rhythm: less mouse, less friction. If the list looks empty, read the copy: only keys with a wired action are live.",
     steps: [
-      step("s1", "Ikon", "Icon", "A billentyűzet-ikon a listát nyitja.", "The keyboard icon opens the list.", "Billentyűzet ikon", "Keyboard icon"),
+      step("s1", "Ikon", "Icon", "A szemüveg menüben a billentyűzet-ikon a listát nyitja.", "In the glasses menu the keyboard icon opens the list.", "Nézet menü → billentyűzet", "View menu → keyboard"),
       step("s2", "Mentés", "Save", "Ctrl/Cmd+S a helyi vaultba ment.", "Ctrl/Cmd+S saves into the local vault.", "Ctrl/Cmd+S kártya", "Ctrl/Cmd+S card"),
       step("s3", "Fókusz", "Focus", "Gépelés közben a navigáció nem fut.", "While typing, navigation keys do not fire.", "Bevitel vs. navigáció", "Input vs navigation"),
     ],

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type MouseEvent } from "react";
 import { BookOpen, KeyRound, LifeBuoy, Plug } from "lucide-react";
 
 import { SiteFooter } from "@/components/SiteFooter";
@@ -11,10 +11,17 @@ import { useI18n, type MessageKey } from "@/i18n";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
 import { oplByPath } from "@/lib/opl";
-import { isSupportHost, supportPageUrl, supportPathSlug, supportPricingHref } from "@/lib/support";
+import { isSupportHost, supportPageUrl, supportPathSlug, supportPricingHref, supportTierDomId } from "@/lib/support";
 import { resolveSupportSlug, type SupportLessonIndex } from "@/lib/supportRoutes";
 import { cn } from "@/lib/utils";
 import { withViewPrefs } from "@/lib/viewPrefs";
+
+const SupportSpaApp = lazy(() => import("../../support/src/App").then((m) => ({ default: m.App })));
+
+function assignSupportHref(e: MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault();
+  window.location.assign(e.currentTarget.href);
+}
 
 function branchHref(slug: string, localNav: boolean): string {
   if (slug.startsWith("#")) return slug;
@@ -42,6 +49,7 @@ type SupportTier = {
   bullets: MessageKey[];
   cta: MessageKey;
   href: string;
+  planHrefLabel: MessageKey;
   recommended?: boolean;
 };
 
@@ -73,6 +81,7 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
       bullets: ["supportDoor.basicB1", "supportDoor.basicB2", "supportDoor.basicB3"],
       cta: "supportDoor.basicCta",
       href: gyik,
+      planHrefLabel: "supportDoor.toPlanBasic",
     },
     {
       id: "pro",
@@ -80,6 +89,7 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
       bullets: ["supportDoor.proB1", "supportDoor.proB2", "supportDoor.proB3"],
       cta: "supportDoor.proCta",
       href: ticket,
+      planHrefLabel: "supportDoor.toPlanPro",
       recommended: true,
     },
     {
@@ -88,6 +98,7 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
       bullets: ["supportDoor.enterpriseB1", "supportDoor.enterpriseB2", "supportDoor.enterpriseB3"],
       cta: "supportDoor.enterpriseCta",
       href: ticket,
+      planHrefLabel: "supportDoor.toPlanEnterprise",
     },
   ];
   const faq = [
@@ -96,7 +107,16 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
     { q: t("supportDoor.faqLicenseQ"), a: t("supportDoor.faqLicenseA") },
     { q: t("supportDoor.faqBillingQ"), a: t("supportDoor.faqBillingA") },
     { q: t("supportDoor.faqSettingsQ"), a: t("supportDoor.faqSettingsA") },
+    { q: t("supportDoor.faqDesktopQ"), a: t("supportDoor.faqDesktopA") },
   ];
+
+  useEffect(() => {
+    const id = typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
+    if (!id) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
 
   return (
     <div
@@ -165,8 +185,9 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
             {tiers.map((tier) => (
               <article
                 key={tier.id}
+                id={supportTierDomId(tier.id)}
                 className={cn(
-                  "flex h-full min-w-0 flex-col rounded-xl border p-4",
+                  "flex h-full min-w-0 scroll-mt-24 flex-col rounded-xl border p-4",
                   tier.recommended
                     ? "border-amber-300/50 bg-card shadow-[0_0_0_1px_rgba(252,211,77,0.12)]"
                     : "border-white/12 bg-card",
@@ -196,9 +217,10 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
                 </Button>
                 <a
                   href={supportPricingHref(tier.id)}
+                  onClick={assignSupportHref}
                   className="mt-2 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                 >
-                  {t("pricing.moreInfo")}
+                  {t(tier.planHrefLabel)}
                 </a>
               </article>
             ))}
@@ -271,13 +293,27 @@ function SupportLessonPage({ lesson }: { lesson: SupportLessonIndex }) {
 export function SupportHost() {
   const [path, setPath] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
   useEffect(() => {
-    const onPop = () => setPath(window.location.pathname);
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    const sync = () => setPath(window.location.pathname);
+    sync();
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
   }, []);
   const route = useMemo(() => resolveSupportSlug(supportPathSlug(path)), [path]);
   if (route.kind === "lesson" && route.lesson) {
     return <SupportLessonPage lesson={route.lesson} />;
   }
-  return <SupportSurface localNav />;
+  if (route.kind === "static") {
+    return (
+      <Suspense
+        fallback={
+          <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground">
+            <span className="text-sm tracking-wide">Szcenárió</span>
+          </div>
+        }
+      >
+        <SupportSpaApp />
+      </Suspense>
+    );
+  }
+  return <SupportSurface />;
 }
