@@ -64,7 +64,7 @@ export function MudaHeatmap({
   onSelectDay,
   amountOf,
   blockId = "muda-heatmap",
-  defaultOpen = true,
+  defaultOpen = false,
 }: {
   txns: Transaction[];
   className?: string;

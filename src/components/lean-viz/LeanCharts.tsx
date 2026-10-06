@@ -166,6 +166,7 @@ type ChartChromeProps = {
   onNext?: () => void;
   windowLabel?: string;
   children: ReactNode;
+  footer?: ReactNode;
   blockId?: string;
   defaultOpen?: boolean;
 };
@@ -179,6 +180,7 @@ function ChartChromeFrame({
   onNext,
   windowLabel,
   children,
+  footer,
   isOpen,
   onToggle,
 }: ChartChromeProps & { isOpen: boolean; onToggle?: () => void }) {
@@ -187,7 +189,7 @@ function ChartChromeFrame({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-2">
           {onToggle ? <RevealToggle open={isOpen} onClick={onToggle} /> : null}
-          <h3 className="text-sm font-medium leading-snug text-slate-200">{title}</h3>
+          <h3 className="text-sm font-medium leading-snug text-[var(--text-main)]">{title}</h3>
         </div>
         {onSpan && onPrev && onNext ? (
           <div className="flex flex-wrap items-center gap-1">
@@ -201,7 +203,7 @@ function ChartChromeFrame({
               ←
             </button>
             {windowLabel ? (
-              <span className="min-w-[5.5rem] px-1 text-center text-[11px] text-slate-300">{windowLabel}</span>
+              <span className="min-w-[5.5rem] px-1 text-center text-[11px] text-[var(--text-muted)]">{windowLabel}</span>
             ) : null}
             <button
               type="button"
@@ -234,6 +236,7 @@ function ChartChromeFrame({
         <>
           {legend ? <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">{legend}</div> : null}
           <div className="mt-2 min-w-0">{children}</div>
+          {footer}
         </>
       ) : null}
     </section>
@@ -242,7 +245,7 @@ function ChartChromeFrame({
 
 function ChartChromePersisted({
   blockId,
-  defaultOpen = true,
+  defaultOpen = false,
   ...rest
 }: ChartChromeProps & { blockId: string }) {
   const { isOpen, toggle } = useDashboardBlockOpen(blockId, defaultOpen);

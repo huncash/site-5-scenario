@@ -651,7 +651,7 @@ export function FinanceDashboard({
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
   const cashflowBlock = useDashboardBlockOpen("cashflow", true);
   const tartozasokBlock = useDashboardBlockOpen("tartozasok", true);
-  const idovonalBlock = useDashboardBlockOpen("idovonal-6ho", true);
+  const idovonalBlock = useDashboardBlockOpen("idovonal-6ho", false);
   const tetelekBlock = useDashboardBlockOpen("tetelek", true);
   const ledgerCollapsed = !tetelekBlock.isOpen;
   type CashflowChannelFilter = "all" | "card" | "transfer" | "bank" | "other";
@@ -5925,10 +5925,10 @@ export function FinanceDashboard({
                 <ChartLegendSwatch tone="pess" label={t("dash.pessimistic")} line />
               </>
             }
+            footer={<ProChartCallout className="mt-2 rounded-xl border border-border/60 bg-card px-4 py-3" />}
           >
             <SmallMultiples series={whatIf.multiples} xLabel={t("dash.month")} yLabel={currencyUnit()} />
           </ChartChrome>
-          <ProChartCallout className="mt-2 rounded-xl border border-border/60 bg-card px-4 py-3" />
         </div>
 
         <div className="viz-split">
@@ -6276,7 +6276,7 @@ export function FinanceDashboard({
             <div className="flex min-w-0 items-center gap-2">
               <RevealToggle open={cashflowBlock.isOpen} onClick={cashflowBlock.toggle} />
               <CardTitle
-                className="text-sm font-medium text-slate-200"
+                className="text-sm font-medium text-[var(--text-main)]"
                 title={`Cashflow — ${workspaceDisplayName(activeWorkspace)}`}
                 data-exact="pénzáramlás — havi bevétel, kiadás, kassza."
               >

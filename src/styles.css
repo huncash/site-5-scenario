@@ -594,6 +594,36 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
+/* Light dashboard: hardcoded white/slate ink on cards is unreadable */
+html.light .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200):not(button),
+html.light-mode .app-shell-main :is(.text-white, .text-slate-50, .text-slate-100, .text-slate-200):not(button) {
+  color: var(--text-main) !important;
+}
+html.light .app-shell-main :is(.text-slate-300, .text-slate-400, .kpi-label),
+html.light-mode .app-shell-main :is(.text-slate-300, .text-slate-400, .kpi-label) {
+  color: var(--text-muted) !important;
+}
+html.light .app-shell-main .kpi-value,
+html.light-mode .app-shell-main .kpi-value {
+  color: var(--text-main);
+}
+html.light .app-shell-main :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(button),
+html.light-mode .app-shell-main :is(.text-emerald-200, .text-emerald-300, .text-emerald-400):not(button) {
+  color: #047857 !important;
+}
+html.light .app-shell-main :is(.text-sky-200, .text-sky-300, .text-sky-400):not(button),
+html.light-mode .app-shell-main :is(.text-sky-200, .text-sky-300, .text-sky-400):not(button) {
+  color: #0369a1 !important;
+}
+html.light .app-shell-main :is(.text-amber-200, .text-amber-300, .text-amber-400):not(button),
+html.light-mode .app-shell-main :is(.text-amber-200, .text-amber-300, .text-amber-400):not(button) {
+  color: #b45309 !important;
+}
+html.light .app-shell-main :is(.text-rose-200, .text-rose-300, .text-rose-400):not(button),
+html.light-mode .app-shell-main :is(.text-rose-200, .text-rose-300, .text-rose-400):not(button) {
+  color: #be123c !important;
+}
+
 /* Kormányzati akadálymentes nézet — WCAG AAA / MSZ EN 301 549, sárga–fekete */
 html.a11y-vision,
 html.a11y-vision.dark,

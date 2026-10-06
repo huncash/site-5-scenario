@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function CollapseMark({ open }: { open: boolean }) {
   return (
     <span
-      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-[var(--dropdown-hover)] font-mono text-sm leading-none text-slate-200"
+      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border bg-[var(--dropdown-hover)] font-mono text-sm leading-none text-[var(--text-main)]"
       aria-hidden="true"
     >
       {open ? "−" : "+"}
@@ -32,7 +32,7 @@ export function RevealToggle({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex shrink-0 items-center justify-center rounded-md text-slate-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
+      className="inline-flex shrink-0 items-center justify-center rounded-md text-[var(--text-main)] hover:text-[var(--accent-color)] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
       title={label}
       aria-expanded={open}
       aria-label={label}
@@ -46,7 +46,7 @@ export function RevealToggle({
 export function CollapsibleCard({
   id,
   title,
-  defaultOpen = true,
+  defaultOpen = false,
   children,
   className,
   headerRight,
@@ -65,7 +65,7 @@ export function CollapsibleCard({
       <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <RevealToggle open={isOpen} onClick={toggle} />
-          <div className="min-w-0 text-sm font-medium leading-snug text-slate-200">{title}</div>
+          <div className="min-w-0 text-sm font-medium leading-snug text-[var(--text-main)]">{title}</div>
         </div>
         {headerRight}
       </div>

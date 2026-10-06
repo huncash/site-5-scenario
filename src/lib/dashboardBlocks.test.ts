@@ -20,6 +20,11 @@ describe("dashboardBlocks", () => {
     expect(resolveDashboardBlockOpen({ id: "hoterkep", open: true }, false)).toBe(true);
   });
 
+  it("keeps viz blocks closed until the user opens them", () => {
+    expect(resolveDashboardBlockOpen(undefined, false)).toBe(false);
+    expect(resolveDashboardBlockOpen({ id: "halmozott", open: true }, false)).toBe(true);
+  });
+
   it("persists through MeshRepository", async () => {
     const repo = createMeshRepository(new InMemoryDataStore<MeshSchema>());
     expect(await readDashboardBlockOpen(repo, "penzaramlas", true)).toBe(true);
