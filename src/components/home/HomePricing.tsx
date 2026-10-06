@@ -138,48 +138,48 @@ export function HomePricing(props: { campus?: boolean }) {
                 ))}
               </ul>
 
-              {isEnterprisePlanId(p.id) ? (
-                <Button
-                  type="button"
-                  className="mt-5 h-9 border-white/35 bg-transparent text-[13px] text-foreground"
-                  variant="outline"
-                  onClick={() => setEnterpriseOpen(true)}
-                >
-                  {t("pricing.enterpriseCta")}
-                </Button>
-              ) : (
-                <Button
-                  asChild
-                  className={cn(
-                    "mt-5 h-9 text-[13px]",
-                    recommended ? "btn-cta" : "border-white/35 bg-transparent text-foreground",
-                  )}
-                  variant={recommended ? "default" : "outline"}
-                >
+              <div className="mt-auto shrink-0 pt-5">
+                {isEnterprisePlanId(p.id) ? (
+                  <Button
+                    type="button"
+                    className="h-auto min-h-10 w-full overflow-visible whitespace-normal py-2 text-[13px] font-semibold leading-tight"
+                    variant="outline"
+                    onClick={() => setEnterpriseOpen(true)}
+                  >
+                    {t("pricing.enterpriseCta")}
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    className={cn(
+                      "h-auto min-h-10 w-full overflow-visible whitespace-normal py-2 text-[13px] font-semibold leading-tight",
+                      recommended ? "btn-cta" : undefined,
+                    )}
+                    variant={recommended ? "default" : "outline"}
+                  >
+                    <a
+                      href={billCheckoutUrl({ tier: p.id, interval: checkoutInterval })}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.assign(billCheckoutUrl({ tier: p.id, interval: checkoutInterval }));
+                      }}
+                    >
+                      {t("pricing.order")}
+                    </a>
+                  </Button>
+                )}
+
+                <div className="mt-4 flex flex-col items-center gap-2.5 border-t border-border/50 pt-3 text-center text-[12px] leading-snug text-muted-foreground">
                   <a
-                    href={billCheckoutUrl({ tier: p.id, interval: checkoutInterval })}
+                    href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
                     onClick={(e) => {
                       e.preventDefault();
-                      window.location.assign(billCheckoutUrl({ tier: p.id, interval: checkoutInterval }));
+                      window.location.assign(e.currentTarget.href);
                     }}
+                    className="underline-offset-2 hover:text-foreground hover:underline"
                   >
-                    {t("pricing.order")}
+                    {t("pricing.moreInfo")}
                   </a>
-                </Button>
-              )}
-
-              <div className="mt-4 flex flex-col items-center gap-2 text-center text-[12px] leading-snug text-muted-foreground">
-                <a
-                  href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.location.assign(e.currentTarget.href);
-                  }}
-                  className="underline-offset-2 hover:text-foreground hover:underline"
-                >
-                  {t("pricing.moreInfo")}
-                </a>
-                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
                   <a
                     href={supportTierHref(SUPPORT_PRICING_ANCHOR[p.id])}
                     onClick={(e) => {

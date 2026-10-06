@@ -4,6 +4,7 @@ import { applyPublicSeo, supportSeoPageFromPath } from "@/lib/seo";
 import { SupportSurface } from "@/components/SupportSurface";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
+import { billCheckoutUrl } from "@/lib/billing";
 import { enterpriseInquiryMailto } from "@/lib/enterpriseSchedule";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
@@ -257,7 +258,31 @@ function PricingPage({ locale }: { locale: Locale }) {
                 <li key={line}>{line}</li>
               ))}
             </ul>
-            <p style={{ margin: "10px 0 0" }}>
+            {tier.id === "enterprise" ? (
+              <a className="ticket-cta" href={enterpriseInquiryMailto({ locale })}>
+                {t.pricingEnterpriseCta}
+              </a>
+            ) : (
+              <a
+                className={tier.id === "pro" ? "ticket-cta" : "ticket-cta secondary"}
+                href={billCheckoutUrl({
+                  tier: tier.id === "basic" ? "starter" : "pro",
+                  interval: "yearly",
+                })}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(
+                    billCheckoutUrl({
+                      tier: tier.id === "basic" ? "starter" : "pro",
+                      interval: "yearly",
+                    }),
+                  );
+                }}
+              >
+                {t.pricingOrder}
+              </a>
+            )}
+            <p style={{ margin: "12px 0 0" }}>
               <a
                 href={`${supportHref("home", { lang: locale })}#support-${tier.id}`}
                 onClick={(e) => {
@@ -268,13 +293,6 @@ function PricingPage({ locale }: { locale: Locale }) {
                 {tier.id === "basic" ? t.toTierBasic : tier.id === "pro" ? t.toTierPro : t.toTierEnterprise}
               </a>
             </p>
-            {tier.id === "enterprise" ? (
-              <p style={{ margin: "10px 0 0" }}>
-                <a className="ticket-cta" href={enterpriseInquiryMailto({ locale })} style={{ display: "inline-block", marginTop: 8 }}>
-                  {t.pricingEnterpriseCta}
-                </a>
-              </p>
-            ) : null}
           </article>
         ))}
       </div>

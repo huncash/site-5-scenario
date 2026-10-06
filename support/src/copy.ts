@@ -85,6 +85,7 @@ const hu = {
     "A folyamat logikus lépésekből épül fel. Első lépésként rögzíted a törzsadatokat: a profilodat, a magánvagyontárgyakat és az ingatlanokat, amelyek titkosítva, kizárólag helyben tárolódnak. Ezt követően érkezik meg a bankkivonat a Mesh Data Managerbe: a Basic csomagban kézi CSV vagy XML fájlformátumban, a Pro csomagban pedig figyelt mappából és saját szabályok alapján. A helyzetkép ekkor áll össze: a tételek a megadott szabályok szerint a megfelelő kategóriákba rendeződnek.",
   pricingWorkflowBody2:
     "Futtatsz, ellenőrzöl, beavatkozol. A pontatlan beolvasást kézzel igazítod ki — ez a te egyéni preferenciáid finomhangolása, nem pedig mesterséges intelligencia tanítása. A magánélet pénzügyei mellett a vállalkozás és a projektek slotjai egyaránt biztonságosan helyet kapnak a helyi műszerfalon.",
+  pricingOrder: "Megrendelem",
   pricingEnterpriseBadge: "Későbbi időpontban érhető el",
   pricingEnterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
   pricingEnterpriseInquiryLead:
@@ -167,6 +168,7 @@ const en: typeof hu = {
     "The sequence is a set of clear steps. First you record master data: your profile, personal assets and property, stored encrypted and only locally. Then the bank statement arrives in Mesh Data Manager: on Basic as a hand-chosen CSV or XML file, on Pro from a watched folder and your own rules. That is when the picture comes together: lines fall into the right categories under the rules you set.",
   pricingWorkflowBody2:
     "You run, check, and act. You correct a bad read by hand — that is fine-tuning your own preferences, not training an artificial intelligence. Beside the finances of private life, business and project slots all sit safely on the local dashboard.",
+  pricingOrder: "Order",
   pricingEnterpriseBadge: "Available at a later date",
   pricingEnterpriseCta: "Contact / request a quote",
   pricingEnterpriseInquiryLead:
