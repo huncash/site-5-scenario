@@ -55,8 +55,14 @@ type SupportTier = {
   recommended?: boolean;
 };
 
-/** support.szcenario.hu — landing, főoldali nézetgombbal és pricing#pro kártyalogikával. */
-export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}) {
+/** Kereső → GYIK → tippek → OPL — oldal és modal közös tartalma. */
+export function SupportMainContent({
+  localNav = false,
+  compactHero = false,
+}: {
+  localNav?: boolean;
+  compactHero?: boolean;
+} = {}) {
   const { t, locale } = useI18n();
   const [kbQuery, setKbQuery] = useState("");
   const needle = kbQuery.trim().toLowerCase();
@@ -121,32 +127,18 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
     },
   ];
 
-  useEffect(() => {
-    const id = typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
-    if (!id) return;
-    window.requestAnimationFrame(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, []);
-
   return (
-    <div
-      className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background text-foreground outline-none"
-      data-support-surface=""
-    >
-      <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-foreground">{t("brand.name")}</div>
-            <div className="truncate text-[10px] font-normal tracking-wide text-muted-foreground">
-              {t("supportDoor.badge")}
-            </div>
-          </div>
-          <ViewSettingsMenu />
+    <div className="mx-auto w-full max-w-5xl space-y-10">
+      {compactHero ? (
+        <div className="mx-auto w-full max-w-3xl space-y-2 pr-12 text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            {t("supportDoor.badge")}
+          </p>
+          <h2 className="text-balance text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            {t("supportDoor.title")}
+          </h2>
         </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-5xl space-y-10 px-4 py-8 pb-16">
+      ) : (
         <div className="mx-auto w-full max-w-3xl space-y-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             {t("supportDoor.badge")}
@@ -161,18 +153,20 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
             {t("supportDoor.lead")}
           </p>
         </div>
+      )}
 
-        <label className="mx-auto block w-full max-w-3xl">
-          <span className="sr-only">{t("supportDoor.kbSearch")}</span>
-          <input
-            type="search"
-            value={kbQuery}
-            onChange={(e) => setKbQuery(e.target.value)}
-            placeholder={t("supportDoor.kbSearch")}
-            aria-label={t("supportDoor.kbSearch")}
-            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus:border-cyan-400/50"
-          />
-        </label>
+      <label className="mx-auto block w-full max-w-3xl">
+        <span className="sr-only">{t("supportDoor.kbSearch")}</span>
+        <input
+          type="search"
+          data-support-search=""
+          value={kbQuery}
+          onChange={(e) => setKbQuery(e.target.value)}
+          placeholder={t("supportDoor.kbSearch")}
+          aria-label={t("supportDoor.kbSearch")}
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus:border-cyan-400/50"
+        />
+      </label>
 
         <section id="faq" className="scroll-mt-24 rounded-xl border border-border/60 bg-card/40 px-4 py-4">
           <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.faqTitle")}</h2>
@@ -300,6 +294,41 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
         <Button asChild className="btn-cta h-10 w-full text-[13px] sm:w-auto">
           <a href={ticket}>{t("supportDoor.ticketCta")}</a>
         </Button>
+    </div>
+  );
+}
+
+/** support.szcenario.hu — landing, főoldali nézetgombbal és pricing#pro kártyalogikával. */
+export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}) {
+  const { t } = useI18n();
+
+  useEffect(() => {
+    const id = typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
+    if (!id) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
+  return (
+    <div
+      className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background text-foreground outline-none"
+      data-support-surface=""
+    >
+      <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">{t("brand.name")}</div>
+            <div className="truncate text-[10px] font-normal tracking-wide text-muted-foreground">
+              {t("supportDoor.badge")}
+            </div>
+          </div>
+          <ViewSettingsMenu />
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 pb-16">
+        <SupportMainContent localNav={localNav} />
       </main>
 
       <div data-site-footer-host />
