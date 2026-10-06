@@ -1,5 +1,6 @@
 import { ENGINE_VERSION } from "@/config/plans";
 import { billPublicOrigin } from "@/lib/billing";
+import { installment2ArrearsActive } from "@/lib/installmentPlan";
 import {
   activeGiftSlotsFromCredits,
   ensureReferralCode,
@@ -41,6 +42,11 @@ export type LicenseEntitlement = {
   permanentSlots?: number;
   /** Megvásárolt bővítő pack id-k ismétléssel. */
   slotPacks?: SlotPackId[];
+  /** Két egyenlő 1. évi részlet. */
+  installmentPlan?: boolean;
+  installment2Paid?: boolean;
+  year1StartedAt?: string;
+  installment2DueAt?: string | null;
 };
 
 const KEY = "szcenario_license_v1";
@@ -90,6 +96,19 @@ export function hasWorkspaceAccess(): boolean {
   const e = readLicense();
   if (!e) return false;
   return e.status === "paid" || e.status === "invoiced" || e.status === "awaiting_transfer" || e.status === "local";
+}
+
+/** 60. naptól: 2. részlet hátralék — nem zár, csak figyelmeztet. */
+export function licenseInstallmentArrears(lic: LicenseEntitlement | null = readLicense(), now = new Date()): boolean {
+  if (!lic || lic.status === "local") return false;
+  return installment2ArrearsActive(
+    {
+      installmentPlan: Boolean(lic.installmentPlan),
+      installment2Paid: Boolean(lic.installment2Paid),
+      year1StartedAt: lic.year1StartedAt ?? lic.verifiedAt,
+    },
+    now,
+  );
 }
 
 export function isLocalDevHost(): boolean {
@@ -186,6 +205,10 @@ export async function verifyBillLicense(token: string): Promise<LicenseEntitleme
       referralCode?: string;
       permanentSlots?: number;
       slotPacks?: string[];
+      installmentPlan?: boolean;
+      installment2Paid?: boolean;
+      year1StartedAt?: string;
+      installment2DueAt?: string;
     };
     if (!data.ok || !data.token) return null;
     const status = data.status;
@@ -200,6 +223,10 @@ export async function verifyBillLicense(token: string): Promise<LicenseEntitleme
       referralCode: data.referralCode ?? ensureReferralCode(),
       permanentSlots: Number(data.permanentSlots ?? 0),
       slotPacks: packs,
+      installmentPlan: Boolean(data.installmentPlan),
+      installment2Paid: Boolean(data.installment2Paid),
+      year1StartedAt: data.year1StartedAt,
+      installment2DueAt: data.installment2DueAt ?? null,
     };
     writeLicense(entitlement);
     return entitlement;

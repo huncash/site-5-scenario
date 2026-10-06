@@ -15,6 +15,10 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
+        "/api/billing": {
+          target: "http://127.0.0.1:5110",
+          changeOrigin: true,
+        },
         "/mnb-rates": {
           target: "http://www.mnb.hu",
           changeOrigin: true,

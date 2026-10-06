@@ -12,16 +12,21 @@ export function SupportLessonToc({
   hrefFor,
   className,
   compact = false,
+  query,
+  hideSearch = false,
 }: {
   hrefFor: (path: string) => string;
   className?: string;
   compact?: boolean;
+  query?: string;
+  hideSearch?: boolean;
 }) {
   const { t, locale } = useI18n();
   const [q, setQ] = useState("");
+  const needle = query ?? q;
   const hits = useMemo(
-    () => searchSupportLessons(q, locale === "en" ? "en" : "hu"),
-    [q, locale],
+    () => searchSupportLessons(needle, locale === "en" ? "en" : "hu"),
+    [needle, locale],
   );
   const guides = hits.filter((l) => l.group === "guide");
   const dash = hits.filter((l) => l.group === "dash");
@@ -34,6 +39,7 @@ export function SupportLessonToc({
         <h2 className={compact ? "text-sm font-semibold" : "text-lg font-semibold"}>{t("supportDoor.tocTitle")}</h2>
         <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t("supportDoor.tocLead")}</p>
       </div>
+      {hideSearch ? null : (
       <label className="block">
         <span className="sr-only">{t("supportDoor.tocSearch")}</span>
         <input
@@ -45,6 +51,7 @@ export function SupportLessonToc({
           className="w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:border-cyan-400/50"
         />
       </label>
+      )}
       {hits.length === 0 ? (
         <p className="text-[13px] text-muted-foreground">{t("supportDoor.tocEmpty")}</p>
       ) : (

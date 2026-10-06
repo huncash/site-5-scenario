@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createServer as createViteServer, type ViteDevServer } from "vite";
+import type { ViteDevServer } from "vite";
 
 import { barionConfigured, createBarionPayment } from "./barion.ts";
 import {
@@ -18,6 +18,13 @@ import {
 } from "./catalog.ts";
 import { buyerFromCheckout } from "./checkoutReady.ts";
 import { billEnv, isLiveBilling, liveBillingError, liveBillingMissingKeys } from "./env.ts";
+import {
+  buildInstallments,
+  installment2Paid,
+  installmentAllowed,
+  isPayPlan,
+  orderForInstallment,
+} from "./installment.ts";
 import { quotePackage } from "./quote.ts";
 import { activeReferralGiftSlots, ensureOrderReferralCode } from "./referral.ts";
 import { stripeConfigured } from "./stripe.ts";
@@ -72,10 +79,16 @@ function vatHint(order: Order): string {
   return "ÁFA";
 }
 
-function transferPayload(order: Order) {
+function transferPayload(order: Order, instN?: 1 | 2) {
+  const inst = instN ? order.installments?.find((i) => i.n === instN) : undefined;
+  const amountHuf = inst?.amountHuf ?? order.amountHuf;
+  const netHuf = inst?.netHuf ?? order.netHuf;
+  const code = inst?.transferCode ?? order.transferCode;
+  const proformaNumber = inst?.proformaNumber ?? order.proformaNumber;
+  const pdfUrl = inst?.pdfUrl ?? order.pdfUrl;
   return {
-    amountHuf: order.amountHuf,
-    netHuf: order.netHuf,
+    amountHuf,
+    netHuf,
     vatRate: order.vatRate,
     vatCode: order.vatCode,
     vatTreatment: order.vatTreatment,
@@ -84,12 +97,46 @@ function transferPayload(order: Order) {
     iban: billEnv.transferIban,
     name: billEnv.transferName,
     bank: billEnv.transferBank,
-    code: order.transferCode,
-    label: tierLabel(order.tier),
-    proformaNumber: order.proformaNumber,
-    pdfUrl: order.pdfUrl,
-    buyerAccountUrl: order.pdfUrl?.startsWith("https://") ? order.pdfUrl : undefined,
+    code,
+    label: inst ? `${tierLabel(order.tier)} · ${inst.n}. részlet` : tierLabel(order.tier),
+    proformaNumber,
+    pdfUrl,
+    buyerAccountUrl: pdfUrl?.startsWith("https://") ? pdfUrl : undefined,
+    installment: inst?.n,
+    dueAt: inst?.dueAt,
+    payPlan: order.payPlan,
   };
+}
+
+async function attachInstallmentProformas(order: Order): Promise<{
+  order: Order;
+  issued: Awaited<ReturnType<typeof issueSzamlazzProforma>>;
+}> {
+  const insts = [...(order.installments ?? [])];
+  let lastIssued: Awaited<ReturnType<typeof issueSzamlazzProforma>> = {};
+  for (let i = 0; i < insts.length; i++) {
+    const inst = insts[i];
+    if (!inst || inst.proformaNumber) continue;
+    const issued = await issueSzamlazzProforma(orderForInstallment(order, inst));
+    lastIssued = issued;
+    if (!issued.number) {
+      console.warn("[bill] dijbekero installment skip/fail", order.id, inst.n, issued.error);
+      continue;
+    }
+    insts[i] = {
+      ...inst,
+      proformaNumber: issued.number,
+      pdfUrl: issued.buyerAccountUrl || issued.pdfUrl,
+    };
+  }
+  const first = insts[0];
+  const next =
+    (await updateOrder(order.id, {
+      installments: insts,
+      proformaNumber: first?.proformaNumber ?? order.proformaNumber,
+      pdfUrl: first?.pdfUrl ?? order.pdfUrl,
+    })) ?? order;
+  return { order: next, issued: lastIssued };
 }
 
 function parseVatField(raw: unknown, fallback: number): number | string | { error: string } {
@@ -160,9 +207,10 @@ function buyerFromStructured(raw: unknown): Buyer | string {
   const taxId = String(b.taxNumber ?? b.taxId ?? "").trim();
   const country = String(b.country ?? "").trim() || countryFromTaxId(taxId) || undefined;
   const address = [zip, city, street].filter(Boolean).join(" ") || street;
+  const nostr = String(b.nostr ?? "").trim();
   if (!name || !address || !email) return "Név, cím és e-mail kell.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Az e-mail formája hibás.";
-  return { name, address, zip, city, country, taxId, email };
+  return { name, address, zip, city, country, taxId, email, nostr: nostr || undefined };
 }
 
 function refuseLiveKeys(): Response | null {
@@ -360,14 +408,33 @@ async function handleApi(req: Request): Promise<Response> {
       slotPack,
     });
     buyer.country = quote.vat.country;
-    const amountHuf = quote.due.gross;
-    const lines: InvoiceLine[] = quote.lines.map((line) => ({
-      name: line.name,
-      quantity: line.quantity,
-      unit: line.unit,
-      netUnitPrice: line.netUnitPrice,
-      vat: quote.vat.vatCode,
-    }));
+    const wantInstallment = isPayPlan(body.payPlan) && body.payPlan === "installment2" && installmentAllowed(tier, interval);
+    const installments = wantInstallment
+      ? buildInstallments({
+          dueNet: quote.dueNet,
+          vatRate: quote.vat.rate,
+          dueGross: quote.due.gross,
+          transferCodes: [newTransferCode(), newTransferCode()],
+        })
+      : undefined;
+    const amountHuf = installments?.[0]?.amountHuf ?? quote.due.gross;
+    const lines: InvoiceLine[] = wantInstallment
+      ? [
+          {
+            name: `${quote.lines[0]?.name ?? tier} — 1. részlet (2-ből)`,
+            quantity: 1,
+            unit: "db",
+            netUnitPrice: installments![0].netHuf,
+            vat: quote.vat.vatCode,
+          },
+        ]
+      : quote.lines.map((line) => ({
+          name: line.name,
+          quantity: line.quantity,
+          unit: line.unit,
+          netUnitPrice: line.netUnitPrice,
+          vat: quote.vat.vatCode,
+        }));
     const payMethod = pay as PayMethod;
     let order = await createOrder({
       status: payMethod === "hu_transfer" ? "awaiting_transfer" : "pending",
@@ -377,51 +444,67 @@ async function handleApi(req: Request): Promise<Response> {
       slotPack,
       addon,
       amountHuf,
-      netHuf: quote.dueNet,
+      netHuf: installments?.[0]?.netHuf ?? quote.dueNet,
+      fullAmountHuf: quote.due.gross,
+      fullNetHuf: quote.dueNet,
       vatRate: quote.vat.rate,
       vatCode: quote.vat.vatCode,
       vatTreatment: quote.vat.treatment,
       buyerCountry: quote.vat.country,
       payMethod,
-      transferCode: payMethod === "hu_transfer" ? newTransferCode() : undefined,
+      payPlan: wantInstallment ? "installment2" : "full",
+      transferCode: payMethod === "hu_transfer" ? (installments?.[0]?.transferCode ?? newTransferCode()) : undefined,
       buyer,
       lines,
+      installments,
     });
 
     if (payMethod === "hu_transfer") {
-      const attached = await attachProforma(order);
+      const attached = wantInstallment ? await attachInstallmentProformas(order) : await attachProforma(order);
       order = attached.order;
-      if (!order.proformaNumber && !billEnv.szamlazzSandbox) {
+      const firstReady = wantInstallment
+        ? Boolean(order.installments?.every((i) => i.proformaNumber))
+        : Boolean(order.proformaNumber);
+      if (!firstReady && !billEnv.szamlazzSandbox) {
         return Response.json(
           { ok: false, orderId: order.id, error: attached.issued.error || "A díjbekérő kiállítása sikertelen." },
           { status: 503 },
         );
       }
+      const transfers = wantInstallment
+        ? (order.installments ?? []).map((i) => transferPayload(order, i.n))
+        : undefined;
       return Response.json({
         ok: true,
         orderId: order.id,
         method: "hu_transfer",
+        payPlan: order.payPlan,
         proformaNumber: order.proformaNumber,
         pdfUrl: attached.issued.pdfUrl,
         pdfBase64: attached.issued.pdfBase64,
         buyerAccountUrl: attached.issued.buyerAccountUrl,
         sandbox: attached.issued.sandbox || billEnv.szamlazzSandbox,
-        warning: order.proformaNumber
+        warning: firstReady
           ? undefined
           : attached.issued.error || "A díjbekérő Agent-hívás nem sikerült; a rendelés megvan, az átutalás ettől függetlenül elindítható.",
         transfer: {
-          ...transferPayload(order),
-          pdfUrl: attached.issued.pdfUrl,
+          ...transferPayload(order, wantInstallment ? 1 : undefined),
+          pdfUrl: wantInstallment ? order.installments?.[0]?.pdfUrl : attached.issued.pdfUrl,
           pdfBase64: attached.issued.pdfBase64,
           buyerAccountUrl: attached.issued.buyerAccountUrl,
         },
+        transfers,
       });
     }
 
+    if (wantInstallment) {
+      const attached = await attachInstallmentProformas(order);
+      order = attached.order;
+    }
     const session = await createBarionPayment(order);
     if ("error" in session) return Response.json({ ok: false, orderId: order.id, error: session.error }, { status: 503 });
     if (session.paymentId) await updateOrder(order.id, { providerRef: session.paymentId });
-    return Response.json({ ok: true, orderId: order.id, hostedUrl: session.url });
+    return Response.json({ ok: true, orderId: order.id, hostedUrl: session.url, payPlan: order.payPlan });
   }
 
   if (p === "/api/billing/webhook") {
@@ -439,12 +522,17 @@ async function handleApi(req: Request): Promise<Response> {
     const packs: string[] = [];
     if (order.slotPack && isSlotPackId(order.slotPack)) packs.push(order.slotPack);
     const giftSlots = await activeReferralGiftSlots(order);
+    const second = order.installments?.find((i) => i.n === 2);
     return Response.json({
       ok: true,
       token: order.transferCode || order.id,
       tier: order.tier,
       interval: order.interval,
       status: order.status,
+      installmentPlan: order.payPlan === "installment2",
+      installment2Paid: installment2Paid(order),
+      year1StartedAt: order.createdAt,
+      installment2DueAt: second?.dueAt,
       referralCode: order.referralCode,
       permanentSlots: giftSlots,
       giftSlots,
@@ -538,6 +626,7 @@ let vite: ViteDevServer | null = null;
 
 async function start() {
   if (!isProd) {
+    const { createServer: createViteServer } = await import("vite");
     vite = await createViteServer({
       configFile: path.join(BILL_ROOT, "vite.config.ts"),
       server: { middlewareMode: true },

@@ -151,6 +151,7 @@ import { LoanDialog } from "@/components/LoanDialog";
 import { HelpIcon, LeanTerm } from "@/components/HelpIcon";
 import { ProChartCallout } from "@/components/home/ProChartExplain";
 import { LedgerTxnRow } from "@/components/LedgerTxnRow";
+import { InstallmentArrearsBar } from "@/components/InstallmentArrearsBar";
 import { KpiQuickBar } from "@/components/KpiQuickBar";
 import { WorkspacePanels, WorkspaceTabs, type PdcaMode } from "@/components/WorkspaceTabs";
 import { ConsistencyLampCard, DataLineage } from "@/components/DataLineage";
@@ -8429,6 +8430,7 @@ export function FinanceDashboard({
       <GuestWatermark />
       <AccessModeBanner />
 
+      <InstallmentArrearsBar />
       {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
 
       <ExportQrDialog open={exportOpen} onOpenChange={setExportOpen} />

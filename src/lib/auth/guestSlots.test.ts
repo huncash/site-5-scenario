@@ -57,6 +57,7 @@ describe("guestSlots", () => {
     expect(guestCodeSlotsForTier("starter")).toBe(1);
     expect(guestCodeSlotsForTier("pro")).toBe(5);
     expect(guestCodeSlotsForTier("expert")).toBe(20);
+    expect(guestCodeSlotsForTier("demo")).toBe(0);
     expect(ensureGuestSlotPool("pro")).toHaveLength(5);
   });
 

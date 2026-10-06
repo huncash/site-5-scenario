@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import { resolvePlanId } from "@/config/plans";
 import {
   addPermanentBonus,
   addPurchasedPack,
+  BASE_SCENARIO_SLOTS,
   checkScenarioSlotCapacity,
   emptySlotLedger,
   MAX_REFERRAL_GIFT_SLOTS,
+  normalizeTierId,
   publicSlotPacksForTier,
   slotExpansionAllowed,
   slotPackNetForInterval,
@@ -15,10 +18,28 @@ import { billingFingerprint, validateReferralAward } from "@/lib/referral";
 import { yearlyPriceHuf } from "@/content/pricing/tiers";
 
 describe("scenarioSlots", () => {
-  it("excludes expansion packs on campus", () => {
+  it("excludes expansion packs on campus and demo", () => {
     expect(slotExpansionAllowed("campus")).toBe(false);
+    expect(slotExpansionAllowed("demo")).toBe(false);
     expect(publicSlotPacksForTier("campus")).toHaveLength(0);
+    expect(publicSlotPacksForTier("demo")).toHaveLength(0);
     expect(publicSlotPacksForTier("pro")).toHaveLength(3);
+  });
+
+  it("never promotes demo or unknown strings to unlimited local", () => {
+    expect(normalizeTierId("demo")).toBe("demo");
+    expect(normalizeTierId(" trial_expired ")).toBe("demo");
+    expect(normalizeTierId("enterprise")).toBe("demo");
+    expect(normalizeTierId("bogus")).toBe("demo");
+    expect(normalizeTierId(null)).toBe("demo");
+    expect(normalizeTierId("basic")).toBe("starter");
+    expect(normalizeTierId("local")).toBe("local");
+    expect(resolvePlanId("demo")).toBe("demo");
+    expect(resolvePlanId("hacked")).toBe("demo");
+    expect(resolvePlanId("local")).toBe("local");
+    expect(BASE_SCENARIO_SLOTS.demo).toBe(3);
+    expect(totalScenarioSlots(emptySlotLedger("demo"))).toBe(3);
+    expect(addPurchasedPack(emptySlotLedger("demo"), "slot_plus_5")).toEqual(emptySlotLedger("demo"));
   });
 
   it("sums base + packs + gift bonus (capped)", () => {

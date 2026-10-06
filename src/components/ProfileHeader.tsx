@@ -29,7 +29,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
-import { KnowledgeBaseModal } from "@/components/KnowledgeBaseModal";
 import { PdcaSemiRotaryKnob } from "@/components/PdcaSemiRotaryKnob";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,7 +83,6 @@ export function ProfileHeader({
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
   const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
-  const [kbOpen, setKbOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [omni, setOmni] = useState("");
@@ -336,13 +334,11 @@ export function ProfileHeader({
                       {t("chrome.activity")}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      setKbOpen(true);
-                    }}
-                  >
-                    <GraduationCap className="mr-2 h-4 w-4" />
-                    {t("chrome.knowledge")}
+                  <DropdownMenuItem asChild>
+                    <Link to="/support">
+                      <GraduationCap className="mr-2 h-4 w-4" />
+                      {t("chrome.knowledge")}
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
@@ -545,8 +541,6 @@ export function ProfileHeader({
             {bottomRow}
           </div>
         ) : null}
-
-        <KnowledgeBaseModal open={kbOpen} onOpenChange={setKbOpen} />
 
         <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
           <DialogContent className="max-w-xl border-border bg-card text-foreground shadow-2xl">

@@ -16,6 +16,7 @@ import { isSupportHost, supportPageUrl, supportPathSlug, supportPricingHref, sup
 import { resolveSupportSlug, type SupportLessonIndex } from "@/lib/supportRoutes";
 import { cn } from "@/lib/utils";
 import { withViewPrefs } from "@/lib/viewPrefs";
+import { supportFaqSections, supportTips } from "../../support/src/copy";
 
 const SupportSpaApp = lazy(() => import("../../support/src/App").then((m) => ({ default: m.App })));
 
@@ -56,7 +57,24 @@ type SupportTier = {
 
 /** support.szcenario.hu — landing, főoldali nézetgombbal és pricing#pro kártyalogikával. */
 export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const [kbQuery, setKbQuery] = useState("");
+  const needle = kbQuery.trim().toLowerCase();
+  const faqSections = useMemo(() => {
+    const sections = supportFaqSections(locale);
+    if (!needle) return sections;
+    return sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((x) => `${section.category} ${x.q} ${x.a}`.toLowerCase().includes(needle)),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [locale, needle]);
+  const tipHits = useMemo(() => {
+    const tips = supportTips(locale);
+    if (!needle) return tips;
+    return tips.filter((x) => `${x.q} ${x.a}`.toLowerCase().includes(needle));
+  }, [locale, needle]);
   const gyik = branchHref("gyik", localNav);
   const ticket = branchHref("ticket", localNav);
   const topics: Topic[] = [
@@ -102,14 +120,6 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
       planHrefLabel: "supportDoor.toPlanEnterprise",
     },
   ];
-  const faq = [
-    { q: t("brand.faqCaseQ"), a: t("brand.faqCaseA") },
-    { q: t("brand.faqSlotQ"), a: t("brand.faqSlotA") },
-    { q: t("supportDoor.faqLicenseQ"), a: t("supportDoor.faqLicenseA") },
-    { q: t("supportDoor.faqBillingQ"), a: t("supportDoor.faqBillingA") },
-    { q: t("supportDoor.faqSettingsQ"), a: t("supportDoor.faqSettingsA") },
-    { q: t("supportDoor.faqDesktopQ"), a: t("supportDoor.faqDesktopA") },
-  ];
 
   useEffect(() => {
     const id = typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
@@ -151,6 +161,65 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
             {t("supportDoor.lead")}
           </p>
         </div>
+
+        <label className="mx-auto block w-full max-w-3xl">
+          <span className="sr-only">{t("supportDoor.kbSearch")}</span>
+          <input
+            type="search"
+            value={kbQuery}
+            onChange={(e) => setKbQuery(e.target.value)}
+            placeholder={t("supportDoor.kbSearch")}
+            aria-label={t("supportDoor.kbSearch")}
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus:border-cyan-400/50"
+          />
+        </label>
+
+        <section id="faq" className="scroll-mt-24 rounded-xl border border-border/60 bg-card/40 px-4 py-4">
+          <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.faqTitle")}</h2>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{t("supportDoor.faqLead")}</p>
+          {faqSections.length ? (
+            faqSections.map((section) => (
+              <div key={section.category} className="mt-3">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {section.category}
+                </h3>
+                <Accordion type="single" collapsible className="mt-1">
+                  {section.items.map((item) => (
+                    <AccordionItem key={item.q} value={item.q} className="border-border/50">
+                      <AccordionTrigger className="text-foreground hover:no-underline">{item.q}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            ))
+          ) : (
+            <p className="mt-3 text-[13px] text-muted-foreground">{t("supportDoor.tocEmpty")}</p>
+          )}
+        </section>
+
+        <section id="tippek" className="scroll-mt-24 rounded-xl border border-border/60 bg-card/40 px-4 py-4">
+          <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.tipsTitle")}</h2>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{t("supportDoor.tipsLead")}</p>
+          {tipHits.length ? (
+            <Accordion type="single" collapsible className="mt-3">
+              {tipHits.map((item) => (
+                <AccordionItem key={item.q} value={item.q} className="border-border/50">
+                  <AccordionTrigger className="text-foreground hover:no-underline">{item.q}</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <p className="mt-3 text-[13px] text-muted-foreground">{t("supportDoor.tocEmpty")}</p>
+          )}
+        </section>
+
+        <SupportLessonToc
+          hrefFor={(path) => branchHref(path, localNav)}
+          query={kbQuery}
+          hideSearch
+        />
 
         <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label={t("supportDoor.navAria")}>
           {topics.map((item) => {
@@ -228,28 +297,9 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
           </div>
         </section>
 
-        <SupportLessonToc hrefFor={(path) => branchHref(path, localNav)} />
-
-        <section id="faq" className="scroll-mt-24 rounded-xl border border-border/60 bg-card/40 px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.faqTitle")}</h2>
-            <a href={gyik} className="text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-              {t("supportDoor.faqAll")}
-            </a>
-          </div>
-          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{t("supportDoor.faqLead")}</p>
-          <Accordion type="single" collapsible defaultValue={faq[0]?.q} className="mt-3">
-            {faq.map((item) => (
-              <AccordionItem key={item.q} value={item.q} className="border-border/50">
-                <AccordionTrigger className="text-foreground hover:no-underline">{item.q}</AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          <Button asChild className="btn-cta mt-4 h-10 w-full text-[13px] sm:w-auto">
-            <a href={ticket}>{t("supportDoor.ticketCta")}</a>
-          </Button>
-        </section>
+        <Button asChild className="btn-cta h-10 w-full text-[13px] sm:w-auto">
+          <a href={ticket}>{t("supportDoor.ticketCta")}</a>
+        </Button>
       </main>
 
       <div data-site-footer-host />

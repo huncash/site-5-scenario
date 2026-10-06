@@ -2555,3 +2555,17 @@ html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
     border: 1px solid #111 !important;
   }
 }
+
+.installment-arrears-tape {
+  border: 2px solid #111;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      #facc15 0 12px,
+      #111 12px 24px
+    );
+}
+.installment-arrears-tape-label {
+  background: #fde047;
+  box-shadow: 0 0 0 2px #111;
+}

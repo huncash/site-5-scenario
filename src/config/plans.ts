@@ -377,11 +377,17 @@ export function yearlyPriceHuf(huf: number): number {
   return huf;
 }
 
+/** `local` csak explicit. Ismeretlen / manipulált string → demo, nem unlimited. */
 export function resolvePlanId(tier: string | null | undefined): PlanId {
-  if (tier === "starter" || tier === "pro" || tier === "expert" || tier === "campus") return tier;
-  if (tier === "demo") return "demo";
-  if (!tier || tier === "local") return "local";
-  return "local";
+  const cleaned = String(tier ?? "")
+    .trim()
+    .toLowerCase();
+  if (cleaned === "basic") return "starter";
+  if (cleaned === "local") return "local";
+  if (cleaned === "starter" || cleaned === "pro" || cleaned === "expert" || cleaned === "campus" || cleaned === "demo") {
+    return cleaned;
+  }
+  return "demo";
 }
 
 export function planQuotas(id: PlanId): PlanQuotas {

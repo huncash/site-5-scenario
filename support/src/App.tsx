@@ -403,11 +403,12 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
       </div>
 
       <KahnBonbon locale={locale} />
+      <FaqSearch locale={locale} />
+      <TipsPage locale={locale} />
       <SupportLessonToc
         compact
         hrefFor={(path) => supportHref(path, { embed, lang: locale })}
       />
-      <FaqSearch locale={locale} />
 
       {videoLessons.length ? (
         <div className="section-block">

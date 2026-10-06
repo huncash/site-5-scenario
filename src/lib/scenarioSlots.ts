@@ -6,7 +6,9 @@ import type { BillingInterval } from "@/lib/funnelOrder";
 import { isSchoolHost } from "@/lib/school";
 
 export type PublicTierId = "starter" | "pro" | "expert";
-export type SlotTierId = PublicTierId | "campus" | "local";
+export type SlotTierId = PublicTierId | "campus" | "local" | "demo";
+
+const SLOT_TIER_IDS = ["starter", "pro", "expert", "campus", "local", "demo"] as const;
 
 export type SlotPackId = "slot_plus_1" | "slot_plus_3" | "slot_plus_5";
 
@@ -30,6 +32,7 @@ export const BASE_SCENARIO_SLOTS: Record<SlotTierId, number> = {
   expert: totalSlots(PLANS_CONFIG.expert),
   campus: totalSlots(PLANS_CONFIG.campus),
   local: totalSlots(PLANS_CONFIG.local),
+  demo: totalSlots(PLANS_CONFIG.demo),
 };
 
 /** Egységár × db (JIT) — nincs mélykedvezmény, ami aláásná a Pro/Enterprise margót. */
@@ -76,7 +79,7 @@ export function slotPackNetForInterval(oneTimeNetHuf: number, _interval: Billing
 
 /** Campus / zárt oktatási keret: bővítő mátrix ki van zárva. */
 export function slotExpansionAllowed(tier: SlotTierId): boolean {
-  if (tier === "campus") return false;
+  if (tier === "campus" || tier === "demo") return false;
   if (typeof window !== "undefined" && isSchoolHost()) return false;
   return true;
 }
@@ -110,7 +113,7 @@ export function purchasedAddonSlots(ledger: SlotLedger): number {
 }
 
 export function totalScenarioSlots(ledger: SlotLedger): number {
-  const base = BASE_SCENARIO_SLOTS[ledger.tier] ?? BASE_SCENARIO_SLOTS.local;
+  const base = BASE_SCENARIO_SLOTS[ledger.tier] ?? BASE_SCENARIO_SLOTS.demo;
   const addons = slotExpansionAllowed(ledger.tier) ? purchasedAddonSlots(ledger) : 0;
   const gifts = Math.min(MAX_REFERRAL_GIFT_SLOTS, Math.max(0, ledger.permanentBonus));
   return base + addons + gifts;
@@ -146,8 +149,13 @@ export function setGiftBonusSlots(ledger: SlotLedger, n: number): SlotLedger {
   return { ...ledger, permanentBonus: Math.min(MAX_REFERRAL_GIFT_SLOTS, Math.max(0, Math.floor(n))) };
 }
 
+/** `local` csak explicit. `demo` / ismeretlen soha nem hullik korlátlanra. */
 export function normalizeTierId(tier: string | null | undefined): SlotTierId {
-  if (tier === "starter" || tier === "pro" || tier === "expert" || tier === "campus") return tier;
-  if (!tier || tier === "local") return "local";
-  return "local";
+  const cleaned = String(tier ?? "")
+    .trim()
+    .toLowerCase();
+  if (cleaned === "basic") return "starter";
+  if (cleaned === "local") return "local";
+  if ((SLOT_TIER_IDS as readonly string[]).includes(cleaned)) return cleaned as SlotTierId;
+  return "demo";
 }

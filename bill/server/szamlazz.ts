@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { billEnv } from "./env.ts";
+import { splitAddress } from "./address.ts";
+import { billDataRoot, billEnv } from "./env.ts";
 import { invoicePackageName, tierLabel } from "./catalog.ts";
 import type { InvoiceLine, Order } from "./store.ts";
 import { countryLabel } from "./vat.ts";
@@ -62,12 +62,7 @@ function addDays(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function splitAddress(address: string, zip?: string, city?: string): { irsz: string; telepules: string; cim: string } {
-  if (zip && city) return { irsz: zip.trim(), telepules: city.trim(), cim: address.trim() || city.trim() };
-  const m = address.match(/^(\d{4})\s+([^,]+),?\s*(.*)$/);
-  if (m) return { irsz: m[1], telepules: m[2].trim(), cim: m[3].trim() || m[2].trim() };
-  return { irsz: "0000", telepules: "—", cim: address };
-}
+export { splitAddress } from "./address.ts";
 
 export function lineAmounts(line: InvoiceLine): BuiltLine {
   const quantity = Number.isFinite(line.quantity) && line.quantity > 0 ? line.quantity : 1;
@@ -129,7 +124,7 @@ export function buildSzamlazzXml(order: Order, kind: SzamlazzKind = "szamla"): s
   const a = splitAddress(order.buyer.address, order.buyer.zip, order.buyer.city);
   const lines = linesFromOrder(order);
   const due = kind === "dijbekero" ? addDays(8) : today();
-  const sendEmail = Boolean(order.buyer.email) && !billEnv.szamlazzSandbox;
+  const sendEmail = Boolean(order.buyer.email?.trim());
   const sellerEmail = billEnv.szamlaFeleszoEmail;
   const dijbekero = kind === "dijbekero";
   const refProforma = !dijbekero && order.proformaNumber ? order.proformaNumber : "";
@@ -148,7 +143,7 @@ export function buildSzamlazzXml(order: Order, kind: SzamlazzKind = "szamla"): s
     <fizmod>${order.payMethod === "hu_transfer" ? "Átutalás" : "Bankkártya"}</fizmod>
     <penznem>HUF</penznem>
     <szamlaNyelve>hu</szamlaNyelve>
-    <megjegyzes>${xmlEscape(`Szcenárió ${tierLabel(order.tier)} · ${order.id}${order.transferCode ? ` · ${order.transferCode}` : ""}${billEnv.szamlazzSandbox ? " · SANDBOX" : ""}`)}</megjegyzes>
+    <megjegyzes>${xmlEscape(`Szcenárió ${tierLabel(order.tier)} · ${order.id}${order.transferCode ? ` · ${order.transferCode}` : ""}${order.buyer.nostr ? ` · Nostr ${order.buyer.nostr}` : ""}${billEnv.szamlazzSandbox ? " · SANDBOX" : ""}`)}</megjegyzes>
     <rendelesSzam>${xmlEscape(order.id)}</rendelesSzam>
     <dijbekeroSzamlaszam>${xmlEscape(refProforma)}</dijbekeroSzamlaszam>
     <elolegszamla>false</elolegszamla>
@@ -235,7 +230,7 @@ export function parseAgentReply(text: string, headers: Headers = new Headers()):
   return { error: "Számlázz.hu nem adott vissza bizonylatszámot." };
 }
 
-const PROFORMA_DIR = fileURLToPath(new URL("../data/proformas", import.meta.url));
+const PROFORMA_DIR = path.join(billDataRoot(), "proformas");
 
 export function proformaPdfPath(orderId: string): string {
   return path.join(PROFORMA_DIR, `${orderId}.pdf`);

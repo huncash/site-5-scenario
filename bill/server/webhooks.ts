@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { billEnv } from "./env.ts";
 import { barionPaymentSucceeded } from "./barion.ts";
 import { applyReferralOnPaid, ensureOrderReferralCode } from "./referral.ts";
+import { installmentNByTransferCode, orderForInstallment } from "./installment.ts";
 import { issueSzamlazzInvoice } from "./szamlazz.ts";
 import { getOrder, getOrderByProviderRef, getOrderByTransferCode, updateOrder, type Order } from "./store.ts";
 
@@ -27,11 +28,47 @@ function stripeOk(payload: string, header: string | null): boolean {
   }
 }
 
+async function markInstallmentPaid(order: Order, n: 1 | 2, providerRef?: string): Promise<Order> {
+  const insts = [...(order.installments ?? [])];
+  const idx = insts.findIndex((i) => i.n === n);
+  if (idx < 0) return order;
+  const inst = insts[idx];
+  if (inst.status === "invoiced") return order;
+  const slice = orderForInstallment(order, inst);
+  const inv = inst.invoiceNumber ? { number: inst.invoiceNumber } : await issueSzamlazzInvoice(slice);
+  if (!inv.number) console.warn("[bill] szamlazz installment skip/fail", order.id, n, "error" in inv ? inv.error : "");
+  insts[idx] = {
+    ...inst,
+    status: inv.number ? "invoiced" : "paid",
+    paidAt: inst.paidAt ?? new Date().toISOString(),
+    invoiceNumber: inv.number ?? inst.invoiceNumber,
+  };
+  const allDone = insts.every((i) => i.status === "paid" || i.status === "invoiced");
+  const firstDone = insts.some((i) => i.n === 1 && (i.status === "paid" || i.status === "invoiced"));
+  return (
+    (await updateOrder(order.id, {
+      installments: insts,
+      providerRef: providerRef ?? order.providerRef,
+      status: allDone ? (inv.number ? "invoiced" : "paid") : firstDone ? "paid" : order.status,
+      invoiceNumber: insts.find((i) => i.n === 1)?.invoiceNumber ?? order.invoiceNumber,
+    })) ?? order
+  );
+}
+
 async function markPaidAndInvoice(
   order: Order,
   providerRef?: string,
   cardFingerprint?: string | null,
+  installmentN?: 1 | 2 | null,
 ): Promise<Order> {
+  if (order.payPlan === "installment2" && order.installments?.length) {
+    const n = installmentN ?? 1;
+    let next = await markInstallmentPaid(order, n, providerRef);
+    if (cardFingerprint) next = (await updateOrder(next.id, { cardFingerprint })) ?? next;
+    await ensureOrderReferralCode(next);
+    await applyReferralOnPaid(next, { cardFingerprint });
+    return (await getOrder(next.id)) ?? next;
+  }
   if (order.status === "invoiced") {
     await applyReferralOnPaid(order, { cardFingerprint });
     return order;
@@ -106,8 +143,9 @@ export async function handleBillingWebhook(req: Request): Promise<Response> {
     }
     const order = code ? await getOrderByTransferCode(code) : null;
     if (!order) return Response.json({ ok: false, error: "order not found" }, { status: 404 });
-    await markPaidAndInvoice(order);
-    return Response.json({ ok: true, orderId: order.id });
+    const n = installmentNByTransferCode(order, code);
+    await markPaidAndInvoice(order, undefined, undefined, n);
+    return Response.json({ ok: true, orderId: order.id, installment: n });
   }
 
   return Response.json({ ok: false, error: "unknown provider" }, { status: 400 });

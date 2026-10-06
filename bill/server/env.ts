@@ -1,5 +1,15 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 function read(name: string, fallback = ""): string {
   return (process.env[name] ?? fallback).trim();
+}
+
+/** Rendelés / díjbekérő fájlok. BILL_DATA_DIR a VPS shared mappa. */
+export function billDataRoot(): string {
+  const override = read("BILL_DATA_DIR");
+  if (override) return path.resolve(override);
+  return fileURLToPath(new URL("../data", import.meta.url));
 }
 
 function truthyFalse(raw: string): boolean {

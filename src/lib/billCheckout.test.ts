@@ -57,10 +57,13 @@ describe("szamlazz dijbekero xml", () => {
       transferCode: "SZC-TEST1",
       buyer: {
         name: "Teszt Kft.",
-        address: "1051 Budapest, Példa utca 1.",
+        address: "Példa utca 1.",
+        zip: "1051",
+        city: "Budapest",
         taxId: "12345678-2-41",
         email: "teszt@example.com",
         partnerKind: "b2b",
+        nostr: "alice@example.com",
       },
       lines: packageLines("pro", "yearly").map((line) => ({
         ...line,
@@ -77,6 +80,11 @@ describe("szamlazz dijbekero xml", () => {
     expect(xml).toContain("<szamlaLetoltes>true</szamlaLetoltes>");
     expect(xml).toContain("Pro Szcenárió");
     expect(xml).toContain("<nettoEgysegar>399000</nettoEgysegar>");
+    expect(xml).toContain("<irsz>1051</irsz>");
+    expect(xml).toContain("<telepules>Budapest</telepules>");
+    expect(xml).toContain("<email>teszt@example.com</email>");
+    expect(xml).toContain("<sendEmail>true</sendEmail>");
+    expect(xml).toContain("Nostr alice@example.com");
     expect(xml).not.toContain("Basic");
   });
 
@@ -120,8 +128,12 @@ describe("poka-yoke checkout fields", () => {
     expect(checkoutReady(completeCheckout)).toBe(true);
     expect(checkoutGap({ ...completeCheckout, name: "" })).toBe("name");
     expect(checkoutGap({ ...completeCheckout, email: "rossz" })).toBe("email");
-    expect(checkoutGap({ ...completeCheckout, address: "  " })).toBe("address");
+    expect(checkoutGap({ ...completeCheckout, address: "  ", zip: "", city: "" })).toBe("zip");
+    expect(checkoutGap({ ...completeCheckout, zip: "12", city: "Budapest", address: "Példa utca 1." })).toBe("zip");
+    expect(checkoutGap({ ...completeCheckout, zip: "1051", city: "", address: "Példa utca 1." })).toBe("city");
+    expect(checkoutGap({ ...completeCheckout, zip: "1051", city: "Budapest", address: "" })).toBe("address");
     expect(checkoutGap({ ...completeCheckout, taxId: "12", partnerKind: "b2b" })).toBe("taxId");
+    expect(checkoutGap({ ...completeCheckout, nostr: "nem-nostr" })).toBe("nostr");
     expect(
       checkoutGap({
         ...completeCheckout,
@@ -133,12 +145,58 @@ describe("poka-yoke checkout fields", () => {
     expect(checkoutGap({ ...completeCheckout, aszfAccepted: false })).toBe("aszf");
     expect(checkoutGap({ ...completeCheckout, payMethod: "stripe" })).toBe("pay");
     expect(checkoutReady({ ...completeCheckout, payMethod: "barion" })).toBe(true);
+    expect(checkoutReady({ ...completeCheckout, nostr: "alice@example.com" })).toBe(true);
+    expect(checkoutReady({ ...completeCheckout, nostr: "npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4skg3x" })).toBe(
+      true,
+    );
+  });
+
+  it("B2C: last+first name, optional tax, required zip; B2B: company + tax", () => {
+    const b2c = {
+      lastName: "Kovács",
+      firstName: "Anna",
+      name: "",
+      address: "Példa utca 1.",
+      zip: "1051",
+      city: "Budapest",
+      email: "anna@example.com",
+      taxId: "",
+      country: "HU",
+      partnerKind: "b2c" as const,
+      immediateConsent: true,
+      aszfAccepted: true,
+      payMethod: "hu_transfer",
+    };
+    expect(checkoutReady(b2c)).toBe(true);
+    expect(checkoutGap({ ...b2c, lastName: "", firstName: "" })).toBe("name");
+    expect(checkoutGap({ ...b2c, firstName: "" })).toBe("name");
+    expect(checkoutGap({ ...b2c, zip: "" })).toBe("zip");
+    expect(checkoutGap({ ...completeCheckout, name: "", companyName: "", taxId: "" })).toBe("name");
+    expect(checkoutGap({ ...completeCheckout, taxId: "" })).toBe("taxId");
+    const buyer = buyerFromCheckout({ ...b2c, taxId: "12345678-2-41" });
+    expect(buyer).toMatchObject({
+      name: "Kovács Anna",
+      lastName: "Kovács",
+      firstName: "Anna",
+      zip: "1051",
+      city: "Budapest",
+      partnerKind: "b2c",
+      taxId: "12345678-2-41",
+    });
+    const firm = buyerFromCheckout({ ...completeCheckout, companyName: "Teszt Kft.", name: "" });
+    expect(firm).toMatchObject({ name: "Teszt Kft.", partnerKind: "b2b", zip: "1051", city: "Budapest" });
   });
 
   it("server buyer parser matches the same gates", () => {
     const ok = buyerFromCheckout({ ...completeCheckout, partnerKind: "b2b" });
-    expect(ok).toMatchObject({ name: "Teszt Kft.", email: "teszt@example.com" });
+    expect(ok).toMatchObject({ name: "Teszt Kft.", email: "teszt@example.com", zip: "1051", city: "Budapest" });
     expect(buyerFromCheckout({ ...completeCheckout, name: "" })).toBe("Név, cím és e-mail kell.");
+    expect(buyerFromCheckout({ ...completeCheckout, zip: "", city: "", address: "utca 1" })).toBe(
+      "Az irányítószám megadása kötelező (NAV-kompatibilis számla).",
+    );
+    expect(buyerFromCheckout({ ...completeCheckout, nostr: "rossz" })).toBe(
+      "A Nostr cím formája hibás (NIP-05 vagy npub).",
+    );
     expect(buyerFromCheckout({ ...completeCheckout, aszfAccepted: false })).toBe(
       "Az ÁSZF és az adatvédelmi tájékoztató elfogadása kötelező.",
     );

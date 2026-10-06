@@ -45,9 +45,10 @@ export const GUEST_CODE_SLOTS_PER_TIER: Record<TierId, number> = {
 };
 
 export function guestCodeSlotsForTier(tier: SlotTierId): number {
+  if (tier === "demo") return PLANS_CONFIG.demo.quotas.guests;
   if (tier === "campus") return PLANS_CONFIG.campus.quotas.guests;
   if (tier === "local") return PLANS_CONFIG.local.quotas.guests;
-  if (!isPublicPlanId(tier)) return PLANS_CONFIG.starter.quotas.guests;
+  if (!isPublicPlanId(tier)) return PLANS_CONFIG.demo.quotas.guests;
   return PLANS_CONFIG[tier].quotas.guests;
 }
 

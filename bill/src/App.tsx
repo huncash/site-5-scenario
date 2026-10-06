@@ -4,7 +4,10 @@ import { getPlan, isPublicPlanId } from "@/config/plans";
 import { planCardBullets } from "@/config/planCopy";
 import { formatCurrency } from "@/i18n/currency";
 import { LocaleProvider, useI18n } from "@/i18n";
-import { checkoutGap } from "../server/checkoutReady";
+import { checkoutGap, composeBuyerName, ingestAddress } from "../server/checkoutReady";
+import { installmentAllowed, splitEqualParts } from "@/lib/installmentPlan";
+
+type PayPlan = "full" | "installment2";
 import {
   addonNetForTier,
   chargeHuf,
@@ -34,7 +37,8 @@ import type { BillingInterval } from "@/lib/funnelOrder";
 import { mainPublicOrigin } from "@/lib/siteSurface";
 import { withViewPrefs } from "@/lib/viewPrefs";
 import { billCopy, statusLabel, tierLabel } from "./copy";
-import { PayLogos } from "./PayLogos";
+import { isBillingRoutingError, readBillingJson } from "./parseBillingJson";
+import { PayLogos } from "./PayLogos.tsx";
 
 type PayMethod = "barion" | "hu_transfer";
 
@@ -55,6 +59,9 @@ type TransferInfo = {
   pdfUrl?: string;
   pdfBase64?: string;
   buyerAccountUrl?: string;
+  installment?: 1 | 2;
+  dueAt?: string;
+  payPlan?: string;
 };
 
 type PortalOrder = {
@@ -179,15 +186,15 @@ function LoginBar({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token: tok, email: mail }),
       });
-      const data = (await res.json()) as { ok?: boolean; order?: PortalOrder };
+      const data = await readBillingJson<{ ok?: boolean; order?: PortalOrder }>(res);
       if (!data.ok || !data.order) {
         setError(t.loginErr);
         return;
       }
       onOpened(data.order);
       setToken("");
-    } catch {
-      setError(t.errNet);
+    } catch (err) {
+      setError(isBillingRoutingError(err) ? t.errApiRouting : t.errNet);
     } finally {
       setBusy(false);
     }
@@ -237,11 +244,11 @@ export function App() {
   );
 }
 
-export function BillingCheckout() {
+export function BillingCheckout({ search }: { search?: string } = {}) {
   const { locale } = useI18n();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);
-  const [q, setQ] = useState(() => readBillCheckoutSearch(billSearchFromLocation()));
+  const [q, setQ] = useState(() => readBillCheckoutSearch(search ?? billSearchFromLocation()));
   const hasCheckoutIntent = q.hasCheckoutIntent;
   const tier = q.tier ?? "pro";
   const ref = q.ref;
@@ -252,15 +259,22 @@ export function BillingCheckout() {
   const pricingHref = withViewPrefs(`${mainPublicOrigin()}/#csomagok`);
 
   const [interval, setInterval] = useState<BillingInterval>(() => q.interval);
-  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [zip, setZip] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [taxId, setTaxId] = useState("");
+  const [nostr, setNostr] = useState("");
   const [country, setCountry] = useState(q.country || SELLER_COUNTRY);
   const [email, setEmail] = useState("");
   const [buyerKind, setBuyerKind] = useState<"b2c" | "b2b">("b2c");
   const [immediateConsent, setImmediateConsent] = useState(false);
   const [aszfAccepted, setAszfAccepted] = useState(false);
   const [payMethod, setPayMethod] = useState<PayMethod>("hu_transfer");
+  const [payPlan, setPayPlan] = useState<PayPlan>("full");
+  const [transfers, setTransfers] = useState<TransferInfo[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [lookupBusy, setLookupBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -281,11 +295,11 @@ export function BillingCheckout() {
   );
 
   useEffect(() => {
-    const next = readBillCheckoutSearch(billSearchFromLocation());
+    const next = readBillCheckoutSearch(search ?? billSearchFromLocation());
     setQ(next);
     setInterval(next.interval);
     if (next.country) setCountry(next.country);
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     document.title = locale === "en" ? "Szcenárió — billing" : "Szcenárió — számlázás";
@@ -293,7 +307,16 @@ export function BillingCheckout() {
 
   useEffect(() => {
     void fetch("/api/billing/config")
-      .then((r) => r.json())
+      .then((r) =>
+        readBillingJson<{
+          stripe?: boolean;
+          barion?: boolean;
+          sandbox?: boolean;
+          live?: boolean;
+          missingKeys?: unknown;
+          error?: string;
+        }>(r),
+      )
       .then((d) =>
         setCfg({
           stripe: !!d.stripe,
@@ -305,8 +328,12 @@ export function BillingCheckout() {
           error: typeof d.error === "string" ? d.error : "",
         }),
       )
-      .catch(() => undefined);
-  }, []);
+      .catch((err) => {
+        if (isBillingRoutingError(err)) {
+          setCfg((c) => ({ ...c, error: t.errApiRouting }));
+        }
+      });
+  }, [t.errApiRouting]);
 
   useEffect(() => {
     const raw = taxId.replace(/[\s./-]/g, "").toUpperCase();
@@ -326,6 +353,9 @@ export function BillingCheckout() {
     dueNet += slotPackNetForInterval(slotPack, interval);
   }
   const due = splitVat(dueNet, vat.rate);
+  const canInstallment = installmentAllowed(planTier, interval);
+  const useInstallment = canInstallment && payPlan === "installment2";
+  const dueNow = useInstallment ? splitVat(splitEqualParts(due.net)[0] ?? due.net, vat.rate) : due;
   const vatPct = Math.round(vat.rate);
   const planTitle = `${plan.label} · ${planTier === "campus" ? (interval === "yearly" ? t.yearlySub : t.monthlySub) : t.yearlySub}`;
   const bullets = planTier === "campus" ? [] : planCardBullets(plan, locale);
@@ -335,15 +365,25 @@ export function BillingCheckout() {
       : locale === "en"
         ? "Year-1 perpetual license. Optional updates: Y2 75% / Y3 60% of Year-1, then free."
         : "1. évi örökös licenc. Opcionális frissítés: 2. év 75% / 3. év 60% az 1. évi árból, majd díjmentes.";
-  const effectiveKind: "b2c" | "b2b" =
-    taxId.replace(/[\s./-]/g, "").length >= 8 ? "b2b" : buyerKind;
+  const composedName = composeBuyerName({
+    partnerKind: buyerKind,
+    lastName,
+    firstName,
+    companyName,
+  });
   const gapHint = checkoutGap({
-    name,
+    name: composedName,
+    lastName,
+    firstName,
+    companyName,
     address,
+    zip,
+    city,
     email,
     taxId,
     country,
-    partnerKind: effectiveKind,
+    nostr,
+    partnerKind: buyerKind,
     immediateConsent,
     aszfAccepted,
     payMethod,
@@ -395,8 +435,13 @@ export function BillingCheckout() {
         setLookupNote(t.lookupEmpty);
         return;
       }
-      if (data.name) setName(data.name);
-      if (data.address) setAddress(data.address);
+      if (data.name) setCompanyName(data.name);
+      if (data.address) {
+        const loc = ingestAddress({ address: data.address });
+        if (loc.zip) setZip(loc.zip);
+        if (loc.city) setCity(loc.city);
+        setAddress(loc.address);
+      }
       setLookupOk(true);
       setLookupNote(data.source === "vies" ? t.lookupVies : t.lookupNav);
     } catch {
@@ -410,12 +455,18 @@ export function BillingCheckout() {
     e.preventDefault();
     setError(null);
     const gap = checkoutGap({
-      name,
+      name: composedName,
+      lastName,
+      firstName,
+      companyName,
       address,
+      zip,
+      city,
       email,
       taxId,
       country,
-      partnerKind: effectiveKind,
+      nostr,
+      partnerKind: buyerKind,
       immediateConsent,
       aszfAccepted,
       payMethod,
@@ -424,9 +475,13 @@ export function BillingCheckout() {
       setError(
         gap === "taxId"
           ? t.needTaxIdB2b
-          : gap === "consent" || gap === "aszf"
-            ? t.needBuyerConsent
-            : t.needCheckout,
+          : gap === "zip"
+            ? t.needZip
+            : gap === "nostr"
+              ? t.needNostr
+              : gap === "consent" || gap === "aszf"
+                ? t.needBuyerConsent
+                : t.needCheckout,
       );
       return;
     }
@@ -444,23 +499,30 @@ export function BillingCheckout() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          name,
+          lastName: buyerKind === "b2c" ? lastName : undefined,
+          firstName: buyerKind === "b2c" ? firstName : undefined,
+          companyName: buyerKind === "b2b" ? companyName : undefined,
+          name: composedName,
+          zip,
+          city,
           address,
-          taxId,
+          taxId: buyerKind === "b2b" ? taxId : taxId.trim() || undefined,
           country,
           email,
+          nostr: nostr.trim() || undefined,
           tier,
           interval,
           ref: ref || undefined,
           slotPack: slotPack || undefined,
           addon: addon || undefined,
           payMethod,
-          partnerKind: effectiveKind,
-          immediateConsent: effectiveKind === "b2c" ? immediateConsent : undefined,
+          payPlan: useInstallment ? "installment2" : "full",
+          partnerKind: buyerKind,
+          immediateConsent: buyerKind === "b2c" ? immediateConsent : undefined,
           aszfAccepted,
         }),
       });
-      const data = (await res.json()) as {
+      const data = await readBillingJson<{
         ok?: boolean;
         error?: string;
         hostedUrl?: string;
@@ -470,7 +532,8 @@ export function BillingCheckout() {
         pdfBase64?: string;
         buyerAccountUrl?: string;
         transfer?: TransferInfo;
-      };
+        transfers?: TransferInfo[];
+      }>(res);
       if (!data.ok) {
         setError(data.error || t.errOrder);
         return;
@@ -479,7 +542,12 @@ export function BillingCheckout() {
         window.location.href = data.hostedUrl;
         return;
       }
-      if (data.transfer) {
+      if (data.transfers?.length) {
+        setTransfers(data.transfers);
+        setTransfer(data.transfers[0] ?? null);
+        if (data.warning) setError(data.warning);
+      } else if (data.transfer) {
+        setTransfers(null);
         setTransfer({
           ...data.transfer,
           pdfUrl: data.pdfUrl ?? data.transfer.pdfUrl,
@@ -488,8 +556,8 @@ export function BillingCheckout() {
         });
         if (data.warning) setError(data.warning);
       }
-    } catch {
-      setError(t.errNet);
+    } catch (err) {
+      setError(isBillingRoutingError(err) ? t.errApiRouting : t.errNet);
     } finally {
       setBusy(false);
     }
@@ -627,38 +695,48 @@ export function BillingCheckout() {
   }
 
   if (transfer) {
+    const parts = transfers?.length ? transfers : [transfer];
     return (
       <div className="wrap">
         {top}
         <LoginBar t={t} onOpened={openPortal} />
         <h1>{t.transferTitle}</h1>
         <p className="muted">{t.transferLead}</p>
-        {transfer.proformaNumber ? (
-          <p className="ok">
-            {t.proformaReady} {t.proforma}: <span className="code">{transfer.proformaNumber}</span> {t.proformaMail}
-          </p>
-        ) : null}
-        {pdfHref(transfer, email) || transfer.buyerAccountUrl ? (
-          <p className="home-plans">
-            {pdfHref(transfer, email) ? (
-              <a
-                className="btn primary"
-                href={pdfHref(transfer, email)}
-                download={transfer.pdfUrl?.startsWith("http") ? undefined : "dijbekero.pdf"}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t.pdfDownload}
-              </a>
+        {parts.map((part, idx) => (
+          <div key={`${part.code ?? idx}-${part.installment ?? 0}`} className="card" style={{ marginTop: 16 }}>
+            {part.installment ? (
+              <h2 style={{ fontSize: 16, margin: "0 0 8px" }}>
+                {t.transferInstTitle.replace("{n}", String(part.installment))}
+              </h2>
             ) : null}
-            {transfer.buyerAccountUrl ? (
-              <a className="btn" href={transfer.buyerAccountUrl} target="_blank" rel="noreferrer">
-                {t.openBuyerAccount}
-              </a>
+            {part.proformaNumber ? (
+              <p className="ok">
+                {t.proformaReady} {t.proforma}: <span className="code">{part.proformaNumber}</span> {t.proformaMail}
+              </p>
             ) : null}
-          </p>
-        ) : null}
-        <TransferSteps t={t} transfer={transfer} money={money} locale={locale} />
+            {pdfHref(part, email) || part.buyerAccountUrl ? (
+              <p className="home-plans">
+                {pdfHref(part, email) ? (
+                  <a
+                    className="btn primary"
+                    href={pdfHref(part, email)}
+                    download={part.pdfUrl?.startsWith("http") ? undefined : "dijbekero.pdf"}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t.pdfDownload}
+                  </a>
+                ) : null}
+                {part.buyerAccountUrl ? (
+                  <a className="btn" href={part.buyerAccountUrl} target="_blank" rel="noreferrer">
+                    {t.openBuyerAccount}
+                  </a>
+                ) : null}
+              </p>
+            ) : null}
+            <TransferSteps t={t} transfer={part} money={money} locale={locale} />
+          </div>
+        ))}
         <SiteFooter inline />
       </div>
     );
@@ -706,7 +784,7 @@ export function BillingCheckout() {
     <div className="wrap" data-bill-checkout-surface="">
       {top}
       {cfg.sandbox ? <p className="hint">{t.sandboxNote}</p> : null}
-      {cfg.missingKeys.length ? (
+      {cfg.error || cfg.missingKeys.length ? (
         <p className="err">{cfg.error || t.liveKeysMissing.replace("{keys}", cfg.missingKeys.join(", "))}</p>
       ) : null}
       <h1>{t.payTitle}</h1>
@@ -726,6 +804,7 @@ export function BillingCheckout() {
               onChange={() => {
                 setBuyerKind("b2c");
                 setImmediateConsent(false);
+                setTaxId("");
               }}
             />
             <span>
@@ -745,7 +824,7 @@ export function BillingCheckout() {
               <div className="hint">{t.buyerB2bHint}</div>
             </span>
           </label>
-          {effectiveKind === "b2c" ? (
+          {buyerKind === "b2c" ? (
             <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 12 }}>
               <input
                 type="checkbox"
@@ -779,16 +858,43 @@ export function BillingCheckout() {
             </span>
           </label>
         </div>
-        <div className="grid2">
+        {buyerKind === "b2c" ? (
+          <div className="grid2">
+            <label>
+              {t.lastName}
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                autoComplete="family-name"
+                required
+              />
+            </label>
+            <label>
+              {t.firstName}
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                autoComplete="given-name"
+                required
+              />
+            </label>
+          </div>
+        ) : (
           <label>
-            {t.name}
-            <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="organization" required />
+            {t.companyName}
+            <input
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              autoComplete="organization"
+              required
+            />
           </label>
-          <label>
-            {t.email}
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-          </label>
-        </div>
+        )}
+        <label>
+          {t.email}
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+          <span className="hint">{t.emailHint}</span>
+        </label>
         <div className="row">
           <label>
             {t.country}
@@ -800,24 +906,54 @@ export function BillingCheckout() {
               ))}
             </select>
           </label>
+          <div className="grid2">
+            <label>
+              {t.zip}
+              <input
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                autoComplete="postal-code"
+                inputMode={country === "HU" ? "numeric" : "text"}
+                required
+              />
+            </label>
+            <label>
+              {t.city}
+              <input value={city} onChange={(e) => setCity(e.target.value)} autoComplete="address-level2" required />
+            </label>
+          </div>
           <label>
             {t.address}
             <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" required />
           </label>
+          {buyerKind === "b2b" ? (
+            <>
+              <label>
+                {t.taxIdRequired}
+                <input
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  autoComplete="off"
+                  placeholder={t.taxPh}
+                  required
+                />
+              </label>
+              <button type="button" className="btn" disabled={lookupBusy || taxId.trim().length < 8} onClick={() => void lookup()}>
+                {lookupBusy ? t.lookupBusy : t.lookup}
+              </button>
+              {lookupNote ? <div className={lookupOk ? "ok" : "hint"}>{lookupNote}</div> : null}
+            </>
+          ) : null}
           <label>
-            {effectiveKind === "b2b" ? t.taxIdRequired : t.taxId}
+            {t.nostr}
             <input
-              value={taxId}
-              onChange={(e) => setTaxId(e.target.value)}
+              value={nostr}
+              onChange={(e) => setNostr(e.target.value)}
               autoComplete="off"
-              placeholder={t.taxPh}
-              required={effectiveKind === "b2b"}
+              placeholder={t.nostrPh}
             />
+            <span className="hint">{t.nostrHint}</span>
           </label>
-          <button type="button" className="btn" disabled={lookupBusy || taxId.trim().length < 8} onClick={() => void lookup()}>
-            {lookupBusy ? t.lookupBusy : t.lookup}
-          </button>
-          {lookupNote ? <div className={lookupOk ? "ok" : "hint"}>{lookupNote}</div> : null}
         </div>
 
         <div className="card summary-card" style={{ marginTop: 4 }}>
@@ -848,6 +984,13 @@ export function BillingCheckout() {
           <div className="muted" style={{ marginTop: 6 }}>
             ({t.net} {money(due.net)} + {vatPct}% {t.vatShort})
           </div>
+          {useInstallment ? (
+            <div className="hint" style={{ marginTop: 8 }}>
+              {t.installmentNow}: {t.gross} {money(dueNow.gross)}
+              <br />
+              {t.installmentLater}: {t.gross} {money(due.gross - dueNow.gross)}
+            </div>
+          ) : null}
           {bullets.length ? (
             <ul className="hint" style={{ marginTop: 10, paddingLeft: 18 }}>
               {bullets.map((line) => (
@@ -867,6 +1010,26 @@ export function BillingCheckout() {
           ) : null}
           <div className="renewal">{renewalLabel}</div>
         </div>
+
+        {canInstallment ? (
+          <div className="row">
+            <div className="muted">{t.payPlan}</div>
+            <div className="pay">
+              <button type="button" className={payPlan === "full" ? "on" : ""} onClick={() => setPayPlan("full")}>
+                <span>{t.payFull}</span>
+                <span className="pay-sub">{t.payFullHint}</span>
+              </button>
+              <button
+                type="button"
+                className={payPlan === "installment2" ? "on" : ""}
+                onClick={() => setPayPlan("installment2")}
+              >
+                <span>{t.payInstallment}</span>
+                <span className="pay-sub">{t.payInstallmentHint}</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="row">
           <div className="muted">{t.payMethod}</div>
@@ -893,7 +1056,7 @@ export function BillingCheckout() {
           disabled={!canSubmit}
           type="submit"
         >
-          {busy ? t.busy : t.submit.replace("{n}", `${t.gross} ${money(due.gross)}`)}
+          {busy ? t.busy : t.submit.replace("{n}", `${t.gross} ${money(dueNow.gross)}`)}
         </button>
         <PayLogos alt={t.payLogosAlt} />
       </form>

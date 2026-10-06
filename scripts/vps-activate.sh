@@ -88,14 +88,13 @@ delete_pm2_5100() {
 }
 
 point_nginx_5100() {
-  echo ">> nginx proxy_pass 4100 → 5100"
+  echo ">> nginx proxy_pass 4100 → 5100 (5110 bill API marad)"
   local f patched=0
-  if sudo -n grep -rlE '127.0.0.1:4100|127.0.0.1:5110' /etc/nginx >/tmp/nginx-ports.txt 2>/dev/null; then
+  if sudo -n grep -rlE '127.0.0.1:4100' /etc/nginx >/tmp/nginx-ports.txt 2>/dev/null; then
     while IFS= read -r f; do
       [ -n "$f" ] || continue
       echo ">> patch $f"
       sudo -n sed -i 's/127\.0\.0\.1:4100/127.0.0.1:5100/g' "$f"
-      sudo -n sed -i 's/127\.0\.0\.1:5110/127.0.0.1:5100/g' "$f"
       patched=1
     done < /tmp/nginx-ports.txt
   fi
@@ -106,12 +105,12 @@ point_nginx_5100() {
     sudo -n grep -n 'proxy_pass' /etc/nginx/sites-enabled/* 2>/dev/null || true
     return 0
   fi
-  echo ">> nginx: a deploy user nem irhatja /etc/nginx-et"
-  echo "ROOT, EGYSZER:"
-  echo "  sudo sed -i 's/127\\.0\\.0\\.1:4100/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
-  echo "  sudo sed -i 's/127\\.0\\.0\\.1:5110/127.0.0.1:5100/g' /etc/nginx/sites-enabled/* /etc/nginx/sites-available/*"
+  echo ">> nginx: nincs 4100, vagy a deploy user nem irhatja /etc/nginx-et"
+  echo "ROOT, EGYSZER (SPA 5100, bill /api 5110):"
+  echo "  # deploy/nginx/szcenario.conf → /etc/nginx/sites-available/szcenario.hu"
   echo "  sudo nginx -t && sudo systemctl reload nginx"
   echo "  curl -sS -H 'Host: school.szcenario.hu' http://127.0.0.1:5100/ | head"
+  echo "  curl -sS -H 'Host: bill.szcenario.hu' http://127.0.0.1:5110/api/billing/config | head"
   return 0
 }
 
@@ -123,7 +122,9 @@ grep -qx "$SHA" "$RELEASE_DIR/BUILD_SHA"
 need "$RELEASE_DIR/.output/public/build-id.txt"
 grep -qx "$SHA" "$RELEASE_DIR/.output/public/build-id.txt"
 need "$RELEASE_DIR/scripts/static-origin.mjs"
+need "$RELEASE_DIR/scripts/bill-api-path.mjs"
 need "$RELEASE_DIR/.output/public"
+need "$RELEASE_DIR/.output/bill-server.mjs"
 
 echo ">> pm2 kill + free $PORT_N"
 delete_pm2_5100
@@ -138,7 +139,7 @@ fi
 echo ">> port $PORT_N free"
 
 echo ">> ensure $ENVF"
-mkdir -p "$APP_DIR/shared" "$LOG_DIR"
+mkdir -p "$APP_DIR/shared" "$APP_DIR/shared/bill-data" "$LOG_DIR"
 if [ ! -f "$ENVF" ]; then
   echo ">> creating $ENVF"
   printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' > "$ENVF"
@@ -217,6 +218,27 @@ grep -q "$SHA" /tmp/version.json
 
 echo ">> school Host probe"
 curl -sS -D- --max-time 8 -H "Host: school.szcenario.hu" "http://127.0.0.1:${PORT}/" | head -n 16 || true
+
+echo ">> wait bill API :5110"
+bill_ok=0
+for i in $(seq 1 20); do
+  if curl -sS --max-time 2 "http://127.0.0.1:5110/api/billing/config" | grep -q '{'; then
+    bill_ok=1
+    break
+  fi
+  echo "bill config try $i"
+  sleep 1
+done
+if [ "$bill_ok" -ne 1 ]; then
+  echo "bill API failed"
+  pm2 describe bill-app || true
+  tail -n 80 "$LOG_DIR/bill-err.log" "$LOG_DIR/bill-out.log" 2>/dev/null || true
+  dump_logs
+  exit 1
+fi
+curl -sS --max-time 4 "http://127.0.0.1:5110/api/billing/config" | tee /tmp/bill-config.json
+echo ">> bill Host /api via static-origin"
+curl -sS -D- --max-time 4 -H "Host: bill.szcenario.hu" "http://127.0.0.1:${PORT}/api/billing/config" | head -n 20 || true
 
 echo ">> nginx → 5100"
 point_nginx_5100

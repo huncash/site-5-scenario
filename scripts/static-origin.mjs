@@ -8,6 +8,7 @@ import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { shouldProxyBillApi } from "./bill-api-path.mjs";
 import { resolveSiteKey, resolveSiteRoot } from "./site-hosts.mjs";
 
 process.on("uncaughtException", (error) => {
@@ -56,6 +57,8 @@ function resolveMainRoot() {
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = resolvePort();
 const MAIN_ROOT = resolveMainRoot();
+const BILL_API_HOST = process.env.BILL_API_HOST || "127.0.0.1";
+const BILL_API_PORT = Number(process.env.BILL_PORT || "5110") || 5110;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -144,6 +147,45 @@ async function shellFile(root) {
   );
 }
 
+function proxyToBillApi(req, res) {
+  const headers = { ...req.headers };
+  delete headers.connection;
+  const upstream = httpRequest(
+    {
+      hostname: BILL_API_HOST,
+      port: BILL_API_PORT,
+      path: req.url,
+      method: req.method,
+      headers: {
+        ...headers,
+        host: req.headers.host || `${BILL_API_HOST}:${BILL_API_PORT}`,
+        "x-forwarded-host": req.headers["x-forwarded-host"] || req.headers.host || "",
+        "x-forwarded-proto": req.headers["x-forwarded-proto"] || "http",
+      },
+    },
+    (up) => {
+      const outHeaders = { ...up.headers, "cache-control": "no-store" };
+      res.writeHead(up.statusCode || 502, outHeaders);
+      up.pipe(res);
+    },
+  );
+  upstream.on("error", (error) => {
+    console.error("[static-origin] bill API proxy failed", {
+      host: BILL_API_HOST,
+      port: BILL_API_PORT,
+      url: req.url,
+      error,
+    });
+    if (res.headersSent) return;
+    res.writeHead(502, {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+    });
+    res.end(JSON.stringify({ ok: false, error: "API végpont nem elérhető / routing hiba" }));
+  });
+  req.pipe(upstream);
+}
+
 const server = createServer(async (req, res) => {
   try {
     const { hostname, port } = parseHostPort(req);
@@ -151,6 +193,10 @@ const server = createServer(async (req, res) => {
     const root = resolveSiteRoot(siteKey, MAIN_ROOT);
     const urlPath = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`).pathname;
 
+    if (shouldProxyBillApi(urlPath, siteKey)) {
+      proxyToBillApi(req, res);
+      return;
+    }
     if (urlPath === "/mnb-rates") {
       const upstream = await fetch("http://www.mnb.hu/arfolyamok.asmx", {
         method: req.method || "POST",
@@ -181,7 +227,7 @@ const server = createServer(async (req, res) => {
         "content-type": "text/plain; charset=utf-8",
         "cache-control": "no-store",
       });
-      res.end(`ok ${HOST}:${PORT} site=${siteKey} root=${root}\n`);
+      res.end(`ok ${HOST}:${PORT} site=${siteKey} root=${root} billApi=${BILL_API_HOST}:${BILL_API_PORT}\n`);
       return;
     }
     if (urlPath === "/build-id.txt") {
@@ -258,6 +304,7 @@ server.on("error", (error) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[static-origin] ${HOST}:${PORT} → ${MAIN_ROOT}`);
+  console.log(`[static-origin] /api/billing → ${BILL_API_HOST}:${BILL_API_PORT}`);
   console.log(`[static-origin] sites: bill/support/docs/blog under ${path.join(MAIN_ROOT, "sites")}`);
   console.log(`[static-origin] build-id.txt=${existsSync(path.join(MAIN_ROOT, "build-id.txt"))}`);
 });
