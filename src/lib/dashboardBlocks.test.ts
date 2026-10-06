@@ -30,9 +30,15 @@ describe("dashboardBlocks", () => {
     expect(resolveDashboardBlockOpen({ id: "kpi-quick-bar", open: true }, false)).toBe(true);
   });
 
-  it("keeps PDCA section frames open until the user closes them", () => {
+  it("does not treat PDCA frames as user-closed when nothing is saved", () => {
     expect(resolveDashboardBlockOpen(undefined, true)).toBe(true);
-    expect(resolveDashboardBlockOpen({ id: "pdca-plan", open: false }, true)).toBe(false);
+  });
+
+  it("PLAN Célok, CHECK Valóság-Sokk and ACT elágazások default open", () => {
+    expect(resolveDashboardBlockOpen(undefined, true)).toBe(true);
+    expect(resolveDashboardBlockOpen({ id: "celok", open: false }, true)).toBe(false);
+    expect(resolveDashboardBlockOpen({ id: "valosag-sokk", open: true }, false)).toBe(true);
+    expect(resolveDashboardBlockOpen({ id: "act-elagazasok", open: true }, false)).toBe(true);
   });
 
   it("persists through MeshRepository", async () => {

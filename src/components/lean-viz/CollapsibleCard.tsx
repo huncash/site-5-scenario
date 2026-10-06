@@ -117,18 +117,16 @@ export function CollapsibleCard({
   );
 }
 
-/** Fő szekció (PLAN/DO/CHECK/ACT): keret nyitva, a belső blokkok külön csukódnak. */
+/** Fő szekció (PLAN/DO/CHECK/ACT): mindig nyitva, +/- nélkül — a belső blokkok külön csukódnak. */
 export function CollapsibleSection({
-  id,
   title,
-  defaultOpen = true,
   children,
   className,
   titleClassName,
   headerRight,
   exact,
 }: {
-  id: string;
+  id?: string;
   title: ReactNode;
   defaultOpen?: boolean;
   children: ReactNode;
@@ -138,18 +136,15 @@ export function CollapsibleSection({
   exact?: string;
 }) {
   return (
-    <CollapsibleFrame
-      as="section"
-      id={id}
-      title={title}
-      defaultOpen={defaultOpen}
-      className={className}
-      titleClassName={titleClassName}
-      headerRight={headerRight}
-      exact={exact}
-    >
-      {children}
-    </CollapsibleFrame>
+    <section className={cn("min-w-0 w-full", className)} data-exact={exact}>
+      <div className="mb-1.5 flex flex-wrap items-start justify-between gap-2">
+        <div className={cn("min-w-0 text-sm font-medium leading-snug text-[var(--text-main)]", titleClassName)}>
+          {title}
+        </div>
+        {headerRight}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
   );
 }
 

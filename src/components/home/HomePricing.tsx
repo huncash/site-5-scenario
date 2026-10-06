@@ -79,9 +79,12 @@ export function HomePricing(props: { campus?: boolean }) {
   const [enterpriseOpen, setEnterpriseOpen] = useState(false);
 
   return (
-    <section id="pricing" className="scroll-mt-24">
+    <section id="pricing" className="flex scroll-mt-24 flex-col">
       {/* Legacy horgony — footer / kampány linkek */}
       <div id="csomagok" className="scroll-mt-24" aria-hidden />
+
+      <PricingRopeHero />
+
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {t("pricing.packages")}
@@ -89,10 +92,7 @@ export function HomePricing(props: { campus?: boolean }) {
         <h2 className="mt-1 max-w-2xl text-pretty text-lg font-semibold leading-snug text-foreground sm:text-xl">
           {t("pricing.packagesHeading")}
         </h2>
-        <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-muted-foreground">{t("pricing.netNote")}</p>
       </div>
-
-      <PricingRopeHero />
 
       {campus ? (
         <div className="mt-2">
@@ -168,31 +168,46 @@ export function HomePricing(props: { campus?: boolean }) {
                 </Button>
               )}
 
-              <a
-                href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.assign(e.currentTarget.href);
-                }}
-                className="mt-2 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              >
-                {t("pricing.moreInfo")}
-              </a>
-              <a
-                href={supportTierHref(SUPPORT_PRICING_ANCHOR[p.id])}
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.assign(e.currentTarget.href);
-                }}
-                className="mt-1 block text-center text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              >
-                {t(SUPPORT_TIER_LABEL[p.id])}
-                {t("pricing.moreInfo")}
-              </a>
+              <div className="mt-4 flex flex-col items-center gap-2 text-center text-[12px] leading-snug text-muted-foreground">
+                <a
+                  href={supportPricingHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.assign(e.currentTarget.href);
+                  }}
+                  className="underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  {t("pricing.moreInfo")}
+                </a>
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                  <a
+                    href={supportTierHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.assign(e.currentTarget.href);
+                    }}
+                    className="underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    {t(SUPPORT_TIER_LABEL[p.id])}
+                  </a>
+                  <a
+                    href={supportTierHref(SUPPORT_PRICING_ANCHOR[p.id])}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.assign(e.currentTarget.href);
+                    }}
+                    className="underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    {t("pricing.moreInfo")}
+                  </a>
+                </div>
+              </div>
             </article>
           );
         })}
       </div>
+
+      <p className="mt-4 max-w-xl text-[13px] leading-relaxed text-muted-foreground">{t("pricing.netNote")}</p>
 
       <div className="mt-6">
         <DesktopAppPanel />

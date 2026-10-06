@@ -7607,6 +7607,7 @@ export function FinanceDashboard({
 
         <CollapsibleCard
           id="valosag-sokk"
+          defaultOpen
           className="rounded-lg border border-emerald-400/20 bg-emerald-950/10 p-3"
           title={
             <LeanTerm
@@ -8238,6 +8239,7 @@ export function FinanceDashboard({
 
         <CollapsibleCard
           id="act-elagazasok"
+          defaultOpen
           title={
             <LeanTerm
               className="text-xs font-medium text-slate-200"
@@ -13796,7 +13798,7 @@ function GoalCard({
   onRemove: (id: string) => void;
   onAdd: (g: { deadline: string; payload: GoalPayload }) => void;
 }) {
-  const celokBlock = useDashboardBlockOpen("celok", false);
+  const celokBlock = useDashboardBlockOpen("celok", true);
   if (!goal) {
     return (
       <Card className="pdca-tile--wide">
