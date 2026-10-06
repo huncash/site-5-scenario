@@ -48,6 +48,23 @@ module.exports = {
         BILL_PORT: process.env.BILL_PORT || "5110",
         BILL_PUBLIC_URL: process.env.BILL_PUBLIC_URL || "https://bill.szcenario.hu",
         BILL_DATA_DIR: process.env.BILL_DATA_DIR || pathJoin(APP_DIR, "shared/bill-data"),
+        BILL_ENV_FILE: process.env.BILL_ENV_FILE || pathJoin(APP_DIR, "shared/.env.production"),
+        SITE_SLUG: SLUG,
+        APP_DIR,
+        ...pickFilledEnv([
+          "SZAMLAZZ_AGENT_KEY",
+          "SZAMLAKEZELO_AGENT_KEY",
+          "SZAMLAZZ_SANDBOX",
+          "BARION_POS_KEY",
+          "BARION_POSKEY",
+          "BARION_ENV",
+          "BILL_TRANSFER_SECRET",
+          "BARION_PIXEL_ID",
+          "BARION_PAYEE",
+          "TRANSFER_IBAN",
+          "TRANSFER_ACCOUNT_NAME",
+          "TRANSFER_BANK",
+        ]),
       },
       out_file: `/var/log/${SLUG}/bill-out.log`,
       error_file: `/var/log/${SLUG}/bill-err.log`,
@@ -58,4 +75,14 @@ module.exports = {
 
 function pathJoin(root, rel) {
   return `${String(root).replace(/\/+$/, "")}/${rel.replace(/^\/+/, "")}`;
+}
+
+/** Üres stringet nem adunk át — a loadEnvFile nem írja felül a létező (üres) env-et. */
+function pickFilledEnv(names) {
+  const out = {};
+  for (const name of names) {
+    const v = String(process.env[name] ?? "").trim();
+    if (v) out[name] = v;
+  }
+  return out;
 }

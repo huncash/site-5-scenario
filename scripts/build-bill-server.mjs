@@ -22,10 +22,6 @@ await build({
   legalComments: "none",
   logLevel: "info",
   external: ["vite"],
-  // package.json sideEffects:false eldobná a loadenv side-effect importot
-  banner: {
-    js: 'try { process.loadEnvFile(".env"); } catch {}\n',
-  },
 });
 
 console.log(`[build-bill-server] → ${outfile}`);

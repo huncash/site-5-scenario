@@ -165,6 +165,29 @@ export STATIC_ROOT="$RELEASE_DIR/.output/public"
 export BUILD_SHA="$SHA"
 export RELEASE_DIR
 export SITE_SLUG
+export APP_DIR
+export BILL_ENV_FILE="$ENVF"
+
+need_key() {
+  local name="$1"
+  eval "local v=\${$name:-}"
+  if [ -z "$v" ]; then
+    echo "[bill] POKA-YOKE: $name hiányzik $ENVF-ből"
+    return 1
+  fi
+  return 0
+}
+bill_keys_ok=1
+need_key SZAMLAZZ_AGENT_KEY || bill_keys_ok=0
+need_key BARION_POS_KEY || need_key BARION_POSKEY || bill_keys_ok=0
+if [ "$bill_keys_ok" -ne 1 ]; then
+  echo "[bill] Tedd a kulcsokat ide (chmod 600), aztán újra activate:"
+  echo "  $ENVF"
+  echo "  SZAMLAZZ_AGENT_KEY=..."
+  echo "  SZAMLAZZ_SANDBOX=false"
+  echo "  BARION_POS_KEY=..."
+  echo "  BARION_ENV=prod"
+fi
 
 ln -sfn "$ENVF" "$RELEASE_DIR/.env"
 ln -sfnT "$RELEASE_DIR" "$APP_DIR/current"

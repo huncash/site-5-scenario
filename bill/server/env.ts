@@ -1,6 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { loadBillEnv } from "./loadenv.ts";
+
+loadBillEnv();
+
 function read(name: string, fallback = ""): string {
   return (process.env[name] ?? fallback).trim();
 }

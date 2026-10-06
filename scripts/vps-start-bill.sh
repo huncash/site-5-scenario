@@ -40,6 +40,18 @@ echo ">> bill root=$ROOT"
 cd "$ROOT"
 mkdir -p "$DATA_DIR"
 
+ENVF="${BILL_ENV_FILE:-/var/www/szcenario/shared/.env.production}"
+if [ -f "$ENVF" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$ENVF"
+  set +a
+  export BILL_ENV_FILE="$ENVF"
+  echo ">> env $ENVF"
+else
+  echo ">> nincs $ENVF — a bill-app csak a process.env-et látja"
+fi
+
 pm2 delete bill-app >/dev/null 2>&1 || true
 
 if [ -f "$ROOT/.output/bill-server.mjs" ]; then

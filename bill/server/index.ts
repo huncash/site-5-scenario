@@ -1,4 +1,3 @@
-import "./loadenv.ts";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -18,6 +17,7 @@ import {
 } from "./catalog.ts";
 import { buyerFromCheckout } from "./checkoutReady.ts";
 import { billEnv, isLiveBilling, liveBillingError, liveBillingMissingKeys } from "./env.ts";
+import { lastBillEnvLoad } from "./loadenv.ts";
 import {
   buildInstallments,
   installment2Paid,
@@ -682,10 +682,14 @@ async function start() {
   });
 
   server.listen(billEnv.port, "0.0.0.0", () => {
+    const from = lastBillEnvLoad().loadedFrom;
     console.log(`[bill] listening on ${billEnv.port} · ${billEnv.publicUrl}`);
+    console.log(`[bill] env file=${from ?? "nincs (csak process.env)"}`);
     const missing = liveBillingMissingKeys();
     if (missing.length) {
       console.error(`[bill] ÉLES KULCSOK HIÁNYOZNAK: ${missing.join(", ")}`);
+    } else if (isLiveBilling()) {
+      console.log("[bill] env ok — Számlázz + Barion kulcsok megvannak");
     }
   });
 }

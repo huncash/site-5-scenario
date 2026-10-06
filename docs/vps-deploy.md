@@ -62,9 +62,13 @@ Nyisd **ugyanazt**, amivel a többi site első nginxét csináltad (atlasz Shell
 mkdir -p /var/www/szcenario/{releases,shared,incoming}
 mkdir -p /var/log/szcenario /var/www/letsencrypt
 chown -R deploy:deploy /var/www/szcenario /var/log/szcenario
-printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' > /var/www/szcenario/shared/.env.production
+printf '%s\n' 'NODE_ENV=production' 'HOST=127.0.0.1' 'PORT=5100' \
+  'SZAMLAZZ_SANDBOX=false' 'BARION_ENV=prod' \
+  'SZAMLAZZ_AGENT_KEY=' 'BARION_POS_KEY=' \
+  > /var/www/szcenario/shared/.env.production
 chmod 600 /var/www/szcenario/shared/.env.production
 chown deploy:deploy /var/www/szcenario/shared/.env.production
+# A két kulcsot töltsd ki — enélkül a bill API 503-at ad.
 ```
 
 A `szcenario.http-first.conf` / `szcenario.conf` a repo `deploy/nginx/` alatt van. Rooton:
