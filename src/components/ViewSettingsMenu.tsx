@@ -52,9 +52,10 @@ export function ViewSettingsMenu({
   const activePalette = paletteName(locale, palette);
   const [open, setOpen] = useState(false);
   const [localViewMode, setLocalViewMode] = useState<ViewMode>("split");
-  const [fan, setFan] = useState({ top: 0, left: 0 });
+  const [fan, setFan] = useState({ top: -9999, left: 0 });
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const isDark = theme === "dark";
   const viewMode = viewModeProp ?? localViewMode;
@@ -69,17 +70,21 @@ export function ViewSettingsMenu({
   }, [forceOpen]);
 
   useLayoutEffect(() => {
-    if (!open) return;
     const place = () => {
       const el = triggerRef.current;
+      const menu = menuRef.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
+      if (!Number.isFinite(r.left) || !Number.isFinite(r.bottom)) return;
       const half = TRAY_WIDTH / 2;
-      const left = Math.min(
-        window.innerWidth - half - 8,
-        Math.max(half + 8, r.left + r.width / 2),
-      );
-      setFan({ top: r.bottom - 1, left });
+      const cx = r.left + r.width / 2;
+      const left = Math.min(window.innerWidth - half - 8, Math.max(half + 8, cx));
+      const top = r.bottom - 1;
+      if (menu) {
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
+      }
+      setFan((prev) => (prev.top === top && prev.left === left ? prev : { top, left }));
     };
     place();
     window.addEventListener("resize", place);
@@ -151,8 +156,9 @@ export function ViewSettingsMenu({
           aria-label={t("view.settings")}
           aria-expanded={open}
           aria-haspopup="true"
-          aria-controls={open ? menuId : undefined}
+          aria-controls={menuId}
           title={t("view.settings")}
+          onMouseDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
             setOpen((value) => !value);
@@ -161,24 +167,27 @@ export function ViewSettingsMenu({
           <Glasses className="h-[18px] w-[18px]" aria-hidden="true" />
         </button>
 
-        {open ? (
-          <div
-            id={menuId}
-            className="semicircle-menu is-open"
-            role="menu"
-            aria-label={t("view.settings")}
-            style={{ top: fan.top, left: fan.left, width: TRAY_WIDTH, height: 86 }}
-          >
-            <div className="semicircle-menu-surface">
-              <svg
-                className="semicircle-tray-svg"
-                viewBox="0 0 200 86"
-                width={TRAY_WIDTH}
-                height={86}
-                aria-hidden="true"
-              >
-                <path d="M16 0.5 A 84 84 0 0 0 184 0.5 Z" />
-              </svg>
+        <div
+          ref={menuRef}
+          id={menuId}
+          className={cn("semicircle-menu", open && "is-open")}
+          role="menu"
+          aria-label={t("view.settings")}
+          aria-hidden={!open}
+          inert={!open ? true : undefined}
+          style={{ top: fan.top, left: fan.left, width: TRAY_WIDTH, height: 86 }}
+        >
+          <div className="semicircle-menu-surface">
+            <svg
+              className="semicircle-tray-svg"
+              viewBox="0 0 200 86"
+              width={TRAY_WIDTH}
+              height={86}
+              preserveAspectRatio="xMidYMin meet"
+              aria-hidden="true"
+            >
+              <path d="M16 0.5 A 84 84 0 0 0 184 0.5 Z" />
+            </svg>
 
               <button
                 type="button"
@@ -237,9 +246,8 @@ export function ViewSettingsMenu({
                   <Keyboard className="h-4 w-4" aria-hidden="true" />
                 </button>
               ) : null}
-            </div>
           </div>
-        ) : null}
+        </div>
       </div>
     </div>
   );

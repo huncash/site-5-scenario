@@ -2158,16 +2158,19 @@ html.light-mode [class*="border-l-pink"] {
   position: fixed;
   z-index: 2000;
   box-sizing: border-box;
-  width: 200px;
-  height: 86px;
-  max-width: 200px;
-  max-height: 86px;
+  top: 0;
+  left: 0;
+  width: 200px !important;
+  height: 86px !important;
+  max-width: 200px !important;
+  max-height: 86px !important;
   transform: translateX(-50%);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
+  contain: size;
   filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.45));
 }
 
@@ -2191,10 +2194,11 @@ html.light-mode [class*="border-l-pink"] {
   position: absolute;
   top: 0;
   left: 0;
-  width: 200px;
-  height: 86px;
-  max-width: 200px;
-  max-height: 86px;
+  display: block;
+  width: 200px !important;
+  height: 86px !important;
+  max-width: 200px !important;
+  max-height: 86px !important;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
