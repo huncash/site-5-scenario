@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
 import { applyPublicSeo, supportSeoPageFromPath } from "@/lib/seo";
 import { SupportSurface } from "@/components/SupportSurface";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
 import { billCheckoutUrl } from "@/lib/billing";
-import { enterpriseInquiryMailto } from "@/lib/enterpriseSchedule";
+import { enterpriseInquiryHref } from "@/lib/enterpriseSchedule";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
+import { SupportTicketForm } from "@/components/support/SupportTicketForm";
 import { oplByPath } from "@/lib/opl";
 import { resolveSupportSlug } from "@/lib/supportRoutes";
+import { readSupportTicketSearch } from "@/lib/support";
 import { lessonBySlug } from "./content";
 import {
   localizeLesson,
@@ -74,42 +76,51 @@ function YouTube({ id, title, empty }: { id: string; title: string; empty: strin
   );
 }
 
-function TicketForm({ locale }: { locale: Locale }) {
-  const t = supportCopy(locale);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+function TicketForm() {
+  const subject = readSupportTicketSearch(typeof window === "undefined" ? "" : window.location.search).subject;
+  return <SupportTicketForm defaultSubject={subject} />;
+}
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const href = `mailto:support@szcenario.hu?subject=${encodeURIComponent(subject.trim() || t.mailSubject)}&body=${encodeURIComponent(
-      `${t.mailName}: ${name.trim()}\nE-mail: ${email.trim()}\n\n${body.trim()}`,
-    )}`;
-    window.location.href = href;
-  };
-
+function RoadmapCard({
+  id,
+  title,
+  when,
+  body,
+  status,
+  ctaHref,
+  ctaLabel,
+}: {
+  id: string;
+  title: string;
+  when: string;
+  body: string;
+  status?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+}) {
   return (
-    <form onSubmit={onSubmit}>
-      <p className="sla">{t.sla}</p>
-      <label>
-        {t.name}
-        <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
-      </label>
-      <label>
-        {t.email}
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-      </label>
-      <label>
-        {t.subject}
-        <input value={subject} onChange={(e) => setSubject(e.target.value)} required />
-      </label>
-      <label>
-        {t.message}
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} required />
-      </label>
-      <button type="submit">{t.send}</button>
-    </form>
+    <article id={id} className="roadmap-card item scroll-mt-24">
+      <h3>{title}</h3>
+      <p className="roadmap-meta">{when}</p>
+      <p className="roadmap-body">{body}</p>
+      {status ? (
+        <div className="status-box">
+          <p>{status}</p>
+        </div>
+      ) : null}
+      {ctaHref && ctaLabel ? (
+        <a
+          className="ticket-cta"
+          href={ctaHref}
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.assign(ctaHref);
+          }}
+        >
+          {ctaLabel}
+        </a>
+      ) : null}
+    </article>
   );
 }
 
@@ -243,6 +254,12 @@ function PricingPage({ locale }: { locale: Locale }) {
         <a href="#workflow">{t.pricingTocWorkflow}</a>
         <a href="#local-import">{t.pricingTocLocal}</a>
       </nav>
+      <nav className="nav" aria-label={t.pricingTocRoadmap}>
+        <span>{t.pricingTocRoadmap}:</span>
+        <a href="#desktop">{t.pricingTocDesktop}</a>
+        <a href="#bcp">{t.pricingTocBcp}</a>
+        <a href="#education-engine">{t.pricingTocEducation}</a>
+      </nav>
 
       <div className="section-block">
         {tiers.map((tier) => (
@@ -259,7 +276,14 @@ function PricingPage({ locale }: { locale: Locale }) {
               ))}
             </ul>
             {tier.id === "enterprise" ? (
-              <a className="ticket-cta" href={enterpriseInquiryMailto({ locale })}>
+              <a
+                className="ticket-cta"
+                href={enterpriseInquiryHref({ locale })}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(enterpriseInquiryHref({ locale }));
+                }}
+              >
                 {t.pricingEnterpriseCta}
               </a>
             ) : (
@@ -318,6 +342,37 @@ function PricingPage({ locale }: { locale: Locale }) {
       <div className="section-block scroll-mt-24" id="local-import">
         <h2>{t.pricingLocalTitle}</h2>
         <p>{t.pricingLocalBody}</p>
+      </div>
+      <div className="section-block scroll-mt-24" id="desktop-engines">
+        <h2>{t.pricingRoadmapTitle}</h2>
+        <p>{t.pricingRoadmapLead}</p>
+
+        <RoadmapCard
+          id="desktop"
+          title={t.pricingRoadmapDesktopTitle}
+          when={t.pricingRoadmapDesktopWhen}
+          body={t.pricingRoadmapDesktopBody}
+          ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
+          ctaLabel={t.pricingAddonBuy}
+        />
+        <RoadmapCard
+          id="bcp"
+          title={t.pricingRoadmapBcpTitle}
+          when={t.pricingRoadmapBcpWhen}
+          body={t.pricingRoadmapBcpBody}
+          status={t.pricingAddonStatus}
+          ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
+          ctaLabel={t.pricingAddonBuy}
+        />
+        <RoadmapCard
+          id="education-engine"
+          title={t.pricingRoadmapEducationTitle}
+          when={t.pricingRoadmapEducationWhen}
+          body={t.pricingRoadmapEducationBody}
+          status={t.pricingAddonStatus}
+          ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
+          ctaLabel={t.pricingAddonBuy}
+        />
       </div>
     </>
   );
@@ -381,11 +436,13 @@ function TipsPage({ locale }: { locale: Locale }) {
   );
 }
 
-export function App() {
+export function App({ pathname }: { pathname?: string } = {}) {
   const { locale, toggleLocale } = useI18n();
   const t = supportCopy(locale);
-  const [path, setPath] = useState(pathOf);
-  const [ticketUnlocked, setTicketUnlocked] = useState(false);
+  const [path, setPath] = useState(() => pathname ?? pathOf());
+  const [ticketUnlocked, setTicketUnlocked] = useState(
+    () => Boolean(readSupportTicketSearch(typeof window === "undefined" ? "" : window.location.search).subject),
+  );
 
   const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
   const route = useMemo(() => resolveSupportSlug(slug), [slug]);
@@ -395,9 +452,13 @@ export function App() {
   }, [slug]);
 
   useEffect(() => {
+    if (pathname) setPath(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
     const onPop = () => {
       setPath(pathOf());
-      setTicketUnlocked(false);
+      setTicketUnlocked(Boolean(readSupportTicketSearch(window.location.search).subject));
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -430,7 +491,7 @@ export function App() {
     body = ticketUnlocked ? (
       <>
         <h1>{t.ticketTitle}</h1>
-        <TicketForm locale={locale} />
+        <TicketForm />
       </>
     ) : (
       <TicketGuard locale={locale} embed={embed} onUnlock={() => setTicketUnlocked(true)} />

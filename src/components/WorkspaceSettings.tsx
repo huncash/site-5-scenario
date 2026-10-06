@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { formatMoney, type Loan, type WorkspaceMeta } from "@/lib/finance";
 import {
@@ -99,6 +100,7 @@ export function WorkspaceSettings({
   embedded?: boolean;
   busy?: boolean;
 }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState<WorkspaceMeta>(() => cloneMeta(meta));
   const [dirty, setDirty] = useState(false);
   const [confirm, setConfirm] = useState<null | { title: string; detail: string; run: () => void }>(null);
@@ -789,20 +791,20 @@ export function WorkspaceSettings({
         <Card>
           <CardHeader className="flex flex-row items-start justify-between pb-2">
             <div>
-              <CardTitle className="text-sm">Tartozások & Pályázati Önrészek</CardTitle>
+              <CardTitle className="text-sm">{t("dash.liabilitiesSettings")}</CardTitle>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Mentés a LoanDialog „Mentés” gombjával — workspace: {workspaceId}
               </p>
             </div>
             {onEditLoan ? (
               <Button type="button" size="sm" className="h-8" onClick={() => onEditLoan(null)}>
-                + Új tartozás
+                {t("dash.newLiability")}
               </Button>
             ) : null}
           </CardHeader>
           <CardContent>
             {wsLoans.length === 0 ? (
-              <div className="text-sm text-muted-foreground">Nincs tartozás ezen a munkatéren.</div>
+              <div className="text-sm text-muted-foreground">{t("dash.noActiveDebt")}</div>
             ) : (
               <ul className="grid gap-3">
                 {wsLoans.map((l) => (

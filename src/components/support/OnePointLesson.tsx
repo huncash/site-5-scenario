@@ -143,15 +143,16 @@ function OplFigure({
   const caption = slot ? (lang === "en" ? slot.captionEn : slot.captionHu) : fallback;
   const alt = slot ? (lang === "en" ? slot.altEn ?? slot.captionEn : slot.altHu ?? slot.captionHu) : fallback;
   const { kind, url } = useOplFrame(slot?.src);
+  const displayUrl = url ?? slot?.src;
   return (
-    <figure className="mx-auto w-[320px] shrink-0 justify-self-end" data-opl-frame={kind}>
+    <figure className="mx-auto w-[320px] shrink-0 justify-self-end" data-opl-frame={url ? kind : displayUrl ? "fetched" : "fallback"}>
       <div
         className="overflow-hidden rounded-lg border border-dashed border-border bg-background"
         style={{ width: OPL_FRAME.widthPx, height: OPL_FRAME.heightPx }}
       >
-        {url ? (
+        {displayUrl ? (
           <img
-            src={url}
+            src={displayUrl}
             alt={alt}
             width={OPL_FRAME.widthPx}
             height={OPL_FRAME.heightPx}

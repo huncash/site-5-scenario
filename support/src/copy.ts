@@ -45,7 +45,8 @@ const hu = {
   email: "E-mail",
   subject: "Tárgy",
   message: "Üzenet",
-  send: "Jegy küldése e-mailben",
+  send: "Jegy küldése",
+  ticketSent: "Köszönjük. A jegyet rögzítettük — külső levelező nem nyílik. Írásban válaszolunk 24 órán belül.",
   mailSubject: "Szcenárió jegy",
   mailName: "Név",
   noLesson: "Nincs ilyen lecke",
@@ -65,6 +66,28 @@ const hu = {
   pricingTocActive: "Aktív munkaterületek",
   pricingTocLocal: "Lokális import",
   pricingTocWorkflow: "Működési elv",
+  pricingTocRoadmap: "Ütemezés",
+  pricingTocDesktop: "Pro Desktop",
+  pricingTocBcp: "Működésfolytonosság",
+  pricingTocEducation: "Oktatási motor",
+  pricingRoadmapTitle: "Asztali alkalmazás és speciális motorok",
+  pricingRoadmapLead:
+    "A gazdasági szcenárió motor a böngésződben, a saját gépeden fut. Az asztali kliens és a nem-gazdasági motorok külön ütemezéssel készülnek — a webes Case és Slot ettől nem áll meg.",
+  pricingRoadmapDesktopTitle: "Pro Desktop",
+  pricingRoadmapDesktopWhen: "Terv szerint • Várható érkezés: 2027. I. negyedév vége / II. negyedév eleje",
+  pricingRoadmapDesktopBody:
+    "A webes Case és Slot a Pro kerettel azonnal él. Az asztali early access ingyenes bónusz a Pro mellé, nem a mostani vásárlás feltétele. Addig a böngésző a munkahely.",
+  pricingRoadmapBcpTitle: "Működésfolytonosság & reziliencia (BCP)",
+  pricingRoadmapBcpWhen: "Tesztelés alatt • Várható érkezés: 2027. I. negyedév",
+  pricingRoadmapBcpBody:
+    "Vállalati és közösségi felkészültség váratlan leállásokra: a vészhelyzeti szcenáriók vizsgálata azért izgalmas a motorunk számára, mert stresszhelyzetben a láncolatos döntések és a „mi lenne, ha” ágak hatásai olyan komplex összefüggéseket rajzolnak ki, amelyek szemléltetik, hogy egyetlen elhibázott lépés hogyan rántja magával a vállalkozás többi pillérét.",
+  pricingRoadmapEducationTitle: "Oktatási szcenárió motor",
+  pricingRoadmapEducationWhen: "Tesztelés alatt • Várható érkezés: 2027. I. negyedév",
+  pricingRoadmapEducationBody:
+    "Nem egy statikus oktatási környezetet szimulálunk, hanem fordítva: valódi, kritikus döntési helyzetek szimulációjával tanítunk meg gondolkodni, ahol a lépéseknek és stratégiáknak azonnali, mérhető következményei vannak a rendszerben. A nyilvános indítás a tesztelés lezárása után várható.",
+  pricingAddonStatus:
+    "Ez a modul most nem indítható. Előkészítés alatt áll, és megvásárolható bővítőként. További részletek a támogatási, míg a vásárlási folyamat a számlázási aloldalunkon található.",
+  pricingAddonBuy: "Vásárlás a számlázáson",
   pricingLoyaltyTitle: "Hároméves lépcsőzetes hűségmodell",
   pricingLoyaltyYears: [
     "1. év: A belépő listaár 100%-a egyszeri vásárlásként — a megvásárolt verzió véglegesen a tiéd marad.",
@@ -128,7 +151,8 @@ const en: typeof hu = {
   email: "E-mail",
   subject: "Subject",
   message: "Message",
-  send: "Send ticket by e-mail",
+  send: "Send ticket",
+  ticketSent: "Thank you. The ticket is recorded — no external mail app opens. We reply in writing within 24 hours.",
   mailSubject: "Szcenárió ticket",
   mailName: "Name",
   noLesson: "No such lesson",
@@ -148,6 +172,28 @@ const en: typeof hu = {
   pricingTocActive: "Active workspaces",
   pricingTocLocal: "Local import",
   pricingTocWorkflow: "How it works",
+  pricingTocRoadmap: "Roadmap",
+  pricingTocDesktop: "Pro Desktop",
+  pricingTocBcp: "Continuity",
+  pricingTocEducation: "Education engine",
+  pricingRoadmapTitle: "Desktop app and special engines",
+  pricingRoadmapLead:
+    "The economic scenario engine runs in your browser, on your machine. The desktop client and the non-economic engines follow a separate schedule — web Case and Slot do not wait.",
+  pricingRoadmapDesktopTitle: "Pro Desktop",
+  pricingRoadmapDesktopWhen: "Planned • Expected arrival: late Q1 / early Q2 2027",
+  pricingRoadmapDesktopBody:
+    "Web Case and Slot with the Pro plan are live at once. Desktop early access is a free bonus with Pro, not a condition of today’s purchase. Until then the browser is the workplace.",
+  pricingRoadmapBcpTitle: "Business continuity & resilience (BCP)",
+  pricingRoadmapBcpWhen: "In testing • Expected arrival: Q1 2027",
+  pricingRoadmapBcpBody:
+    "Corporate and community readiness for unexpected stoppages: examining emergency scenarios is compelling for our engine, because under stress the chain of decisions and the effects of “what if” branches draw out complex relations that show how a single misstep can pull the rest of the enterprise with it.",
+  pricingRoadmapEducationTitle: "Education scenario engine",
+  pricingRoadmapEducationWhen: "In testing • Expected arrival: Q1 2027",
+  pricingRoadmapEducationBody:
+    "We do not simulate a static classroom. Quite the reverse: we teach people to think through genuine, critical decision situations, where steps and strategies have immediate, measurable consequences in the system. Public launch follows the close of testing.",
+  pricingAddonStatus:
+    "This module cannot be started now. It is in preparation, and can be purchased as an add-on. Further details are on the support page, while the purchase process is on billing.",
+  pricingAddonBuy: "Purchase on billing",
   pricingLoyaltyTitle: "Three-year tiered loyalty model",
   pricingLoyaltyYears: [
     "Year 1: 100% of the entry list price as a one-time purchase — the purchased version stays yours permanently.",

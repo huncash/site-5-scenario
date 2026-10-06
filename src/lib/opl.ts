@@ -169,6 +169,80 @@ export const OPL_CORE_LESSONS: OplLesson[] = [
       },
     ],
   },
+  {
+    id: "lecke-03",
+    path: "lecke-3-pdca",
+    categoryHu: "Ciklus",
+    categoryEn: "Cycle",
+    titleHu: "PDCA",
+    titleEn: "PDCA",
+    whyHu: "A tárcsa párosával fordul. Négy állás: PLAN|DO, DO|CHECK, CHECK|ACT, ACT|PLAN.",
+    whyEn: "The dial turns in pairs. Four states: PLAN|DO, DO|CHECK, CHECK|ACT, ACT|PLAN.",
+    jargon: ["pdca", "plan", "do", "check", "act"],
+    keywords: ["pdca", "tárcsa", "plan", "do", "check", "act", "ciklus"],
+    deepDiveHu:
+      "A félkörös tárcsa mindig két szomszédos fázist mutat, nem egyet. PLAN: törzs és cél — ide a kiinduló számok kerülnek, nem a napi rezsi. DO: a futó üzem, cashflow, tétel. CHECK: ami eltért, a mérés. ACT: a javítás, amit bevezeted. A „Forgatás” gomb negyedfordulatot tesz: PD → DC → CA → AP, aztán vissza. Ha PLAN-be írsz napi tételt, összekevered a törzset a működéssel. A tárcsa nem ment új Case-t — csak a munkamódot cseréli. A kör akkor zárul, ha az ACT után újra PLAN-en indítod a következő tanulást.",
+    deepDiveEn:
+      "The semi-circle dial always shows two neighbouring phases, not one. PLAN: trunk and goal — starting numbers belong here, not daily overhead. DO: the live run, cashflow, posting. CHECK: what drifted, the measure. ACT: the fix you adopt. Rotate turns a quarter step: PD → DC → CA → AP, then back. If you post daily items in PLAN, you mix the trunk with operations. The dial does not save a new Case — it only swaps the work mode. The loop closes when after ACT you start the next learning on PLAN again.",
+    steps: [
+      {
+        id: "s1",
+        titleHu: "PLAN | DO",
+        titleEn: "PLAN | DO",
+        actionHu: "PD állás: balra a terv, jobbra a futó üzem.",
+        actionEn: "PD state: plan on the left, live run on the right.",
+        image: {
+          captionHu: "Tárcsa PD — PLAN és DO oszlop",
+          captionEn: "Dial PD — PLAN and DO columns",
+          src: "/opl-frames/pdca-dial-pd.webp",
+          altHu: "PDCA tárcsa PLAN|DO állásban, két oszlop egymás mellett",
+          altEn: "PDCA dial in PLAN|DO state, two columns side by side",
+        },
+      },
+      {
+        id: "s2",
+        titleHu: "DO | CHECK",
+        titleEn: "DO | CHECK",
+        actionHu: "Forgat: DC állás. Üzem balra, mérés jobbra.",
+        actionEn: "Rotate: DC state. Run on the left, measure on the right.",
+        image: {
+          captionHu: "Tárcsa DC — DO és CHECK oszlop",
+          captionEn: "Dial DC — DO and CHECK columns",
+          src: "/opl-frames/pdca-dial-dc.webp",
+          altHu: "PDCA tárcsa DO|CHECK állásban",
+          altEn: "PDCA dial in DO|CHECK state",
+        },
+      },
+      {
+        id: "s3",
+        titleHu: "CHECK | ACT",
+        titleEn: "CHECK | ACT",
+        actionHu: "CA állás: eltérés balra, beavatkozás jobbra.",
+        actionEn: "CA state: drift on the left, intervention on the right.",
+        image: {
+          captionHu: "Tárcsa CA — CHECK és ACT oszlop",
+          captionEn: "Dial CA — CHECK and ACT columns",
+          src: "/opl-frames/pdca-dial-ca.webp",
+          altHu: "PDCA tárcsa CHECK|ACT állásban",
+          altEn: "PDCA dial in CHECK|ACT state",
+        },
+      },
+      {
+        id: "s4",
+        titleHu: "ACT | PLAN",
+        titleEn: "ACT | PLAN",
+        actionHu: "AP állás: a javítás zárja a kört, új terv jobbra.",
+        actionEn: "AP state: the fix closes the loop, new plan on the right.",
+        image: {
+          captionHu: "Tárcsa AP — ACT és PLAN oszlop",
+          captionEn: "Dial AP — ACT and PLAN columns",
+          src: "/opl-frames/pdca-dial-ap.webp",
+          altHu: "PDCA tárcsa ACT|PLAN állásban",
+          altEn: "PDCA dial in ACT|PLAN state",
+        },
+      },
+    ],
+  },
 ];
 
 export const OPL_LESSONS: OplLesson[] = [...OPL_CORE_LESSONS, ...DASH_OPL_LESSONS, ...MOTOR_OPL_LESSONS];

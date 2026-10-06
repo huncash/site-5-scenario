@@ -242,10 +242,10 @@ export function WorkspacePanels({
   };
   const phaseExact = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
     if (phaseExactFor) return phaseExactFor(p);
-    if (p === "PLAN") return "tervezés — célok, szimuláció, örökölt törzs. Itt tervezel, mielőtt élesítesz.";
-    if (p === "DO") return "végrehajtás — élő folyamat. Ami most történik.";
-    if (p === "CHECK") return "ellenőrzés — a számok és a mutatók valósága.";
-    return "beavatkozás — protokoll vagy keret.";
+    if (p === "PLAN") return t("pdca.planExact");
+    if (p === "DO") return t("pdca.doExact");
+    if (p === "CHECK") return t("pdca.checkExact");
+    return t("pdca.actExact");
   };
   const phaseCls = (p: "PLAN" | "DO" | "CHECK" | "ACT") => {
     if (p === "PLAN") return "text-amber-400 font-bold";

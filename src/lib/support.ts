@@ -37,7 +37,7 @@ export function supportPublicOrigin(hostname?: string, pathname?: string): strin
   return SUPPORT_ORIGIN_PROD;
 }
 
-/** Support /pricing SSOT horgonyok — részletes árazás / licenc / helyi import / munkamenet. */
+/** Support /pricing SSOT horgonyok — részletes árazás / licenc / helyi import / munkamenet / asztali és speciális motorok. */
 export type SupportPricingAnchor =
   | "basic"
   | "pro"
@@ -45,7 +45,11 @@ export type SupportPricingAnchor =
   | "tiered-loyalty"
   | "active-workspaces"
   | "workflow"
-  | "local-import";
+  | "local-import"
+  | "desktop-engines"
+  | "desktop"
+  | "bcp"
+  | "education-engine";
 
 export type SupportPlanId = "basic" | "pro" | "enterprise";
 
@@ -88,6 +92,19 @@ export function supportPageUrl(slug: string): string {
   const url = new URL(path, `${origin}/`);
   applyViewPrefsToSearch(url);
   return url.toString();
+}
+
+export function supportTicketHref(opts?: { subject?: string }): string {
+  const url = new URL(supportPageUrl("ticket"));
+  const subject = opts?.subject?.trim();
+  if (subject) url.searchParams.set("subject", subject);
+  return url.toString();
+}
+
+export function readSupportTicketSearch(search = ""): { subject: string } {
+  const raw = search.startsWith("?") ? search.slice(1) : search;
+  const q = new URLSearchParams(raw);
+  return { subject: (q.get("subject") ?? "").trim() };
 }
 
 export function supportEmbedUrl(slug: string): string {

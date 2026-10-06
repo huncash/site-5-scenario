@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { buyerFromCheckout, checkoutGap, checkoutReady } from "../../bill/server/checkoutReady.ts";
 import { isLiveBilling, liveBillingError, liveBillingMissingKeys } from "../../bill/server/env.ts";
+import { billCopy } from "../../bill/src/copy.ts";
+import { BARION_WALLETS_LIVE } from "../../bill/src/payLogos.ts";
 
 import { PLANS_CONFIG } from "@/config/plans";
 import {
@@ -197,5 +199,18 @@ describe("live billing keys", () => {
     process.env.BARION_POS_KEY = "pos-key";
     expect(liveBillingMissingKeys()).toEqual([]);
     expect(liveBillingError()).toBeNull();
+  });
+});
+
+describe("Barion pay logos", () => {
+  it("keeps the strip to Barion, Visa and Mastercard until wallets are live", () => {
+    expect(BARION_WALLETS_LIVE).toBe(false);
+    const hu = billCopy("hu");
+    const en = billCopy("en");
+    expect(hu.barionHint).toMatch(/Visa/);
+    expect(hu.barionHint).toMatch(/Mastercard/);
+    expect(hu.barionHint).not.toMatch(/Apple Pay|Google Pay|Discover|Diners/i);
+    expect(en.barionHint).not.toMatch(/Apple Pay|Google Pay|Discover|Diners/i);
+    expect(hu.payLogosAlt).toBe("Barion, Mastercard, Visa");
   });
 });

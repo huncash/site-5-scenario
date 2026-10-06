@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { BookOpen, KeyRound, LifeBuoy, Plug } from "lucide-react";
 
 import { SiteFooter } from "@/components/SiteFooter";
@@ -291,14 +292,8 @@ function SupportLessonPage({ lesson }: { lesson: SupportLessonIndex }) {
 
 /** support.szcenario.hu és /support/* — landing vagy kanonikus lecke-aloldal. */
 export function SupportHost() {
-  const [path, setPath] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
-  useEffect(() => {
-    const sync = () => setPath(window.location.pathname);
-    sync();
-    window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
-  }, []);
-  const route = useMemo(() => resolveSupportSlug(supportPathSlug(path)), [path]);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const route = useMemo(() => resolveSupportSlug(supportPathSlug(pathname)), [pathname]);
   if (route.kind === "lesson" && route.lesson) {
     return <SupportLessonPage lesson={route.lesson} />;
   }
@@ -311,7 +306,7 @@ export function SupportHost() {
           </div>
         }
       >
-        <SupportSpaApp />
+        <SupportSpaApp pathname={pathname} />
       </Suspense>
     );
   }

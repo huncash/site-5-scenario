@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   SUPPORT_ORIGIN_PROD,
+  readSupportTicketSearch,
   supportMountPrefix,
   supportPricingHref,
+  supportTicketHref,
   supportTierDomId,
   supportTierHref,
 } from "@/lib/support";
@@ -16,6 +18,17 @@ describe("support pricing ↔ tier hrefs", () => {
     expect(supportPricingHref("enterprise")).toContain("#enterprise");
     expect(supportPricingHref("workflow")).toContain("#workflow");
     expect(supportPricingHref("local-import")).toContain("#local-import");
+    expect(supportPricingHref("desktop-engines")).toContain("#desktop-engines");
+    expect(supportPricingHref("desktop")).toContain("#desktop");
+    expect(supportPricingHref("bcp")).toContain("#bcp");
+    expect(supportPricingHref("education-engine")).toContain("#education-engine");
+  });
+
+  it("opens the ticket form with a subject query, not mailto", () => {
+    expect(supportTicketHref({ subject: "Enterprise & Csapatok ajánlatkérés" })).toContain("/ticket");
+    expect(supportTicketHref({ subject: "Enterprise & Csapatok ajánlatkérés" })).toContain("subject=");
+    expect(supportTicketHref()).not.toMatch(/^mailto:/);
+    expect(readSupportTicketSearch("?subject=Enterprise%20teszt").subject).toBe("Enterprise teszt");
   });
 
   it("maps support levels to home hashes", () => {

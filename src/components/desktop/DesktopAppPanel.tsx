@@ -116,7 +116,7 @@ export function DesktopAppPanel({ compact = false }: { compact?: boolean }) {
                         {t("pricing.order")}
                       </a>
                       {" · "}
-                      <a className="underline underline-offset-2" href={supportPricingHref("pro")}>
+                      <a className="underline underline-offset-2" href={supportPricingHref("desktop")}>
                         {t("pricing.moreInfo")}
                       </a>
                     </p>

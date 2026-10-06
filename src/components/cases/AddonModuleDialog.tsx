@@ -34,7 +34,7 @@ export function AddonModuleDialog({ open, title, onOpenChange }: Props) {
             {t("door.addonCtaClose")}
           </Button>
           <Button type="button" variant="outline" asChild>
-            <a href={supportPricingHref("pro")}>{t("door.addonCtaSupport")}</a>
+            <a href={supportPricingHref("desktop-engines")}>{t("door.addonCtaSupport")}</a>
           </Button>
           <Button type="button" className="btn-cta" asChild>
             <a href={billCheckoutUrl({ tier: "pro", interval: "yearly" })}>{t("door.addonCtaBuy")}</a>

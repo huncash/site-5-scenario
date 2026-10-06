@@ -28,6 +28,39 @@ describe("i18n", () => {
     expect(keysOf(en).sort()).toEqual(keysOf(hu).sort());
   });
 
+  it("keeps dashboard money labels bilingual; user names stay out of the dictionary", () => {
+    expect(translate("hu", "dash.cashflowTitle")).toBe("Pénzáramlás");
+    expect(translate("en", "dash.cashflowTitle")).toBe("Cash Flow");
+    expect(translate("hu", "dash.freeNet")).toBe("Szabad nettó");
+    expect(translate("en", "dash.freeNet")).toBe("Free Net");
+    expect(translate("hu", "dash.vatReserve")).toBe("ÁFA tartalék");
+    expect(translate("en", "dash.vatReserve")).toBe("VAT Reserve");
+    expect(translate("hu", "dash.bankBalance")).toBe("Banki egyenleg");
+    expect(translate("en", "dash.bankBalance")).toBe("Bank Balance");
+    expect(translate("hu", "dash.locked")).toBe("Zárolt");
+    expect(translate("en", "dash.locked")).toBe("Locked");
+    expect(translate("hu", "dash.heatmap")).toBe("Kivétel-hőtérkép");
+    expect(translate("en", "dash.heatmap")).toBe("Exception Heatmap");
+    expect(translate("hu", "dash.liabilities")).toBe("Tartozások / Kötelezettségek");
+    expect(translate("en", "dash.liabilities")).toBe("Liabilities / Payables");
+    expect(translate("hu", "dash.newLiability")).toBe("+ Új tartozás");
+    expect(translate("en", "dash.newLiability")).toBe("+ New liability");
+    expect(translate("hu", "dash.outstanding")).toBe("Fennálló tartozás");
+    expect(translate("en", "dash.outstanding")).toBe("Outstanding debt");
+    expect(translate("hu", "dash.publicDebt")).toBe("Köztartozás");
+    expect(translate("en", "dash.publicDebt")).toBe("Tax arrears");
+    expect(translate("hu", "dash.nextDue")).toBe("Következő esedékesség");
+    expect(translate("en", "dash.nextDue")).toBe("Next due date");
+    expect(translate("hu", "loan.typeCredit")).toBe("Forgóeszköz hitel");
+    expect(translate("en", "loan.typeCredit")).toBe("Working capital loan");
+    expect(translate("hu", "dash.itemsQuick")).toBe("Tételek (gyors szerkesztés)");
+    expect(translate("en", "dash.itemsQuick")).toBe("Items (quick edit)");
+    expect(translate("hu", "pdca.actWord")).toBe("Beavatkozás");
+    expect(translate("en", "pdca.actWord")).toBe("Intervention");
+    expect(translate("hu", "loan.slotNote", { name: "Core üzem vállalkozás" })).toContain("Core üzem vállalkozás");
+    expect(translate("en", "loan.slotNote", { name: "Core üzem vállalkozás" })).toContain("Core üzem vállalkozás");
+  });
+
   it("keeps professional terms identical", () => {
     expect(hu.term).toEqual(TERMS);
     expect(en.term).toEqual(TERMS);

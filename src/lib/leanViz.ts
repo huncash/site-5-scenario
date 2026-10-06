@@ -1,4 +1,5 @@
 import { compactCurrency } from "@/i18n/currency";
+import type { Locale } from "@/i18n/locale";
 
 /**
  * Lean vizualizációs playbook + öntanuló preferencia.
@@ -26,35 +27,45 @@ export type LeanVizAdvice = {
 export const LEAN_VIZ_PLAYBOOK: Readonly<
   Record<
     LeanVizKind,
-    { labelHu: string; when: string; replaces: string }
+    { labelHu: string; labelEn: string; when: string; replaces: string }
   >
 > = {
   waterfall: {
     labelHu: "Vízesés",
+    labelEn: "Waterfall",
     when: "Kezdő értéktől a végeredményig (bevétel → költség → eredmény).",
     replaces: "Többsoros tábla / halmozott oszlop.",
   },
   bullet: {
     labelHu: "Bullet (cél vs. tény)",
+    labelEn: "Bullet (target vs actual)",
     when: "Egy mutató célhoz viszonyítva, kis helyen.",
     replaces: "Sebességmérő / gauge.",
   },
   heatmap: {
     labelHu: "Kivétel-hőtérkép",
+    labelEn: "Exception heatmap",
     when: "Sok cella, a deviancia a lényeg.",
     replaces: "Számtábla.",
   },
   small_multiples: {
     labelHu: "Kis többszörösök",
+    labelEn: "Small multiples",
     when: "Több azonos skálájú trend egymás mellett.",
     replaces: "Tészta-vonalgrafikon.",
   },
   sankey: {
     labelHu: "Áramlás (Sankey)",
+    labelEn: "Flow (Sankey)",
     when: "Honnan hová folyik a tőke.",
     replaces: "Kördiagram.",
   },
 };
+
+export function leanVizLabel(kind: LeanVizKind, locale: Locale = "hu"): string {
+  const row = LEAN_VIZ_PLAYBOOK[kind];
+  return locale === "en" ? row.labelEn : row.labelHu;
+}
 
 const USED_PREFIX = "ui:leanVizUsed:";
 const PREF_PREFIX = "ui:leanVizPref:";

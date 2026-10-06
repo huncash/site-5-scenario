@@ -14,39 +14,35 @@ import {
   type LoanType,
 } from "@/lib/finance";
 import { formatMoney } from "@/lib/finance";
+import { useI18n, type MessageKey } from "@/i18n";
 
-function typeLabel(t: LoanType) {
-  switch (t) {
+function typeKey(kind: LoanType): MessageKey {
+  switch (kind) {
     case "bank_loan":
-      return "Banki tartozás";
+      return "loan.typeBank";
     case "personal_loan":
-      return "Személyi tartozás";
+      return "loan.typePersonal";
     case "leasing":
-      return "Lízing";
+      return "loan.typeLeasing";
     case "credit_line":
-      return "Hitelszerű keret";
+      return "loan.typeCredit";
     case "shareholder_loan":
-      return "Tagi kölcsön";
+      return "loan.typeShareholder";
     case "nav_installment":
-      return "NAV részletfizetés";
+      return "loan.typeNav";
     case "supplier_debt":
-      return "Beszállítói tartozás";
+      return "loan.typeSupplier";
     case "grant_own_contribution":
-      return "Pályázati önrész";
+      return "loan.typeGrant";
     default:
-      return "Egyéb kötelezettség";
+      return "loan.typeOther";
   }
 }
 
-function freqLabel(f: DebtFrequency) {
-  switch (f) {
-    case "monthly":
-      return "Havi részletek";
-    case "one_off":
-      return "Egyszeri";
-    default:
-      return "Egyedi ütemezés";
-  }
+function freqKey(f: DebtFrequency): MessageKey {
+  if (f === "monthly") return "loan.freqMonthly";
+  if (f === "one_off") return "loan.freqOneOff";
+  return "loan.freqCustom";
 }
 
 function parseNum(s: string) {
@@ -78,6 +74,7 @@ export function LoanDialog({
   const [months, setMonths] = useState("6");
   const [schedule, setSchedule] = useState<DebtScheduleItem[]>([]);
   const [status, setStatus] = useState<LoanStatus>("active");
+  const { t } = useI18n();
   const [rate, setRate] = useState("");
 
   useEffect(() => {
@@ -162,34 +159,29 @@ export function LoanDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 custom-scrollbar">
         <DialogHeader>
-          <DialogTitle>
-            {editing ? "Tartozás / kötelezettség szerkesztése" : "Új tartozás / kötelezettség"}
-          </DialogTitle>
-          <div className="text-[11px] text-muted-foreground">
-            Slot: <span className="font-mono text-foreground">{workspaceName}</span> — a tartozás csak ide
-            kötődik (workspace izoláció).
-          </div>
+          <DialogTitle>{editing ? t("loan.editTitle") : t("loan.newTitle")}</DialogTitle>
+          <div className="text-[11px] text-muted-foreground">{t("loan.slotNote", { name: workspaceName })}</div>
         </DialogHeader>
 
         <div className="grid gap-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="grid gap-2.5">
-              <Label className="text-muted-foreground">Megnevezés</Label>
+              <Label className="text-muted-foreground">{t("loan.name")}</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.currentTarget.value)}
-                placeholder='pl. "NAV ÁFA Részletfizetés 2026"'
+                placeholder={t("loan.namePh")}
               />
             </div>
             <div className="grid gap-2.5">
-              <Label>Partner</Label>
-              <Input value={partner} onChange={(e) => setPartner(e.currentTarget.value)} placeholder='pl. "NAV"' />
+              <Label>{t("loan.partner")}</Label>
+              <Input value={partner} onChange={(e) => setPartner(e.currentTarget.value)} placeholder={t("loan.partnerPh")} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="grid gap-2.5">
-              <Label>Típus</Label>
+              <Label>{t("loan.type")}</Label>
               <Select value={type} onValueChange={(v) => setType(v as LoanType)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -207,20 +199,20 @@ export function LoanDialog({
                       "shareholder_loan",
                       "other",
                     ] as LoanType[]
-                  ).map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {typeLabel(t)}
+                  ).map((kind) => (
+                    <SelectItem key={kind} value={kind}>
+                      {t(typeKey(kind))}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2.5">
-              <Label>Teljes összeg (Ft)</Label>
+              <Label>{t("loan.total")}</Label>
               <Input inputMode="decimal" value={total} onChange={(e) => setTotal(e.currentTarget.value)} />
             </div>
             <div className="grid gap-2.5">
-              <Label>Gyakoriság</Label>
+              <Label>{t("loan.frequency")}</Label>
               <Select value={frequency} onValueChange={(v) => setFrequency(v as DebtFrequency)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -228,7 +220,7 @@ export function LoanDialog({
                 <SelectContent>
                   {(["monthly", "one_off", "custom"] as DebtFrequency[]).map((f) => (
                     <SelectItem key={f} value={f}>
-                      {freqLabel(f)}
+                      {t(freqKey(f))}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -238,11 +230,11 @@ export function LoanDialog({
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="grid gap-2.5">
-              <Label>Kezdő dátum</Label>
+              <Label>{t("loan.startDate")}</Label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.currentTarget.value)} />
             </div>
             <div className="grid gap-2.5">
-              <Label>Futamidő (hónap)</Label>
+              <Label>{t("loan.termMonths")}</Label>
               <Input
                 inputMode="numeric"
                 value={months}
@@ -252,19 +244,19 @@ export function LoanDialog({
             </div>
             <div className="flex items-end">
               <Button type="button" variant="outline" className="w-full" onClick={regenerate}>
-                Ütemező újragenerálása
+                {t("loan.regenerate")}
               </Button>
             </div>
           </div>
 
           <div className="rounded-md border border-border/60 bg-background/40">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2">
-              <div className="text-xs font-medium text-slate-200">Részletfizetési ütemezés (szerkeszthető)</div>
+              <div className="text-xs font-medium text-slate-200">{t("loan.schedule")}</div>
               <div className="text-[11px] text-slate-300">
-                Összeg:{" "}
+                {t("loan.sum")}:{" "}
                 <span className="font-mono text-slate-100">{formatMoney(Math.round(scheduleSum), "HUF")}</span>
                 {" · "}
-                Hátralévő:{" "}
+                {t("loan.remaining")}:{" "}
                 <span className="font-mono text-slate-100">{formatMoney(Math.round(pendingSum), "HUF")}</span>
               </div>
             </div>
@@ -273,16 +265,16 @@ export function LoanDialog({
                 <thead className="sticky top-0 bg-[var(--card-bg)] text-[var(--text-main)] backdrop-blur-md">
                   <tr>
                     <th className="px-3 py-2 text-left font-medium">#</th>
-                    <th className="px-3 py-2 text-left font-medium">Esedékesség</th>
-                    <th className="px-3 py-2 text-left font-medium">Összeg (Ft)</th>
-                    <th className="px-3 py-2 text-left font-medium">Státusz</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("loan.due")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("loan.amountFt")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("loan.status")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {schedule.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                        Add meg az összeget és a futamidőt — az ütemező automatikusan kitölti a táblázatot.
+                        {t("loan.scheduleEmpty")}
                       </td>
                     </tr>
                   ) : (
@@ -314,8 +306,8 @@ export function LoanDialog({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="pending">Függő</SelectItem>
-                              <SelectItem value="paid">Fizetve</SelectItem>
+                              <SelectItem value="pending">{t("loan.pending")}</SelectItem>
+                              <SelectItem value="paid">{t("loan.paid")}</SelectItem>
                             </SelectContent>
                           </Select>
                         </td>
@@ -326,25 +318,25 @@ export function LoanDialog({
               </table>
             </div>
             <div className="border-t border-border/60 px-3 py-2 text-[11px] text-muted-foreground">
-              💡 NAV tipp: generáld a 6 egyenlő sort, majd az utolsó (kerekítő) összeget írd át kézzel.
+              {t("loan.navTip")}
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="grid gap-2.5">
-              <Label>Státusz</Label>
+              <Label>{t("loan.status")}</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as LoanStatus)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Aktív</SelectItem>
-                  <SelectItem value="paid_off">Kiegyenlítve</SelectItem>
+                  <SelectItem value="active">{t("loan.active")}</SelectItem>
+                  <SelectItem value="paid_off">{t("loan.paidOff")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2.5">
-              <Label>Kamatláb % (opcionális)</Label>
+              <Label>{t("loan.rate")}</Label>
               <Input
                 inputMode="decimal"
                 value={rate}
@@ -357,7 +349,7 @@ export function LoanDialog({
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-            Mégse
+            {t("loan.cancel")}
           </Button>
           <Button
             type="button"
@@ -381,7 +373,7 @@ export function LoanDialog({
               onOpenChange(false);
             }}
           >
-            Mentés
+            {t("loan.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -71,6 +71,9 @@ describe("pre-flight public promise", () => {
       supportCopy("hu").pricingLocalBody,
       supportCopy("hu").pricingWorkflowBody,
       supportCopy("hu").pricingWorkflowBody2,
+      supportCopy("hu").pricingRoadmapLead,
+      supportCopy("hu").pricingRoadmapBcpBody,
+      supportCopy("hu").pricingAddonStatus,
     ].join("\n");
     const operationEn = [
       en.brand.localFirstBody,
@@ -83,6 +86,9 @@ describe("pre-flight public promise", () => {
       supportCopy("en").pricingLocalBody,
       supportCopy("en").pricingWorkflowBody,
       supportCopy("en").pricingWorkflowBody2,
+      supportCopy("en").pricingRoadmapLead,
+      supportCopy("en").pricingRoadmapBcpBody,
+      supportCopy("en").pricingAddonStatus,
     ].join("\n");
     expect(operationHu).not.toMatch(/Barion/i);
     expect(operationEn).not.toMatch(/Barion/i);
@@ -139,6 +145,18 @@ describe("pre-flight public promise", () => {
     expect(hu.pricingActiveTitle).not.toMatch(/#/);
     expect(hu.pricingWorkflowTitle).not.toMatch(/#/);
     expect(hu.pricingLocalTitle).not.toMatch(/#/);
+    expect(hu.pricingRoadmapTitle).not.toMatch(/#/);
+    expect(hu.pricingAddonStatus).toBe(
+      "Ez a modul most nem indítható. Előkészítés alatt áll, és megvásárolható bővítőként. További részletek a támogatási, míg a vásárlási folyamat a számlázási aloldalunkon található.",
+    );
+    expect(hu.pricingRoadmapDesktopWhen).toMatch(/I\. negyedév vége/);
+    expect(hu.pricingRoadmapBcpWhen).toMatch(/Tesztelés alatt/);
+    expect(hu.pricingRoadmapEducationWhen).toMatch(/Tesztelés alatt/);
+    expect(hu.pricingRoadmapBcpBody).toMatch(/vészhelyzeti szcenáriók/);
+    expect(hu.pricingRoadmapEducationBody).toMatch(/statikus oktatási környezetet/);
+    expect(hu.pricingRoadmapEducationBody).toMatch(/nyilvános indítás/);
+    expect(hu.pricingRoadmapEducationBody).not.toMatch(/2027/);
+    expect(hu.pricingRoadmapBcpTitle).toMatch(/Működésfolytonosság & reziliencia \(BCP\)/);
     const blob = supportPricingTiers("hu")
       .flatMap((t) => [t.detail, t.ladder, ...t.bullets])
       .join("\n");

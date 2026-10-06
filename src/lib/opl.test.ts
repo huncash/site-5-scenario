@@ -10,6 +10,7 @@ describe("opl", () => {
       "lecke-1-dashboard-kezeles",
       "lecke-2-szukseglet-vagy-befektetes",
       "lecke-cashflow-logika",
+      "lecke-3-pdca",
     ]);
   });
 
@@ -54,6 +55,8 @@ describe("opl", () => {
 
   it("resolves by path", () => {
     expect(oplByPath("lecke-cashflow-logika")?.id).toBe("lecke-cashflow");
+    expect(oplByPath("lecke-3-pdca")?.steps.every((s) => Boolean(s.image?.src))).toBe(true);
+    expect(oplByPath("lecke-dash-pdca-tarcsa")?.steps.every((s) => Boolean(s.image?.src))).toBe(true);
     expect(oplByPath("lecke-dash-horizont")?.titleHu).toMatch(/6 \/ 12 \/ 24/);
     expect(oplByPath("lecke-dash-horizont")?.steps.every((s) => Boolean(s.image?.src))).toBe(true);
     expect(oplByPath("lecke-motor-jit")?.titleHu).toMatch(/JIT/i);

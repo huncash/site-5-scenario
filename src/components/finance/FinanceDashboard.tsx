@@ -3129,7 +3129,7 @@ export function FinanceDashboard({
         level: "green" as const,
         icon: "🟢",
         cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
-        label: "Nincs tartozás / puffer OK",
+        label: t("dash.bufferOk"),
         free,
         outstanding,
         net90,
@@ -3146,7 +3146,7 @@ export function FinanceDashboard({
         level: "red" as const,
         icon: "🔴",
         cls: "border-rose-500/30 bg-rose-500/10 text-rose-200",
-        label: "Piros: nincs elég puffer a tartozásokra",
+        label: t("dash.bufferRed"),
         free,
         outstanding,
         net90,
@@ -3158,7 +3158,7 @@ export function FinanceDashboard({
         level: "yellow" as const,
         icon: "🟡",
         cls: "border-amber-500/30 bg-amber-500/10 text-amber-200",
-        label: "Sárga: fedezi, de szűk a puffer / negatív trend",
+        label: t("dash.bufferYellow"),
         free,
         outstanding,
         net90,
@@ -3169,7 +3169,7 @@ export function FinanceDashboard({
       level: "green" as const,
       icon: "🟢",
       cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
-      label: "Zöld: fedezi és van puffer",
+      label: t("dash.bufferGreen"),
       free,
       outstanding,
       net90,
@@ -3185,6 +3185,7 @@ export function FinanceDashboard({
     txnNetHuf,
     txns,
     vatReserve?.free,
+    t,
   ]);
 
   const vatLedger = useMemo(() => {
@@ -6275,19 +6276,19 @@ export function FinanceDashboard({
             <RevealToggle open={tartozasokBlock.isOpen} onClick={tartozasokBlock.toggle} />
             <CardTitle
               className="flex items-center text-sm font-medium text-muted-foreground"
-              data-exact="Tartozások — fennálló hitelek és kötelezettségek, következő részlettel."
+              data-exact={t("dash.liabilitiesExact")}
             >
-              Tartozások / Kötelezettségek
+              {t("dash.liabilities")}
               <HelpIcon kbId="loans-liabilities" />
             </CardTitle>
           </div>
           {tartozasokBlock.isOpen ? (
           <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
             <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 font-medium", debtBuffer.cls)} title={debtBuffer.label}>
-              {debtBuffer.icon} puffer
+              {debtBuffer.icon} {t("dash.buffer")}
             </span>
             <span className="font-mono">
-              szabad: {formatMoney(Math.round(debtBuffer.free), CURRENCY)} · tartozás:{" "}
+              {t("dash.freeShort")}: {formatMoney(Math.round(debtBuffer.free), CURRENCY)} · {t("dash.debtShort")}:{" "}
               {formatMoney(Math.round(debtBuffer.outstanding), CURRENCY)}
             </span>
           </div>
@@ -6304,7 +6305,7 @@ export function FinanceDashboard({
               setLoanOpen(true);
             }}
           >
-            + Új tartozás
+            {t("dash.newLiability")}
           </Button>
         </div>
       </CardHeader>
@@ -6312,26 +6313,26 @@ export function FinanceDashboard({
       <CardContent className="space-y-3">
         <div className="grid gap-2 sm:grid-cols-3">
           <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
-            <div className="text-[11px] text-slate-300">Fennálló tartozás</div>
+            <div className="text-[11px] text-slate-300">{t("dash.outstanding")}</div>
             <div className="mt-1 text-sm font-semibold text-white tabular-nums">
               {formatMoney(Math.round(loanKpis.totalOutstanding), CURRENCY)}
             </div>
           </div>
           <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
-            <div className="text-[11px] text-slate-300">Közeli részletteher (~30 nap)</div>
+            <div className="text-[11px] text-slate-300">{t("dash.nearInstallment")}</div>
             <div className="mt-1 text-sm font-semibold text-white tabular-nums">
               {formatMoney(Math.round(loanKpis.monthlyBurden), CURRENCY)}
             </div>
           </div>
           <div className="rounded-md border border-slate-700/60 bg-slate-800/80 p-3">
-            <div className="text-[11px] text-slate-300">Következő esedékesség</div>
+            <div className="text-[11px] text-slate-300">{t("dash.nextDue")}</div>
             <div className="mt-1 text-sm font-semibold text-white tabular-nums">
               {loanKpis.nextMaturity ?? "—"}
             </div>
           </div>
         </div>
         {activeLoans.length === 0 ? (
-          <div className="text-xs text-muted-foreground">Nincs aktív tartozás ezen a munkatéren.</div>
+          <div className="text-xs text-muted-foreground">{t("dash.noActiveDebt")}</div>
         ) : (
           <ul className="grid gap-2">
             {activeLoans.slice(0, 8).map((l) => {
@@ -6350,7 +6351,7 @@ export function FinanceDashboard({
                   </div>
                   {(l.schedule?.length ?? 0) > 0 ? (
                     <div className="mt-1 text-[10px] text-slate-400">
-                      {l.schedule!.filter((s) => s.status !== "paid").length} függő részlet · következő:{" "}
+                      {t("dash.pendingNext", { n: l.schedule!.filter((s) => s.status !== "paid").length })}{" "}
                       {debtNextPendingDue(l.schedule) ?? "—"}
                     </div>
                   ) : null}
@@ -6373,10 +6374,10 @@ export function FinanceDashboard({
               <RevealToggle open={cashflowBlock.isOpen} onClick={cashflowBlock.toggle} />
               <CardTitle
                 className="text-sm font-medium text-[var(--text-main)]"
-                title={`Cashflow — ${workspaceDisplayName(activeWorkspace)}`}
-                data-exact="pénzáramlás — havi bevétel, kiadás, kassza."
+                title={`${t("dash.cashflowTitle")} — ${workspaceDisplayName(activeWorkspace)}`}
+                data-exact={t("dash.cashflowKpiExact")}
               >
-                Cashflow — {workspaceDisplayName(activeWorkspace)}
+                {t("dash.cashflowTitle")} — {workspaceDisplayName(activeWorkspace)}
               </CardTitle>
             </div>
             <SectionSettingsGear onClick={() => jumpToReferences("bank", undefined, activeWorkspace)} />
@@ -6432,7 +6433,7 @@ export function FinanceDashboard({
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-emerald-500/60 bg-muted/25 p-2.5"
                 data-exact="Szabad egyenleg — ami a kötelezettségek után még elkölthető."
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300">Szabad egyenleg</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300">{t("dash.freeBalance")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(personalCashflowKpis.free), CURRENCY)}
@@ -6442,9 +6443,9 @@ export function FinanceDashboard({
               </div>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-sky-500/60 bg-muted/25 p-2.5"
-                data-exact="Perselyek — félretett alhalmazok (célok, puffer, ÁFA)."
+                data-exact={t("dash.piggiesExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Megtakarítások / perselyek">Perselyek</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.piggiesTitle")}>{t("dash.piggies")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-sky-400 sm:text-sm"
                   title={formatMoney(Math.round(personalCashflowKpis.piggies), CURRENCY)}
@@ -6454,9 +6455,9 @@ export function FinanceDashboard({
               </div>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-border bg-muted/25 p-2.5"
-                data-exact="Banki egyenleg — a számlán lévő bruttó összeg."
+                data-exact={t("dash.bankBalanceExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Banki egyenleg / kassa">Banki egyenleg</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.bankBalanceTitle")}>{t("dash.bankBalance")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(personalCashflowKpis.bankGross), CURRENCY)}
@@ -6484,9 +6485,9 @@ export function FinanceDashboard({
             <>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-emerald-500/60 bg-muted/25 p-2.5"
-                data-exact="Szabad nettó — ÁFA és zárolás után elkölthető összeg."
+                data-exact={t("dash.freeNetExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Szabad nettó egyenleg">Szabad nettó</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.freeNetTitle")}>{t("dash.freeNet")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(vatReserve.free), CURRENCY)}
@@ -6496,9 +6497,9 @@ export function FinanceDashboard({
               </div>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-amber-500/60 bg-muted/25 p-2.5"
-                data-exact="ÁFA tartalék — a fizetendő ÁFA, amit ne költs el."
+                data-exact={t("dash.vatReserveExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="ÁFA tartalék / fizetendő">ÁFA tartalék</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.vatReserve")}>{t("dash.vatReserve")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-amber-400 sm:text-sm"
                   title={formatMoney(Math.round(vatReserve.payable), CURRENCY)}
@@ -6508,9 +6509,9 @@ export function FinanceDashboard({
               </div>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-border bg-muted/25 p-2.5"
-                data-exact="Banki egyenleg — a céges számla bruttó egyenlege."
+                data-exact={t("dash.bankBalanceGrossExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Banki egyenleg (bruttó)">Banki egyenleg</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.bankBalance")}>{t("dash.bankBalance")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(vatReserve.balance), CURRENCY)}
@@ -6520,9 +6521,9 @@ export function FinanceDashboard({
               </div>
               <div
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-sky-500/60 bg-muted/25 p-2.5"
-                data-exact="Zárolt — fenntartott összeg (tartalék, nem szabad)."
+                data-exact={t("dash.lockedExact")}
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Zárolt / fenntartott">Zárolt</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={t("dash.lockedTitle")}>{t("dash.locked")}</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-sky-400 sm:text-sm"
                   title={formatMoney(Math.round(vatReserve.reserved ?? 0), CURRENCY)}
@@ -6532,14 +6533,14 @@ export function FinanceDashboard({
               </div>
             </>
           ) : (
-            <div className="w-full text-sm text-slate-300">Nincs elég adat a cashflow KPI-khoz.</div>
+            <div className="w-full text-sm text-slate-300">{t("dash.cashflowNoKpi")}</div>
           )}
 
           <div className="col-span-full w-full pt-2">
             {leanBuilt.links.length ? (
               <ChartChrome
                 blockId="penzaramlas"
-                title="Pénzáramlás"
+                title={t("dash.cashflowTitle")}
                 span={vizSpan}
                 onSpan={onVizSpan}
                 onPrev={onVizPrev}
@@ -6547,8 +6548,8 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color={SERIES_COLORS.source} label="Honnan" />
-                    <ChartLegendSwatch color={SERIES_COLORS.sink} label="Költséghely" />
+                    <ChartLegendSwatch color={SERIES_COLORS.source} label={t("dash.from")} />
+                    <ChartLegendSwatch color={SERIES_COLORS.sink} label={t("dash.costCenter")} />
                   </>
                 }
               >
@@ -6558,7 +6559,7 @@ export function FinanceDashboard({
             <div className="viz-split">
               <ChartChrome
                 blockId="hoterkep"
-                title="Kivétel-hőtérkép"
+                title={t("dash.heatmap")}
                 span={vizSpan}
                 onSpan={onVizSpan}
                 onPrev={onVizPrev}
@@ -6566,9 +6567,9 @@ export function FinanceDashboard({
                 windowLabel={vizWindowLabel}
                 legend={
                   <>
-                    <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
-                    <ChartLegendSwatch color={SERIES_COLORS.neutral} label="Semleges" />
-                    <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
+                    <ChartLegendSwatch color={SERIES_COLORS.plus} label={t("dash.plus")} />
+                    <ChartLegendSwatch color={SERIES_COLORS.neutral} label={t("dash.neutral")} />
+                    <ChartLegendSwatch color={SERIES_COLORS.minus} label={t("dash.minus")} />
                   </>
                 }
               >
@@ -6663,8 +6664,8 @@ export function FinanceDashboard({
         <CardHeader className="pb-1.5">
           <RevealPanel
             id="do.quickTxns"
-            title="Tételek (gyors szerkesztés)"
-            exact="Tételek — a napló: bevétel, kiadás, átvezetés. Kattints egy sorra a részlethez."
+            title={t("dash.itemsQuick")}
+            exact={t("dash.itemsExact")}
           >
           <div className="mb-2 flex flex-wrap items-center gap-2">
             {auditDayIso ? (
@@ -8092,16 +8093,16 @@ export function FinanceDashboard({
           <Card className="w-full">
             <CardContent className="pt-2.5">
               {leanBuilt.links.length === 0 ? (
-                <EmptyBlock>Még nincs rögzített áramlás.</EmptyBlock>
+                <EmptyBlock>{t("dash.cashflowEmpty")}</EmptyBlock>
               ) : (
                 <ChartChrome
                   blockId="penzaramlas"
                   title={
                     <LeanTerm
-                      title="Pénzáramlás"
-                      exact="Pénzáramlás — honnan hová megy a pénz. A vastagság az összeg."
+                      title={t("dash.cashflowTitle")}
+                      exact={t("dash.cashflowExact")}
                     >
-                      Pénzáramlás
+                      {t("dash.cashflowTitle")}
                     </LeanTerm>
                   }
                   span={vizSpan}
@@ -8111,8 +8112,8 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color={SERIES_COLORS.source} label="Honnan" />
-                      <ChartLegendSwatch color={SERIES_COLORS.sink} label="Költséghely" />
+                      <ChartLegendSwatch color={SERIES_COLORS.source} label={t("dash.from")} />
+                      <ChartLegendSwatch color={SERIES_COLORS.sink} label={t("dash.costCenter")} />
                     </>
                   }
                 >
@@ -8122,7 +8123,7 @@ export function FinanceDashboard({
               <div className="viz-split">
                 <ChartChrome
                   blockId="hoterkep"
-                  title="Kivétel-hőtérkép"
+                  title={t("dash.heatmap")}
                   span={vizSpan}
                   onSpan={onVizSpan}
                   onPrev={onVizPrev}
@@ -8130,9 +8131,9 @@ export function FinanceDashboard({
                   windowLabel={vizWindowLabel}
                   legend={
                     <>
-                      <ChartLegendSwatch color={SERIES_COLORS.plus} label="Plusz" />
-                      <ChartLegendSwatch color={SERIES_COLORS.neutral} label="Semleges" />
-                      <ChartLegendSwatch color={SERIES_COLORS.minus} label="Levonás" />
+                      <ChartLegendSwatch color={SERIES_COLORS.plus} label={t("dash.plus")} />
+                      <ChartLegendSwatch color={SERIES_COLORS.neutral} label={t("dash.neutral")} />
+                      <ChartLegendSwatch color={SERIES_COLORS.minus} label={t("dash.minus")} />
                     </>
                   }
                 >
@@ -8230,8 +8231,8 @@ export function FinanceDashboard({
             </div>
             {bridge.suggestedTransfer > 0 ? (
               <div className="mt-2 text-[11px] text-slate-300">
-                Pénzáramlás-híd: javasolt áthidalás{" "}
-                <span className="font-mono text-emerald-200">{formatMoney(Math.round(bridge.suggestedTransfer), CURRENCY)}</span> (üzleti surplusból)
+                {t("dash.cashflowBridge")}{" "}
+                <span className="font-mono text-emerald-200">{formatMoney(Math.round(bridge.suggestedTransfer), CURRENCY)}</span> {t("dash.cashflowBridgeFrom")}
               </div>
             ) : null}
           </CollapsibleCard>
@@ -10104,7 +10105,7 @@ export function FinanceDashboard({
                                 <CardContent className="p-5">
                                   <div className="flex items-start justify-between gap-2">
                                     <p className="text-xs uppercase tracking-wide text-foreground/80">
-                                      Szabad nettó egyenleg (elkölthető keret)
+                                      {t("dash.freeNetSpendable")}
                                     </p>
                                     <HelpIcon kbId="cashflow-savings" />
                                   </div>
@@ -10112,7 +10113,7 @@ export function FinanceDashboard({
                                     {formatMoney(Math.round(vatReserve.free), CURRENCY)}
                                   </p>
                                   <p className="mt-1 text-[11px] text-foreground/70">
-                                    Ez az az összeg, ami a persely + ÁFA tartalék levonása után ténylegesen elkölthető.
+                                    {t("dash.freeNetHint")}
                                   </p>
                                 </CardContent>
                               </Card>
@@ -10121,7 +10122,7 @@ export function FinanceDashboard({
                                 <CardContent className="p-5">
                                   <div className="flex items-start justify-between gap-2">
                                     <p className="text-xs uppercase tracking-wide text-foreground/80">
-                                      Befizetésre váró ÁFA tartalék
+                                      {t("dash.vatReserveDue")}
                                     </p>
                                     <HelpIcon kbId="cashflow-savings" />
                                   </div>
@@ -10129,7 +10130,7 @@ export function FinanceDashboard({
                                     {formatMoney(Math.round(payable), CURRENCY)}
                                   </p>
                                   <p className="mt-1 text-[11px] text-foreground/70">
-                                    Banki egyenleg része, de kötelezettség miatt “zárolt”.
+                                    {t("dash.vatReserveHint")}
                                   </p>
                                 </CardContent>
                               </Card>
@@ -10330,7 +10331,7 @@ export function FinanceDashboard({
                                 </div>
                                 <div className="mt-1 text-sm text-slate-200">
                                   <div className="flex items-center justify-between gap-2">
-                                    <span className="text-slate-300">ÁFA tartalék (havi)</span>
+                                    <span className="text-slate-300">{t("dash.vatReserveMonthly")}</span>
                                     <span className="font-mono">
                                       {formatMoney(Math.round(leanInsights.bufferVatMonthly), CURRENCY)}
                                     </span>
@@ -11233,7 +11234,7 @@ export function FinanceDashboard({
 
                           <div className="grid grid-cols-1 gap-3 min-w-0 sm:grid-cols-2">
                             <div className="grid gap-2">
-                              <Label htmlFor="rec-next">Következő esedékesség</Label>
+                              <Label htmlFor="rec-next">{t("dash.nextDue")}</Label>
                               <Input
                                 id="rec-next"
                                 type="date"
@@ -12326,10 +12327,10 @@ export function FinanceDashboard({
                     <CardContent className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium", debtBuffer.cls)}>
-                          {debtBuffer.icon} puffer
+                          {debtBuffer.icon} {t("dash.buffer")}
                         </span>
                         <span className="font-mono">
-                          szabad: {formatMoney(Math.round(debtBuffer.free), CURRENCY)} · tartozás:{" "}
+                          {t("dash.freeShort")}: {formatMoney(Math.round(debtBuffer.free), CURRENCY)} · {t("dash.debtShort")}:{" "}
                           {formatMoney(Math.round(debtBuffer.outstanding), CURRENCY)}
                         </span>
                       </div>

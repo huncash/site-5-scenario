@@ -4,6 +4,7 @@ import { HelpIcon } from "@/components/HelpIcon";
 import { RevealToggle } from "@/components/lean-viz/CollapsibleCard";
 import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
 import { currencyUnit } from "@/i18n/currency";
+import { useI18n } from "@/i18n";
 import { formatMoney } from "@/lib/finance";
 import {
   compactHuf,
@@ -759,6 +760,7 @@ export function FlowSankey({
   sinks: string[];
   links: SankeyLink[];
 }) {
+  const { t } = useI18n();
   const [hot, setHot] = useState<string | null>(null);
   const { ref, w } = useBoxWidth(360);
   const srcTot = sources.map((s) => links.filter((l) => l.from === s).reduce((a, l) => a + l.value, 0));
@@ -805,7 +807,7 @@ export function FlowSankey({
         viewBox={`0 0 ${vbW} ${vbH}`}
         preserveAspectRatio="xMidYMid meet"
         role="img"
-        aria-label="Pénzáramlás: bal forrás, jobb költséghely és összeg"
+        aria-label={t("dash.cashflowAria")}
       >
         {sources.map((s, i) => (
           <g key={`src-${s}`}>

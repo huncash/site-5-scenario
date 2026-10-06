@@ -21,7 +21,8 @@ import {
   type LeanConsultantAdvice,
   type PdcaUiMode,
 } from "@/lib/leanConsultantRules";
-import { acceptVizAdvice, LEAN_VIZ_PLAYBOOK } from "@/lib/leanViz";
+import { useI18n } from "@/i18n";
+import { acceptVizAdvice, leanVizLabel, LEAN_VIZ_PLAYBOOK } from "@/lib/leanViz";
 import { cn } from "@/lib/utils";
 import { LeanProofPopover, type LeanProof } from "@/components/LeanProofPopover";
 
@@ -42,6 +43,7 @@ export function LeanConsultantPanel({
     plan?: { id: "tag_manual_auto" | "prefer_import" | "other" },
   ) => void;
 }) {
+  const { locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [followup, setFollowup] = useState<LeanConsultantAdvice | null>(null);
 
@@ -376,7 +378,7 @@ export function LeanConsultantPanel({
                       <div className="text-sm font-medium text-slate-100">{v.title}</div>
                       <div className="mt-0.5 text-[11px] text-slate-400">{v.why}</div>
                       <div className="mt-0.5 text-[10px] text-slate-500">
-                        {LEAN_VIZ_PLAYBOOK[v.kind].labelHu} · {LEAN_VIZ_PLAYBOOK[v.kind].replaces}
+                        {leanVizLabel(v.kind, locale)} · {LEAN_VIZ_PLAYBOOK[v.kind].replaces}
                       </div>
                       <Button
                         type="button"

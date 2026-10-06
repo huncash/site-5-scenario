@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { getPlan, isPublicPlanId } from "@/config/plans";
 import { planCardBullets } from "@/config/planCopy";
@@ -29,11 +29,12 @@ import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { SiteFooter } from "@/components/SiteFooter";
 import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
-import { enterpriseInquiryMailto, ENTERPRISE_SELF_SERVE_CHECKOUT, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
+import { enterpriseInquiryHref, ENTERPRISE_SELF_SERVE_CHECKOUT, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { mainPublicOrigin } from "@/lib/siteSurface";
 import { withViewPrefs } from "@/lib/viewPrefs";
 import { billCopy, statusLabel, tierLabel } from "./copy";
+import { PayLogos } from "./PayLogos";
 
 type PayMethod = "barion" | "hu_transfer";
 
@@ -240,7 +241,7 @@ export function BillingCheckout() {
   const { locale } = useI18n();
   const t = billCopy(locale);
   const money = (n: number) => formatCurrency(n, locale);
-  const q = useMemo(() => readBillCheckoutSearch(billSearchFromLocation()), []);
+  const [q, setQ] = useState(() => readBillCheckoutSearch(billSearchFromLocation()));
   const hasCheckoutIntent = q.hasCheckoutIntent;
   const tier = q.tier ?? "pro";
   const ref = q.ref;
@@ -278,6 +279,13 @@ export function BillingCheckout() {
   const [portal, setPortal] = useState<PortalOrder | null>(() =>
     typeof window === "undefined" ? null : readPortal(),
   );
+
+  useEffect(() => {
+    const next = readBillCheckoutSearch(billSearchFromLocation());
+    setQ(next);
+    setInterval(next.interval);
+    if (next.country) setCountry(next.country);
+  }, []);
 
   useEffect(() => {
     document.title = locale === "en" ? "Szcenárió — billing" : "Szcenárió — számlázás";
@@ -525,7 +533,14 @@ export function BillingCheckout() {
           · {t.enterpriseInquiryLead}
         </p>
         <p className="home-plans" style={{ marginTop: 16 }}>
-          <a className="btn primary" href={enterpriseInquiryMailto({ locale })}>
+          <a
+            className="btn primary"
+            href={enterpriseInquiryHref({ locale })}
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.assign(enterpriseInquiryHref({ locale }));
+            }}
+          >
             {t.enterpriseCta}
           </a>
           <a className="btn" href={pricingHref}>
@@ -666,7 +681,14 @@ export function BillingCheckout() {
           <a className="btn primary" href={withViewPrefs("/?tier=pro&interval=yearly")}>
             {t.homePickPro}
           </a>
-          <a className="btn" href={enterpriseInquiryMailto({ locale })}>
+          <a
+            className="btn"
+            href={enterpriseInquiryHref({ locale })}
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.assign(enterpriseInquiryHref({ locale }));
+            }}
+          >
             {t.homePickExpert} — {t.enterpriseCta}
           </a>
         </div>
@@ -873,24 +895,7 @@ export function BillingCheckout() {
         >
           {busy ? t.busy : t.submit.replace("{n}", `${t.gross} ${money(due.gross)}`)}
         </button>
-        <footer className="pay-logos">
-          <a href="https://www.barion.com" target="_blank" rel="noreferrer">
-            <img
-              className="pay-logos-light"
-              src="/barion/barion-smart-banner-light.png"
-              alt={t.payLogosAlt}
-              width={756}
-              height={108}
-            />
-            <img
-              className="pay-logos-dark"
-              src="/barion/barion-smart-banner-dark.png"
-              alt=""
-              width={756}
-              height={108}
-            />
-          </a>
-        </footer>
+        <PayLogos alt={t.payLogosAlt} />
       </form>
       <SiteFooter inline />
     </div>

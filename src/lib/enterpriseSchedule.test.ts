@@ -4,10 +4,11 @@ import { planCardBullets } from "@/config/planCopy";
 import { PLANS_CONFIG } from "@/config/plans";
 import {
   ENTERPRISE_SELF_SERVE_CHECKOUT,
-  enterpriseInquiryMailto,
+  enterpriseInquiryHref,
+  enterpriseInquirySubject,
   isEnterprisePlanId,
 } from "@/lib/enterpriseSchedule";
-import { SUPPORT_MAIL } from "@/lib/support";
+import { SUPPORT_ORIGIN_PROD } from "@/lib/support";
 
 describe("enterprise schedule", () => {
   it("keeps Enterprise visible without self-serve checkout", () => {
@@ -19,10 +20,12 @@ describe("enterprise schedule", () => {
     expect(PLANS_CONFIG.expert.priceHuf).toBe(799_000);
   });
 
-  it("builds a mailto inquiry, not a bill checkout URL", () => {
-    const href = enterpriseInquiryMailto({ locale: "hu", name: "Teszt", email: "a@b.hu" });
-    expect(href.startsWith(`mailto:${SUPPORT_MAIL}?`)).toBe(true);
-    expect(href).toContain("Enterprise");
+  it("routes Enterprise inquiry to the Support ticket form, not mailto", () => {
+    const href = enterpriseInquiryHref({ locale: "hu" });
+    const url = new URL(href);
+    expect(href.startsWith("mailto:")).toBe(false);
+    expect(href).toContain(`${SUPPORT_ORIGIN_PROD}/ticket`);
+    expect(url.searchParams.get("subject")).toBe(enterpriseInquirySubject("hu"));
     expect(href).not.toMatch(/bill\.szcenario/);
   });
 

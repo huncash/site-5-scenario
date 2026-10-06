@@ -103,11 +103,23 @@ input, select { height: 40px; border-radius: 10px; border: 1px solid var(--card-
   margin-top: 18px;
   padding-top: 14px;
   border-top: 1px solid var(--card-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+  pointer-events: none;
+  user-select: none;
 }
-.pay-logos a { display: block; }
-.pay-logos img { max-width: 100%; height: auto; display: block; }
-html.dark .pay-logos-light { display: none; }
-html:not(.dark) .pay-logos-dark { display: none; }
+.pay-logos img,
+.pay-logos svg {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+.pay-logos .mark {
+  height: 32px;
+}
 .btn.primary { background: var(--accent-emerald); color: #ffffff; font-weight: 650; text-align: center; }
 .btn.primary:hover { background: var(--accent-hover); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }

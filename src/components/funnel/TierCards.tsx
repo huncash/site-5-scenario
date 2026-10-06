@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BillingIntervalToggle, useBillingInterval } from "@/components/funnel/BillingIntervalToggle";
 import { billCheckoutUrl } from "@/lib/billing";
-import { enterpriseInquiryMailto, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
+import { enterpriseInquiryHref, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +87,15 @@ export function TierCards(props: {
                         className="mt-3 h-8 w-full border-white/35 bg-transparent text-foreground"
                         variant="outline"
                       >
-                        <a href={enterpriseInquiryMailto({ locale: "hu" })}>Kapcsolatfelvétel / Ajánlatkérés</a>
+                        <a
+                          href={enterpriseInquiryHref({ locale: "hu" })}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.location.assign(enterpriseInquiryHref({ locale: "hu" }));
+                          }}
+                        >
+                          Kapcsolatfelvétel / Ajánlatkérés
+                        </a>
                       </Button>
                     ) : (
                       <Button
