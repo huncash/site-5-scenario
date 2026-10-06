@@ -234,17 +234,9 @@ export function LeanConsultantPanel({
               </LeanTerm>
             </DialogTitle>
             <DialogDescription>
-              Beépített Lean engine (MUDA, Heijunka, 5S, SMED, Poka-Yoke, VSM). Offline; a választott kimutatást
-              megjegyzi.
+              Beépített Lean engine: muda, Heijunka, 5S, SMED, Poka-Yoke, VSM — minden szcenárió
+              háttértudása. Offline; a választott kimutatást megjegyzi.
             </DialogDescription>
-            <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-              <LeanTerm termId="muda">MUDA</LeanTerm>
-              <LeanTerm termId="heijunka">Heijunka</LeanTerm>
-              <LeanTerm termId="fiveS">5S</LeanTerm>
-              <LeanTerm termId="smed">SMED</LeanTerm>
-              <LeanTerm termId="pokaYoke">Poka-Yoke</LeanTerm>
-              <LeanTerm termId="vsm">VSM</LeanTerm>
-            </div>
           </DialogHeader>
 
           <div className="space-y-4">

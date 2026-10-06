@@ -1,5 +1,4 @@
-import { GlossaryLabel } from "@/components/HelpIcon";
-import { type MasterBaselineContext } from "@/lib/masterBaseline";
+import { MASTER_BASELINE_LABEL, type MasterBaselineContext } from "@/lib/masterBaseline";
 import { formatHuf } from "@/content/pricing/tiers";
 
 function resourceLines(ctx: MasterBaselineContext) {

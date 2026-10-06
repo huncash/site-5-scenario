@@ -143,7 +143,7 @@ import { ExportQrDialog, ImportQrDialog } from "@/components/ProfileTransfer";
 import { getMeshDeviceId, setMeshActiveProfile, useMeshRepository } from "@/lib/mesh/meshRepository";
 import { TransactionListItem } from "@/components/TransactionListItem";
 import { LoanDialog } from "@/components/LoanDialog";
-import { GlossaryLabel, HelpIcon, LeanTerm } from "@/components/HelpIcon";
+import { HelpIcon, LeanTerm } from "@/components/HelpIcon";
 import { ProChartCallout } from "@/components/home/ProChartExplain";
 import { LedgerTxnRow } from "@/components/LedgerTxnRow";
 import { KpiQuickBar } from "@/components/KpiQuickBar";
@@ -235,7 +235,7 @@ import {
 } from "@/components/strategy/KahnCaseGuide";
 import { requestWorkspaceSwitch } from "@/lib/workspaceSwitch";
 import type { KahnGuideWorkspace } from "@/lib/kahnGuide";
-import { KAHN_FOCUS_IDS } from "@/lib/kahnCrossTab";
+import { KAHN_FOCUS_IDS, KAHN_JARGON } from "@/lib/kahnCrossTab";
 
 const CHART_COLORS = [
   "var(--color-chart-1)",
@@ -5725,7 +5725,7 @@ export function FinanceDashboard({
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <CardTitle className="text-sm font-medium text-slate-200">
-              <GlossaryLabel id="whatIf" className="text-sm font-medium normal-case tracking-normal text-slate-200" />
+              {t("dash.workSim")}
             </CardTitle>
           </div>
           <div className="flex flex-wrap items-center gap-1 min-[560px]:justify-end">
@@ -5767,31 +5767,40 @@ export function FinanceDashboard({
           <>
             <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
               <div className="tile-lift rounded-lg p-2.5">
-                <GlossaryLabel
-                  id="runway"
-                  showPlain={false}
+                <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                />
+                  title={KAHN_JARGON.runway.termHu}
+                  exact={KAHN_JARGON.runway.exactHu}
+                  summary={KAHN_JARGON.runway.exactHu}
+                >
+                  Runway
+                </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {whatIf.kahnMetrics.worseRunwayMonths} hó
                 </div>
               </div>
               <div className="tile-lift rounded-lg p-2.5">
-                <GlossaryLabel
-                  id="penalty"
-                  showPlain={false}
+                <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                />
+                  title={KAHN_JARGON.penalty.termHu}
+                  exact={KAHN_JARGON.penalty.exactHu}
+                  summary={KAHN_JARGON.penalty.exactHu}
+                >
+                  Kötbér vs. Kilépés
+                </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {formatMoney(whatIf.kahnMetrics.exitPenaltyHuf, "HUF")}
                 </div>
               </div>
               <div className="tile-lift rounded-lg p-2.5">
-                <GlossaryLabel
-                  id="stopLoss"
-                  showPlain={false}
+                <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                />
+                  title={KAHN_JARGON.stopLoss.termHu}
+                  exact={KAHN_JARGON.stopLoss.exactHu}
+                  summary={KAHN_JARGON.stopLoss.exactHu}
+                >
+                  Stop-loss
+                </LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
                   {whatIf.kahnMetrics.decisionDays} nap
                 </div>
@@ -5826,7 +5835,9 @@ export function FinanceDashboard({
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
-                  termId="breakEven"
+                  title="Fedezeti pont"
+                  exact="Fedezeti pont — az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
+                  summary="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát. Halmozott eredmény = a havi (bevétel − kiadás) összege a horizont elejétől."
                 >
                   Fedezeti pont
                 </LeanTerm>
@@ -6247,15 +6258,6 @@ export function FinanceDashboard({
       <Card className="pdca-tile--wide relative overflow-hidden">
         <CardHeader className="pb-1.5 pr-3">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-sm font-medium text-slate-200">
-              <GlossaryLabel id="cashflow" className="text-sm font-medium normal-case tracking-normal text-slate-200" />
-              <span className="ml-1 text-slate-400">— {workspaceDisplayName(activeWorkspace)}</span>
-
-  const lockedDoCashflow = (
-    <div className="pdca-module-stack w-full min-w-0">
-      <Card className="pdca-tile--wide relative overflow-hidden">
-        <CardHeader className="pb-1.5 pr-3">
-          <div className="flex items-center justify-between gap-2">
             <CardTitle
               className="text-sm font-medium text-slate-200"
               title={`Cashflow — ${workspaceDisplayName(activeWorkspace)}`}
@@ -6339,9 +6341,7 @@ export function FinanceDashboard({
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-border bg-muted/25 p-2.5"
                 data-exact="Banki egyenleg — a számlán lévő bruttó összeg."
               >
-                <LeanTerm className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" termId="runway">
-                  Runway
-                </LeanTerm>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Banki egyenleg / kassa">Banki egyenleg</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(personalCashflowKpis.bankGross), CURRENCY)}
@@ -6371,9 +6371,19 @@ export function FinanceDashboard({
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-emerald-500/60 bg-muted/25 p-2.5"
                 data-exact="Szabad nettó — ÁFA és zárolás után elkölthető összeg."
               >
-                <LeanTerm className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" termId="vat">
-                  ÁFA tartalék
-                </LeanTerm>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Szabad nettó egyenleg">Szabad nettó</div>
+                <div
+                  className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
+                  title={formatMoney(Math.round(vatReserve.free), CURRENCY)}
+                >
+                  {formatMoney(Math.round(vatReserve.free), CURRENCY)}
+                </div>
+              </div>
+              <div
+                className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-amber-500/60 bg-muted/25 p-2.5"
+                data-exact="ÁFA tartalék — a fizetendő ÁFA, amit ne költs el."
+              >
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="ÁFA tartalék / fizetendő">ÁFA tartalék</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-amber-400 sm:text-sm"
                   title={formatMoney(Math.round(vatReserve.payable), CURRENCY)}
@@ -7369,14 +7379,6 @@ export function FinanceDashboard({
               return (
                 <>
                   <div className="flex items-center justify-between gap-3">
-                    <LeanTerm className="text-xs uppercase tracking-wide text-emerald-200/90" termId="kaizen">
-                workspaceId: "personal",
-                now: new Date(),
-              });
-              const rate = k.mudaRate;
-              return (
-                <>
-                  <div className="flex items-center justify-between gap-3">
                     <LeanTerm
                       className="text-xs uppercase tracking-wide text-emerald-200/90"
                       title="Kaizen"
@@ -7384,7 +7386,23 @@ export function FinanceDashboard({
                     >
                       Kaizen — heti/havi audit
                     </LeanTerm>
-                      <LeanTerm className="text-[11px] text-slate-300" termId="muda">
+                    {rate ? (
+                      <span className="font-mono text-xs text-emerald-100">
+                        MUDA: {formatMoney(Math.round(rate.currentMonthMuda), CURRENCY)} · 3h átlag:{" "}
+                        {formatMoney(Math.round(rate.prev3AvgMuda), CURRENCY)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </div>
+
+                  {rate ? (
+                    <div className="mt-2 rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
+                      <LeanTerm
+                        className="text-[11px] text-slate-300"
+                        title="MUDA-ráta"
+                        exact="veszteség-arány — mennyivel kevesebb vagy több a pazarlás ebben a hónapban, mint az előző három hónap átlaga."
+                      >
                         MUDA-ráta
                       </LeanTerm>
                       <div className="mt-0.5 font-mono text-slate-100">
@@ -7550,7 +7568,10 @@ export function FinanceDashboard({
               onClick={() => setMudaOpen((v) => !v)}
               aria-expanded={mudaOpen}
             >
-              <LeanTerm title="Észlelt MUDA" termId="muda">
+              <LeanTerm
+                title="Észlelt MUDA"
+                exact="veszteség — pazarlás a tételeken (impulzus, díj, selejt, dupla előfizetés)."
+              >
                 Észlelt MUDA
               </LeanTerm>
               <span className="font-mono text-rose-200">{formatMoney(Math.round(mirrorSummary.muda), CURRENCY)}</span>
@@ -7786,15 +7807,23 @@ export function FinanceDashboard({
             </div>
             <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
-                <LeanTerm className="text-[11px] text-slate-300" termId="muda">
-              </LeanTerm>
-              <span className="font-mono text-xs text-slate-300">
-                Fix baseline: {formatMoney(Math.round(multiYear.baselineFixNeedMonthly), CURRENCY)}/hó
-              </span>
-            </div>
-            <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
+                <LeanTerm
+                  className="text-[11px] text-slate-300"
+                  title="Évesített MUDA"
+                  exact="veszteség — ha a mostani pazarlás így marad, ennyi forint megy el egy év alatt."
+                >
+                  Évesített MUDA
+                </LeanTerm>
+                <div className="mt-0.5 font-mono text-rose-200">
+                  {formatMoney(Math.round(multiYear.annualizedMuda), CURRENCY)}/év
+                </div>
+              </div>
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
-                <LeanTerm className="text-[11px] text-slate-300" termId="want">
+                <LeanTerm
+                  className="text-[11px] text-slate-300"
+                  title="Évesített WANT"
+                  exact="vágy — ha a mostani extra (nem kötelező) költés így marad, ennyi egy év alatt."
+                >
                   Évesített WANT
                 </LeanTerm>
                 <div className="mt-0.5 font-mono text-amber-200">
@@ -7802,7 +7831,11 @@ export function FinanceDashboard({
                 </div>
               </div>
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
-                <LeanTerm className="text-[11px] text-slate-300" termId="runway">
+                <LeanTerm
+                  className="text-[11px] text-slate-300"
+                  title="Céltartalék (most → lean)"
+                  exact="hány hónapig tart a kassza a mostani ütemmel, és mennyivel tovább, ha a pazarlást elhagyod."
+                >
                   Céltartalék (most → lean)
                 </LeanTerm>
                 <div className="mt-0.5 font-mono text-slate-100">
@@ -7828,14 +7861,9 @@ export function FinanceDashboard({
           </div>
         ) : null}
         <div className="flex items-center justify-between">
-          <LeanTerm termId="muda" title="MUDA score">
-            ) : null}
-            <div className="mt-2 text-xs text-slate-300">
-              Lean forgatókönyv: <span className="font-mono text-slate-100">{formatMoney(Math.round(multiYear.annualizedMuda), CURRENCY)}</span>{" "}
-              /év felszabadul, ha a pazarlást lenullázod.
-            </div>
-          </div>
-            <LeanTerm termId="ev" title="EV+EFO arány">
+          <LeanTerm
+            title="MUDA score"
+            exact="veszteség-pont — 0–100: minél magasabb, annál több a pazarlás."
           >
             MUDA score
           </LeanTerm>
@@ -9666,9 +9694,21 @@ export function FinanceDashboard({
                           min={0}
                           max={100}
                           step={5}
-                      <LeanTerm className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground" termId="kpi">
+                          value={Math.round(Number(activeWorkspaceMeta.completion_pct ?? 25))}
+                          onChange={(e) =>
+                            updateWorkspaceMeta(activeWorkspace, { completion_pct: Number(e.currentTarget.value) }, "Projekt készültség")
+                          }
+                          className="w-full"
+                        />
+                        <span className="w-12 text-right font-mono text-xs text-muted-foreground">
+                          {Math.round(Number(activeWorkspaceMeta.completion_pct ?? 25))}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border/60 bg-background/40 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                         KPI bontás (projekt)
-                      </LeanTerm>
+                      </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         A KPI-k a tényleges tételeket külön kezelik a tervezettől (státusz alapján).
                       </div>
@@ -9695,7 +9735,7 @@ export function FinanceDashboard({
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    <GlossaryLabel id="szumma" className="text-sm font-medium normal-case tracking-normal text-muted-foreground" />
+                    Szumma — összesítő
                   </CardTitle>
                   <Badge variant="secondary" className="text-[10px]" title="Belső átvezetések kiejtve a grafikonokból">
                     elimination
@@ -9999,8 +10039,12 @@ export function FinanceDashboard({
                     <div className="mb-4 rounded-lg border bg-background/40 p-3">
                       <div className="flex flex-wrap items-end justify-between gap-2">
                         <div>
-                          <div className="flex items-center gap-2 text-sm font-semibold">
-                            <LeanTerm termId="runway">Céltartalék lefedettség</LeanTerm>
+                          <div
+                            className="flex items-center gap-2 text-sm font-semibold"
+                            data-exact="hány hónapig tart a kassza a mostani költési ütemmel."
+                          >
+                            Céltartalék lefedettség
+                            <HelpIcon kbId="loans-liabilities" />
                           </div>
                           <div className="mt-1 text-xs text-muted-foreground">
                             Elérhető keret:{" "}
@@ -10063,7 +10107,7 @@ export function FinanceDashboard({
                     <>
                       {!leanInsights.jitOk && (
                         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-950/20 p-3 text-sm text-amber-100">
-                          Súlyponti fókusz (<LeanTerm termId="jit">JIT</LeanTerm>): Először a biztonsági tartalékot töltsd fel, a célok/perselyek
+                          Súlyponti fókusz (JIT): Először a biztonsági tartalékot töltsd fel, a célok/perselyek
                           automatikus finanszírozása most szünetel.
                         </div>
                       )}
@@ -10199,9 +10243,9 @@ export function FinanceDashboard({
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <LeanTerm className="text-sm font-semibold" termId="muda">
+                                <div className="text-sm font-semibold" data-exact="veszteség-pont — álló tőke, súrlódás, adat-hulladék.">
                                   MUDA score
-                                </LeanTerm>
+                                </div>
                                 <div className="mt-0.5 text-xs text-muted-foreground">
                                   Heurisztikus jelzések: álló tőke, súrlódási költségek, adat-hulladék.
                                 </div>
@@ -10223,9 +10267,7 @@ export function FinanceDashboard({
 
                             <div className="mt-4 grid gap-3">
                               <div className="rounded-md border border-border/60 bg-background/30 p-3">
-                                <LeanTerm className="text-xs text-slate-200" termId="idleCash">
-                                  Idle Cash (60 nap)
-                                </LeanTerm>
+                                <div className="text-xs text-slate-200">Idle Cash (60 nap)</div>
                                 <div className="mt-1 font-mono text-sm text-slate-200">
                                   {formatMoney(Math.round(leanInsights.idleCash), CURRENCY)}
                                 </div>
@@ -11886,9 +11928,9 @@ export function FinanceDashboard({
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <LeanTerm className="text-sm font-semibold" termId="muda">
+                              <div className="text-sm font-semibold" data-exact="veszteség-pont — álló tőke, súrlódás, adat-hulladék.">
                                 MUDA score
-                              </LeanTerm>
+                              </div>
                               <div className="mt-0.5 text-xs text-muted-foreground">
                                 Álló tőke · súrlódás · adat-hulladék
                               </div>
@@ -11897,18 +11939,6 @@ export function FinanceDashboard({
                               variant="secondary"
                               className={cn(
                                 "text-[10px]",
-                                leanInsights.score >= 70
-                                  ? "bg-emerald-950/40 text-emerald-200 border border-emerald-500/20"
-                                  : leanInsights.score >= 40
-                                    ? "bg-amber-950/40 text-amber-200 border border-amber-500/20"
-                                    : "bg-rose-950/40 text-rose-200 border border-rose-500/20",
-                              )}
-                            >
-                              {leanInsights.score}/100
-                            </Badge>
-                          </div>
-                          <div className="mt-3 text-xs text-slate-300">
-                            <LeanTerm termId="runway">Runway 60 nap</LeanTerm>:{" "}
                                 leanInsights.score >= 70
                                   ? "bg-emerald-950/40 text-emerald-200 border border-emerald-500/20"
                                   : leanInsights.score >= 40
@@ -16098,10 +16128,10 @@ function WorkspaceTabsLegacy({
           >
             <Plus className="h-3.5 w-3.5" />
             <span className="btn-new-item-label">Új</span>
-        title="Szumma — az összes Slot összegezve, belső átvezetés nélkül"
-      >
-        <Sigma className="h-3.5 w-3.5" />
-        <LeanTerm termId="szumma">Szumma</LeanTerm>
+          </button>
+          <HelpIcon kbId="new-workspace" />
+        </div>
+      </div>
 
       <button
         type="button"
