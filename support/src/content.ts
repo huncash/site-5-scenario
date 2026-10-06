@@ -218,7 +218,7 @@ export const KAHN_BONBON = {
 } as const;
 
 export const TIPS = [
-  { q: "Hol vannak az adataim?", a: "A saját eszközödön, IndexedDB-ben. A VPS nem tárol szcenáriót." },
+  { q: "Hol vannak az adataim?", a: "A saját eszközödön. A fejlesztők soha nem látják és nem gyűjtik. Mentés fájlba, mint régen egy táblázatot — vagy meghívott vendég." },
   { q: "Van telefonos support?", a: "Nincs. Kizárólag írásban, jeggyel." },
   { q: "Mennyi a válaszidő?", a: "Átlagosan 24 órán belül, írásban." },
   { q: "Hol a videó?", a: "YouTube-on. A saját szerver nem tárol videófájlt." },
@@ -233,10 +233,14 @@ export type FaqSection = { category: string; items: FaqItem[] };
 
 /** Általános GYIK (a fogalom-szekció a `conceptFaq` forrásból jön a copy rétegben). */
 export const FAQ_GENERAL: FaqItem[] = [
-  { q: "Regisztráció kell?", a: "Nem. A helyi profil a készülékeden marad." },
+  { q: "Regisztráció kell?", a: "Nem. A helyi profil a készülékeden marad. A demók elképzelt minták a motor kipróbálásához." },
   { q: "Miért nincs telefonszám?", a: "A pontosabb ügyintézéshez írásos jegy kell — nincs telefonos sor." },
   { q: "Hol kérek segítséget?", a: "Először a GYIK és a tudásbázis. Ha nincs válasz, a „Nem találtam választ” gombbal nyílik a jegy — előtte egy ellenőrző lépés." },
   { q: "Működik offline?", a: "Az app igen. A support iframe hálózatot kér; offline a helyi súgó marad." },
+  {
+    q: "Látják a fejlesztők az adataimat?",
+    a: "Nem. A Szcenárió a saját eszközödön számol. A kivonat a Mesh Data Managerbe kerül helyben. A fejlesztők soha, semmilyen szinten nem látják és nem gyűjtik a modellezett adatot.",
+  },
   {
     q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",
     a: "Igen, sokkal több. A „jó év / rossz év” csak két statikus szám egy táblázat alján. A Szcenárió viszont egy élő forgatókönyv: megmutatja a döntéseid láncreakcióját és pontos időzítését. Nem azt találgatja, mi lesz év végén, hanem megmutatja, hogy egy váratlan kiadás vagy kieső bevétel pontosan melyik hónapban és napon éri el a kritikus biztonsági határodat — így nem utólag reagálsz, hanem előre látod a mozgásteredet.",

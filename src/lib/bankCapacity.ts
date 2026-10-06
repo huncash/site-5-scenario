@@ -33,7 +33,7 @@ export function bankCapacityToast(tier: SlotTierId = resolveBankTier()): string 
     if (tier === "pro") return "Pro: több bankfiók & kivonat csatolható Slot**-onként.";
     return "Enterprise / local: korlátlan banki / könyvelési csatolás.";
   }
-  return `Basic / Campus: legfeljebb ${limit} banki kivonat (számla) / Slot** — bármilyen időszakra (CSV / PDF / XLS).`;
+  return `Basic / Campus: legfeljebb ${limit} banki kivonat (számla) / Slot** — bármilyen időszakra (CSV / XML).`;
 }
 
 export function isPublicTierId(v: string): v is TierId {

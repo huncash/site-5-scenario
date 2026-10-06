@@ -1,6 +1,6 @@
 import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
-import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -89,9 +89,9 @@ function KpiTrio({ kpis }: { kpis: PhysicalKpi[] }) {
     <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
       {kpis.map((k) => (
         <div key={k.id} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground break-words">{k.label}</p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{k.hint}</p>
-          <dl className="mt-2 grid gap-1 text-[12px]">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] break-words">{k.label}</p>
+          <DetailFold id={`res-kpi-${k.id}`} text={k.hint} />
+          <dl className="mt-2 grid gap-1 text-[12px] text-[var(--text-main)]">
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone="opt" label="Opt" line />
               <span className="min-w-[4.5rem] font-mono tabular-nums text-right">{formatMetric(k.opt, k.unit)}</span>

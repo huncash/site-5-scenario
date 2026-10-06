@@ -1,7 +1,14 @@
 import { MASTER_BASELINE } from "@/lib/masterBaseline";
 import type { KahnForkNode, KahnProLive, StrategyTone } from "@/lib/strategyCases";
 
-export type StrategyForkKind = "inflation" | "market";
+export type StrategyForkKind = "inflation" | "market" | "newline";
+
+export function strategyForkKindOf(id: string | null | undefined): StrategyForkKind | null {
+  if (id === "demo20_strategy_input_inflation") return "inflation";
+  if (id === "demo21_strategy_new_market") return "market";
+  if (id === "demo19_strategy_new_line") return "newline";
+  return null;
+}
 
 export type StrategyForkTree = {
   root: string;
@@ -31,6 +38,8 @@ const CORE_DRAIN = Math.round(MASTER_BASELINE.monthlyRevenueNet * 0.11);
 const ENTRY_COST = 420_000;
 const PASS_COGS = 180_000;
 const CUT_COGS = 90_000;
+const LINE_STOCK = Math.round(MASTER_BASELINE.monthlyRevenueNet * 0.28);
+const LINE_PUSH = Math.round(MASTER_BASELINE.monthlyRevenueNet * 0.62);
 
 export function inflationForkTree(): StrategyForkTree {
   return {
@@ -118,8 +127,53 @@ export function marketForkTree(): StrategyForkTree {
   };
 }
 
+export function newLineForkTree(): StrategyForkTree {
+  return {
+    root: MASTER_BASELINE.businessAlias,
+    primaryQuestion: "1. fordulat: tervezett ütem vagy piaci berobbanás?",
+    primary: [
+      {
+        id: "planned",
+        label: "Tervezett ütem",
+        tone: "real",
+        detail: "Stabil megrendelés. A törzs viszi a fixet — nincs előre hozott készletlyuk.",
+        amountHint: "nincs előfinanszírozás",
+      },
+      {
+        id: "burst",
+        label: "Piaci berobbanás",
+        tone: "opt",
+        detail: "A 2. fordulat: megállj a likviditásnál, vagy tovább finanszírozd a sort.",
+        amountHint: `készlet ${formatHuf(LINE_STOCK)}`,
+      },
+    ],
+    secondaryQuestion: "2. fordulat (ha berobbanás): megállj a csapdánál, vagy tovább?",
+    secondary: [
+      {
+        id: "halt",
+        label: "Megállj",
+        tone: "opt",
+        detail: "Nincs új előfinanszírozás. A felfutás a már lekötött sort hozza.",
+        amountHint: "a core megmarad",
+      },
+      {
+        id: "push",
+        label: "Tovább — még egy kör",
+        tone: "pess",
+        detail: "Még mélyebb előfinanszírozás. A lyuk nő, ha a kereslet nem tart.",
+        amountHint: `készlet ${formatHuf(LINE_PUSH)}`,
+      },
+    ],
+    secondaryNeeds: "burst",
+    outcomeQuestion: "PRO kimenet — melyik sávon olvasod a döntést?",
+    metricLabels: ["Runway", "Készletkötés", "Havi teher"],
+  };
+}
+
 export function strategyForkTree(kind: StrategyForkKind): StrategyForkTree {
-  return kind === "inflation" ? inflationForkTree() : marketForkTree();
+  if (kind === "inflation") return inflationForkTree();
+  if (kind === "market") return marketForkTree();
+  return newLineForkTree();
 }
 
 export function resolveInflationPlanPro(primary: string | null, secondary: string | null): KahnProLive[] {
@@ -194,12 +248,50 @@ export function resolveMarketPlanPro(primary: string | null, secondary: string |
   ];
 }
 
+export function resolveNewLinePlanPro(primary: string | null, secondary: string | null): KahnProLive[] {
+  if (!primary) {
+    return [
+      empty("Bővítés", "opt", "Válaszd: tervezett ütem vagy berobbanás."),
+      empty("Tartás", "real", "Válaszd: tervezett ütem vagy berobbanás."),
+      empty("Tartalék", "pess", "Válaszd: tervezett ütem vagy berobbanás."),
+    ];
+  }
+  if (primary === "planned") {
+    return [
+      { tone: "opt", label: "Bővítés", runwayMonths: 12, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "A törzs ritmusa viszi. Nincs WC-lyuk." },
+      { tone: "real", label: "Tartás", runwayMonths: 10, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Kiszámítható megtérülés. Stabil likviditás." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 8, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Ha a kereslet lassul, a puffer még tart." },
+    ];
+  }
+  if (!secondary) {
+    return [
+      { tone: "opt", label: "Bővítés", runwayMonths: 5, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "Berobbanás. Válaszd: megállj vagy tovább." },
+      { tone: "real", label: "Tartás", runwayMonths: 4, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "Az első 60 nap előfinanszírozás." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 3, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "A 2. fordulat a lyukat dönti el." },
+    ];
+  }
+  if (secondary === "halt") {
+    return [
+      { tone: "opt", label: "Bővítés", runwayMonths: 8, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "Nincs új előfinanszírozás. A core megmarad." },
+      { tone: "real", label: "Tartás", runwayMonths: 6, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "A felfutás a lekötött sort hozza." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 5, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "A motor megmutatta a megállót." },
+    ];
+  }
+  return [
+    { tone: "opt", label: "Bővítés", runwayMonths: 5, exitPenaltyHuf: LINE_PUSH, monthlyObligationHuf: Math.round(LINE_STOCK * 0.4), strategy: "Még egy kapacitáskör. A keresletnek tartania kell." },
+    { tone: "real", label: "Tartás", runwayMonths: 4, exitPenaltyHuf: LINE_PUSH, monthlyObligationHuf: Math.round(LINE_STOCK * 0.4), strategy: "Mélyebb előfinanszírozás." },
+    { tone: "pess", label: "Tartalék", runwayMonths: 3, exitPenaltyHuf: LINE_PUSH, monthlyObligationHuf: Math.round(LINE_STOCK * 0.5), strategy: "A berobbanás wow — a lyuk is." },
+  ];
+}
+
 export function resolveStrategyForkPro(
   kind: StrategyForkKind,
   primary: string | null,
   secondary: string | null,
 ): KahnProLive[] {
-  return kind === "inflation" ? resolveInflationPlanPro(primary, secondary) : resolveMarketPlanPro(primary, secondary);
+  if (kind === "inflation") return resolveInflationPlanPro(primary, secondary);
+  if (kind === "market") return resolveMarketPlanPro(primary, secondary);
+  return resolveNewLinePlanPro(primary, secondary);
 }
 
 export const STRATEGY_FORK_CONST = {
@@ -207,4 +299,6 @@ export const STRATEGY_FORK_CONST = {
   entryCost: ENTRY_COST,
   passCogs: PASS_COGS,
   cutCogs: CUT_COGS,
+  lineStock: LINE_STOCK,
+  linePush: LINE_PUSH,
 } as const;

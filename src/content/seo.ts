@@ -1,12 +1,12 @@
 /** Nyilvános SEO — helyi-első / böngészős / 2027 Desktop EA. Márka: Szcenárió. */
 
 export const SEO_HOME_TITLE =
-  "Szcenárió — Helyi-első vállalkozói kontrolling és Case/Slot kezelés a böngészőben";
+  "Szcenárió — Helyi irányító-szimuláció a böngészőben · a számok nálad maradnak";
 export const SEO_HOME_DESCRIPTION =
-  "Azonnal indul a böngésződben. Helyi adat, nincs felhős adatbázis. Válaszd a Basic vagy Pro csomagot, és kapd meg a 2027-es asztali early access verziót ingyen bónuszként.";
-export const SEO_OG_TITLE = "Szcenárió — Vállalkozói kontrolling a böngésződben";
+  "Lokális irodai és vállalati irányító-szimuláció a böngészőben. A fejlesztők soha nem látják és nem gyűjtik az adataidat. Nincs felhős adatbázis. Mesh Data Manager a gépeden. Basic vagy Pro: asztali early access 2027-ben, ingyen.";
+export const SEO_OG_TITLE = "Szcenárió — A számok a gépeden maradnak · a böngésződben";
 export const SEO_OG_DESCRIPTION =
-  "Helyi-első architektúra, nulla felhős kockázat. Kezdj el dolgozni azonnal, asztali early access 2027 tavaszán.";
+  "Zéró adatgyűjtés. Mentés fájllal vagy meghívott vendéggel. Azonnal a böngészőben; helyi adat, nincs felhős adatbázis. Asztali early access 2027 tavaszán, ingyen.";
 
 export type SeoPageId = "home" | "school" | "support" | "pricing" | "gdpr" | "about" | "aszf";
 

@@ -6,15 +6,15 @@ const packages = STANDARD_TIER_COPY;
 export const OKTATAS_SZIMULACIO_FUNNEL = {
   hero: {
     eyebrow: "Oktatási és szimulációs tréningek",
-    title: "Két PDCA-eset: startup cash-flow és Lean VSM",
+    title: "Két elképzelt tréning a motor kipróbálásához",
     subtitle:
-      "Pénzügyi sáv és Lean / Poka-Yoke mikro együtt. Diák- és tanműhely-lépték, helyi számítás.",
+      "Pénzügyi és működési sáv együtt, diák- és tanműhely-léptéken. A számok a gépeden maradnak. Nem baj, ha elsőre sűrű.",
     primaryCta: "Esetek megnyitása",
     secondaryCta: "Csomagok megtekintése",
   },
   proofBullets: [
-    "Startup: burn rate, fedezeti pont, fix/változó — PRO sáv",
-    "Lean VSM: OEE, SMED, Poka-Yoke, átfutási idő + kiesés Ft",
+    "Induló kassza és fedezet — három pálya a gépeden",
+    "Működési veszteségek és beavatkozás ugyanazon a mintán",
   ],
   demoTeaser: {
     title: "Interaktív előnézet: oktatási tréning (demó)",
@@ -30,12 +30,12 @@ export const OKTATAS_SZIMULACIO_FUNNEL = {
   faq: [
     ...CONCEPT_FAQ_ITEMS,
     {
-      q: "Mi keveredik itt?",
-      a: "A fix PDCA keret. A pénzügyi sáv (burn, rezsi, helyreállás) és a Lean / Poka-Yoke mikro (OEE, SMED, kvóta, izoláció) ugyanazon a moszaikon van.",
+      q: "Mit látok a tréningen?",
+      a: "Pénzügyi sáv és működési veszteségek ugyanazon a mintán. Diák- és tanműhely-lépték. A számok a gépeden maradnak.",
     },
     {
       q: "Ez ügyféladat?",
-      a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő, nincs telemetria.",
+      a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő. A fejlesztők nem látják.",
     },
     PRICING_VAT_FAQ,
     WHY_FAQ,

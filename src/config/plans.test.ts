@@ -108,19 +108,32 @@ describe("PLANS_CONFIG perpetual model", () => {
     expect(hasPermission("demo", "DEMO", "RESET_DEMO")).toBe(true);
     expect(ENGINE_VERSION).toMatch(/^\d+\.\d+\.\d+/);
 
-    const gateOk = evaluateLicenseGate({
+    const paidPro = {
       token: "t",
       tier: "pro",
-      interval: "perpetual",
-      status: "paid",
+      interval: "perpetual" as const,
+      status: "paid" as const,
       verifiedAt: new Date().toISOString(),
       engineVersion: ENGINE_VERSION,
       updatesUntil: new Date(Date.now() + 86400000).toISOString(),
       licenseExpiryDate: null,
-    });
+    };
+    const gateOk = evaluateLicenseGate(paidPro);
     expect(gateOk.runtimeOk).toBe(true);
     expect(gateOk.updatesActive).toBe(true);
     expect(gateOk.engineOk).toBe(true);
+
+    const paidStarter = { ...paidPro, tier: "starter" as const };
+    expect(hasPermission("starter", "SEAT", "WATCHED_FOLDER", paidStarter)).toBe(false);
+    expect(hasPermission("starter", "SEAT", "CUSTOM_RULES", paidStarter)).toBe(false);
+    expect(hasPermission("starter", "SEAT", "BUSINESS_WORKSPACES", paidStarter)).toBe(false);
+    expect(hasPermission("starter", "SEAT", "PROJECTS", paidStarter)).toBe(false);
+    expect(hasPermission("pro", "SEAT", "WATCHED_FOLDER", paidPro)).toBe(true);
+    expect(hasPermission("pro", "SEAT", "CUSTOM_RULES", paidPro)).toBe(true);
+    expect(hasPermission("pro", "SEAT", "BUSINESS_WORKSPACES", paidPro)).toBe(true);
+    expect(hasPermission("local", "SEAT", "WATCHED_FOLDER")).toBe(true);
+    expect(PLANS_CONFIG.starter.features.canWatchedFolder).toBe(false);
+    expect(PLANS_CONFIG.pro.features.canProjects).toBe(true);
   });
 
   it("keeps perpetual JIT module prices (Pro Case 49k, Enterprise Case 39k)", () => {

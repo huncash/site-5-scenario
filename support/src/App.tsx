@@ -235,6 +235,7 @@ function PricingPage({ locale }: { locale: Locale }) {
         <a href="#enterprise">Enterprise</a>
         <a href="#tiered-loyalty">{t.pricingTocLoyalty}</a>
         <a href="#active-workspaces">{t.pricingTocActive}</a>
+        <a href="#workflow">{t.pricingTocWorkflow}</a>
         <a href="#local-import">{t.pricingTocLocal}</a>
       </nav>
 
@@ -285,6 +286,10 @@ function PricingPage({ locale }: { locale: Locale }) {
       <div className="section-block scroll-mt-24" id="active-workspaces">
         <h2>{t.pricingActiveTitle}</h2>
         <p>{t.pricingActiveBody}</p>
+      </div>
+      <div className="section-block scroll-mt-24" id="workflow">
+        <h2>{t.pricingWorkflowTitle}</h2>
+        <p>{t.pricingWorkflowBody}</p>
       </div>
       <div className="section-block scroll-mt-24" id="local-import">
         <h2>{t.pricingLocalTitle}</h2>

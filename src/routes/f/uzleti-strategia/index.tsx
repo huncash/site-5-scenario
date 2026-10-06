@@ -28,10 +28,10 @@ function UzletiStrategiaLandingPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-[11px]">Master Baseline</Badge>
-              <Badge variant="secondary" className="text-[11px]">PDCA</Badge>
-              <Badge variant="secondary" className="text-[11px]">PRO pályák</Badge>
-              <Badge variant="secondary" className="text-[11px]">offline</Badge>
+              <Badge variant="secondary" className="text-[11px]">Törzs</Badge>
+              <Badge variant="secondary" className="text-[11px]">Három pálya</Badge>
+              <Badge variant="secondary" className="text-[11px]">Helyben</Badge>
+              <Badge variant="secondary" className="text-[11px]">Elképzelt minta</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {STRATEGY_SEGMENTS.filter((s) => s.id === "demo11_strategy_kahn_fork").map((s) => (

@@ -6,7 +6,7 @@ const packages = STANDARD_TIER_COPY;
 
 const MEASURE_FAQ = {
   q: "Hogyan látom, melyik belépő működik?",
-  a: "Dedikált aloldal (/bcp, /strategia, /kozosseg, /oktatas, /makro) és tiszta UTM. A csatorna a címből és a checkouton továbbvitt jelölőből látszik. Az app nem küld használatot, nincs telemetria.",
+  a: "Dedikált aloldal (/bcp, /strategia, /kozosseg, /oktatas, /makro) és tiszta UTM. A csatorna a címből és a checkouton továbbvitt jelölőből látszik. Az app nem küld használatot.",
 } as const;
 
 export type CampaignFunnelCopy = {
@@ -35,21 +35,21 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     id: "bcp",
     seoTitle: "Szcenárió — Vállalati BCP és reziliencia",
     seoDescription:
-      "IT-kiesés, logisztikai sokk, folytonosság. TTR és local-first BCP-eset a te eszközödön. Nincs regisztráció, nincs telemetria.",
+      "IT-kiesés, logisztikai sokk, folytonosság. Tartalék a saját eszközödön. Nincs regisztráció. A fejlesztők nem látják az adataidat.",
     hero: {
       eyebrow: "Vállalati BCP és működési reziliencia",
       title: "Folytonosság IT-kiesésnél és logisztikai sokknál",
       subtitle:
-        "Cégvezetőknek és operációs vezetőknek. TTR, local-first másolat, redundáns hálózat. Egy BCP-eset a PDCA-ban — a motor a te eszközödön fut.",
+        "Cégvezetőknek és operációs vezetőknek. Elképzelt minta: leállás és tartalék a saját eszközön. A fejlesztők nem látják az adataidat.",
       primaryCta: "BCP-eset megnyitása",
       secondaryCta: "Csomagok",
     },
     chooserIntro:
       "Vállalati BCP: kritikus SaaS / felhő kiesése. TTR, tartalék link, helyi másolat. Nem riadó — működési reziliencia.",
     proofBullets: [
-      "Kritikus SaaS / felhő: TTR, tartalék link, helyi másolat",
-      "Ugyanaz a PDCA-keret, mint a stratégiai és oktatási eseteknél",
-      "Nincs felhő-adatbázis, nincs telemetria",
+      "Kritikus szoftver-kiesés: tartalék út és helyi másolat",
+      "Ugyanaz a négy lépéses munkamenet, mint a többi mintánál",
+      "Nincs felhő-adatbázis, nincs használatküldés",
     ],
     caseHeading: "Egy BCP-eset",
     demoTeaser: {
@@ -78,21 +78,21 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     id: "strategia",
     seoTitle: "Szcenárió — Stratégiai és pénzügyi what-if",
     seoDescription:
-      "Cash-flow, árrés, optimista–pesszimista sáv. Master Baseline, stratégiai esetek, helyi számítás.",
+      "Kassza, árrés, rossz–közepes–jó pálya. Elképzelt minták, helyi számítás. A fejlesztők nem látják az adataidat.",
     hero: {
       eyebrow: "Stratégiai és pénzügyi what-if",
       title: "Cash-flow, árrés, három pálya — ugyanabból a törzsből",
       subtitle:
-        "Klasszikus vállalkozói kérdés: mi történik, ha a vonal, a beszerzés vagy a piac változik. Master Baseline, PRO sáv, helyi számítás.",
+        "Klasszikus vállalkozói kérdés: mi történik, ha a vonal, a beszerzés vagy a piac változik. A törzset egyszer viszed be. A számok a gépeden maradnak.",
       primaryCta: "Stratégiai esetek",
       secondaryCta: "Csomagok",
     },
     chooserIntro:
-      "A cég törzse a Master Baseline. Kahn-esettanulmány: 4,5 M hitel vagy 3×1,1 M organikus; A kötbéres / B rugalmas. PRO pályák, helyi cash-flow.",
+      "A cég törzsét egyszer viszed be. Elképzelt minták: hitel vagy organikus út, kötbér vagy rugalmas kilépés. A számok a gépeden maradnak.",
     proofBullets: [
-      "Master Baseline: a core számokat nem kell duplán megadni",
-      "Kahn: hitel/organikus → A kötbér / B rugalmas → PRO",
-      "PRO: likviditási csapda, árrés, runway, stop-loss",
+      "A törzset nem kell duplán megadni",
+      "Hitel vagy organikus út, kötbér vagy rugalmas kilépés",
+      "Rossz, közepes és jó pálya ugyanarra a múltra",
     ],
     caseHeading: "Stratégiai esetek",
     demoTeaser: {
@@ -109,8 +109,8 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     faq: [
       ...CONCEPT_FAQ_ITEMS,
       {
-        q: "Mi a Master Baseline?",
-        a: "A cég működő törzse: partnerek, fix költség, core cash-flow. A stratégiai esetek ezt öröklik. A projekt csak a döntés rétegét viszi.",
+        q: "Mi a törzs?",
+        a: "A cég működő alapja: partnerek, fix költség, a mindennapi kassza. A stratégiai minták ezt öröklik. A projekt csak a döntés rétegét viszi.",
       },
       MEASURE_FAQ,
       PRICING_VAT_FAQ,
@@ -121,7 +121,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     id: "kozosseg",
     seoTitle: "Szcenárió — Kisközösség és helyi biztonság",
     seoDescription:
-      "Helyi ellátás, önellátás, hálózati függetlenség. Víz, energia, 72 órás működési tartalék. Local-first, nincs telemetria.",
+      "Helyi ellátás, önellátás, hálózati függetlenség. Víz, energia, működési tartalék. A számok a gépeden maradnak.",
     hero: {
       eyebrow: "Kisközösség, civil, helyi függetlenség",
       title: "Helyi ellátás, önellátás, hálózati függetlenség",
@@ -133,9 +133,9 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
     chooserIntro:
       "Helyi ellátás és háztartási működési tartalék. Víz, energia, mesh, 72 óra. Ugyanaz a fizikai motor, mint a vállalati BCP-nél.",
     proofBullets: [
-      "Közösség: decentralizált víz, energia, helyi mesh",
-      "Háztartás: 72 órás működési tartalék — akkumulátor, készlet",
-      "Ugyanaz a ResourceRunway / EnergyAutonomy / TTR számítás",
+      "Közösség: helyi víz, energia, saját kör",
+      "Háztartás: működési tartalék kiesésre",
+      "Ugyanaz a motor, mint a céges tartalék-mintánál",
     ],
     caseHeading: "Két helyi eset",
     demoTeaser: {
@@ -174,10 +174,10 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
       secondaryCta: "Csomagok",
     },
     chooserIntro:
-      "Fix PDCA. Pénzügyi sáv és Lean / Poka-Yoke mikro ugyanazon a moszaikon. Diák- és tanműhely-lépték.",
+      "Elképzelt tréning-minták a motor kipróbálásához. Pénzügyi és működési sáv együtt. Diák- és tanműhely-lépték.",
     proofBullets: [
-      "Startup: burn rate, fedezeti pont, PRO sáv",
-      "Lean VSM: OEE, SMED, Poka-Yoke",
+      "Induló kassza és fedezet — három pálya a gépeden",
+      "Működési veszteségek és beavatkozás ugyanazon a mintán",
     ],
     caseHeading: "Két tréning-eset",
     demoTeaser: {
@@ -195,7 +195,7 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
       ...CONCEPT_FAQ_ITEMS,
       {
         q: "Ez ügyféladat?",
-        a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő, nincs telemetria.",
+        a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő. A fejlesztők nem látják.",
       },
       MEASURE_FAQ,
       PRICING_VAT_FAQ,

@@ -11,7 +11,7 @@ import {
   PlayCircle,
   SearchX,
   ShieldCheck,
-  TrendingUp,
+  SlidersHorizontal,
   Upload,
   Zap,
   type LucideIcon,
@@ -373,24 +373,30 @@ export function ScenarioDoor() {
                   {t("door.howLead")}
                 </h2>
               </div>
-              <ol className="grid list-none gap-3 grid-cols-1 md:grid-cols-3 p-0">
+              <ol className="grid list-none gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 p-0">
                 <HowValueCard
                   step="1"
-                  icon={Upload}
+                  icon={HardDrive}
                   title={t("door.howStep1Title")}
                   body={t("door.howStep1Body")}
                 />
                 <HowValueCard
                   step="2"
-                  icon={GitBranch}
+                  icon={Upload}
                   title={t("door.howStep2Title")}
                   body={t("door.howStep2Body")}
                 />
                 <HowValueCard
                   step="3"
-                  icon={TrendingUp}
+                  icon={GitBranch}
                   title={t("door.howStep3Title")}
                   body={t("door.howStep3Body")}
+                />
+                <HowValueCard
+                  step="4"
+                  icon={SlidersHorizontal}
+                  title={t("door.howStep4Title")}
+                  body={t("door.howStep4Body")}
                 />
               </ol>
             </section>

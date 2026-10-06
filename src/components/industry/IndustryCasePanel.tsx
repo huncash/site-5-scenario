@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
-import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HospitalTriageSim } from "@/components/industry/HospitalTriageSim";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
@@ -50,18 +50,20 @@ function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kin
                 const on = picked?.id === c.id;
                 return (
                   <li key={c.id}>
-                    <button
-                      type="button"
-                      className={`crisis-tl-btn crisis-tl-${c.tone}${on ? " is-on" : ""}`}
-                      aria-pressed={on}
-                      onClick={() => setPath(chooseAt(path, idx, c.id))}
-                    >
-                      <span className="crisis-tl-btn-head">
-                        <ChartLegendSwatch tone={c.tone} label={TONE_LABEL[c.tone]} line />
-                        <span className="surv-label-chip">{c.label}</span>
-                      </span>
-                      <span className="crisis-tl-effect">{c.lead}</span>
-                    </button>
+                    <div className={`crisis-tl-btn crisis-tl-${c.tone}${on ? " is-on" : ""}`}>
+                      <button
+                        type="button"
+                        className="kahn-pick"
+                        aria-pressed={on}
+                        onClick={() => setPath(chooseAt(path, idx, c.id))}
+                      >
+                        <span className="crisis-tl-btn-head">
+                          <ChartLegendSwatch tone={c.tone} label={TONE_LABEL[c.tone]} line />
+                          <span className="surv-label-chip">{c.label}</span>
+                        </span>
+                      </button>
+                      <DetailFold id={`ind-walk-${kind}-${step.id}-${c.id}`} text={c.lead} />
+                    </div>
                   </li>
                 );
               })}
@@ -90,8 +92,8 @@ function Walk({ kind }: { kind: Exclude<ReturnType<typeof industryCaseById>["kin
             <dd>{climax.beMonth == null ? t("panel.beyondHorizon") : t("panel.monthN", { n: climax.beMonth })}</dd>
           </div>
         </dl>
-        <p className="narr-climax-lock">{climax.lockIn}</p>
-        <p className="narr-climax-wow">{climax.wow}</p>
+        <DetailFold id={`ind-walk-${kind}-lock`} text={climax.lockIn} />
+        <DetailFold id={`ind-walk-${kind}-wow`} text={climax.wow} />
       </aside>
     </div>
   );
@@ -112,9 +114,9 @@ function SignalCards({ signals }: { signals: IndustrySignal[] }) {
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <ChartLegendSwatch tone={s.tone} label={TONE_LABEL[s.tone]} line />
           </div>
-          <p className="mt-2 text-[12px] font-medium text-foreground break-words">{s.title}</p>
-          <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-foreground">{s.metric}</p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{s.detail}</p>
+          <p className="mt-2 text-[12px] font-medium text-[var(--text-main)] break-words">{s.title}</p>
+          <p className="mt-0.5 min-w-[4.5rem] font-mono text-[13px] tabular-nums text-[var(--text-main)]">{s.metric}</p>
+          <DetailFold id={`ind-sig-${s.tone}`} text={s.detail} />
         </li>
       ))}
     </ul>

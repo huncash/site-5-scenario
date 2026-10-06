@@ -36,6 +36,7 @@ describe("pre-flight public promise", () => {
     expect(hu.legal.pageLead).toMatch(/nem megy a cég szerverére/);
     expect(hu.legal.localBody).toMatch(/nem menti szerverre/);
     expect(hu.legal.bannerBody).toMatch(/cég szerverére/);
+    expect(hu.legal.bannerBody).toMatch(/soha nem látják/);
     expect(en.legal.pageLead).toMatch(/company server/);
   });
 
@@ -65,8 +66,10 @@ describe("pre-flight public promise", () => {
       hu.door.howStep1Body,
       hu.door.howStep2Body,
       hu.door.howStep3Body,
+      hu.door.howStep4Body,
       hu.supportDoor.navIntegrationsLead,
       supportCopy("hu").pricingLocalBody,
+      supportCopy("hu").pricingWorkflowBody,
     ].join("\n");
     const operationEn = [
       en.brand.localFirstBody,
@@ -74,8 +77,10 @@ describe("pre-flight public promise", () => {
       en.door.howStep1Body,
       en.door.howStep2Body,
       en.door.howStep3Body,
+      en.door.howStep4Body,
       en.supportDoor.navIntegrationsLead,
       supportCopy("en").pricingLocalBody,
+      supportCopy("en").pricingWorkflowBody,
     ].join("\n");
     expect(operationHu).not.toMatch(/Barion/i);
     expect(operationEn).not.toMatch(/Barion/i);
@@ -91,13 +96,33 @@ describe("pre-flight public promise", () => {
       hu.door.howStep2Body,
       hu.door.howStep3Title,
       hu.door.howStep3Body,
+      hu.door.howStep4Title,
+      hu.door.howStep4Body,
       hu.pricing.sloganStarter,
       hu.pricing.hs3,
       hu.pricing.cf4,
       hu.brand.faqProConceptQ,
     ].join("\n");
     expect(publicHu).not.toMatch(/P-R-O|P–R–O/);
-    expect(hu.door.howStep1Title).toMatch(/Adatok importálása/);
-    expect(hu.door.howStep3Title).toMatch(/kockázatkezelési határok/);
+    expect(hu.door.howStep1Title).toMatch(/Törzsadatok/);
+    expect(hu.door.howStep2Title).toMatch(/Mesh Data Manager/);
+    expect(hu.door.howStep4Title).toMatch(/szabályok/);
+  });
+
+  it("keeps public leads free of editorial cross-talk", () => {
+    const huBlob = [
+      supportCopy("hu").pricingLead,
+      hu.school.lead,
+      hu.supportDoor.tiersLead,
+      hu.supportDoor.faqSettingsA,
+    ].join("\n");
+    const enBlob = [
+      supportCopy("en").pricingLead,
+      en.school.lead,
+      en.supportDoor.tiersLead,
+      en.supportDoor.faqSettingsA,
+    ].join("\n");
+    expect(huBlob).not.toMatch(/főoldal csak röviden|pontos keret ide tartozik|nem promózzuk|visszaide/i);
+    expect(enBlob).not.toMatch(/homepage stays short|exact frame|not promoted on the homepage|come back here/i);
   });
 });

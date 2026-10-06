@@ -12,10 +12,10 @@ export const HERO_SUBHEADLINE =
 export const HERO_SLOGAN = "Káoszból tiszta pálya.";
 export const HERO_LOCAL_FIRST_LABEL = "A számok a gépeden maradnak:";
 export const HERO_LOCAL_FIRST_BODY =
-  "Mentés fájlba vagy QR-rel a másik gépre. Nem küldünk használatot. A kivonat (CAMT.053, CSV, XML) helyben jön be. A számok a böngésződben maradnak — nincs külső felhős adatbázis.";
+  "Lokális irányító-szimuláció a saját eszközödön: a fejlesztők soha nem látják és nem gyűjtik az adataidat. Megosztás meghívott vendéggel, vagy mentési fájllal — mint régen egy táblázatot. A kivonat (CSV, XML) a Mesh Data Managerbe kerül, helyben. Nincs külső felhős adatbázis.";
 export const HERO_DEMO_PREVIEW_TITLE = "További demó helyzetek";
 export const HERO_DEMO_PREVIEW_BODY =
-  "Előre betöltött példa. Nincs regisztráció — egy kattintással látod, merre szivárog a kassza.";
+  "Szabadon játszható, elképzelt minták a motor kipróbálásához. Nem baj, ha elsőre sok az infó vagy idegen a szakterület: nincs regisztráció, a számok a gépeden maradnak.";
 export const ABOUT_TAGLINE =
   "Három pálya magánra és vállalkozásra — a számok a gépeden maradnak";
 export const ABOUT_LEAD =

@@ -35,7 +35,7 @@ function OktatasSzimulacioDemoLoaderPage() {
     <FunnelShell
       eyebrow="Oktatási és szimulációs tréningek"
       title="Esetek megnyitása…"
-      subtitle="A négy kevert mutatójú tréning közül választasz. Nincs automata belépés egyetlen pályára."
+      subtitle="Elképzelt tréning-minták. Nincs automata belépés egyetlen pályára — a számok a gépeden maradnak."
     >
       <Card className="border-border/60 bg-background/30">
         <CardHeader className="pb-2">

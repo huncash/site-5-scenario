@@ -4,12 +4,13 @@ import { SEO_HOME_DESCRIPTION, SEO_HOME_TITLE, SEO_OG_DESCRIPTION, SEO_OG_TITLE 
 import { publicSeoHead, seoCanonicalUrl, supportSeoPageFromPath } from "@/lib/seo";
 
 describe("public SEO", () => {
-  it("indexes local-first browser Case/Slot and 2027 desktop bonus", () => {
+  it("indexes local-first browser sovereignty and 2027 desktop bonus", () => {
     expect(SEO_HOME_TITLE).toMatch(/^Szcenárió/);
     expect(SEO_HOME_TITLE).not.toMatch(/Szenárió —/);
     expect(SEO_HOME_TITLE).toMatch(/böngészőben/);
-    expect(SEO_HOME_TITLE).toMatch(/Case\/Slot/);
+    expect(SEO_HOME_TITLE).not.toMatch(/Case\/Slot/);
     expect(SEO_HOME_DESCRIPTION).toMatch(/felhős adatbázis/);
+    expect(SEO_HOME_DESCRIPTION).toMatch(/soha nem látják/);
     expect(SEO_HOME_DESCRIPTION).toMatch(/2027/);
     expect(SEO_HOME_DESCRIPTION).toMatch(/ingyen/);
     expect(SEO_OG_TITLE).toMatch(/böngésződben/);

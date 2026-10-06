@@ -18,6 +18,9 @@ import { toast } from "sonner";
 
 import { decryptJSON, encryptJSON } from "@/lib/crypto";
 import { useVault } from "@/lib/vault";
+import { usePlanPermissions } from "@/hooks/usePlanPermissions";
+import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
+import { planUpgradeCopy } from "@/lib/planGate";
 import { purgeDemoGeneratedDataForActiveProfile } from "@/lib/demoSeed";
 import { denyShowcaseWrite, SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
 import { localdb, type BankAccountRow, type BankAccountWorkspaceRow, type BankRawRow, type SnapshotRow } from "@/lib/localdb";
@@ -296,6 +299,9 @@ function SettingsPage() {
   const qc = useQueryClient();
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
+  const { can } = usePlanPermissions();
+  const { openComingSoon } = useFeatureComingSoon();
+  const canCustomRules = can("CUSTOM_RULES");
   const profileId = String(search.profile ?? "");
   const meshRepo = useMeshRepository();
   const activeTab = (search.tab ?? "accounts") as SettingsTabId;
@@ -2603,13 +2609,30 @@ function SettingsPage() {
           {show("rules") && (
           <Card>
             <CardHeader>
-              <CardTitle>⚡ Automatikus besorolási szabályok</CardTitle>
+              <CardTitle>Automatikus besorolási szabályok</CardTitle>
               <div className="text-xs text-muted-foreground">
-                🎯 Mire jó? Gyorsítja az importot és a rögzítést: ismétlődő mintákból (pl. „Lidl”, „MÁV”) automatikusan
-                kitölti a kategóriát és a partnert.
+                {canCustomRules
+                  ? "Ismétlődő mintákból (pl. Lidl, MÁV) kitölti a kategóriát. A beépített heurisztika Basicben is fut; a saját szabály a Proban."
+                  : "A beépített heurisztika helyben fut. Saját minta rögzítése a Pro csomagban él."}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {!canCustomRules ? (
+                <div className="rounded-lg border border-dashed border-border/60 bg-background/40 p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Basicben a motor a beépített szabályokkal kategorizál. Egyéni mintát a Pro asztalán adsz — nem tanítás, a gépeden marad.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => openComingSoon({ ...planUpgradeCopy("CUSTOM_RULES"), kind: "upgrade" })}
+                  >
+                    Support: Pro keret
+                  </Button>
+                </div>
+              ) : (
+              <>
               <div className="rounded-lg border border-border/60 bg-background/40 p-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="grid gap-2">
@@ -3163,6 +3186,8 @@ function SettingsPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              </>
+              )}
             </CardContent>
           </Card>
           )}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyCrisisChoice,
+  applyCrisisSelections,
   buildPhysicalDashboard,
   communicationRedundancy,
   energyAutonomyHours,
@@ -65,5 +66,13 @@ describe("physicalMetrics", () => {
     const next = applyCrisisChoice(dash, choice);
     expect(dash.ttr.hours).toBe(before);
     expect(next.ttr.hours).toBeGreaterThan(before);
+  });
+
+  it("replays stored PLAN fork onto CHECK gauges from the same seed", () => {
+    const seed = buildPhysicalDashboard("demo12_resilience_saas_outage")!;
+    const choice = seed.forks[0]!.choices.find((c) => c.id === "p2p")!;
+    const live = applyCrisisSelections(seed, { [seed.forks[0]!.id]: choice.id });
+    expect(live.ttr.hours).toBeGreaterThan(seed.ttr.hours);
+    expect(live.ttr.hours).not.toBe(seed.ttr.hours);
   });
 });

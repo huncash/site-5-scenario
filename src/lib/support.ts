@@ -37,13 +37,14 @@ export function supportPublicOrigin(hostname?: string, pathname?: string): strin
   return SUPPORT_ORIGIN_PROD;
 }
 
-/** Support /pricing SSOT horgonyok — részletes árazás / licenc / helyi import. */
+/** Support /pricing SSOT horgonyok — részletes árazás / licenc / helyi import / munkamenet. */
 export type SupportPricingAnchor =
   | "basic"
   | "pro"
   | "enterprise"
   | "tiered-loyalty"
   | "active-workspaces"
+  | "workflow"
   | "local-import";
 
 export type SupportPlanId = "basic" | "pro" | "enterprise";

@@ -76,7 +76,7 @@ export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }
   { id: "promote", title: "2. Élesítés & Tagi kölcsön" },
   { id: "loans", title: "3. Hitelek & Kötelezettségek" },
   { id: "cashflow", title: "4. Cashflow & Megtakarítások" },
-  { id: "bank-sync", title: "5. Helyi kivonat-import (CAMT / CSV / XML)" },
+  { id: "bank-sync", title: "5. Helyi kivonat-import (CSV / XML)" },
   { id: "settings", title: "6. Beállítások & Danger Zone" },
   { id: "scenario", title: "7. P-R-O forgatókönyv & grafikon" },
   { id: "lessons", title: "8. Szcenárió-leckék" },
@@ -267,12 +267,12 @@ Mentéskor:
     category: "bank",
     title: "Helyi kivonat-import — ne jöjjön be kétszer ugyanaz",
     summary:
-      "CAMT.053, CSV, XML a gépedről. A rendszer megjegyzi a fájl ujjlenyomatát a Slotra, hogy ne importáld kétszer. A számolás a böngésződben marad.",
+      "CSV, XML a gépedről. A rendszer megjegyzi a fájl ujjlenyomatát a Slotra, hogy ne importáld kétszer. A számolás a böngésződben marad.",
     body: `🎯 Mire jó?
 - Hogy a kivonat a gépedről jöjjön be, ne a felhőből. És ne legyen véletlen dupla tétel.
 
 ⚙️ Hogyan működik?
-- CAMT.053, CSV, XML — vagy ütemezett helyi fájl. A számolás nálad marad.
+- Magán: XML (SpreadsheetML). Vállalkozás (Pro): CSV. Figyelt mappa: Pro, belépéskor a tárolt mappa, ha a böngésző engedélyezi.
 - A fájl tartalmából ujjlenyomat készül. Ugyanaz a fájl másik Slotra mehet.
 - Beállításokban törölhető az import-emlékezet. Importnál választható a kényszerített újraolvasás.
 

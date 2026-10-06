@@ -39,7 +39,7 @@ function ValsagRezilienciaDemoLoaderPage() {
     <FunnelShell
       eyebrow="BCP és működési reziliencia"
       title="Esetek megnyitása…"
-      subtitle="BCP, helyi önfenntartás, működési tartalék, stratégiai előrejelzés. Nincs automata belépés egyetlen pályára."
+      subtitle="Elképzelt tartalék- és helyreállási minták. Nincs automata belépés egyetlen pályára — a számok a gépeden maradnak."
     >
       <Card className="border-border/60 bg-background/30">
         <CardHeader className="pb-2">

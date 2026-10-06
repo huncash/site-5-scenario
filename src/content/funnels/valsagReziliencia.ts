@@ -6,17 +6,17 @@ const packages = STANDARD_TIER_COPY;
 export const VALSAG_REZILIENCIA_FUNNEL = {
   hero: {
     eyebrow: "BCP és működési reziliencia",
-    title: "Aki a nehéz sávot is számolja, az érett — nem vakon optimista",
+    title: "Aki a nehéz sávot is számolja, az érett — nem vakon derűlátó",
     subtitle:
-      "Fekete hattyú, felhőleállás, logisztikai sokk, demográfiai pálya. ResourceRunway, EnergyAutonomy, TTR. Local-first: olyat tud, amit a steril enterprise Excel nem.",
+      "Leállás, ellátási sokk, tartalék a saját eszközön. Elképzelt minták: szabadon játszhatók, ha idegen a szakterület. Nincs felhős adatbázis.",
     primaryCta: "Esetek megnyitása",
     secondaryCta: "Csomagok megtekintése",
   },
   proofBullets: [
-    "Vállalati BCP: redundáns hálózat, local-first, TTR — kockázatkezelés, nem pánik",
-    "Közösség: decentralizált helyi ellátás és biztonság",
-    "Háztartás: ugyanaz a motor, működési tartalék 72 órás kiesésre",
-    "Makró: strategic foresight — TFR és munkaképes kor, 20 éves gazdasági kihívás",
+    "Vállalat: tartalék és helyreállás — kockázatkezelés, nem pánik",
+    "Közösség: helyi ellátás a saját körön",
+    "Háztartás: ugyanaz a motor, működési tartalék kiesésre",
+    "Hosszabb táv: népességi pálya, nem riadó",
   ],
   demoTeaser: {
     title: "Interaktív előnézet: BCP / reziliencia (demó)",

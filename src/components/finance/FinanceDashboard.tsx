@@ -50,6 +50,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
+import { usePlanPermissions } from "@/hooks/usePlanPermissions";
+import { planUpgradeCopy } from "@/lib/planGate";
+import type { PlanPermission } from "@/lib/planPermissions";
 import { LeanConsultantPanel } from "@/components/LeanConsultantPanel";
 import { ProfileHeader } from "@/components/ProfileHeader";
 // (PDCA rotary knob is rendered inside ProfileHeader)
@@ -127,6 +130,7 @@ import {
   type UsageEvent,
   type UsageTemplate,
   type VatMode,
+  type WorkspaceType,
 } from "@/lib/finance";
 import { decryptJSON, encryptJSON } from "@/lib/crypto";
 import { useVault } from "@/lib/vault";
@@ -137,6 +141,7 @@ import { cn } from "@/lib/utils";
 import { getWorkspaceTransactionsGuard } from "@/lib/workspaceGuard";
 import { sha256Hex } from "@/lib/hash";
 import { fsHandleKey, getDirectoryHandle, setDirectoryHandle } from "@/lib/fsHandleStore";
+import { ensureDirectoryReadPermission, pickLatestStatementFile } from "@/lib/watchedFolder";
 import { applySuggestion, suggestFromRules } from "@/lib/categoryRules";
 import { categorizePersonalBankRow } from "@/lib/personalBankCategorizer";
 import { ExportQrDialog, ImportQrDialog } from "@/components/ProfileTransfer";
@@ -227,6 +232,7 @@ import { isResilienceSegment } from "@/lib/resilienceCases";
 import { scenarioLens } from "@/lib/scenarioLens";
 import { baselineForSegment, pdcaPhaseExact, scenarioSurface } from "@/lib/scenarioSurface";
 import { buildStrategyWhatIf, isKahnForkSegment, isStrategySegment } from "@/lib/strategyCases";
+import { strategyForkKindOf } from "@/lib/strategyForks";
 import {
   GuidedTourRestoreChip,
   KahnCaseGuide,
@@ -236,6 +242,7 @@ import {
   KahnWorkspaceHint,
 } from "@/components/strategy/KahnCaseGuide";
 import { KahnLiveKpis } from "@/components/strategy/KahnLiveKpis";
+import { StrategyLiveKpis } from "@/components/strategy/StrategyLiveKpis";
 import { requestWorkspaceSwitch } from "@/lib/workspaceSwitch";
 import type { KahnGuideWorkspace } from "@/lib/kahnGuide";
 import { KAHN_FOCUS_IDS } from "@/lib/kahnCrossTab";
@@ -594,6 +601,18 @@ export function FinanceDashboard({
   const meshRepo = useMeshRepository();
   const { openReferences } = useReferencesNav();
   const { t, locale } = useI18n();
+  const { openComingSoon } = useFeatureComingSoon();
+  const { can } = usePlanPermissions();
+
+  const requirePlan = useCallback(
+    (permission: PlanPermission) => {
+      if (can(permission)) return true;
+      const copy = planUpgradeCopy(permission);
+      openComingSoon({ ...copy, kind: "upgrade" });
+      return false;
+    },
+    [can, openComingSoon],
+  );
 
   useEffect(() => {
     setMeshActiveProfile(profileId, profileName);
@@ -1244,17 +1263,26 @@ export function FinanceDashboard({
   const denyWorkspaceCreate = () => {
     if (denyMutateIfViewer()) {
       toast.warning("Guest módban nem hozható létre Slot.");
-      return;
+      return false;
     }
     const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
     const cap = checkScenarioSlotCapacity(used, readSlotLedger());
     if (!cap.ok) {
       setSlotChooserOpen(true);
       setWsCreateDenied(false);
-      return;
+      return false;
     }
-    setWsCreateDenied(true);
-    toast.warning("Ez a funkció a jelenlegi verzióban nem engedélyezett.");
+    return true;
+  };
+
+  const beginWorkspaceType = (type: WorkspaceType) => {
+    if (!denyWorkspaceCreate()) return;
+    if (type === "business" && !isVisitorDemo && !requirePlan("BUSINESS_WORKSPACES")) return;
+    if (type === "project" && !isVisitorDemo && !requirePlan("PROJECTS")) return;
+    setWsCreateDenied(false);
+    setCreateWsType(type);
+    setPdcaNewOpen(false);
+    setCreateWsOpen(true);
   };
   const workspaceMetaById = useMemo(() => {
     const m = new Map<string, (typeof workspaceMetas)[number]>();
@@ -1304,11 +1332,18 @@ export function FinanceDashboard({
   );
 
   const visibleWsOptions = useMemo(() => {
+    const allowBusiness = isVisitorDemo || can("BUSINESS_WORKSPACES");
+    const allowProjects = isVisitorDemo || can("PROJECTS");
     return workspaceMetas
       .filter((w) => w.id !== "personal")
       .filter((w) => !(isVisitorDemo && DEMO_GHOST_WORKSPACES.has(w.id)))
+      .filter((w) => {
+        if (w.type === "project") return allowProjects;
+        if (w.type === "business") return allowBusiness;
+        return true;
+      })
       .map((w) => w.id);
-  }, [isVisitorDemo, workspaceMetas]);
+  }, [can, isVisitorDemo, workspaceMetas]);
 
   const activeLoans = useMemo(() => {
     if (activeWorkspace === "__all") return loans.filter((l) => l.status === "active");
@@ -1715,20 +1750,25 @@ export function FinanceDashboard({
   );
 
   const onBankPersonalXmlText = useCallback(
-    async (input: { fileName: string; text: string; fileSize?: number | null; bypassWantsLock?: boolean }) => {
+    async (input: { fileName: string; text: string; fileSize?: number | null; bypassWantsLock?: boolean; quiet?: boolean; workspaceId?: string }) => {
       if (denyShowcaseWrite(isVisitorDemo)) return;
       try {
-        const activeWorkspaceId = (activeWorkspace && activeWorkspace !== "__all" ? activeWorkspace : "") || "magan";
-        console.log("[BANK IMPORT DEBUG] Current active workspace:", activeWorkspaceId);
-        console.log("[bank:personal] import:start", {
-          fileName: input.fileName,
-          fileSize: input.fileSize ?? null,
-          textBytes: input.text?.length ?? 0,
-          activeWorkspace,
-        });
-        toast.message(`XML feldolgozás: ${input.fileName}`, {
-          description: `Munkatér: ${activeWorkspace} · méret: ${input.fileSize ?? input.text.length} byte`,
-        });
+        const activeWorkspaceId =
+          (input.workspaceId && input.workspaceId !== "__all" ? input.workspaceId : null) ||
+          (activeWorkspace && activeWorkspace !== "__all" ? activeWorkspace : "") ||
+          "personal";
+        if (!input.quiet) {
+          console.log("[BANK IMPORT DEBUG] Current active workspace:", activeWorkspaceId);
+          console.log("[bank:personal] import:start", {
+            fileName: input.fileName,
+            fileSize: input.fileSize ?? null,
+            textBytes: input.text?.length ?? 0,
+            activeWorkspace: activeWorkspaceId,
+          });
+          toast.message(`XML feldolgozás: ${input.fileName}`, {
+            description: `Munkatér: ${activeWorkspaceId} · méret: ${input.fileSize ?? input.text.length} byte`,
+          });
+        }
 
         const [accounts, maps] = await Promise.all([localdb.listBankAccounts(), localdb.listBankAccountWorkspaces()]);
         const normalize = (s: string) =>
@@ -1760,15 +1800,16 @@ export function FinanceDashboard({
         }
 
         const rows = parseHuPersonalHistorySpreadsheetXml(input.text);
-        console.log("[bank:personal] parsedRows", { parsedRows: rows.length, activeWorkspace, fileName: input.fileName });
+        if (!input.quiet) {
+          console.log("[bank:personal] parsedRows", { parsedRows: rows.length, activeWorkspace: activeWorkspaceId, fileName: input.fileName });
+        }
         if (rows.length === 0) {
-          console.log("[XML SAMPLE]", String(input.text ?? "").slice(0, 500));
           setBankImportStatus("Nem ismert XML formátum. (HISTORY_… SpreadsheetML kivonatot várok.)");
-          toast.error("HIBA: Az XML struktúrából nem sikerült tranzakciókat kinyerni. Ellenőrizd a fájl formátumát!");
+          if (!input.quiet) toast.error("HIBA: Az XML struktúrából nem sikerült tranzakciókat kinyerni. Ellenőrizd a fájl formátumát!");
           return;
         }
 
-        if (activeWorkspace === "__all") {
+        if (activeWorkspaceId === "__all") {
           setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
           return;
         }
@@ -2068,12 +2109,14 @@ export function FinanceDashboard({
           skippedNonHuf ? `, nem HUF: ${skippedNonHuf}` : ""
         }.`;
         setBankImportStatus(msg);
-        toast.success(msg);
-        console.log("[bank:personal] import:done", { saved, duplicates, skippedNonHuf, activeWorkspace, fileName: input.fileName });
+        if (!input.quiet || saved > 0) toast.success(msg);
+        if (!input.quiet) {
+          console.log("[bank:personal] import:done", { saved, duplicates, skippedNonHuf, activeWorkspace: activeWorkspaceId, fileName: input.fileName });
+        }
         appendAudit({
           op: "save",
           store: "bank_import",
-          key: activeWorkspace,
+          key: activeWorkspaceId,
           message: `Magán banki XML import: ${saved} tétel`,
         });
       } catch (e) {
@@ -2084,17 +2127,20 @@ export function FinanceDashboard({
     [activeWorkspace, appendAudit, qc, vaultKey, workspaceMetaById, updateWorkspaceMeta, categoryRulesQ.data, isVisitorDemo],
   );
 
-  const syncPersonalBankFromLatestFileInFolder = useCallback(async () => {
+  const syncPersonalBankFromLatestFileInFolder = useCallback(async (opts?: { autoscan?: boolean; workspaceId?: string }) => {
     if (denyShowcaseWrite(isVisitorDemo)) return;
-    if (activeWorkspace === "__all") {
-      setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
+    const targetWs = opts?.workspaceId ?? activeWorkspace;
+    const quiet = Boolean(opts?.autoscan);
+    if (targetWs === "__all") {
+      if (!quiet) setBankImportStatus("Szumma nézetben import nem indítható. Válts Magán/Vállalkozás munkatérre.");
       return;
     }
     try {
-      const key = fsHandleKey({ profileId, workspaceId: activeWorkspace, kind: "bank-personal" });
-      let dir = bankDirHandleRef.current;
+      const key = fsHandleKey({ profileId, workspaceId: targetWs, kind: "bank-personal" });
+      let dir = quiet ? null : bankDirHandleRef.current;
       if (!dir) dir = await getDirectoryHandle(key);
       if (!dir) {
+        if (quiet) return;
         const picker = (window as any).showDirectoryPicker;
         if (typeof picker !== "function") {
           setBankImportStatus("A böngésző nem támogatja a mappa-szinkront. Használd a fájl kiválasztást.");
@@ -2108,46 +2154,69 @@ export function FinanceDashboard({
         } catch {
           /* best-effort */
         }
+      } else {
+        bankDirHandleRef.current = dir;
       }
 
-      let best: { name: string; file: File } | null = null;
-      for await (const [name, handle] of (dir as any).entries()) {
-        if (!handle || handle.kind !== "file") continue;
-        const lower = String(name).toLowerCase();
-        if (!(lower.endsWith(".xml") || lower.endsWith(".csv"))) continue;
-        const file: File = await handle.getFile();
-        if (!best || file.lastModified > best.file.lastModified) best = { name, file };
-      }
-
-      if (!best) {
-        setBankImportStatus("Nem találok .xml (vagy .csv) kivonat fájlt a kiválasztott mappában.");
+      const allowed = await ensureDirectoryReadPermission(dir);
+      if (!allowed) {
+        if (quiet) {
+          setBankImportStatus("Figyelt mappa: a böngésző olvasási engedélyt kér. Nyomd a Magán szinkront.");
+          return;
+        }
+        setBankImportStatus("Nincs olvasási jog a figyelt mappához. Válassz mappát újra, vagy használd a fájl kiválasztást.");
         return;
       }
 
-      console.log("[bank:personal] sync:latestFile", {
-        fileName: best.name,
-        size: best.file.size,
-        lastModified: best.file.lastModified,
-        activeWorkspace,
-      });
-      toast.message("Magán banki szinkron indult", {
-        description: `${best.name} · ${best.file.size} byte · ws=${activeWorkspace}`,
-      });
+      const best = await pickLatestStatementFile(dir);
+      if (!best) {
+        if (!quiet) setBankImportStatus("Nem találok .xml (vagy .csv) kivonat fájlt a kiválasztott mappában.");
+        return;
+      }
+
+      if (!quiet) {
+        toast.message("Magán banki szinkron indult", {
+          description: `${best.name} · ${best.file.size} byte · ws=${targetWs}`,
+        });
+      }
 
       setBankImportStatus(`Szinkron… (${best.name})`);
       const text = await best.file.text();
       if (String(best.name).toLowerCase().endsWith(".csv")) {
-        setBankImportStatus("Ez a Magán szinkron XML (SpreadsheetML) kivonatot vár. CSV-t a Vállalkozás import kezeli.");
-        toast.warning("Nem megfelelő formátum (Magán)", {
-          description: "Magán szinkron: Banki XML / SpreadsheetML (.xml)",
-        });
+        if (!quiet) {
+          setBankImportStatus("Ez a Magán szinkron XML (SpreadsheetML) kivonatot vár. CSV-t a Vállalkozás import kezeli.");
+          toast.warning("Nem megfelelő formátum (Magán)", {
+            description: "Magán szinkron: Banki XML / SpreadsheetML (.xml)",
+          });
+        }
         return;
       }
-      await onBankPersonalXmlText({ fileName: best.name, text, fileSize: best.file.size });
+      await onBankPersonalXmlText({
+        fileName: best.name,
+        text,
+        fileSize: best.file.size,
+        quiet,
+        workspaceId: targetWs,
+      });
     } catch (e) {
-      setBankImportStatus(e instanceof Error ? e.message : "Mappa-szinkron hiba.");
+      if (!quiet) setBankImportStatus(e instanceof Error ? e.message : "Mappa-szinkron hiba.");
     }
   }, [activeWorkspace, onBankPersonalXmlText, profileId, isVisitorDemo]);
+
+  const requestWatchedFolderSync = useCallback(() => {
+    if (!isVisitorDemo && !requirePlan("WATCHED_FOLDER")) return;
+    void syncPersonalBankFromLatestFileInFolder();
+  }, [isVisitorDemo, requirePlan, syncPersonalBankFromLatestFileInFolder]);
+
+  const watchedAutoscanRef = useRef(false);
+  useEffect(() => {
+    if (watchedAutoscanRef.current) return;
+    if (isVisitorDemo) return;
+    if (!profileId) return;
+    if (!can("WATCHED_FOLDER")) return;
+    watchedAutoscanRef.current = true;
+    void syncPersonalBankFromLatestFileInFolder({ autoscan: true, workspaceId: "personal" });
+  }, [can, isVisitorDemo, profileId, syncPersonalBankFromLatestFileInFolder]);
 
   const saveSettings = useMutation({
     mutationFn: async (next: CustomSettings) => {
@@ -3952,6 +4021,61 @@ export function FinanceDashboard({
     [settings, saveSettings, pushUndo, vaultKey, qc, appendAudit, profileId],
   );
 
+  const commitNewWorkspace = useCallback(() => {
+    if (!createWsType) return;
+    const alias = createWsName.trim();
+    if (!alias) {
+      toast.error("Adj nevet a slotnak.");
+      return;
+    }
+    if (createWsType === "project" && !createProjectMode) {
+      toast.error("Válassz projekt módot.");
+      return;
+    }
+    if (!denyWorkspaceCreate()) return;
+    if (createWsType === "business" && !isVisitorDemo && !requirePlan("BUSINESS_WORKSPACES")) return;
+    if (createWsType === "project" && !isVisitorDemo && !requirePlan("PROJECTS")) return;
+
+    const existing = (settings.workspaces ?? []).map((w) => w.id);
+    const prefix = createWsType === "project" ? "Projekt" : createWsType === "business" ? "Vállalkozás" : "Magan";
+    let n = 1;
+    while (existing.includes(`${prefix}${n}`)) n += 1;
+    const id = `${prefix}${n}`;
+    const row = {
+      id,
+      type: createWsType,
+      alias,
+      description: null,
+      color_tag: null,
+      bank_sync_folder: null,
+      imported_file_hashes: [],
+      project_mode: createWsType === "project" ? createProjectMode : null,
+      parent_business_id: createWsType === "project" && createProjectMode === "pilot" ? createPilotBusinessId || null : null,
+      scenario: createWsType === "project" ? ("realistic" as const) : null,
+    };
+    const base = (settings.workspaces ?? []).length > 0 ? settings.workspaces ?? [] : workspaceMetas;
+    commitSettings({ ...settings, workspaces: [...base.filter((w) => w.id !== id), row] }, "Új slot");
+    setMiddleWs(id);
+    setActiveWs(createWsType === "personal" && id === "personal" ? "magan" : "middle");
+    setCreateWsOpen(false);
+    setCreateWsType(null);
+    setCreateWsName("");
+    setCreateProjectMode(null);
+    setCreatePilotBusinessId("");
+    toast.success("Slot létrehozva a gépeden.");
+  }, [
+    createWsType,
+    createWsName,
+    createProjectMode,
+    createPilotBusinessId,
+    settings,
+    workspaceMetas,
+    commitSettings,
+    denyWorkspaceCreate,
+    isVisitorDemo,
+    requirePlan,
+  ]);
+
   const addCategory = useCallback(
     (kind: "income" | "expense", label: string) => {
       const trimmed = label.trim();
@@ -5745,6 +5869,8 @@ export function FinanceDashboard({
     </Card>
   );
 
+  const strategyForkKind = strategyForkKindOf(demoSegmentId);
+
   const whatIfPanel = whatIf ? (
     <Card className="pdca-tile--wide w-full min-w-0 overflow-hidden">
       <CardHeader className="pb-2">
@@ -5795,45 +5921,47 @@ export function FinanceDashboard({
       <CardContent className="grid items-start gap-3">
         {isKahnForkSegment(demoSegmentId) ? (
           <KahnLiveKpis />
+        ) : strategyForkKind ? (
+          <StrategyLiveKpis kind={strategyForkKind} caseId={demoSegmentId!} />
         ) : (
           <>
             <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  className="kpi-label text-[10px] uppercase tracking-wide text-[var(--text-muted)]"
                   title="Fedezeti pont"
                   exact="Fedezeti pont — az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
                   summary="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát. Halmozott eredmény = a havi (bevétel − kiadás) összege a horizont elejétől."
                 >
                   Fedezeti pont
                 </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                <div className="kpi-value mt-1 font-mono text-sm text-[var(--text-main)]">
                   {whatIf.breakEvenLabel ?? "—"}
                 </div>
               </div>
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  className="kpi-label text-[10px] uppercase tracking-wide text-[var(--text-muted)]"
                   title="Megtérülés (ROI)"
                   exact="Megtérülés — (bevétel − költség) / költség a 12 hónapon. Százalék, nem kamat."
                   summary="(A horizont teljes bevétele mínusz a teljes költség) osztva a költséggel. Százalék. Nem diszkontált, nem kamat."
                 >
                   Megtérülés
                 </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                <div className="kpi-value mt-1 font-mono text-sm text-[var(--text-main)]">
                   {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
                 </div>
               </div>
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
-                  className="kpi-label text-[10px] uppercase tracking-wide text-slate-300"
+                  className="kpi-label text-[10px] uppercase tracking-wide text-[var(--text-muted)]"
                   title="Fix arány"
                   exact="Fix arány — a havi kiadásból mennyi a kötött tétel (bérlet, előfizetés). Magas arány: kevesebb mozgástér."
                   summary="A havi kiadásból mennyi a kötött tétel (bérleti díj, előfizetés). A maradék a forgalommal mozog. Magas arány: kevesebb mozgástér, ha esik a bevétel."
                 >
                   Fix arány
                 </LeanTerm>
-                <div className="kpi-value mt-1 font-mono text-sm text-slate-50">
+                <div className="kpi-value mt-1 font-mono text-sm text-[var(--text-main)]">
                   {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
                 </div>
               </div>
@@ -5864,6 +5992,8 @@ export function FinanceDashboard({
           </>
         )}
 
+        {isKahnForkSegment(demoSegmentId) || strategyForkKind ? null : (
+        <>
         <div className="viz-split">
           <ChartChrome
             blockId="halmozott"
@@ -5910,13 +6040,16 @@ export function FinanceDashboard({
             <WaterfallChart steps={whatIf.waterfall} />
           </ChartChrome>
         </div>
+        </>
+        )}
       </CardContent>
       ) : null}
     </Card>
   ) : null;
 
   const strategyPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
-    whatIf?.strategySignals?.length ? (
+    whatIf?.strategySignals?.length &&
+    !(phase !== "PLAN" && (isKahnForkSegment(demoSegmentId) || strategyForkKind)) ? (
       <StrategyCasePanel
         segmentId={demoSegmentId}
         signals={whatIf.strategySignals}
@@ -6074,7 +6207,9 @@ export function FinanceDashboard({
       if (completed) updateWorkspaceMeta(activeWorkspace, completed, "PDCA ciklus lezárás + új PLAN");
     }
     setPdcaNewOpen(true);
-    denyWorkspaceCreate();
+    if (!denyWorkspaceCreate()) {
+      setPdcaNewOpen(false);
+    }
   };
 
   const newImprovementGoal = () => {
@@ -6959,7 +7094,7 @@ export function FinanceDashboard({
                     variant="secondary"
                     size="sm"
                     className="h-8 gap-2 px-2 sm:px-3"
-                    onClick={() => void syncPersonalBankFromLatestFileInFolder()}
+                    onClick={() => void requestWatchedFolderSync()}
                     title="Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából"
                     aria-label="Magán szinkron XML"
                   >
@@ -8326,7 +8461,7 @@ export function FinanceDashboard({
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
-                onClick={denyWorkspaceCreate}
+                onClick={() => beginWorkspaceType("business")}
               >
                 <div className="text-sm font-medium">🔵 Élő működés (DO)</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
@@ -8336,12 +8471,20 @@ export function FinanceDashboard({
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
-                onClick={denyWorkspaceCreate}
+                onClick={() => beginWorkspaceType("project")}
               >
                 <div className="text-sm font-medium">🟡 Tervezés / Szimuláció (PLAN)</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
                   Projekt (alapból Szimuláció mód).
                 </div>
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
+                onClick={() => beginWorkspaceType("personal")}
+              >
+                <div className="text-sm font-medium">💳 Magán számla / Kassza</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">Személyes alszámla a magánvagyonhoz.</div>
               </button>
             </div>
           )}
@@ -9395,7 +9538,7 @@ export function FinanceDashboard({
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
-                onClick={denyWorkspaceCreate}
+                onClick={() => beginWorkspaceType("business")}
               >
                 <div className="text-sm font-medium">💼 Új Vállalkozás</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
@@ -9405,17 +9548,17 @@ export function FinanceDashboard({
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
-                onClick={denyWorkspaceCreate}
+                onClick={() => beginWorkspaceType("project")}
               >
                 <div className="text-sm font-medium">🧪 Új Projekt</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
-                  Szimuláció / tervezés (P-R-O forgatókönyvek, készültség).
+                  Szimuláció / tervezés, készültség.
                 </div>
               </button>
               <button
                 type="button"
                 className="rounded-lg border border-border/60 bg-background/40 p-3 text-left hover:bg-muted/30"
-                onClick={denyWorkspaceCreate}
+                onClick={() => beginWorkspaceType("personal")}
               >
                 <div className="text-sm font-medium">💳 Új Magán számla / Kassza</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">Személyes alszámla / keret.</div>
@@ -9539,10 +9682,7 @@ export function FinanceDashboard({
             {createWsType !== null && (
               <Button
                 type="button"
-                onClick={() => {
-                  denyWorkspaceCreate();
-                  setCreateWsOpen(false);
-                }}
+                onClick={() => commitNewWorkspace()}
               >
                 Létrehoz
               </Button>
@@ -9893,7 +10033,7 @@ export function FinanceDashboard({
                             type="button"
                             variant="secondary"
                             className="h-9 gap-2"
-                            onClick={() => void syncPersonalBankFromLatestFileInFolder()}
+                            onClick={() => void requestWatchedFolderSync()}
                             title="Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából"
                           >
                             <Folder className="h-4 w-4" />
@@ -11628,7 +11768,7 @@ export function FinanceDashboard({
                               type="button"
                               variant="outline"
                               className="h-9 gap-2 px-2 sm:px-3"
-                              onClick={() => void syncPersonalBankFromLatestFileInFolder()}
+                              onClick={() => void requestWatchedFolderSync()}
                               title={
                                 activeWorkspaceMeta?.bank_sync_folder
                                   ? `Magán szinkron (mappa: ${activeWorkspaceMeta.bank_sync_folder})`
@@ -12294,6 +12434,7 @@ export function FinanceDashboard({
                           type="button"
                           size="sm"
                           onClick={() => {
+                            if (!isVisitorDemo && !requirePlan("CUSTOM_RULES")) return;
                             const s = autoRuleSuggestion;
                             setAutoRuleWsId(s.workspaceId);
                             setAutoRuleKeyword(s.keyword);

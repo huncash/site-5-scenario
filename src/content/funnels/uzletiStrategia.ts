@@ -6,16 +6,16 @@ const packages = STANDARD_TIER_COPY;
 export const UZLETI_STRATEGIA_FUNNEL = {
   hero: {
     eyebrow: "Üzleti és stratégiai tervezés",
-    title: "Stratégiai esetek a PDCA-ban, Master Baseline törzzsel",
+    title: "Stratégiai minták a törzsből — a számok a gépeden maradnak",
     subtitle:
-      "Kahn-esettanulmány a törzsből: 4,5 M hitel vagy 3×1,1 M organikus; A 0,9%/hó+850 ezer kötbér, B 1,25%/hó rugalmas. A cég alapadatait egyszer viszed be — a projekt örökli. PRO pályák, helyi cash-flow.",
+      "Elképzelt helyzetek a motor kipróbálásához. A cég törzsét egyszer viszed be; a projekt örökli. Hitel vagy organikus út, kötbér vagy rugalmas kilépés — rossz, közepes és jó pálya ugyanarra a múltra.",
     primaryCta: "Esetek megnyitása",
     secondaryCta: "Csomagok megtekintése",
   },
   proofBullets: [
-    "Master Baseline: a core üzem számait nem kell duplán megadni",
-    "PDCA keret: PLAN / DO / CHECK / ACT ugyanazon a moszaikon",
-    "PRO pályák: likviditási csapda, árrés, runway, stop-loss — helyben számolva",
+    "A cég törzsét egyszer viszed be — a projekt örökli",
+    "Rossz, közepes és jó pálya ugyanarra a múltra, a gépeden",
+    "Elképzelt minták: a motor kipróbálása, nem élő ügyfél",
   ],
   demoTeaser: {
     title: "Interaktív előnézet: stratégiai eset (demó)",
@@ -31,16 +31,16 @@ export const UZLETI_STRATEGIA_FUNNEL = {
   faq: [
     ...CONCEPT_FAQ_ITEMS,
     {
-      q: "Mi a Master Baseline?",
-      a: "A cég működő törzse: partnerek, fix költség, core cash-flow. A stratégiai esetek ezt öröklik. A projekt csak a döntés rétegét viszi.",
+      q: "Mi a törzs?",
+      a: "A cég működő alapja: partnerek, fix költség, a mindennapi kassza. A stratégiai minták ezt öröklik. A projekt csak a döntés rétegét viszi.",
     },
     {
       q: "A stratégiai esetek külön adatbázis?",
-      a: "Nem. Mindegyik a saját helyi profiljában fut, de ugyanabból a Master Baseline sémából indul. Nincs felhő-másolat.",
+      a: "Nem. Mindegyik a saját helyi profiljában fut. Nincs felhő-másolat. A fejlesztők nem látják.",
     },
     {
-      q: "Mit látok a PDCA-ban?",
-      a: "PLAN-ben a törzs + a döntés. CHECK-ben a három PRO pálya mikrojelzéseit. ACT-ben a csapda, az árrés vagy a kilépés beavatkozását.",
+      q: "Mit látok a négy lépésben?",
+      a: "Törzsadat helyben. Kivonat a Mesh Data Managerbe. A helyzetkép összeáll. Saját szabály — nem tanítás. Magán, vállalkozás, projekt egy asztalon.",
     },
     PRICING_VAT_FAQ,
     WHY_FAQ,

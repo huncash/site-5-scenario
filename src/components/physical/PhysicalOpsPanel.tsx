@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { CrisisBranchTimeline } from "@/components/physical/CrisisBranchTimeline";
 import { MeshNodeMap } from "@/components/physical/MeshNodeMap";
@@ -6,11 +6,12 @@ import { SurvivalGauges } from "@/components/physical/SurvivalGauges";
 import { useI18n } from "@/i18n";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
 import {
-  applyCrisisChoice,
+  applyCrisisSelections,
   buildPhysicalDashboard,
   type CrisisChoice,
   type SurvivalGauge,
 } from "@/lib/physicalMetrics";
+import { usePhysicalPlanPath } from "@/lib/physicalPlanPath";
 
 function planGauges(gauges: SurvivalGauge[], prefix: string): SurvivalGauge[] {
   return gauges.map((g) => ({
@@ -32,19 +33,13 @@ export function PhysicalOpsPanel(props: {
     () => buildPhysicalDashboard(props.segmentId, props.baseline),
     [props.baseline, props.segmentId],
   );
-  const [dash, setDash] = useState(seed);
-  const [selected, setSelected] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    setDash(seed);
-    setSelected({});
-  }, [seed]);
+  const { selected, setChoice } = usePhysicalPlanPath(props.segmentId ?? "");
+  const dash = useMemo(() => (seed ? applyCrisisSelections(seed, selected) : seed), [seed, selected]);
 
   if (!seed || !dash || !dash.gauges.length) return null;
 
   const onChoose = (forkId: string, choice: CrisisChoice) => {
-    setSelected((s) => ({ ...s, [forkId]: choice.id }));
-    setDash(applyCrisisChoice(seed, choice));
+    setChoice(forkId, choice.id);
   };
 
   const phase = props.phase ?? "CHECK";

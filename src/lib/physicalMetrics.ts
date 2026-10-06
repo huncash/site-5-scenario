@@ -496,6 +496,16 @@ export function applyCrisisChoice(dash: PhysicalDashboard, choice: CrisisChoice)
   };
 }
 
+export function applyCrisisSelections(
+  seed: PhysicalDashboard,
+  selected: Record<string, string>,
+): PhysicalDashboard {
+  return seed.forks.reduce((dash, fork) => {
+    const choice = fork.choices.find((c) => c.id === selected[fork.id]);
+    return choice ? applyCrisisChoice(dash, choice) : dash;
+  }, seed);
+}
+
 export function buildPhysicalDashboard(
   segmentId: string | null | undefined,
   baseline?: MasterBaselineContext | null,

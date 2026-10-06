@@ -6,6 +6,14 @@
 import type { DataStore, StoreDefinition } from "@/storage/DataStore";
 import { IndexedDbDataStore } from "@/storage/indexeddb/IndexedDbDataStore";
 import { decryptJSON, deriveKey, encryptJSON, importRawKey, randomSaltB64 } from "@/lib/crypto";
+import {
+  envelopeHasPlainLeak,
+  fromStoredBankRaw,
+  isEncryptedBankRawStored,
+  isLegacyPlainBankRaw,
+  toStoredBankRaw,
+  type BankRawEnvelope,
+} from "@/lib/bankRawCrypto";
 
 const DB_NAME = "finance-vault";
 const DB_VERSION = 8;
@@ -133,7 +141,7 @@ type FinanceDataSchema = {
   [STORE_PROFILES]: StoreDefinition<string, Profile>;
   [STORE_SETTINGS]: StoreDefinition<string, EncSettingsRow>;
   [STORE_LOANS]: StoreDefinition<string, EncLoanRow>;
-  [STORE_BANK_RAW]: StoreDefinition<string, BankRawRow>;
+  [STORE_BANK_RAW]: StoreDefinition<string, BankRawEnvelope | BankRawRow>;
   [STORE_BANK_ACCOUNTS]: StoreDefinition<string, BankAccountRow>;
   [STORE_BANK_ACCOUNT_WORKSPACES]: StoreDefinition<string, BankAccountWorkspaceRow>;
   [STORE_SNAPSHOTS]: StoreDefinition<string, SnapshotRow>;
@@ -219,6 +227,26 @@ const dataStore: DataStore<FinanceDataSchema> = new IndexedDbDataStore({
 function requireActive(): string {
   if (!activeProfileId) throw new Error("Nincs aktív profil.");
   return activeProfileId;
+}
+
+async function requireVaultKey(): Promise<CryptoKey> {
+  const cachedRaw = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(VAULT_SESSION_KEY) : null;
+  if (!cachedRaw) throw new Error("Nincs feloldott profil (vault kulcs hiányzik).");
+  return importRawKey(cachedRaw);
+}
+
+async function decodeBankRawRow(stored: BankRawEnvelope | BankRawRow | undefined): Promise<BankRawRow | undefined> {
+  if (!stored) return undefined;
+  const key = await requireVaultKey();
+  const plain = await fromStoredBankRaw(key, stored);
+  if (isLegacyPlainBankRaw(stored)) {
+    try {
+      await dataStore.save(STORE_BANK_RAW, await toStoredBankRaw(key, plain));
+    } catch {
+      /* best-effort migrate */
+    }
+  }
+  return plain;
 }
 
 export const localdb = {
@@ -330,7 +358,7 @@ export const localdb = {
       goals: EncGoalRow[];
       settings: EncSettingsRow[];
       loans: EncLoanRow[];
-      bank_raw: BankRawRow[];
+        bank_raw: BankRawEnvelope[] | BankRawRow[];
       bank_accounts: BankAccountRow[];
       bank_account_workspaces: BankAccountWorkspaceRow[];
       snapshots: SnapshotRow[];
@@ -364,7 +392,7 @@ export const localdb = {
         goals: EncGoalRow[];
         settings: EncSettingsRow[];
         loans?: EncLoanRow[];
-        bank_raw: BankRawRow[];
+        bank_raw: BankRawEnvelope[] | BankRawRow[];
         bank_accounts: BankAccountRow[];
         bank_account_workspaces: BankAccountWorkspaceRow[];
         snapshots?: SnapshotRow[];
@@ -593,7 +621,7 @@ export const localdb = {
               /* ignore */
             }
           }
-          const raws: BankRawRow[] = await tx.getAll(STORE_BANK_RAW as any);
+          const raws: Array<BankRawEnvelope | BankRawRow> = await tx.getAll(STORE_BANK_RAW as any);
           for (const r of raws) {
             if (r.profile_id === pid && r.workspace === workspaceId) await tx.delete(STORE_BANK_RAW as any, r.id);
           }
@@ -673,7 +701,7 @@ export const localdb = {
       await localdb.putLoan({ id: l.id, data_enc, profile_id: pid });
     }
     for (const r of plain.data?.bank_raw ?? []) {
-      await dataStore.save(STORE_BANK_RAW, { ...r, profile_id: pid });
+      await localdb.putBankRaw({ ...r, profile_id: pid });
     }
     for (const a of plain.data?.bank_accounts ?? []) {
       await dataStore.save(STORE_BANK_ACCOUNTS, { ...a, profile_id: pid });
@@ -786,20 +814,50 @@ export const localdb = {
   },
 
   async getBankRaw(id: string): Promise<BankRawRow | undefined> {
-    return dataStore.get(STORE_BANK_RAW, id);
+    return decodeBankRawRow(await dataStore.get(STORE_BANK_RAW, id));
   },
   async listBankRaw(): Promise<BankRawRow[]> {
     const pid = requireActive();
+    const key = await requireVaultKey();
     const rows = await dataStore.getAll(STORE_BANK_RAW);
-    return rows.filter((r) => r.profile_id === pid);
+    const out: BankRawRow[] = [];
+    for (const stored of rows) {
+      if (stored.profile_id !== pid) continue;
+      try {
+        const plain = await fromStoredBankRaw(key, stored);
+        if (isLegacyPlainBankRaw(stored)) {
+          try {
+            await dataStore.save(STORE_BANK_RAW, await toStoredBankRaw(key, plain));
+          } catch {
+            /* best-effort migrate */
+          }
+        }
+        out.push(plain);
+      } catch {
+        /* skip undecryptable */
+      }
+    }
+    return out;
   },
   async putBankRaw(
-    row: Omit<BankRawRow, "profile_id"> & { profile_id?: string },
+    row: Omit<BankRawRow, "profile_id"> & { profile_id?: string; data_enc?: string },
   ): Promise<"inserted" | "exists"> {
     const pid = row.profile_id ?? requireActive();
     const existing = await dataStore.get(STORE_BANK_RAW, row.id);
     if (existing) return "exists";
-    await dataStore.save(STORE_BANK_RAW, { ...row, profile_id: pid });
+    const key = await requireVaultKey();
+    if (isEncryptedBankRawStored(row) && !envelopeHasPlainLeak(row)) {
+      await dataStore.save(STORE_BANK_RAW, {
+        id: row.id,
+        profile_id: pid,
+        workspace: row.workspace,
+        data_enc: row.data_enc,
+      });
+      return "inserted";
+    }
+    const source = isEncryptedBankRawStored(row) ? await fromStoredBankRaw(key, row) : { ...row, profile_id: pid };
+    const envelope = await toStoredBankRaw(key, { ...source, profile_id: pid });
+    await dataStore.save(STORE_BANK_RAW, envelope);
     return "inserted";
   },
   deleteBankRaw(id: string) {

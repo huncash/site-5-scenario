@@ -24,7 +24,12 @@ export type PlanPermission =
   | "EXPLORE_SCENARIOS"
   | "BANK_API"
   | "OPTIONAL_SYNC"
-  | "RECEIVE_UPDATES";
+  | "RECEIVE_UPDATES"
+  | "WATCHED_FOLDER"
+  | "CUSTOM_RULES"
+  | "BUSINESS_WORKSPACES"
+  | "PROJECTS"
+  | "ADVANCED_SCENARIO";
 
 export type LicenseGate = {
   /** Örökös használat / fizetett entitás érvényes. */
@@ -50,6 +55,11 @@ const FEATURE_BY_PERMISSION: Partial<Record<PlanPermission, keyof PlanFeatures>>
   MANAGE_GUESTS: "canManageGuests",
   MULTI_PORTFOLIO: "canMultiPortfolio",
   OPTIONAL_SYNC: "optionalSync",
+  WATCHED_FOLDER: "canWatchedFolder",
+  CUSTOM_RULES: "canCustomRules",
+  BUSINESS_WORKSPACES: "canBusinessWorkspaces",
+  PROJECTS: "canProjects",
+  ADVANCED_SCENARIO: "canAdvancedScenario",
 };
 
 function parseIsoDate(raw: string | null | undefined): Date | null {
@@ -174,13 +184,18 @@ export function hasPermission(
   } else {
     if (permission === "RECEIVE_UPDATES") return gate.updatesActive;
     // Írás / modell: kell érvényes runtime + kompatibilis engine.
-    const writeLike =
+    const needsActiveLicense =
       permission === "EDIT_MODELS" ||
       permission === "CONFIGURE_STRUCTURE" ||
       permission === "EXPORT_RAW" ||
       permission === "RESET_CASE" ||
-      permission === "MANAGE_GUESTS";
-    if (writeLike && (!gate.runtimeOk || !gate.engineOk)) return false;
+      permission === "MANAGE_GUESTS" ||
+      permission === "WATCHED_FOLDER" ||
+      permission === "CUSTOM_RULES" ||
+      permission === "BUSINESS_WORKSPACES" ||
+      permission === "PROJECTS" ||
+      permission === "ADVANCED_SCENARIO";
+    if (needsActiveLicense && (!gate.runtimeOk || !gate.engineOk)) return false;
   }
 
   if (permission === "BANK_API") return plan.features.bankImport === "api";

@@ -13,10 +13,10 @@ export const hu = {
       "Táblázat helyett: látod, hány hónapig bírja a kassza, ha holnaptól semmi sem jön be. Magán, vállalkozás, projekt — ugyanazon az asztalon, a gépeden.",
     localFirstLabel: "A számok a gépeden maradnak:",
     localFirstBody:
-      "Mentés fájlba vagy QR-rel a másik gépre. Nem küldünk használatot. A kivonat (CAMT.053, CSV, XML) helyben jön be. A számok a böngésződben maradnak — nincs külső felhős adatbázis.",
+      "Lokális irányító-szimuláció a saját eszközödön: a fejlesztők soha nem látják és nem gyűjtik az adataidat. Megosztás meghívott vendéggel, vagy mentési fájllal — mint régen egy táblázatot. A kivonat (CSV, XML) a Mesh Data Managerbe kerül, helyben. Nincs külső felhős adatbázis.",
     demoPreviewTitle: "További demó helyzetek",
     demoPreviewBody:
-      "Interaktív előnézet: a motor egy előre betöltött helyzeten fut. Nincs regisztráció — egy kattintással átláthatod a cash-flow fókuszokat és a likviditási mutatókat.",
+      "Szabadon játszható, elképzelt minták a motor kipróbálásához. Nem baj, ha elsőre sok az infó vagy idegen a szakterület: nincs regisztráció, a számok a gépeden maradnak.",
     whyTitle: "Miért hívják Szcenáriónak — túl a jó és a rossz éven",
     whyLead:
       "A „jó év / rossz év” két szám az év végén. A szcenárió más: megmutatja, melyik hónapban fogy el a levegő — nem csak azt, mennyi marad decemberben.",
@@ -31,13 +31,13 @@ export const hu = {
     infraTitle: "Infrastruktúra és adatvédelem",
     infraLead: "A számolás a böngésződben fut. Nincs felhős adatbázis.",
     infraBody:
-      "Nincs rejtett küldés, nincs profil a használatodból. Mentés fájllal vagy QR-rel — nálad a másolat. A kivonat helyben jön be. A Pro Desktop early access 2027 tavaszán jön, ingyen — addig a webes Case/Slot a teljes érték.",
+      "Nincs rejtett küldés, nincs profil a használatodból. A fejlesztők soha, semmilyen szinten nem látják a modellezett adataidat. Mentés fájllal vagy meghívott vendéggel — nálad a másolat. A kivonat a Mesh Data Managerbe, helyben. A Pro Desktop early access 2027 tavaszán jön, ingyen — addig a webes Case/Slot a teljes érték.",
     infraPoint1Title: "A számolás a böngésződben fut",
-    infraPoint1Body: "Nincs felhős adatbázis. A döntési adat nálad marad.",
+    infraPoint1Body: "Nincs felhős adatbázis. A döntési adat nálad marad. A fejlesztők nem látják.",
     infraPoint2Title: "Nem építünk profilt",
-    infraPoint2Body: "Nem küldünk használatot. Nem nézzük, mit csinálsz.",
+    infraPoint2Body: "Nem küldünk használatot. Nem nézzük, mit csinálsz. Nulla adatgyűjtés.",
     infraPoint3Title: "A másolat nálad van",
-    infraPoint3Body: "Mentés fájllal vagy QR-rel gépből gépre.",
+    infraPoint3Body: "Mentési fájl, mint régen egy táblázat — vagy meghívott vendég a saját gépén.",
     proCallout: "Kockázati mozgástér — nem jóslat",
     proWhy:
       "A grafikon nem megmondja, mi lesz. Azt mutatja: hány hónapig bírja a kassza, ha elromlik vagy ha összejön.",
@@ -117,14 +117,14 @@ export const hu = {
     navDocsLead: "Tudástár, GYIK és leckék a saját gépeden.",
     navIntegrations: "Bekötések",
     navIntegrationsLead:
-      "Helyi kivonat (CAMT.053, CSV, XML). Az adatok a böngésződben maradnak — nincs külső felhős adatbázis.",
+      "Kivonat a Mesh Data Managerbe a saját gépeden (CSV, XML). A figyelt mappa a Proban, belépéskor. A fejlesztők nem látják. Nincs külső felhős adatbázis.",
     navLicense: "Licenckezelés",
     navLicenseLead: "Örökös licenc, hűségmodell, Aktív Case és Slot.",
     navTicket: "Hibabejelentés",
     navTicketLead: "Írásos jegy, ha a tudásbázis nem adott választ.",
     tiersEyebrow: "Támogatás",
     tiersTitle: "Támogatási szintek",
-    tiersLead: "A csomagodhoz tartozó segítség. A kártya az árazásra visz, onnan visszaide.",
+    tiersLead: "A csomagodhoz tartozó segítség: tudástár, írásos jegy, a Standardnál a helyi beolvasás is.",
     basicTitle: "Basic támogatás",
     basicB1: "Közösségi fórum és tudásbázis cikkek",
     basicB2: "Alapvető hibabejelentés",
@@ -132,7 +132,7 @@ export const hu = {
     basicCta: "Tudásbázis",
     proTitle: "Standard támogatás",
     proB1: "A jegyed előrébb kerül",
-    proB2: "Helyi kivonat: CAMT.053, CSV, XML. Ha a fájl nem jön be, vagy kétszer jön — ebben segítünk.",
+    proB2: "Helyi kivonat: CSV, XML. Ha a fájl nem jön be, vagy kétszer jön — ebben segítünk.",
     proB3: "Helyi mappa és ütemezett fájl: ha elakadtál a beolvasáson",
     proCta: "Jegy nyitása",
     enterpriseTitle: "Priority / Enterprise támogatás",
@@ -152,7 +152,7 @@ export const hu = {
       "A számlázás a bill.szcenario.hu oldalon fut (Számlázz.hu + Barion). Ez a Szcenárió díja és számlája — nem a te könyvelésed. A díjbekérő a megadott e-mailre megy; a rendelést az azonosító és az e-mail nyitja meg.",
     faqSettingsQ: "Hol állítom a nézetet (téma, nyelv, paletta)?",
     faqSettingsA:
-      "A fejléc nézetbeállításai ugyanazok, mint a főoldalon: paletta, világos/sötét mód, akadálymentes kontraszt és nyelv.",
+      "A fejléc nézetbeállításaiban: paletta, világos/sötét mód, akadálymentes kontraszt és nyelv.",
     faqDesktopQ: "Hol az asztali telepítő?",
     faqDesktopA:
       "Most a motor a böngészőben fut, a gépeden. Nincs felhős adatbázis. A Pro Desktop early access 2027 tavaszán jön, ingyen a Pro mellé. Addig a webes Case/Slot a teljes érték.",
@@ -246,7 +246,7 @@ export const hu = {
     phase2Title: "2. Fázis — Mesterjelszó, helyi zár",
     phase2Body: "Az asztali adat a gépeden marad, mesterjelszóval zárva. Hálózat nélkül is megy.",
     phase3Title: "3. Fázis — Helyi kivonat",
-    phase3Body: "CAMT.053, CSV, XML a gépeden. A könyvelésedhez nincs külső szerver.",
+    phase3Body: "CSV, XML a gépeden. A könyvelésedhez nincs külső szerver.",
     phase4Title: "4. Fázis — Opcionális saját vonal",
     phase4Body:
       "Kapcsoló a beállításokban: jelszó nélküli belépés és titkosított support, ha te kéred. Senkire nem erőltetjük.",
@@ -267,19 +267,19 @@ export const hu = {
       "A Szcenárió nem hoz helyetted döntést, és nem épít rólad profilt. A számolás a saját böngésződben fut. A pénzügyi számok nem mennek külső AI-hoz, szerverre vagy felhőbe.",
     bannerTitle: "Az adat nálad marad",
     bannerBody:
-      "A Szcenárió 100%-ban lokálisan, a böngésződben dolgozza fel a modellezett adataidat. Érzékeny üzleti adat nem mentődik a cég szerverére. Nem használunk követő sütiket (tracking cookies) és nem adjuk el az adataidat. A rendszer kizárólag a helyi tárolódat (LocalStorage / IndexedDB) használja a mentéseidhez, valamint a számlázáshoz szükséges adatokat kezeli a jogszabályoknak megfelelően.",
+      "A Szcenárió a saját eszközödön, a böngésződben számol. A fejlesztők soha nem látják és nem gyűjtik a modellezett adataidat — érzékeny üzleti adat nem mentődik a cég szerverére. Nincs követő süti, nincs eladás. Mentés nálad: fájl vagy meghívott vendég. A számlázáshoz szükséges adatot a törvény szerint külön kezeljük.",
     bannerAccept: "Értettem",
     bannerDetails: "Részletek / GDPR",
     pageTitle: "Adatvédelmi tájékoztató (GDPR)",
     pageLead:
-      "Helyi, böngészőben futó modellezés · üzleti/szimulációs adat nem megy a cég szerverére · számlázási adat csak a díjhoz.",
+      "Helyi, böngészőben futó modellezés · a fejlesztők nem látják és nem gyűjtik · üzleti/szimulációs adat nem megy a cég szerverére · számlázási adat csak a díjhoz.",
     controllerTitle: "1. Adatkezelő",
     controllerAddress: "Székhely",
     controllerTax: "Adószám",
     controllerContact: "Kapcsolat (írásban)",
     localTitle: "2. In-browser modellezés és helyi adatok",
     localBody:
-      "A kalkulációk, pénzügyi adatok és cash-flow szimulációk kizárólag a felhasználó saját eszközén (RAM / LocalStorage / IndexedDB) tárolódnak. Az Adatkezelő ezekhez az adatokhoz nem fér hozzá, nem menti szerverre, és nem továbbítja AI szolgáltatóknak.",
+      "A kalkulációk, pénzügyi adatok és szimulációk kizárólag a felhasználó saját eszközén tárolódnak. Az Adatkezelő — a fejlesztők is — ezekhez soha, semmilyen szinten nem fér hozzá, nem gyűjti, nem menti szerverre, és nem továbbítja külső szolgáltatónak. Megosztás csak a te mentési fájloddal vagy meghívott vendéggel történik.",
     billingTitle: "3. Számlázási adatok (jogszabályi kötelezettség)",
     billingBody:
       "Előfizetés vagy vásárlás esetén kezelt adatok: név, számlázási cím, adószám, e-mail. Cél: számlakiállítás és számviteli bizonylat-megőrzés (Számv. tv. 169. § — 8 év). A törlés a törvényi megőrzési idő lejárta után lehetséges.",
@@ -324,7 +324,7 @@ export const hu = {
   school: {
     kicker: "school.szcenario.hu",
     title: "Diák / Oktatási csatorna",
-    lead: "Korlátozott oktatási licenc a böngészőben, a gépeden. Azonnal indul. Helyi adat, nincs felhős adatbázis. A Pro Desktop early access 2027 tavaszán jön, ingyen a fizetős Pro mellé. A főoldalon nem promózzuk; közvetlen URL vagy ez a hivatkozás.",
+    lead: "Korlátozott oktatási licenc a böngészőben, a gépeden. Azonnal indul. Helyi adat, nincs felhős adatbázis. A Pro Desktop early access 2027 tavaszán jön, ingyen a fizetős Pro mellé.",
     capacity: "Legfeljebb 1 Aktív Case és 2 Aktív Slot. Nem bővíthető.",
     watermark: "Oktatási Licenc – Üzleti célra nem használható",
     engineOnly: "Csak a Gazdasági Szcenárió Motor alapfunkciói érhetők el.",
@@ -434,7 +434,7 @@ export const hu = {
     kahnEyebrow: "DEMO 11 — kiemelt eset",
     kahnTitle: "Bisztró bővítés & magánvagyon-kockázat szimuláció",
     kahnBody:
-      "Vendéglátóipari kapacitás-elágazás egy integrált modellben: törzsüzem (bisztró cash-flow), magán/ingatlan (jelzálog, vésztartalék), projekt (terasz és konyha hitelből vs. magán adósságrendezés és organikus növekedés). A három pálya megmutatja a tartalékhónapokat és a tőkevédelmi pontot — még a tőkebefektetés előtt.",
+      "Elképzelt minta a motor kipróbálásához — nem élő ügyfél. Vendéglátó kapacitás, hitel vagy adósságrendezés, magán ingatlanfedezet egy asztalon. Nem baj, ha elsőre sűrű: a cél a kipróbálás, a számok a gépeden maradnak.",
     kahnCta: "Kipróbálom a bisztró szimulációt",
     kahnEvolveTitle: "A döntési fáktól a teljes körű rezilienciáig",
     kahnEvolveLead:
@@ -452,41 +452,44 @@ export const hu = {
     pillarInner: "Belső zónák",
     pillarInnerBlurb: "Személyes, civil, BCP, demográfia, oktatás — a házon belüli keretek.",
     howTitle: "Hogyan működik?",
-    howLead: "A saját adataidtól a döntésig 3 lépésben",
-    howStep1Title: "Adatok importálása a saját gépedről",
+    howLead: "A saját adataidtól a kontrollig négy lépésben — a számok a gépeden maradnak.",
+    howStep1Title: "Törzsadatok a saját eszközödön",
     howStep1Body:
-      "Húzd be a banki kivonataidat (PDF, CSV, CAMT.053, XML) akár 1–3 évre visszamenőleg. Az adatok kizárólag a te böngésződben dolgoznak: nincs külső felhős adatbázis, a számok nálad maradnak.",
-    howStep2Title: "Új terv ráillesztése",
+      "Profil, magán vagyontárgyak, ingatlanok: titkosítva, helyben. Ez helyi irodai és vállalati irányító-szimuláció. A fejlesztők soha nem látják és nem gyűjtik az adataidat.",
+    howStep2Title: "Kivonatok a Mesh Data Managerbe",
     howStep2Body:
-      "Az automatikusan kianalizált múltbeli bázisra (baseline) rákötheted a saját következő évi terveidet és fejlesztési irányaidat.",
-    howStep3Title: "Szcenáriók és kockázatkezelési határok",
+      "Letöltöd a banki kivonatot (CSV vagy XML), és a saját gépeden a Mesh Data Managerbe teszed — kézzel, vagy Proban egy figyelt mappából, amit belépéskor megnéz. Semmi nem megy felhőbe.",
+    howStep3Title: "A helyzetkép helyben áll össze",
     howStep3Body:
-      "Azonnal kirajzolódnak a különböző jövőképek, az optimista és pesszimista kimenetelek, valamint a pontos tőkevédelmi stop-loss pontok, hogy pontosan lásd a pénzügyi mozgástered határait.",
+      "A felület a gépeden töltődik. A tételek maguktól kategóriába kerülnek a napi irányítás körforgásában: tervezed, futtatod, ellenőrzöd, beavatkozol — képletek és táblázatok nélkül.",
+    howStep4Title: "Saját szabályok, nem tanítás",
+    howStep4Body:
+      "A pontatlan beolvasást kézzel igazítod. Egyéni szabályt a Pro asztalán adsz — nem mesterséges intelligenciát tanítasz. Magánvagyon Basicben; vállalkozás és projekt a Proban. A kontroll nálad marad.",
     hoodTitle: "Motorháztető alatt",
     hoodLead: "A számok a gépeden maradnak. A motor gyors, mert helyben fut.",
     howLocalTitle: "Saját eszközödön számol",
     howLocalBody:
-      "A számolás a böngésződben fut. A pénzügyi számok nem mennek felhőbe.",
+      "A számolás a böngésződben fut. A pénzügyi számok nem mennek felhőbe. A fejlesztők nem látják.",
     howLeanTitle: "Lean döntéshozatal másodpercek alatt",
     howLeanBody:
       "Változtasd a paramétereket élőben, és lásd azonnal a cash-flow-ra, megtérülésre, valamint a működési kockázatokra gyakorolt hatást. A döntési láncokban rejlő veszteségek azonnal azonosíthatók.",
     howSovTitle: "Többkörös lokális titkosítás",
     howSovBody:
-      "A számok a gépeden maradnak, és ott titkosítódnak. Idegen a helyi tárolóból vagy a QR-ből sem olvassa ki őket.",
+      "A számok a gépeden maradnak, és ott titkosítódnak. Megosztás: mentési fájl vagy meghívott vendég — idegen a tárolódból nem olvassa ki.",
     howArchDevice: "Saját eszköz (böngésző)",
     howArchEngine: "Lokális szcenárió engine",
     howArchFlow: "Csak a böngészőben fut",
     howArchBlocked:
       "Zárt rendszer — nincs felhős adatküldés. A titkosítás a gépeden fut.",
     factLocal: "Helyben számol",
-    factLocalBody: "Terv, tény, eltérés a böngészőben készül. Nincs felhő‑adatbázis, nincs telemetria.",
+    factLocalBody: "Terv, tény, eltérés a böngészőben készül. Nincs felhő‑adatbázis. A fejlesztők nem látják.",
     factFocus: "Egy ágazat, több fókusz",
     factFocusBody:
       "7 vendéglátós / személyes alapeset, plusz 11 iparági és döntési lencse: TTR, energia, készlet — ugyanaz a helyi motor.",
-    factDemo: "Demó = minta, nem ügyfél",
+    factDemo: "Demó = elképzelt minta",
     factSave: "Mentés nálad",
     factSaveBody:
-      "Export/import, vagy közeli eszköz↔eszköz QR‑rel. A belépés mesterjelszóval az eszközön történik.",
+      "Mentési fájl, mint régen egy táblázat — vagy meghívott vendég a saját gépén. A belépés mesterjelszóval az eszközön történik.",
     industryLead:
       "Először az iparágat választod. A 7 vendéglátós alapeset, a kórházi blackout és a két gyártási lencse már nyitva; a többi ág ugyanerre a módszerre jön.",
     economicAside: "Gazdasági Szcenárió Motor",
@@ -497,11 +500,11 @@ export const hu = {
     noProfile: "Nincs aktív profil.",
     settingsFail: "Nem sikerült megnyitni a beállításokat.",
     educationLead:
-      "Fix PDCA. A pénzügyi sáv (burn, rezsi, helyreállás) és a Lean / Poka-Yoke mikro (OEE, SMED, kvóta, izoláció) ugyanazon a moszaikon van. Diák- és campus-lépték.",
+      "Elképzelt tréning-minták a motor kipróbálásához. Pénzügyi és működési sáv együtt, diák- és campus-léptéken — a számok a gépeden maradnak.",
     resilienceLead:
-      "Nem világvége-szimulátor. Vállalatnál BCP és működési reziliencia; makróban stratégiai előrejelzés; közösségben helyi önfenntartás. A motor fizikai korlátot is visz — ResourceRunway, EnergyAutonomy, TTR. A TFR 2023-as helyi másolat, nem élő API.",
+      "Nem világvége-játék. Vállalat, közösség, háztartás: tartalék és helyreállás a saját eszközön. A minták szabadon játszhatók, ha idegen a szakterület.",
     strategyLead:
-      "A cég törzse a Master Baseline. A stratégiai esetek ezt öröklik — a partnereket, a fix költséget és a core cash-flow-t nem kell újra megadni. A projekt csak a döntés rétegét viszi, PRO pályákkal.",
+      "A cég törzsét egyszer viszed be. A stratégiai minták ezt öröklik. Elképzelt helyzetek a motorhoz — nem élő ügyfél, a kontroll nálad marad.",
     stepLead: {
       healthcare: "A hálózat kiesett. A létfontosságú osztályok a tartalék áramon osztoznak. Lean triázs — nem Ft-oszlop.",
       manufacturing: "A sor áll, vagy rejtett hiba fut. SMED, OEE, Poka-Yoke — a Lean a vészhelyzeten.",
@@ -682,7 +685,7 @@ export const hu = {
     fnLoyaltyLink: "Hűségmodell",
     fnLoyaltyShort: "1. év 100% · 2. −25% · 3. −40% · 4. évtől díjmentes frissítés.",
     fnLocalLink: "Lokális import & Edge",
-    fnLocalShort: "CAMT.053 / CSV helyben; Edge opcionális.",
+    fnLocalShort: "CSV / XML helyben; Edge opcionális.",
     fnCaseLabel: "Aktív Case",
     fnSlotLabel: "Aktív Slot",
     fnConceptsLink: "Részletek a Supporton",
@@ -780,8 +783,8 @@ export const hu = {
     cp5: "1 Seat + 5 Guest",
     ce5: "3 Seat + 20 Guest",
     cf6: "Banki kivonat import",
-    cs6: "✓ 1 kivonat / Slot** (bármilyen időszakra)",
-    cp6: "✓ CAMT.053 / CSV / XML bankkivonat import",
+    cs6: "✓ Kézi CSV / XML import",
+    cp6: "✓ CSV / XML + figyelt mappa",
     ce6: "✓ Könyvelési/bankkivonat import + Szenzoros / Edge",
     cf7: "A számok nálad maradnak",
     cs7: "Titkosított lokális mentés",

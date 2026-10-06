@@ -10,4 +10,4 @@ alwaysApply: true
 2. **Barion csak a pénztárban:** A fizetési szolgáltató (Barion) kizárólag a fizetési feltételeknél és a számlázási tájékoztató jogi részében szerepelhet. A szoftver működési leírásában vagy az adatvédelmi pontokban a Barion nevének előfordulása *szigorúan tilos*.
 3. **Prozai minőség:** Érthető, egzakt, magyar üzleti próza építse fel a bizalmat. Az applikáción belül (a sűrű workspace-ben) megmaradhat a mérnöki gyorsnyelv, de a külső márkán ez nem csúszhat át.
 
-A főoldal 3 lépése a `door.howStep1*`–`howStep3*` kulcsokon él; HU szöveg a felhasználó által rögzített próza.
+A főoldal 4 lépése a `door.howStep1*`–`howStep4*` kulcsokon él; HU szöveg a felhasználó által rögzített próza. Support `#workflow` a részletes munkamenet.

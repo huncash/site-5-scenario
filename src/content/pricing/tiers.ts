@@ -88,7 +88,7 @@ export const PRICING_CASE_RESET_FAQ = {
 export const PRICING_VAT_FAQ = PRICING_CASE_RESET_FAQ;
 
 export const DEMO_STARTER_BLURB =
-  "Interaktív előnézet: a motor egy előre betöltött helyzeten fut. Nincs regisztráció — egy kattintással átláthatod a cash-flow fókuszokat és a likviditási mutatókat.";
+  "Szabadon játszható, elképzelt minták a motor kipróbálásához. Nem baj, ha elsőre sűrű vagy idegen a szakterület: nincs regisztráció, a számok a gépeden maradnak.";
 
 export const TIER_SLOGAN: Record<TierId, string> = {
   starter: planSlogan(PLANS_CONFIG.starter),

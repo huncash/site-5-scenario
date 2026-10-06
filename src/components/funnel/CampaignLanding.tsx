@@ -47,8 +47,8 @@ export function CampaignLanding(props: { campaignId: CampaignId }) {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-[11px]">PDCA</Badge>
-              <Badge variant="secondary" className="text-[11px]">offline</Badge>
+              <Badge variant="secondary" className="text-[11px]">Helyben</Badge>
+              <Badge variant="secondary" className="text-[11px]">Elképzelt minta</Badge>
               <Badge variant="secondary" className="text-[11px]">{CAMPAIGN_PATHS[campaignId]}</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">

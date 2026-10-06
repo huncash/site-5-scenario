@@ -14,6 +14,8 @@ describe("support pricing ↔ tier hrefs", () => {
     expect(supportPricingHref("basic")).toContain("#basic");
     expect(supportPricingHref("pro")).toContain("#pro");
     expect(supportPricingHref("enterprise")).toContain("#enterprise");
+    expect(supportPricingHref("workflow")).toContain("#workflow");
+    expect(supportPricingHref("local-import")).toContain("#local-import");
   });
 
   it("maps support levels to home hashes", () => {

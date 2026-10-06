@@ -35,7 +35,7 @@ function UzletiStrategiaDemoLoaderPage() {
     <FunnelShell
       eyebrow="Üzleti és stratégiai tervezés"
       title="Esetek megnyitása…"
-      subtitle="A Master Baseline törzset öröklő három eset közül választasz. Nincs automata belépés egyetlen pályára."
+      subtitle="Elképzelt stratégiai minták. Nincs automata belépés egyetlen pályára — a számok a gépeden maradnak."
     >
       <Card className="border-border/60 bg-background/30">
         <CardHeader className="pb-2">

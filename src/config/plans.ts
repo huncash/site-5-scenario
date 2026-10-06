@@ -42,6 +42,16 @@ export type PlanFeatures = {
   proLevel: ProScenarioLevel;
   /** Dedikált offline / egyedi integráció (Enterprise). */
   dedicatedOfflineIntegration: boolean;
+  /** Mappa-szinkron (File System Access) — nem a kézi fájlválasztás. */
+  canWatchedFolder: boolean;
+  /** Egyéni kategória-szabály szerkesztő (a beépített heurisztika Basicben is fut). */
+  canCustomRules: boolean;
+  /** Vállalkozási munkatér / ÁFA-kör. */
+  canBusinessWorkspaces: boolean;
+  /** Aktív / pihentetett projekt-slot. */
+  canProjects: boolean;
+  /** Összetett döntési mátrix (Kahn / elágazás / BCP fa). */
+  canAdvancedScenario: boolean;
 };
 
 /** Nettó listaár Ft + tájékoztató EUR. */
@@ -174,6 +184,19 @@ const PUBLIC_FEATURES_BASE = {
   canMultiPortfolio: false,
   optionalSync: false,
   dedicatedOfflineIntegration: false,
+  canWatchedFolder: false,
+  canCustomRules: false,
+  canBusinessWorkspaces: false,
+  canProjects: false,
+  canAdvancedScenario: false,
+} as const;
+
+const PRO_RUNTIME_FEATURES = {
+  canWatchedFolder: true,
+  canCustomRules: true,
+  canBusinessWorkspaces: true,
+  canProjects: true,
+  canAdvancedScenario: true,
 } as const;
 
 const LOYALTY_STARTER = buildLoyaltyLadder({ huf: 199_000, eur: 199 });
@@ -216,6 +239,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
     quotas: { cases: 2, slotsPerCase: 3, seats: 1, guests: 5, bankAccountsPerSlot: "unlimited" },
     features: {
       ...PUBLIC_FEATURES_BASE,
+      ...PRO_RUNTIME_FEATURES,
       bankImport: "multi",
       proLevel: "advanced",
     },
@@ -235,6 +259,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
     quotas: { cases: 5, slotsPerCase: 4, seats: 3, guests: 20, bankAccountsPerSlot: "unlimited" },
     features: {
       ...PUBLIC_FEATURES_BASE,
+      ...PRO_RUNTIME_FEATURES,
       canMultiPortfolio: true,
       canSaveToCloud: true,
       optionalSync: true,
@@ -287,6 +312,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
       canMultiPortfolio: false,
       optionalSync: false,
       dedicatedOfflineIntegration: false,
+      ...PRO_RUNTIME_FEATURES,
       bankImport: "single",
       proLevel: "basic",
     },
@@ -306,6 +332,7 @@ export const PLANS_CONFIG: Record<PlanId, PlanConfig> = {
     quotas: { cases: "unlimited", slotsPerCase: 4, seats: 3, guests: 20, bankAccountsPerSlot: "unlimited" },
     features: {
       ...PUBLIC_FEATURES_BASE,
+      ...PRO_RUNTIME_FEATURES,
       canResetDemo: true,
       canMultiPortfolio: true,
       canSaveToCloud: true,

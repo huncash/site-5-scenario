@@ -16,10 +16,10 @@ export const en: DeepString<typeof hu> = {
       "Instead of a spreadsheet: you see how many months the till lasts if nothing comes in from tomorrow. Personal, business, project — same desk, on your machine.",
     localFirstLabel: "The numbers stay on your machine:",
     localFirstBody:
-      "Save to a file or QR to another machine. We do not send usage. The statement (CAMT.053, CSV, XML) comes in locally. The numbers stay in your browser — there is no external cloud database.",
+      "A local steering simulation on your own device: developers never see or collect your data. Share with an invited guest, or a save file — like a spreadsheet before the cloud. The statement (CSV, XML) goes into Mesh Data Manager, locally. There is no external cloud database.",
     demoPreviewTitle: "More sample situations",
     demoPreviewBody:
-      "Interactive preview: the engine runs on a preloaded case. No registration — one click shows cash-flow focus and liquidity gauges.",
+      "Playable, fictional samples to try the engine. It is fine if the first pass feels dense or the field is unfamiliar: no registration, the numbers stay on your machine.",
     whyTitle: "Why it’s called Szcenárió — beyond a good and a bad year",
     whyLead:
       "A “good year / bad year” is two numbers at year-end. A scenario is different: it shows which month the air runs out — not only what is left in December.",
@@ -34,13 +34,13 @@ export const en: DeepString<typeof hu> = {
     infraTitle: "Infrastructure and privacy",
     infraLead: "The calculation runs in your browser. No cloud database.",
     infraBody:
-      "No hidden send, no profile from your use. Save by file or QR — the copy stays with you. The statement comes in locally. Pro Desktop early access comes spring 2027, free — until then web Case/Slot is the full value.",
+      "No hidden send, no profile from your use. Developers never see modelled data at any level. Save by file or invited guest — the copy stays with you. The statement goes into Mesh Data Manager, locally. Pro Desktop early access comes spring 2027, free — until then web Case/Slot is the full value.",
     infraPoint1Title: "The calculation runs in your browser",
-    infraPoint1Body: "No cloud database. Decision data stays with you.",
+    infraPoint1Body: "No cloud database. Decision data stays with you. Developers do not see it.",
     infraPoint2Title: "We do not build a profile",
-    infraPoint2Body: "We do not send usage. We do not watch what you do.",
+    infraPoint2Body: "We do not send usage. We do not watch what you do. Zero collection.",
     infraPoint3Title: "The copy stays with you",
-    infraPoint3Body: "Save by file or QR, machine to machine.",
+    infraPoint3Body: "A save file, like a spreadsheet used to be — or an invited guest on their own machine.",
     proCallout: "Risk room to move — not a forecast",
     proWhy:
       "The chart does not tell you what will happen. It shows how many months the till lasts if things go badly or if they work out.",
@@ -119,14 +119,14 @@ export const en: DeepString<typeof hu> = {
     navDocsLead: "Knowledge base, FAQ and lessons on your device.",
     navIntegrations: "Hook-ups",
     navIntegrationsLead:
-      "Local statement (CAMT.053, CSV, XML). The data stays in your browser — there is no external cloud database.",
+      "Statements into Mesh Data Manager on your machine (CSV, XML). The watched folder is on Pro, checked at sign-in. Developers do not see them. There is no external cloud database.",
     navLicense: "License",
     navLicenseLead: "Perpetual license, loyalty ladder, Active Case and Slot.",
     navTicket: "Report an issue",
     navTicketLead: "Written ticket if the knowledge base did not answer.",
     tiersEyebrow: "Support",
     tiersTitle: "Support levels",
-    tiersLead: "Help that matches your plan. The card goes to pricing; from there you come back here.",
+    tiersLead: "Help that matches your plan: knowledge base, written tickets, and on Standard the local import path.",
     basicTitle: "Basic support",
     basicB1: "Community forum and knowledge-base articles",
     basicB2: "Basic issue reporting",
@@ -134,7 +134,7 @@ export const en: DeepString<typeof hu> = {
     basicCta: "Knowledge base",
     proTitle: "Standard support",
     proB1: "Your ticket goes ahead in the queue",
-    proB2: "Local statement: CAMT.053, CSV, XML. If the file will not come in, or comes in twice — that is what we help with.",
+    proB2: "Local statement: CSV, XML. If the file will not come in, or comes in twice — that is what we help with.",
     proB3: "Local folder and scheduled file: if the read-in got stuck",
     proCta: "Open a ticket",
     enterpriseTitle: "Priority / Enterprise support",
@@ -154,7 +154,7 @@ export const en: DeepString<typeof hu> = {
       "Billing runs on bill.szcenario.hu (Számlázz.hu + Barion). That is Szcenárió’s fee and invoice — not your bookkeeping. The proforma goes to the given e-mail; the order opens with the id and the e-mail.",
     faqSettingsQ: "Where do I set the view (theme, language, palette)?",
     faqSettingsA:
-      "The header view settings are the same as on the main site: palette, light/dark mode, high-contrast and language.",
+      "In the header view settings: palette, light/dark mode, high-contrast and language.",
     faqDesktopQ: "Where is the desktop installer?",
     faqDesktopA:
       "The engine runs in your browser, on your machine. No cloud database. Pro Desktop early access comes spring 2027, free with Pro. Until then web Case/Slot is the full value.",
@@ -248,7 +248,7 @@ export const en: DeepString<typeof hu> = {
     phase2Title: "Phase 2 — Master password, local lock",
     phase2Body: "Desktop data stays on your machine, locked with a master password. It runs with no network.",
     phase3Title: "Phase 3 — Local statements",
-    phase3Body: "CAMT.053, CSV, XML on your machine. No outside server for your books.",
+    phase3Body: "CSV, XML on your machine. No outside server for your books.",
     phase4Title: "Phase 4 — Optional own line",
     phase4Body:
       "A switch in settings: password-free sign-in and encrypted support, if you turn it on. We do not force it on anyone.",
@@ -269,19 +269,19 @@ export const en: DeepString<typeof hu> = {
       "Szcenárió does not decide for you and does not build a profile. The calculation runs in your own browser. Financial numbers do not go to an external AI, a server, or a cloud.",
     bannerTitle: "The data stays with you",
     bannerBody:
-      "Szcenárió processes modelled data 100% locally in your browser. Sensitive business data is not saved on the company server. We do not use tracking cookies and we do not sell your data. The system only uses local storage (LocalStorage / IndexedDB) for your saves, and processes billing data only as required by law.",
+      "Szcenárió calculates on your own device, in the browser. Developers never see or collect modelled data — sensitive business data is not saved on the company server. No tracking cookies, no sale. Saves stay with you: a file or an invited guest. Billing data is handled separately, as the law requires.",
     bannerAccept: "Got it",
     bannerDetails: "Details / GDPR",
     pageTitle: "Privacy notice (GDPR)",
     pageLead:
-      "Local in-browser modelling · business/simulation data does not go to the company server · billing data only for the fee.",
+      "Local in-browser modelling · developers do not see or collect it · business/simulation data does not go to the company server · billing data only for the fee.",
     controllerTitle: "1. Data controller",
     controllerAddress: "Registered seat",
     controllerTax: "Tax ID",
     controllerContact: "Contact (in writing)",
     localTitle: "2. In-browser modelling and local data",
     localBody:
-      "Calculations, financial data and cash-flow simulations stay on your device only (RAM / LocalStorage / IndexedDB). The controller cannot access them, does not store them on a server, and does not forward them to AI providers.",
+      "Calculations, financial data and simulations stay on your device only. The controller — developers included — never accesses, collects, stores them on a server, or forwards them to an outside service. Sharing happens only with your save file or an invited guest.",
     billingTitle: "3. Billing data (legal obligation)",
     billingBody:
       "On subscription or purchase we may process: name, billing address, tax ID, email. Purpose: invoicing and accounting retention (Hungarian Accounting Act §169 — 8 years). Erasure is possible after the statutory retention period.",
@@ -327,7 +327,7 @@ export const en: DeepString<typeof hu> = {
   school: {
     kicker: "school.szcenario.hu",
     title: "Student / education channel",
-    lead: "Limited education licence in the browser, on your machine. It starts at once. Local data, no cloud database. Pro Desktop early access comes spring 2027, free with paid Pro. Not promoted on the homepage; direct URL or this discreet link.",
+    lead: "Limited education licence in the browser, on your machine. It starts at once. Local data, no cloud database. Pro Desktop early access comes spring 2027, free with paid Pro.",
     capacity: "At most 1 Active Case and 2 Active Slot. Not expandable.",
     watermark: "Oktatási Licenc – Üzleti célra nem használható",
     engineOnly: "Only the core Economic Scenario Engine features are available.",
@@ -437,7 +437,7 @@ export const en: DeepString<typeof hu> = {
     kahnEyebrow: "DEMO 11 — featured case",
     kahnTitle: "Bistro expansion & private-wealth risk simulation",
     kahnBody:
-      "Hospitality capacity fork in one model: core ops (bistro cash-flow), personal/property (mortgage, emergency reserve), project (terrace and kitchen on loan vs private debt cleanup and organic growth). The three paths show reserve months and the capital-protection point — before you invest capital.",
+      "A fictional sample to try the engine — not a live client. Hospitality capacity, loan or debt cleanup, personal property as cover on one desk. Fine if the first pass feels dense: the aim is to try it; the numbers stay on your machine.",
     kahnCta: "Try the bistro simulation",
     kahnEvolveTitle: "From decision trees to full resilience",
     kahnEvolveLead:
@@ -455,40 +455,44 @@ export const en: DeepString<typeof hu> = {
     pillarInner: "Inner zones",
     pillarInnerBlurb: "Personal, civil, BCP, demography, education — frames inside the house.",
     howTitle: "How it works",
-    howLead: "From your own data to a decision in 3 steps",
-    howStep1Title: "Import data from your own machine",
+    howLead: "From your own data to control in four steps — the numbers stay on your machine.",
+    howStep1Title: "Master data on your own device",
     howStep1Body:
-      "Drag in your bank statements (PDF, CSV, CAMT.053, XML) going back 1–3 years. The data is processed only in your browser: there is no external cloud database, the numbers stay with you.",
-    howStep2Title: "Fit a new plan onto it",
+      "Profile, personal assets, property: encrypted, local. This is a local office and company steering simulation. Developers never see or collect your data.",
+    howStep2Title: "Statements into Mesh Data Manager",
     howStep2Body:
-      "On the automatically analysed historical base (baseline) you can attach your own next-year plans and development directions.",
-    howStep3Title: "Scenarios and risk-management bounds",
+      "You download the bank statement (CSV or XML) and put it into Mesh Data Manager on your machine — by hand, or on Pro from a watched folder checked at sign-in. Nothing goes to a cloud.",
+    howStep3Title: "The picture assembles locally",
     howStep3Body:
-      "Different futures draw at once: optimistic and pessimistic outcomes, and the exact capital-protection stop-loss points, so you see the limits of your financial room to move.",
+      "The surface loads on your machine. Lines fall into categories in the daily steering loop: plan, run, check, act — without formulas and tables.",
+    howStep4Title: "Your rules, not training",
+    howStep4Body:
+      "You correct a bad read by hand. A personal rule is on Pro — not training an intelligence. Personal wealth on Basic; business and projects on Pro. Control stays with you.",
     hoodTitle: "Under the hood",
     hoodLead: "The numbers stay on your machine. The motor is fast because it is local.",
     howLocalTitle: "Runs on your device",
     howLocalBody:
-      "The calculation runs in your browser. Financial numbers do not go to a cloud.",
+      "The calculation runs in your browser. Financial numbers do not go to a cloud. Developers do not see them.",
     howLeanTitle: "Lean decisions in seconds",
     howLeanBody:
       "Change parameters live and see cash-flow, payback, and operating risk shift at once. Waste in the decision chain shows up immediately.",
     howSovTitle: "Multi-layer local encryption",
     howSovBody:
-      "The numbers stay on your machine and are encrypted there. An outsider cannot read them from local storage or a QR.",
+      "The numbers stay on your machine and are encrypted there. Share with a save file or an invited guest — an outsider cannot read them from your store.",
     howArchDevice: "Your device (browser)",
     howArchEngine: "Local scenario engine",
     howArchFlow: "In-browser only",
     howArchBlocked:
       "Closed system — no cloud send. Encryption runs on your machine.",
     factLocal: "Computed locally",
-    factLocalBody: "Plan, actual, and gap are made in the browser. No cloud database, no telemetry.",
+    factLocalBody: "Plan, actual, and gap are made in the browser. No cloud database. Developers do not see them.",
     factFocus: "One sector, several foci",
     factFocusBody:
       "7 hospitality / personal base cases, plus 11 industry and decision lenses: TTR, energy, stock — the same local engine.",
-    factDemo: "Demo = sample, not a client",
+    factDemo: "Demo = a fictional sample",
     factSave: "Backup stays with you",
-    factSaveBody: "Export/import, or nearby device↔device via QR. Unlock is a master password on this device.",
+    factSaveBody:
+      "A save file, like a spreadsheet used to be — or an invited guest on their own machine. Unlock is a master password on this device.",
     industryLead:
       "Pick the industry first. The 7 hospitality base cases, the hospital blackout, and the two manufacturing lenses are open; the other branches use the same method.",
     economicAside: "Economic Scenario Engine",
@@ -499,11 +503,11 @@ export const en: DeepString<typeof hu> = {
     noProfile: "No active profile.",
     settingsFail: "Could not open settings.",
     educationLead:
-      "Fixed PDCA. The finance band (burn, utilities, recovery) and Lean / Poka-Yoke micro (OEE, SMED, quota, isolation) sit on the same mosaic. Student and campus scale.",
+      "Fictional training samples to try the engine. Finance and operations together, student and campus scale — the numbers stay on your machine.",
     resilienceLead:
-      "Not an end-of-world simulator. For firms: BCP and operational resilience; at macro: strategic foresight; in community: local self-reliance. The engine also carries physical limits — ResourceRunway, EnergyAutonomy, TTR. TFR is a 2023 local copy, not a live API.",
+      "Not an end-of-world game. Firm, community, household: reserve and recovery on your own device. The samples are free to play if the field is unfamiliar.",
     strategyLead:
-      "The firm trunk is the Master Baseline. Strategy cases inherit it — partners, fixed cost, and core cash-flow are not re-entered. The project only carries the decision layer, with PRO paths.",
+      "You enter the firm trunk once. Strategy samples inherit it. Fictional cases for the engine — not a live client; control stays with you.",
     stepLead: {
       healthcare: "The grid is down. Vital wards share reserve power. Lean triage — not a forint column.",
       manufacturing: "The line is stopped, or a hidden defect is running. SMED, OEE, Poka-Yoke — Lean in the emergency.",
@@ -681,7 +685,7 @@ export const en: DeepString<typeof hu> = {
     fnLoyaltyLink: "Loyalty model",
     fnLoyaltyShort: "Y1 100% · Y2 −25% · Y3 −40% · Y4+ free updates.",
     fnLocalLink: "Local import & Edge",
-    fnLocalShort: "CAMT.053 / CSV on-device; Edge optional.",
+    fnLocalShort: "CSV / XML on-device; Edge optional.",
     fnCaseLabel: "Active Case",
     fnSlotLabel: "Active Slot",
     fnConceptsLink: "Details on Support",
@@ -779,8 +783,8 @@ export const en: DeepString<typeof hu> = {
     cp5: "1 Seat + 5 Guest",
     ce5: "3 Seat + 20 Guest",
     cf6: "Bank statement import",
-    cs6: "✓ 1 statement / Slot** (any period)",
-    cp6: "✓ CAMT.053 / CSV / XML statement import",
+    cs6: "✓ Manual CSV / XML import",
+    cp6: "✓ CSV / XML + watched folder",
     ce6: "✓ Accounting/bank import + Sensor / Edge",
     cf7: "The numbers stay with you",
     cs7: "Encrypted local backup",

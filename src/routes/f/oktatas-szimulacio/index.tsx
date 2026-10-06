@@ -28,10 +28,10 @@ function OktatasSzimulacioLandingPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-[11px]">PDCA</Badge>
-              <Badge variant="secondary" className="text-[11px]">Lean / Poka-Yoke</Badge>
-              <Badge variant="secondary" className="text-[11px]">PRO sáv</Badge>
-              <Badge variant="secondary" className="text-[11px]">offline</Badge>
+              <Badge variant="secondary" className="text-[11px]">Tréning-minta</Badge>
+              <Badge variant="secondary" className="text-[11px]">Három pálya</Badge>
+              <Badge variant="secondary" className="text-[11px]">Helyben</Badge>
+              <Badge variant="secondary" className="text-[11px]">Elképzelt minta</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {EDUCATION_SEGMENTS.filter((s) => s.id === "demo16_edu_startup_cashflow" || s.id === "demo17_edu_ops_process").map((s) => (

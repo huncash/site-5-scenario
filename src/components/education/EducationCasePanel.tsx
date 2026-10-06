@@ -1,7 +1,7 @@
 import { caseTitle, useI18n } from "@/i18n";
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
 import { HelpIcon } from "@/components/HelpIcon";
-import { CollapsibleCard } from "@/components/lean-viz/CollapsibleCard";
+import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
@@ -87,8 +87,8 @@ function KpiTrio({ kpis }: { kpis: EducationKpi[] }) {
     <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
       {kpis.map((k) => (
         <div key={k.id} className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground break-words">{k.label}</p>
-          <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground/80">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] break-words">{k.label}</p>
+          <p className="mt-0.5 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             {k.family === "finance"
               ? t("panel.familyFinance")
               : k.family === "lean"
@@ -97,8 +97,8 @@ function KpiTrio({ kpis }: { kpis: EducationKpi[] }) {
                   ? t("panel.familyEnergy")
                   : t("panel.familyTime")}
           </p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground break-words">{k.hint}</p>
-          <dl className="mt-2 grid gap-1 text-[12px]">
+          <DetailFold id={`edu-kpi-${k.id}`} text={k.hint} />
+          <dl className="mt-2 grid gap-1 text-[12px] text-[var(--text-main)]">
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <ChartLegendSwatch tone="opt" label="Opt" line />
               <span className="min-w-[4.5rem] font-mono tabular-nums text-right">{formatMetric(k.opt, k.unit)}</span>
@@ -162,15 +162,14 @@ export function EducationCasePanel(props: {
         </span>
       }
     >
-      <p className="text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
+      <p className="text-[12px] leading-snug text-[var(--text-main)]">{phaseHint}</p>
       {ops ? (
-          <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-2 text-[11px] leading-snug text-emerald-100/90">
-            <span className="font-semibold text-emerald-200/95">
-              Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins):{" "}
-            </span>
-            A folyamatbeli veszteségek (várakozási idők, selejt, felesleges mozgatás) megszüntetése az
-            első fázisban minimális beruházási igénnyel (CapEx) nagyságrendekkel több eredményt és
-            szabad cash-flow-t termel, mint a fix megvalósítási költségek.
+          <div className="mt-2 rounded-md border border-border/60 bg-background px-2.5 py-2 text-[11px] leading-snug text-[var(--text-main)]">
+            <span className="font-semibold">Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins)</span>
+            <DetailFold
+              id="edu-ops-tutor"
+              text="A folyamatbeli veszteségek (várakozási idők, selejt, felesleges mozgatás) megszüntetése az első fázisban minimális beruházási igénnyel nagyságrendekkel több eredményt és szabad cash-flow-t termel, mint a fix megvalósítási költségek."
+            />
           </div>
         ) : null}
       <div className="mt-3 grid gap-3">

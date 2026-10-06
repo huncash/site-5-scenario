@@ -39,26 +39,26 @@ function bankHighlight(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
     if (mode === "api") return "Automated accounting / bank-statement import";
     if (mode === "multi") {
-      return "Local bank statement & posting import (CAMT.053, CSV, XML)";
+      return "Local statement (CSV, XML) + watched folder";
     }
-    return "Bank statement import for any period / Slot**";
+    return "Manual statement import (CSV, XML) on your machine";
   }
   if (mode === "api") return "Automatizált könyvelési/bankkivonat import";
   if (mode === "multi") {
-    return "Automatizált bankkivonat & tranzakció import (CAMT.053, CSV, XML)";
+    return "Helyi kivonat (CSV, XML) + figyelt mappa";
   }
-  return "Tetszőleges időszaki bankkivonat import / Slot**";
+  return "Kézi kivonat-import (CSV, XML) a gépeden";
 }
 
 function bankCompare(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
     if (mode === "api") return "✓ Accounting / bank-statement import";
-    if (mode === "multi") return "✓ CAMT.053 / CSV / XML statement import";
-    return "✓ Statement import / Slot** (any period)";
+    if (mode === "multi") return "✓ CSV / XML + watched folder";
+    return "✓ Manual CSV / XML import";
   }
   if (mode === "api") return "✓ Könyvelési/bankkivonat import";
-  if (mode === "multi") return "✓ CAMT.053 / CSV / XML bankkivonat import";
-  return "✓ Kivonat import / Slot** (bármilyen időszakra)";
+  if (mode === "multi") return "✓ CSV / XML + figyelt mappa";
+  return "✓ Kézi CSV / XML import";
 }
 
 function proHighlight(level: ProScenarioLevel, locale: Locale): string {
@@ -112,8 +112,8 @@ export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
   }
   if (plan.id === "pro") {
     return locale === "en"
-      ? "Starts at once in the browser. Local bank statement import (CAMT.053, CSV, XML). Desktop early access spring 2027, free. Need more than 2 concurrent cases? Extra active Case module (+€49 perpetual)."
-      : "Azonnal a böngészőben. Helyi bankkivonat-import (CAMT.053, CSV, XML). Asztali early access 2027 tavaszán, ingyen. 2-nél több párhuzamos case-hez: Extra aktív Case modul (+49 000 Ft / örökös).";
+      ? "Starts at once in the browser. Business and project slots, custom rules, watched folder, local CSV/XML import. Desktop early access spring 2027, free. Need more than 2 concurrent cases? Extra active Case module (+€49 perpetual)."
+      : "Azonnal a böngészőben. Vállalkozás és projekt, saját szabály, figyelt mappa, helyi CSV/XML import. Asztali early access 2027 tavaszán, ingyen. 2-nél több párhuzamos case-hez: Extra aktív Case modul (+49 000 Ft / örökös).";
   }
   return locale === "en"
     ? "Starts at once in the browser: 1 active case, 3 active slots (three base paths)."
@@ -152,13 +152,13 @@ export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string
           "2 parallel active cases",
           "3 active slots each",
           "1 editor + 5 guests",
-          "Local bank statement & posting import (CAMT.053, CSV, XML)",
+          "Local CSV/XML import, watched folder, own rules",
         ]
       : [
           "2 párhuzamos aktív case",
           "3 aktív slot case-enként",
           "1 szerkesztő + 5 vendég",
-          "Helyi bankkivonat & tételimport (CAMT.053, CSV, XML)",
+          "Helyi bankkivonat (CSV, XML), figyelt mappa, saját szabály",
         ];
   }
   if (plan.id === "expert") {
@@ -273,6 +273,15 @@ export function buildPricingCompareRows(locale: Locale = "hu"): PricingCompareRo
             ? "✓ Multi-portfolio & organisational BCP audit"
             : "✓ Multi-portfólió & szervezeti BCP audit"
           : "–",
+      },
+    },
+    {
+      id: "runtime",
+      feature: L ? "Business, project, own rules" : "Vállalkozás, projekt, saját szabály",
+      cells: {
+        starter: L ? "Personal wealth · built-in rules" : "Magánvagyon · beépített szabály",
+        pro: L ? "✓ Business + project · custom rules · watched folder" : "✓ Vállalkozás + projekt · saját szabály · figyelt mappa",
+        expert: L ? "✓ Same as Pro + org audit" : "✓ Pro + szervezeti audit",
       },
     },
   ];

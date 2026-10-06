@@ -3,15 +3,12 @@ import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCa
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HelpIcon } from "@/components/HelpIcon";
 import { KahnDecisionTree } from "@/components/strategy/KahnDecisionTree";
-import { StrategyBranchWalk } from "@/components/strategy/StrategyBranchWalk";
 import { StrategyForkMatrix } from "@/components/strategy/StrategyForkMatrix";
 import { formatMoney } from "@/lib/finance";
 import { MASTER_BASELINE_LABEL } from "@/lib/masterBaseline";
+import { strategyForkKindOf } from "@/lib/strategyForks";
 import {
-  isInflationSegment,
   isKahnForkSegment,
-  isNewLineSegment,
-  isNewMarketSegment,
   isStrategySegment,
   strategyCaseById,
   type StrategyCaseId,
@@ -34,10 +31,8 @@ export function StrategyCasePanel(props: {
     pess: t("dash.pessimistic"),
   };
   const kahn = isKahnForkSegment(props.segmentId);
-  const newLine = isNewLineSegment(props.segmentId);
-  const inflation = isInflationSegment(props.segmentId);
-  const market = isNewMarketSegment(props.segmentId);
-  const showTree = (kahn || inflation || market) && props.phase !== "DO";
+  const forkKind = strategyForkKindOf(props.segmentId);
+  const showTree = Boolean((kahn || forkKind) && props.phase === "PLAN");
   const phaseHint = kahn
     ? props.phase === "PLAN"
       ? t("panel.kahnPlan")
@@ -72,14 +67,12 @@ export function StrategyCasePanel(props: {
         </span>
       }
     >
-      {showTree || (newLine && props.phase === "PLAN") ? null : (
+      {showTree ? null : (
         <p className="text-[12px] leading-snug text-[var(--text-main)] break-words">{phaseHint}</p>
       )}
-      {props.phase === "PLAN" && newLine ? <StrategyBranchWalk storyId="new-line" /> : null}
       {kahn && showTree ? <KahnDecisionTree /> : null}
-      {inflation && showTree ? <StrategyForkMatrix kind="inflation" caseId={cse.id} /> : null}
-      {market && showTree ? <StrategyForkMatrix kind="market" caseId={cse.id} /> : null}
-      {!showTree && (props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
+      {forkKind && showTree ? <StrategyForkMatrix kind={forkKind} caseId={cse.id} /> : null}
+      {!showTree && !kahn && !forkKind && (props.phase === "CHECK" || props.phase === "ACT") && props.signals.length ? (
         <ul className="mt-3 grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
           {props.signals.map((s) => (
             <li key={s.tone} className="min-w-0 rounded-lg border border-border/50 bg-background p-2.5">

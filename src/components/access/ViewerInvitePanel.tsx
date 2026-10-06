@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { canConfigureStructure, isViewerReadonly } from "@/lib/accessRole";
+import { usePlanPermissions } from "@/hooks/usePlanPermissions";
 import {
   ensureGuestSlotPool,
   generateGuestCodeForSlot,
@@ -18,6 +19,7 @@ import { ensureReferralCode } from "@/lib/referral";
 import { viewerConnectUrl } from "@/lib/viewerInvite";
 
 export function ViewerInvitePanel() {
+  const { can } = usePlanPermissions();
   const tier = resolveGuestTier();
   const limit = guestCodeSlotsForTier(tier);
   const [slots, setSlots] = useState<GuestCodeSlot[]>(() => listGuestSlots(tier));
@@ -25,7 +27,7 @@ export function ViewerInvitePanel() {
   const [activeCode, setActiveCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const referral = ensureReferralCode();
-  const owner = canConfigureStructure() && !isViewerReadonly();
+  const owner = canConfigureStructure() && !isViewerReadonly() && can("MANAGE_GUESTS");
 
   const refresh = useCallback(() => {
     ensureGuestSlotPool(tier);
@@ -71,7 +73,7 @@ export function ViewerInvitePanel() {
   if (!owner) {
     return (
       <div className="rounded-xl border border-border/60 bg-card px-4 py-3 text-sm text-muted-foreground">
-        Guest módban nem generálható megosztó kulcs.
+        Vendégmeghívó a csomagod vendégkeretében él. Guest módban nem generálható kulcs.
       </div>
     );
   }

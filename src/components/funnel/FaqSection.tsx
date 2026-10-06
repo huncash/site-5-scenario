@@ -20,7 +20,7 @@ export function FaqSection(props: { items: ReadonlyArray<{ q: string; a: string 
         ) : null}
       </div>
       <div className="mt-1 text-[12px] text-slate-300">
-        Local‑first adatbiztonság és multi‑site használat — röviden, lényegre törően.
+        A számok a gépeden maradnak. Nincs felhős adatbázis.
       </div>
       <div className="mt-3">
         <Accordion type="single" collapsible defaultValue={defaultOpenFirst && first ? first : undefined}>

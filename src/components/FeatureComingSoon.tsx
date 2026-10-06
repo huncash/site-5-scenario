@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { planUpgradeHref } from "@/lib/planGate";
 
 export type ComingSoonPayload = {
   /** Rövid funkciónév a címsorban */
@@ -18,6 +19,8 @@ export type ComingSoonPayload = {
   purpose: string;
   /** Stabil azonosító a későbbi modulcseréhez */
   featureId?: string;
+  /** upgrade = csomaghatár; soon = még nincs kész a belépési pont. */
+  kind?: "soon" | "upgrade";
 };
 
 type Ctx = {
@@ -54,6 +57,7 @@ export function FeatureComingSoonProvider({ children }: { children: ReactNode })
         title={payload?.title ?? "Funkció"}
         purpose={payload?.purpose ?? "Ez a funkció előkészítés alatt áll."}
         featureId={payload?.featureId}
+        kind={payload?.kind ?? (payload?.featureId?.startsWith("plan.") ? "upgrade" : "soon")}
       />
     </FeatureComingSoonContext.Provider>
   );
@@ -79,14 +83,18 @@ export function FeatureComingSoonDialog({
   onOpenChange,
   title,
   purpose,
-  featureId,
+  featureId: _featureId,
+  kind = "soon",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   purpose: string;
   featureId?: string;
+  kind?: "soon" | "upgrade";
 }) {
+  void _featureId;
+  const upgrade = kind === "upgrade";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg border-border bg-card text-foreground sm:rounded-xl">
@@ -94,7 +102,9 @@ export function FeatureComingSoonDialog({
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300">
             <Construction className="h-5 w-5" aria-hidden />
           </div>
-          <DialogTitle className="text-lg tracking-tight">Funkció előkészítés alatt</DialogTitle>
+          <DialogTitle className="text-lg tracking-tight">
+            {upgrade ? "Ez a Pro csomagban él" : "Funkció előkészítés alatt"}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">{title}</span>
             <span className="mt-2 block leading-relaxed">{purpose}</span>
@@ -102,15 +112,18 @@ export function FeatureComingSoonDialog({
         </DialogHeader>
 
         <div className="rounded-lg border border-dashed border-border bg-[var(--dropdown-hover)] px-4 py-5">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-300/90">
-            [Szerkeszthető Tartalom Helye - PLACEHOLDER]
-          </div>
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            Ide kerül az éles modul UI-ja (panel, tábla, varázsló vagy AI tanácsadó). A gomb már
-            bekötött belépési pont — cseréld le ezt a blokkot a kész implementációra.
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {upgrade
+              ? "A számok a gépeden maradnak. A Basic a magánvagyon, a kézi rögzítés és a fájl-import asztala. A Pro a vállalkozás, a projekt, a figyelt mappa és a saját szabály."
+              : "A belépési pont megvan. A modul a saját eszközödön fog futni — nincs felhős adatbázis."}
           </p>
-          {featureId ? (
-            <p className="mt-3 font-mono text-[10px] text-slate-500">featureId: {featureId}</p>
+          {upgrade ? (
+            <a
+              href={planUpgradeHref()}
+              className="mt-3 inline-flex text-xs font-medium text-cyan-300 underline-offset-2 hover:underline"
+            >
+              Support: Pro keret
+            </a>
           ) : null}
         </div>
 

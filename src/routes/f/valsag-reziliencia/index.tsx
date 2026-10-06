@@ -28,10 +28,10 @@ function ValsagRezilienciaLandingPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-[11px]">ResourceRunway</Badge>
-              <Badge variant="secondary" className="text-[11px]">EnergyAutonomy</Badge>
-              <Badge variant="secondary" className="text-[11px]">TTR</Badge>
-              <Badge variant="secondary" className="text-[11px]">offline</Badge>
+              <Badge variant="secondary" className="text-[11px]">Tartalék</Badge>
+              <Badge variant="secondary" className="text-[11px]">Helyreállás</Badge>
+              <Badge variant="secondary" className="text-[11px]">Helyben</Badge>
+              <Badge variant="secondary" className="text-[11px]">Elképzelt minta</Badge>
             </div>
             <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-200">
               {RESILIENCE_SEGMENTS.filter((s) =>
