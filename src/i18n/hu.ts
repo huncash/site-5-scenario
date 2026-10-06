@@ -168,8 +168,8 @@ export const hu = {
     toPlanPro: "Árazás: Pro csomag",
     toPlanEnterprise: "Árazás: Enterprise csomag",
     toTierBasic: "Támogatás: Basic",
-    toTierPro: "Támogatás: Standard",
-    toTierEnterprise: "Támogatás: Priority",
+    toTierPro: "Támogatás: Standard szint",
+    toTierEnterprise: "Támogatás: Priority szint",
   },
   chrome: {
     home: "Főoldal",

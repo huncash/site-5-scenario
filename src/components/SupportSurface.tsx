@@ -293,6 +293,7 @@ function SupportLessonPage({ lesson }: { lesson: SupportLessonIndex }) {
 /** support.szcenario.hu és /support/* — landing vagy kanonikus lecke-aloldal. */
 export function SupportHost() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const route = useMemo(() => resolveSupportSlug(supportPathSlug(pathname)), [pathname]);
   if (route.kind === "lesson" && route.lesson) {
     return <SupportLessonPage lesson={route.lesson} />;
@@ -306,7 +307,7 @@ export function SupportHost() {
           </div>
         }
       >
-        <SupportSpaApp pathname={pathname} />
+        <SupportSpaApp pathname={pathname} search={search} />
       </Suspense>
     );
   }

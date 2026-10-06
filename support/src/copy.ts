@@ -61,15 +61,16 @@ const hu = {
   pricingLead:
     "A Basic és a Pro verzió közvetlenül a te számítógépeden, a böngésződben fut. Minden adat helyben marad, külső felhős adatbázist nem használunk. Az alábbiakban részletesen bemutatjuk a csomagok kapacitásait, a kedvezményes hűségmodellt és a helyi adatkezelés elveit. Az asztali alkalmazás korai hozzáférése 2027 tavaszán érkezik, amelyet a Pro csomag tulajdonosai ingyenesen megkapnak.",
   pricingTocPlans: "Csomagok",
-  pricingTocModels: "Modellek",
+  pricingTocKb: "Tudásbázis",
   pricingTocLoyalty: "Hűségmodell",
+  pricingTocAddons: "Bővítő modulok",
   pricingTocActive: "Aktív munkaterületek",
-  pricingTocLocal: "Lokális import",
+  pricingTocLocal: "Lokális import/auto import",
   pricingTocWorkflow: "Működési elv",
-  pricingTocRoadmap: "Ütemezés",
-  pricingTocDesktop: "Pro Desktop",
-  pricingTocBcp: "Működésfolytonosság",
-  pricingTocEducation: "Oktatási motor",
+  pricingTocDesktop: "ProDesktop",
+  pricingTocEconomic: "Gazdasági szcenárió motor",
+  pricingTocBcp: "Működésfolytonosság szcenárió motor",
+  pricingTocEducation: "Oktatási szcenárió motor",
   pricingRoadmapTitle: "Asztali alkalmazás és speciális motorok",
   pricingRoadmapLead:
     "A gazdasági szcenárió motor a böngésződben, a saját gépeden fut. Az asztali kliens és a nem-gazdasági motorok külön ütemezéssel készülnek — a webes Case és Slot ettől nem áll meg.",
@@ -88,6 +89,14 @@ const hu = {
   pricingAddonStatus:
     "Ez a modul most nem indítható. Előkészítés alatt áll, és megvásárolható bővítőként. További részletek a támogatási, míg a vásárlási folyamat a számlázási aloldalunkon található.",
   pricingAddonBuy: "Vásárlás a számlázáson",
+  pricingAddonsTitle: "Bővítő modulok",
+  pricingAddonsBody:
+    "Örökös bővítők a párhuzamosan nyitott esetekre, munkaterületekre, szerkesztőkre és a helyi Edge-bekötésre. A vásárlás a számlázási aloldalon történik.",
+  pricingAddonPriceMeta: "Ft nettó, örökös",
+  pricingEconomicTitle: "Gazdasági szcenárió motor",
+  pricingEconomicWhen: "Elérhető",
+  pricingEconomicBody:
+    "A gazdasági szcenárió motor a böngésződben, a saját gépeden fut. Basic, Pro és Enterprise ezen a motoron dolgozik — a webes Case és Slot azonnal él.",
   pricingLoyaltyTitle: "Hároméves lépcsőzetes hűségmodell",
   pricingLoyaltyYears: [
     "1. év: A belépő listaár 100%-a egyszeri vásárlásként — a megvásárolt verzió véglegesen a tiéd marad.",
@@ -114,8 +123,8 @@ const hu = {
   pricingEnterpriseInquiryLead:
     "Az Enterprise csomag egyedi egyeztetést igényel. Nincs önkiszolgáló checkout.",
   toTierBasic: "Támogatás: Basic",
-  toTierPro: "Támogatás: Standard",
-  toTierEnterprise: "Támogatás: Priority",
+  toTierPro: "Támogatás: Standard szint",
+  toTierEnterprise: "Támogatás: Priority szint",
 };
 
 const en: typeof hu = {
@@ -167,15 +176,16 @@ const en: typeof hu = {
   pricingLead:
     "Basic and Pro run directly on your computer, in your browser. All data stays local; we do not use an external cloud database. Below we set out plan capacity, the loyalty discount model, and the principles of local data handling. Desktop early access arrives in spring 2027, free for Pro owners.",
   pricingTocPlans: "Plans",
-  pricingTocModels: "Models",
+  pricingTocKb: "Knowledge base",
   pricingTocLoyalty: "Loyalty model",
+  pricingTocAddons: "Add-on modules",
   pricingTocActive: "Active workspaces",
-  pricingTocLocal: "Local import",
+  pricingTocLocal: "Local import / auto import",
   pricingTocWorkflow: "How it works",
-  pricingTocRoadmap: "Roadmap",
-  pricingTocDesktop: "Pro Desktop",
-  pricingTocBcp: "Continuity",
-  pricingTocEducation: "Education engine",
+  pricingTocDesktop: "ProDesktop",
+  pricingTocEconomic: "Economic scenario engine",
+  pricingTocBcp: "Continuity scenario engine",
+  pricingTocEducation: "Education scenario engine",
   pricingRoadmapTitle: "Desktop app and special engines",
   pricingRoadmapLead:
     "The economic scenario engine runs in your browser, on your machine. The desktop client and the non-economic engines follow a separate schedule — web Case and Slot do not wait.",
@@ -194,6 +204,14 @@ const en: typeof hu = {
   pricingAddonStatus:
     "This module cannot be started now. It is in preparation, and can be purchased as an add-on. Further details are on the support page, while the purchase process is on billing.",
   pricingAddonBuy: "Purchase on billing",
+  pricingAddonsTitle: "Add-on modules",
+  pricingAddonsBody:
+    "Perpetual add-ons for concurrently open cases, workspaces, editors and local Edge intake. Purchase is on the billing page.",
+  pricingAddonPriceMeta: "HUF net, perpetual",
+  pricingEconomicTitle: "Economic scenario engine",
+  pricingEconomicWhen: "Available",
+  pricingEconomicBody:
+    "The economic scenario engine runs in your browser, on your machine. Basic, Pro and Enterprise work on this engine — web Case and Slot are live at once.",
   pricingLoyaltyTitle: "Three-year tiered loyalty model",
   pricingLoyaltyYears: [
     "Year 1: 100% of the entry list price as a one-time purchase — the purchased version stays yours permanently.",
@@ -220,8 +238,8 @@ const en: typeof hu = {
   pricingEnterpriseInquiryLead:
     "The Enterprise plan needs a conversation. There is no self-serve checkout.",
   toTierBasic: "Support: Basic",
-  toTierPro: "Support: Standard",
-  toTierEnterprise: "Support: Priority",
+  toTierPro: "Support: Standard level",
+  toTierEnterprise: "Support: Priority level",
 };
 
 const TIPS_EN = [
@@ -380,8 +398,74 @@ export type SupportPricingTier = {
   ladder: string;
   /** Részletes, horgonyhoz tartozó leírás (SSOT). */
   detail: string;
+  contentsTitle: string;
   bullets: string[];
+  modulesHeading: string;
+  modules: string[];
 };
+
+const MODULES_HU_BASIC = [
+  "CORE · PROJEKT · MAGÁN",
+  "MASTER BASELINE",
+  "ALAPMŰKÖDÉS — TÖRZS ÁLLAPOT",
+  "Célok",
+  "Részletes progresszió",
+  "Megtakarítási alhalmazok",
+  "Tervezett kiadások / Projekt szimuláció",
+  "What-if — munkaszimuláció",
+  "Pénzáramlás",
+  "PÉNZÜGYI VALÓSÁG-SOKK",
+  "Cashflow – pénzáramlás és kivétel hőtérkép kimutatások több év adatai alapján",
+  "Tartozások / Kötelezettségek",
+  "Adósság-helyreállítás",
+  "Magán-üzleti híd",
+  "Döntési elágazások",
+  "Okos tanácsadó*",
+  "Eredménylevezetés",
+  "Havi bevétel, kiadás és megtakarítás",
+];
+
+const MODULES_HU_PRO = [
+  "Core · Projekt · Magán",
+  "Master Baseline",
+  "Alapműködés — törzs állapot",
+  "Célok",
+  "Részletes progresszió",
+  "Megtakarítási alhalmazok",
+  "Tervezett kiadások / Projekt szimuláció",
+  "What-if — munkaszimuláció",
+  "Pénzáramlás",
+  "Pénzügyi Valóság-Sokk",
+  "Cashflow – pénzáramlás és kivétel hőtérkép kimutatások több év adatai alapján",
+  "Tartozások / Kötelezettségek",
+  "Adósság-helyreállítás",
+  "Magán-üzleti híd",
+  "Döntési elágazások",
+  "Okos tanácsadó*",
+  "Eredménylevezetés",
+  "Havi bevétel, kiadás és megtakarítás",
+];
+
+const MODULES_EN = [
+  "Core · Project · Personal",
+  "Master Baseline",
+  "Base operation — trunk state",
+  "Goals",
+  "Detailed progression",
+  "Savings subsets",
+  "Planned spend / project simulation",
+  "What-if — work simulation",
+  "Cash flow",
+  "Financial reality-shock",
+  "Cashflow — cash-flow and exception-heatmap reports from several years of data",
+  "Liabilities / Payables",
+  "Debt recovery",
+  "Personal–business bridge",
+  "Decision forks",
+  "Smart advisor*",
+  "Result walkthrough",
+  "Monthly income, spend and saving",
+];
 
 export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
   if (locale === "en") {
@@ -389,48 +473,63 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "basic",
         title: "Basic plan",
-        priceLine: "€199 in year 1 — one-time net list entry.",
+        priceLine: "net €199 in year 1 — one-time fee [perpetual licence + 1 year of update rights]",
         ladder:
-          "On the loyalty model: year 2 €149 (−25%), year 3 €119 (−40%), and from year 4 updates for life.",
+          "On the loyalty model: year 2 €149 (−25%): +1 year of update rights, year 3 €119 (−40%) +1 year of update rights, and from year 4 updates for life.",
         detail:
           "The Basic plan is designed for a single decision-maker: one concurrently active case, three active slots, plus one editor and one guest. It includes full master-data handling, manual entry, file import (CSV, XML) and personal-wealth tracking. The app starts at once in your browser. Inactive data may be overwritten without limit, and all computation runs entirely on your own machine.",
+        contentsTitle: "What the Basic plan includes:",
         bullets: [
-          "1 active case · 3 active slots · 1 editor and 1 guest",
+          "1 active case (no demo data): 3 active workspaces (Personal, Business1, Project1)",
+          "1 editor and 1 guest (rights may be narrowed to a named person, not to an IP/device)",
           "Unlimited overwrite of inactive slots — no archive fees",
-          "Three outcome paths (pessimistic, realistic, optimistic) processed locally",
+          "Three outcome paths (pessimistic, realistic, optimistic)",
+          "Built-in methods, primers and guides: from first project planning to running projects",
         ],
+        modulesHeading: "MODULES:",
+        modules: MODULES_EN,
       },
       {
         id: "pro",
         title: "Pro plan (Recommended)",
-        priceLine: "€399 in year 1 — one-time net list entry.",
+        priceLine: "€399 in year 1 — one-time net list entry [perpetual licence + 1 year of update rights].",
         ladder:
-          "On the loyalty model: year 2 €299 (−25%), year 3 €239 (−40%), and from year 4 updates for life.",
+          "On the loyalty model: year 2 €299 (−25%): +1 year of update rights, year 3 €239 (−40%) +1 year of update rights, and from year 4 updates for life.",
         detail:
-          "The Pro plan already covers a second parallel active case, business and project slots, editing your own rules, watched-folder sync and local CSV/XML import. Processing stays on your machine throughout. The Pro Desktop early-access build arriving in spring 2027 is free with Pro, and is not a condition of using the web app today. The frame applies to desks and tabs open at the same time; extras remain perpetual modules.",
+          "The Pro plan starts with 2 parallel empty active cases, each with 1 personal, 1 business and 1 project workspace, including shared movables and property if you need them. Schedulable local CSV/XML import is included. Processing stays on your machine throughout, with layered encryption. The Pro Desktop early-access build arriving in spring 2027 is free with Pro, and is not a condition of using the web app today. The frame applies to cases and workspaces open at the same time; extras remain perpetual modules.",
+        contentsTitle: "What the Pro plan includes:",
         bullets: [
-          "2 active cases · 3 active slots per case · 1 editor and 5 guests",
+          "2 active cases (no demo data): 3 active workspaces per case (e.g. Personal, Business, Project), including shared movables and property",
+          "1 editor and 5 guests (rights may be narrowed to a named person, not to an IP/device)",
           "Local CSV/XML import, watched folder and your own rules on your machine",
           "Pro Desktop early access in spring 2027, free with Pro",
           "Extra active-case module: +€49 (yours for life)",
-          "Support: Standard level",
+          "Three outcome paths (pessimistic, realistic, optimistic)",
+          "Built-in methods, primers and guides: from first project planning to running projects",
         ],
+        modulesHeading: "MODULES (full Basic plan inherited, plus Pro extras):",
+        modules: MODULES_EN,
       },
       {
         id: "enterprise",
         title: "Enterprise & Teams",
-        priceLine: "€799 in year 1 — one-time net list entry.",
+        priceLine: "€799 in year 1 — one-time net list entry [perpetual licence + 1 year of update rights].",
         ladder:
-          "On the loyalty model: year 2 €599 (−25%), year 3 €479 (−40%), and from year 4 updates for life.",
+          "On the loyalty model: year 2 €599 (−25%): +1 year of update rights, year 3 €479 (−40%) +1 year of update rights, and from year 4 updates for life.",
         detail:
-          "The Enterprise plan provides team seats, several parallel active cases, automated accounting and bank-statement import (CSV, XML), and optional local sensor or Edge intake. Imported data stays closed on your machine. The Enterprise Desktop add-on is in preparation and does not affect launching existing web cases and slots. Because this plan needs a conversation, there is no self-serve checkout — please contact us for a quote.",
+          "The Enterprise plan provides team seats, several parallel active cases, automated accounting and bank-statement import (CSV, XML), and optional local sensor or Edge intake. Imported data stays closed on your machine. The Enterprise Desktop add-on is in preparation (free access at launch) and does not affect launching existing web cases and slots. Because this plan needs a conversation, there is no self-serve checkout — please contact us for a quote.",
+        contentsTitle: "What the Enterprise plan includes:",
         bullets: [
-          "5 active cases · 4 active slots per case · 3 editors and 20 guests",
-          "Automated accounting/bank-statement import and sensor/Edge intake",
-          "Enterprise Desktop add-on in preparation",
+          "5 active cases (no demo data): 4 active slots per case, with scalable frames",
+          "3 editors and 20 guests (rights may be narrowed to a named person, not to an IP/device)",
+          "Automated accounting/bank-statement import and sensor/Edge intake, run on your machine",
+          "Enterprise Desktop add-on in preparation (free access at launch)",
           "Modular extras: case, slot, editor, Edge",
-          "Support: Priority level",
+          "Three outcome paths (pessimistic, realistic, optimistic)",
+          "Built-in methods, primers and guides",
         ],
+        modulesHeading: "MODULES (full Basic and Pro features, plus enterprise automation and analytics):",
+        modules: MODULES_EN,
       },
     ];
   }
@@ -438,48 +537,63 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "basic",
       title: "Basic csomag",
-      priceLine: "199 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      priceLine: "nettó 199 000 Ft az 1. évben — egyszeri díj [örökéletű licensz +1 évre frissítés jogosultság]",
       ladder:
-        "A hűségmodell alapján: 2. év 149 000 Ft (−25%), 3. év 119 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 149 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 119 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
       detail:
         "A Basic csomagot egyetlen döntéshozónak terveztük: egyidejűleg egy aktív esetet, három aktív slotot, valamint egy szerkesztői és egy vendég hozzáférést biztosít. Tartalmazza a teljes törzsadatkezelést, a kézi rögzítést, a fájl-alapú importot (CSV, XML) és a magánvagyon nyomon követését. Az alkalmazás azonnal elindul a böngésződben. Az inaktív adatok korlátozás nélkül, szabadon felülírhatók, a számítások pedig teljes egészében a saját gépeden futnak le.",
+      contentsTitle: "A Basic csomag tartalma:",
       bullets: [
-        "1 aktív eset · 3 aktív slot · 1 szerkesztő és 1 vendég hozzáférés",
+        "1 aktív eset (demó adat mentes): 3 aktív munkaterület (Magán, Vállalkozás1, Projekt1)",
+        "1 szerkesztő és 1 vendég hozzáférés (akár konkrét személyre szűkítve a jogkört, nem ip cím/eszközre)",
         "Az inaktív slotok korlátlan felülírása — archív díjak nélkül",
-        "Három kimeneti pálya (pesszimista, realista, optimista) helyi feldolgozásban",
+        "Három kimeneti pálya (pesszimista, realista, optimista)",
+        "Beépített módszertanok, segédletek, és útmutatások: Első projekt tervezéstől – projektek vezetéséig",
       ],
+      modulesHeading: "MODULOK:",
+      modules: MODULES_HU_BASIC,
     },
     {
       id: "pro",
       title: "Pro csomag (Ajánlott)",
-      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [örökéletű licensz +1 évre frissítés jogosultság].",
       ladder:
-        "A hűségmodell alapján: 2. év 299 000 Ft (−25%), 3. év 239 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 299 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 239 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
       detail:
-        "A Pro csomag már a második párhuzamos aktív esetet, a vállalkozási és projektslotokat, a saját szabályok szerkesztését, a figyelt mappás szinkront és a helyi CSV/XML importot is biztosítja. Az adatok feldolgozása mindvégig a te gépeden történik. A 2027 tavaszán érkező Pro Desktop early access változat ingyenesen jár a Pro csomag mellé, de ez nem feltétele a jelenlegi webes használatnak. A keretrendszer az egyidejűleg nyitott asztalokra és fülekre vonatkozik; a bővítők örökös modulok maradnak.",
+        "A Pro csomag már 2 párhuzamos aktív üres esettel indít, esetenként 1 magán, 1 vállalkozás, és egy projekt munkaterülettel, akár közös ingóság, és vagy ingatlan kezeléssel. Beütemezhető helyi CSV/XML import biztosítással. Az adatok feldolgozása mindvégig a te gépeden történik többszörös titkosítással. A 2027 tavaszán érkező Pro Desktop early access változat ingyenesen jár a Pro csomag mellé, de ez nem feltétele a jelenlegi webes használatnak. A keretrendszer az egyidejűleg nyitott esetekre és munkaterületekre vonatkozik; a bővítők örökös modulok maradnak.",
+      contentsTitle: "A Pro csomag tartalma:",
       bullets: [
-        "2 aktív eset · 3 aktív slot esetenként · 1 szerkesztő és 5 vendég hozzáférés",
+        "2 aktív eset (demó adat mentes): esetenként 3 aktív munkaterület (pl. Magán, Vállalkozás, Projekt), akár közös ingóság- és ingatlan kezeléssel",
+        "1 szerkesztő és 5 vendég hozzáférés (akár konkrét személyre szűkítve a jogkört, nem IP cím/eszközre)",
         "Helyi CSV/XML import, figyelt mappa és saját szabályok a gépeden",
         "Pro Desktop early access 2027 tavaszán, a Pro csomag mellé ingyen",
         "Extra aktív eset modul: +49 000 Ft (örökös tulajdon)",
-        "Támogatás: Standard szint",
+        "Három kimeneti pálya (pesszimista, realista, optimista)",
+        "Beépített módszertanok, segédletek, és útmutatások: Első projekt tervezéstől – projektek vezetéséig",
       ],
+      modulesHeading: "MODULOK (teljes Basic csomag örökölve, plusz Pro bővítések):",
+      modules: MODULES_HU_PRO,
     },
     {
       id: "enterprise",
       title: "Enterprise & Csapatok",
-      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő.",
+      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [örökéletű licensz +1 évre frissítés jogosultság].",
       ladder:
-        "A hűségmodell alapján: 2. év 599 000 Ft (−25%), 3. év 479 000 Ft (−40%), a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 599 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 479 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
       detail:
         "Az Enterprise csomag csapathelyeket, több párhuzamos aktív esetet, automatizált könyvelési és bankkivonat-importot (CSV, XML), valamint opcionális helyi érzékelő- vagy Edge-bekötést nyújt. Az importált adatok zártan a gépeden maradnak. Az Enterprise Desktop bővítő modul előkészítés alatt áll, de ez nem befolyásolja a meglévő webes esetek és slotok indítását. Mivel ez a csomag egyedi egyeztetést igényel, nincs önkiszolgáló checkout — kérjük, vedd fel velünk a kapcsolatot az ajánlatért.",
+      contentsTitle: "Az Enterprise csomag tartalma:",
       bullets: [
-        "5 aktív eset · 4 aktív slot esetenként · 3 szerkesztő és 20 vendég hozzáférés",
-        "Automatizált könyvelési/bankkivonat import és szenzoros/Edge adatgyűjtő bekötés",
-        "Enterprise Desktop bővítő modul előkészítés alatt",
+        "5 aktív eset (demó adat mentes): esetenként 4 aktív slot, skálázható keretekkel",
+        "3 szerkesztő és 20 vendég hozzáférés (akár konkrét személyre szűkítve a jogkört, nem IP cím/eszközre)",
+        "Automatizált könyvelési/bankkivonat import és szenzoros/Edge adatgyűjtő bekötés a gépeden futtatva",
+        "Enterprise Desktop bővítő modul előkészítés alatt (ingyenes hozzáféréssel a megjelenéskor)",
         "Moduláris bővítési lehetőségek: eset, slot, szerkesztő, Edge",
-        "Támogatás: Priority szint",
+        "Három kimeneti pálya (pesszimista, realista, optimista)",
+        "Beépített módszertanok, segédletek, és útmutatások",
       ],
+      modulesHeading: "MODULOK (teljes Basic és Pro funkciók, plusz vállalati szintű automatizációk és analitikák):",
+      modules: MODULES_HU_PRO,
     },
   ];
 }

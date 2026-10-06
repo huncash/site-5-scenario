@@ -46,12 +46,16 @@ export type SupportPricingAnchor =
   | "active-workspaces"
   | "workflow"
   | "local-import"
+  | "addons"
   | "desktop-engines"
   | "desktop"
+  | "economic-engine"
   | "bcp"
   | "education-engine";
 
 export type SupportPlanId = "basic" | "pro" | "enterprise";
+
+export type SupportHrefLoc = { hostname?: string; pathname?: string };
 
 /** Főoldali /support útvonal — a support aldomainen üres. */
 export function supportMountPrefix(hostname?: string, pathname?: string): string {
@@ -62,43 +66,48 @@ export function supportMountPrefix(hostname?: string, pathname?: string): string
   return "";
 }
 
-function supportOriginHref(pathname: string, hash: string): string {
-  const origin = isSupportHost() ? supportPublicOrigin() : SUPPORT_ORIGIN_PROD;
-  const mount = supportMountPrefix();
-  const inner = pathname === "/" ? mount || "/" : `${mount}${pathname}`;
-  const url = new URL(inner, `${origin}/`);
+function serializeSupportHref(inner: string, hash: string, origin?: string): string {
+  const url = new URL(inner, `${origin ?? "https://support.local"}/`);
   if (hash) url.hash = hash;
   applyViewPrefsToSearch(url);
-  return url.toString();
+  if (origin) return url.toString();
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
-export function supportPricingHref(anchor: SupportPricingAnchor): string {
-  return supportOriginHref("/pricing", anchor);
+function supportOriginHref(pathname: string, hash: string, loc?: SupportHrefLoc): string {
+  const onSupport = isSupportHost(loc?.hostname, loc?.pathname);
+  const mount = supportMountPrefix(loc?.hostname, loc?.pathname);
+  const inner = pathname === "/" ? mount || "/" : `${mount}${pathname}`;
+  if (onSupport) return serializeSupportHref(inner, hash);
+  return serializeSupportHref(inner, hash, SUPPORT_ORIGIN_PROD);
+}
+
+export function supportPricingHref(anchor: SupportPricingAnchor, loc?: SupportHrefLoc): string {
+  return supportOriginHref("/pricing", anchor, loc);
 }
 
 /** Támogatási kártya a support főoldalon — Basic / Standard / Priority. */
-export function supportTierHref(plan: SupportPlanId): string {
-  return supportOriginHref("/", `support-${plan}`);
+export function supportTierHref(plan: SupportPlanId, loc?: SupportHrefLoc): string {
+  return supportOriginHref("/", `support-${plan}`, loc);
 }
 
 export function supportTierDomId(plan: SupportPlanId): string {
   return `support-${plan}`;
 }
 
-export function supportPageUrl(slug: string): string {
-  const origin = isSupportHost() ? supportPublicOrigin() : SUPPORT_ORIGIN_PROD;
+export function supportPageUrl(slug: string, loc?: SupportHrefLoc): string {
   const canonical = !slug || slug === "home" ? "home" : canonicalizeSupportSlug(slug);
   const path = canonical === "home" ? "/" : `/${canonical.replace(/^\/+/, "")}`;
-  const url = new URL(path, `${origin}/`);
-  applyViewPrefsToSearch(url);
-  return url.toString();
+  return supportOriginHref(path, "", loc);
 }
 
-export function supportTicketHref(opts?: { subject?: string }): string {
-  const url = new URL(supportPageUrl("ticket"));
+export function supportTicketHref(opts?: { subject?: string } & SupportHrefLoc): string {
+  const page = supportPageUrl("ticket", opts);
+  const url = new URL(page, "https://support.local");
   const subject = opts?.subject?.trim();
   if (subject) url.searchParams.set("subject", subject);
-  return url.toString();
+  if (page.startsWith("http")) return url.toString();
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export function readSupportTicketSearch(search = ""): { subject: string } {

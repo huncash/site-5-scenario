@@ -4,6 +4,7 @@ import {
   SUPPORT_ORIGIN_PROD,
   readSupportTicketSearch,
   supportMountPrefix,
+  supportPageUrl,
   supportPricingHref,
   supportTicketHref,
   supportTierDomId,
@@ -20,6 +21,8 @@ describe("support pricing ↔ tier hrefs", () => {
     expect(supportPricingHref("local-import")).toContain("#local-import");
     expect(supportPricingHref("desktop-engines")).toContain("#desktop-engines");
     expect(supportPricingHref("desktop")).toContain("#desktop");
+    expect(supportPricingHref("addons")).toContain("#addons");
+    expect(supportPricingHref("economic-engine")).toContain("#economic-engine");
     expect(supportPricingHref("bcp")).toContain("#bcp");
     expect(supportPricingHref("education-engine")).toContain("#education-engine");
   });
@@ -43,5 +46,16 @@ describe("support pricing ↔ tier hrefs", () => {
     expect(supportMountPrefix("szcenario.hu", "/")).toBe("");
     expect(supportMountPrefix("szcenario.hu", "/support")).toBe("/support");
     expect(supportMountPrefix("support.szcenario.hu", "/pricing")).toBe("");
+  });
+
+  it("stays on the local support surface when already under /support", () => {
+    const loc = { pathname: "/support/pricing" };
+    expect(supportTierHref("basic", loc)).toContain("/support");
+    expect(supportTierHref("basic", loc)).toContain("#support-basic");
+    expect(supportTierHref("basic", loc)).not.toMatch(/^https:/);
+    expect(supportPageUrl("home", loc)).toContain("/support");
+    expect(supportPageUrl("home", loc)).not.toMatch(/^https:/);
+    expect(supportTicketHref({ subject: "Enterprise & Csapatok ajánlatkérés", ...loc })).toContain("/support/ticket");
+    expect(supportTicketHref({ subject: "Enterprise & Csapatok ajánlatkérés", ...loc })).not.toMatch(/^https:/);
   });
 });

@@ -157,10 +157,16 @@ describe("pre-flight public promise", () => {
     expect(hu.pricingRoadmapEducationBody).toMatch(/nyilvános indítás/);
     expect(hu.pricingRoadmapEducationBody).not.toMatch(/2027/);
     expect(hu.pricingRoadmapBcpTitle).toMatch(/Működésfolytonosság & reziliencia \(BCP\)/);
+    expect(hu.pricingTocKb).toBe("Tudásbázis");
+    expect(hu.pricingTocAddons).toBe("Bővítő modulok");
+    expect(hu.pricingTocEconomic).toMatch(/Gazdasági szcenárió motor/);
     const blob = supportPricingTiers("hu")
-      .flatMap((t) => [t.detail, t.ladder, ...t.bullets])
+      .flatMap((t) => [t.detail, t.ladder, t.contentsTitle, t.modulesHeading, ...t.bullets, ...t.modules])
       .join("\n");
     expect(blob).not.toMatch(/lásd #|see #/i);
     expect(supportPricingTiers("hu").find((t) => t.id === "pro")?.bullets.join(" ")).toMatch(/2027/);
+    expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.modules).toContain("Pénzáramlás");
+    expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.priceLine).toMatch(/örökéletű licensz/);
+    expect(supportPricingTiers("hu").find((t) => t.id === "enterprise")?.contentsTitle).toMatch(/Enterprise csomag tartalma/);
   });
 });

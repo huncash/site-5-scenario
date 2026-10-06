@@ -6,6 +6,8 @@ import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
 import { billCheckoutUrl } from "@/lib/billing";
 import { enterpriseInquiryHref } from "@/lib/enterpriseSchedule";
+import { supportPageUrl, supportTierHref } from "@/lib/support";
+import { PUBLIC_JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
 import { SupportTicketForm } from "@/components/support/SupportTicketForm";
@@ -76,9 +78,11 @@ function YouTube({ id, title, empty }: { id: string; title: string; empty: strin
   );
 }
 
-function TicketForm() {
-  const subject = readSupportTicketSearch(typeof window === "undefined" ? "" : window.location.search).subject;
-  return <SupportTicketForm defaultSubject={subject} />;
+function TicketForm({ search = "" }: { search?: string }) {
+  const subject = readSupportTicketSearch(
+    search || (typeof window === "undefined" ? "" : window.location.search),
+  ).subject;
+  return <SupportTicketForm key={subject || "ticket"} defaultSubject={subject} />;
 }
 
 function RoadmapCard({
@@ -109,14 +113,7 @@ function RoadmapCard({
         </div>
       ) : null}
       {ctaHref && ctaLabel ? (
-        <a
-          className="ticket-cta"
-          href={ctaHref}
-          onClick={(e) => {
-            e.preventDefault();
-            window.location.assign(ctaHref);
-          }}
-        >
+        <a className="ticket-cta" href={ctaHref}>
           {ctaLabel}
         </a>
       ) : null}
@@ -223,9 +220,10 @@ function TicketGuard({
   );
 }
 
-function PricingPage({ locale }: { locale: Locale }) {
+function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }) {
   const t = supportCopy(locale);
   const tiers = supportPricingTiers(locale);
+  const loc = { pathname };
 
   useEffect(() => {
     const id = window.location.hash.replace(/^#/, "");
@@ -241,22 +239,23 @@ function PricingPage({ locale }: { locale: Locale }) {
       <h1>{t.pricingTitle}</h1>
       <p>{t.pricingLead}</p>
 
+      <nav className="nav" aria-label={t.pricingTocKb}>
+        <a href={supportPageUrl("home", loc)}>{t.pricingTocKb}</a>
+      </nav>
       <nav className="nav" aria-label={t.pricingTocPlans}>
         <span>{t.pricingTocPlans}:</span>
         <a href="#basic">Basic</a>
         <a href="#pro">Pro</a>
         <a href="#enterprise">Enterprise</a>
-      </nav>
-      <nav className="nav" aria-label={t.pricingTocModels}>
-        <span>{t.pricingTocModels}:</span>
         <a href="#tiered-loyalty">{t.pricingTocLoyalty}</a>
+        <a href="#addons">{t.pricingTocAddons}</a>
+      </nav>
+      <nav className="nav" aria-label={t.pricingTocActive}>
         <a href="#active-workspaces">{t.pricingTocActive}</a>
         <a href="#workflow">{t.pricingTocWorkflow}</a>
         <a href="#local-import">{t.pricingTocLocal}</a>
-      </nav>
-      <nav className="nav" aria-label={t.pricingTocRoadmap}>
-        <span>{t.pricingTocRoadmap}:</span>
         <a href="#desktop">{t.pricingTocDesktop}</a>
+        <a href="#economic-engine">{t.pricingTocEconomic}</a>
         <a href="#bcp">{t.pricingTocBcp}</a>
         <a href="#education-engine">{t.pricingTocEducation}</a>
       </nav>
@@ -270,20 +269,20 @@ function PricingPage({ locale }: { locale: Locale }) {
               {tier.ladder}
             </p>
             <p style={{ margin: "0 0 8px" }}>{tier.detail}</p>
-            <ul style={{ margin: 0, paddingLeft: "1.2rem" }}>
+            <p className="contents-title">{tier.contentsTitle}</p>
+            <ul className="plan-bullets">
               {tier.bullets.map((line) => (
                 <li key={line}>{line}</li>
               ))}
             </ul>
+            <p className="modules-title">{tier.modulesHeading}</p>
+            <ul className="plan-modules">
+              {tier.modules.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
             {tier.id === "enterprise" ? (
-              <a
-                className="ticket-cta"
-                href={enterpriseInquiryHref({ locale })}
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.assign(enterpriseInquiryHref({ locale }));
-                }}
-              >
+              <a className="ticket-cta" href={enterpriseInquiryHref({ locale, pathname })}>
                 {t.pricingEnterpriseCta}
               </a>
             ) : (
@@ -293,27 +292,12 @@ function PricingPage({ locale }: { locale: Locale }) {
                   tier: tier.id === "basic" ? "starter" : "pro",
                   interval: "yearly",
                 })}
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.assign(
-                    billCheckoutUrl({
-                      tier: tier.id === "basic" ? "starter" : "pro",
-                      interval: "yearly",
-                    }),
-                  );
-                }}
               >
                 {t.pricingOrder}
               </a>
             )}
             <p style={{ margin: "12px 0 0" }}>
-              <a
-                href={`${supportHref("home", { lang: locale })}#support-${tier.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.assign(e.currentTarget.href);
-                }}
-              >
+              <a href={supportTierHref(tier.id, loc)}>
                 {tier.id === "basic" ? t.toTierBasic : tier.id === "pro" ? t.toTierPro : t.toTierEnterprise}
               </a>
             </p>
@@ -330,6 +314,27 @@ function PricingPage({ locale }: { locale: Locale }) {
         </ul>
         <p>{t.pricingLoyaltyBody}</p>
       </div>
+      <div className="section-block scroll-mt-24" id="addons">
+        <h2>{t.pricingAddonsTitle}</h2>
+        <p>{t.pricingAddonsBody}</p>
+        <ul className="plan-bullets">
+          {PUBLIC_JIT_ADDONS.map((addon) => (
+            <li key={addon.id}>
+              {jitAddonLabel(addon, locale)} — {addon.priceHuf.toLocaleString(locale === "en" ? "en-IE" : "hu-HU")}{" "}
+              {t.pricingAddonPriceMeta}
+              {" · "}
+              <a href={billCheckoutUrl({
+                  tier: "pro",
+                  interval: "yearly",
+                  addon: addon.id,
+                  slotPack: addon.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+                })}>
+                {t.pricingOrder}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="section-block scroll-mt-24" id="active-workspaces">
         <h2>{t.pricingActiveTitle}</h2>
         <p>{t.pricingActiveBody}</p>
@@ -344,9 +349,6 @@ function PricingPage({ locale }: { locale: Locale }) {
         <p>{t.pricingLocalBody}</p>
       </div>
       <div className="section-block scroll-mt-24" id="desktop-engines">
-        <h2>{t.pricingRoadmapTitle}</h2>
-        <p>{t.pricingRoadmapLead}</p>
-
         <RoadmapCard
           id="desktop"
           title={t.pricingRoadmapDesktopTitle}
@@ -354,6 +356,12 @@ function PricingPage({ locale }: { locale: Locale }) {
           body={t.pricingRoadmapDesktopBody}
           ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
           ctaLabel={t.pricingAddonBuy}
+        />
+        <RoadmapCard
+          id="economic-engine"
+          title={t.pricingEconomicTitle}
+          when={t.pricingEconomicWhen}
+          body={t.pricingEconomicBody}
         />
         <RoadmapCard
           id="bcp"
@@ -436,13 +444,16 @@ function TipsPage({ locale }: { locale: Locale }) {
   );
 }
 
-export function App({ pathname }: { pathname?: string } = {}) {
+export function App({ pathname, search }: { pathname?: string; search?: string } = {}) {
   const { locale, toggleLocale } = useI18n();
   const t = supportCopy(locale);
   const [path, setPath] = useState(() => pathname ?? pathOf());
-  const [ticketUnlocked, setTicketUnlocked] = useState(
-    () => Boolean(readSupportTicketSearch(typeof window === "undefined" ? "" : window.location.search).subject),
-  );
+  const ticketSearch =
+    (search && search !== "?" ? search : "") ||
+    (typeof window === "undefined" ? "" : window.location.search);
+  const subjectPrefill = readSupportTicketSearch(ticketSearch).subject;
+  const [ticketUnlocked, setTicketUnlocked] = useState(() => Boolean(subjectPrefill));
+  const ticketOpen = ticketUnlocked || Boolean(subjectPrefill);
 
   const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
   const route = useMemo(() => resolveSupportSlug(slug), [slug]);
@@ -456,6 +467,10 @@ export function App({ pathname }: { pathname?: string } = {}) {
   }, [pathname]);
 
   useEffect(() => {
+    if (readSupportTicketSearch(window.location.search).subject) setTicketUnlocked(true);
+  }, []);
+
+  useEffect(() => {
     const onPop = () => {
       setPath(pathOf());
       setTicketUnlocked(Boolean(readSupportTicketSearch(window.location.search).subject));
@@ -466,10 +481,10 @@ export function App({ pathname }: { pathname?: string } = {}) {
 
   useEffect(() => {
     if (route.kind !== "lesson" || route.slug === route.canonical) return;
-    const next = supportHref(route.canonical, { embed, lang: locale });
+    const next = supportHref(route.canonical, { embed, lang: locale, pathname: path });
     if (`${window.location.pathname}${window.location.search}` === next) return;
     window.history.replaceState({}, "", next);
-  }, [embed, locale, route]);
+  }, [embed, locale, path, route]);
 
   if (!embed && route.kind === "home") {
     return <SupportSurface localNav />;
@@ -486,12 +501,12 @@ export function App({ pathname }: { pathname?: string } = {}) {
   } else if (slug === "gyik") {
     body = <FaqSearch locale={locale} />;
   } else if (slug === "pricing") {
-    body = <PricingPage locale={locale} />;
+    body = <PricingPage locale={locale} pathname={path} />;
   } else if (slug === "ticket") {
-    body = ticketUnlocked ? (
+    body = ticketOpen ? (
       <>
         <h1>{t.ticketTitle}</h1>
-        <TicketForm />
+        <TicketForm search={ticketSearch} />
       </>
     ) : (
       <TicketGuard locale={locale} embed={embed} onUnlock={() => setTicketUnlocked(true)} />
@@ -521,9 +536,9 @@ export function App({ pathname }: { pathname?: string } = {}) {
       <>
         <h1>{t.noLesson}</h1>
         <p>
-          <a href={supportHref("tippek", { embed, lang: locale })}>{t.backTips}</a>
+          <a href={supportHref("tippek", { embed, lang: locale, pathname: path })}>{t.backTips}</a>
           {" · "}
-          <a href={supportHref("home", { embed, lang: locale })}>{t.backHome}</a>
+          <a href={supportHref("home", { embed, lang: locale, pathname: path })}>{t.backHome}</a>
         </p>
       </>
     );
@@ -532,7 +547,7 @@ export function App({ pathname }: { pathname?: string } = {}) {
   return (
     <main className={wrap}>
       <div className="top">
-        <a className="brand" href={supportHref("home", { embed, lang: locale })}>
+        <a className="brand" href={supportHref("home", { embed, lang: locale, pathname: path })}>
           {t.brand}
         </a>
         <div className="flex items-center gap-2">

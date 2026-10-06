@@ -20,6 +20,8 @@ describe("support router", () => {
     expect(supportHref("ticket")).toBe("/ticket");
     expect(supportHref("ticket", { embed: true, lang: "hu" })).toBe("/embed/ticket?lang=hu");
     expect(supportHref("home", { lang: "en" })).toBe("/?lang=en");
+    expect(supportHref("home", { lang: "hu", pathname: "/support/pricing" })).toBe("/support?lang=hu");
+    expect(supportHref("ticket", { pathname: "/support/pricing" })).toBe("/support/ticket");
   });
 
   it("canonicalizes lesson aliases in hrefs", () => {

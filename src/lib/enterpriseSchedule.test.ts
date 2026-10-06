@@ -29,6 +29,14 @@ describe("enterprise schedule", () => {
     expect(href).not.toMatch(/bill\.szcenario/);
   });
 
+  it("keeps Enterprise inquiry on the local support ticket when under /support", () => {
+    const href = enterpriseInquiryHref({ locale: "hu", pathname: "/support/pricing" });
+    expect(href.startsWith("mailto:")).toBe(false);
+    expect(href).toContain("/support/ticket");
+    expect(href).not.toMatch(/^https:/);
+    expect(new URL(href, "https://support.local").searchParams.get("subject")).toBe(enterpriseInquirySubject("hu"));
+  });
+
   it("uses Aktív Case / Aktív Slot on the Enterprise card", () => {
     const hu = planCardBullets(PLANS_CONFIG.expert, "hu");
     expect(hu[0]).toBe("5 Aktív Case");

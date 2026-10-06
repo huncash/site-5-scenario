@@ -40,9 +40,9 @@ export function parseSupportPath(pathname: string): { embed: boolean; slug: Supp
   return { embed: false, slug: path.replace(/^\//, "") };
 }
 
-export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; lang?: string }): string {
+export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; lang?: string; pathname?: string }): string {
   const canonical = slug && slug !== "home" ? canonicalizeSupportSlug(slug) : "home";
-  const mount = supportMountPrefix();
+  const mount = supportMountPrefix(opts?.pathname);
   const inner = opts?.embed
     ? canonical && canonical !== "home"
       ? `/embed/${canonical}`

@@ -170,8 +170,8 @@ export const en: DeepString<typeof hu> = {
     toPlanPro: "Pricing: Pro plan",
     toPlanEnterprise: "Pricing: Enterprise plan",
     toTierBasic: "Support: Basic",
-    toTierPro: "Support: Standard",
-    toTierEnterprise: "Support: Priority",
+    toTierPro: "Support: Standard level",
+    toTierEnterprise: "Support: Priority level",
   },
   chrome: {
     home: "Home",

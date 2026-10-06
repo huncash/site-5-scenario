@@ -119,6 +119,21 @@ button.lang-btn:not(.view-settings-icon-btn):hover {
 .nav a { font-size: 12px; }
 .nav span { font-size: 12px; color: var(--text-muted); align-self: center; }
 .note { font-size: 12px; }
+.contents-title,
+.modules-title {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-main);
+}
+.plan-bullets,
+.plan-modules {
+  margin: 0 0 8px;
+  padding-left: 1.2rem;
+}
+.plan-modules {
+  margin-bottom: 12px;
+}
 .roadmap-card {
   display: grid;
   gap: 10px;
