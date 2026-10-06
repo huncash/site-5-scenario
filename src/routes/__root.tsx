@@ -15,7 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
 import { BillTestSurface } from "@/components/BillTestSurface";
-import { SupportSurface } from "@/components/SupportSurface";
+import { SupportHost } from "@/components/SupportSurface";
 import { Toaster } from "@/components/ui/sonner";
 import { VaultProvider } from "@/lib/vault";
 import { OnboardingTourProvider } from "@/components/onboarding/OnboardingTourProvider";
@@ -277,7 +277,7 @@ function RootComponent() {
                 ) : isBill ? (
                   <BillTestSurface />
                 ) : isSupport ? (
-                  <SupportSurface />
+                  <SupportHost />
                 ) : !schoolOk ? (
                   <SchoolSurface />
                 ) : (

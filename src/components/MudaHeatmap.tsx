@@ -189,11 +189,13 @@ export function MudaHeatmap({
         <div className="flex items-center gap-1" data-exact="A cella zöldje a napi összes kiadás nagysága a hónap maximumához képest.">
           <span className="inline-block h-2.5 w-3.5 rounded-sm bg-emerald-400/40 a11y-pat-dots" /> költési intenzitás
         </div>
-        <div className="flex items-center gap-1" data-exact="vágy — nem kötelező kiadás ezen a napon.">
-          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-pink-400/70 a11y-pat-h-stripe" /> WANT nap
+        <div className="flex items-center gap-1">
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-pink-400/70 a11y-pat-h-stripe" />{" "}
+          <LeanTerm termId="want">WANT nap</LeanTerm>
         </div>
-        <div className="flex items-center gap-1" data-exact="veszteség — pazarlás, impulzus vagy felesleges tétel ezen a napon.">
-          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-rose-400/90 a11y-pat-checker" /> MUDA nap
+        <div className="flex items-center gap-1">
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-rose-400/90 a11y-pat-checker" />{" "}
+          <LeanTerm termId="muda">MUDA nap</LeanTerm>
         </div>
       </div>
 

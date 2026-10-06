@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { LeanTerm } from "@/components/HelpIcon";
 import { CrisisBranchTimeline } from "@/components/physical/CrisisBranchTimeline";
 import { MeshNodeMap } from "@/components/physical/MeshNodeMap";
 import { SurvivalGauges } from "@/components/physical/SurvivalGauges";
@@ -146,7 +147,7 @@ export function PhysicalOpsPanel(props: {
                   <li key={e.step}>
                     SMED / Poka-Yoke: {e.label} — következő iteráció standardja.
                   </li>
-                ))}
+                    <LeanTerm termId="smed">SMED</LeanTerm> / <LeanTerm termId="pokaYoke">Poka-Yoke</LeanTerm>: {e.label} — következő iteráció standardja.
               {dash.pokaYoke.events.every((e) => !e.violated) ? (
                 <li>A tartott lépések mennek tovább standardként. Új sértés nincs.</li>
               ) : null}

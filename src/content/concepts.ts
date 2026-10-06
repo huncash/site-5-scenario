@@ -27,19 +27,19 @@ export const CONCEPT_FAQ_HU: ConceptFaqSection = {
       id: "faq-case",
       question: "Mi az Aktív Case?",
       answer:
-        "Az **Aktív Case** az egyidejűleg éles döntési / szimulációs munkaterület. A licenc a párhuzamosan futó aktív Case-ek számát köti — nem a felhalmozott adatokét. Lezárt Case törölhető vagy felülírható díj nélkül.",
+        "Az **Aktív Case** az asztal, amin most dolgozol. A licenc azt köti, hány ilyen asztal lehet egyszerre nyitva — nem azt, mennyi régi mentésed van. A lezártat törölheted vagy felülírhatod, nincs díj.",
     },
     {
       id: "faq-slot",
       question: "Mi az Aktív Slot?",
       answer:
-        "Az **Aktív Slot** a Case-en belüli egyidejűleg éles adatterület (lapfül: Magán, Vállalkozás, Projekt). Inaktív Slot törölhető / felülírható; új párhuzamos éles Slot-hoz bővítő modul kell.",
+        "Az **Aktív Slot** a fül: Magán, Vállalkozás, Projekt — külön kassza ugyanazon az asztalon. A nem használtat felülírhatod. Ha új párhuzamos hely kell, bővíteni kell.",
     },
     {
       id: "faq-pro",
       question: "Mit jelent a P-R-O Szcenárió?",
       answer:
-        "A **P-R-O Szcenárió** a Pesszimista · Realista · Optimista rövidítése: a három egyidejűleg futó szimulációs görbe minden Slotban — a teljes kockázati mozgástér, nem egyetlen szám.",
+        "A **P-R-O** három gomb: Pesszimista, Realista, Optimista — rossz / közepes / jó. Ugyanaz a múlt, három számolás. Nem megmondja a jövőt. Azt mutatja: melyik ágon meddig bírja a kassza.",
     },
     {
       id: "faq-seat",

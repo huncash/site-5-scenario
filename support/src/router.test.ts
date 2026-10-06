@@ -21,4 +21,13 @@ describe("support router", () => {
     expect(supportHref("ticket", { embed: true, lang: "hu" })).toBe("/embed/ticket?lang=hu");
     expect(supportHref("home", { lang: "en" })).toBe("/?lang=en");
   });
+
+  it("canonicalizes lesson aliases in hrefs", () => {
+    expect(supportHref("lecke-02")).toBe("/lecke-1-dashboard-kezeles");
+    expect(supportHref("lecke-03", { embed: true, lang: "hu" })).toBe("/embed/lecke-3-pdca?lang=hu");
+    expect(parseSupportPath("/lecke-1-dashboard-kezeles")).toEqual({
+      embed: false,
+      slug: "lecke-1-dashboard-kezeles",
+    });
+  });
 });

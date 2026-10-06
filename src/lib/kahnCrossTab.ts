@@ -1,5 +1,6 @@
 /** Kahn: Core ↔ Projekt ↔ Magán reakciós hatásmodell (illusztratív, demó). */
 
+import { glossaryCopy } from "@/lib/glossary";
 import { MASTER_BASELINE } from "@/lib/masterBaseline";
 import { KAHN_FORK } from "@/lib/strategyCases";
 import { KAHN_PESS_PAY_CUT_PCT, kahnOptimisticDividendHuf, type KahnImpactScenario } from "@/lib/kahnGuide";
@@ -12,29 +13,21 @@ export const KAHN_STOP_LOSS_ALERT_HU =
 export const KAHN_STOP_LOSS_ALERT_EN =
   "Triggering the marked stop-loss point requires an immediate suspension of project financing to protect personal reserves.";
 
+function jargon(id: "runway" | "stopLoss" | "penalty") {
+  const hu = glossaryCopy(id, "hu");
+  const en = glossaryCopy(id, "en");
+  return {
+    termHu: `${hu.term} (${hu.plain})`,
+    termEn: `${en.term} (${en.plain})`,
+    exactHu: hu.exact,
+    exactEn: en.exact,
+  };
+}
+
 export const KAHN_JARGON = {
-  runway: {
-    termHu: "Runway (Túlélési időszak)",
-    termEn: "Runway (survival period)",
-    exactHu:
-      "Azon időszak hossza (hónapokban), ameddig a struktúra működőképes marad nulla bejövő bevétel esetén.",
-    exactEn:
-      "How long (in months) the structure stays operable with zero incoming revenue.",
-  },
-  stopLoss: {
-    termHu: "Stop-loss (Vészfék-pont)",
-    termEn: "Stop-loss",
-    exactHu:
-      "Előre meghatározott mutatóérték, amelynél a projektet fel kell függeszteni az alapvető likviditás megőrzése érdekében.",
-    exactEn:
-      "A pre-set metric at which the project must be suspended to preserve core liquidity.",
-  },
-  penalty: {
-    termHu: "Kötbér vs. Kilépés",
-    termEn: "Penalty vs exit",
-    exactHu: "A projekt-megszakítás és a veszteségfinanszírozás összehasonlító költségelemzése.",
-    exactEn: "Comparative cost analysis of project interruption versus loss-financing.",
-  },
+  runway: jargon("runway"),
+  stopLoss: jargon("stopLoss"),
+  penalty: jargon("penalty"),
 } as const;
 
 export const KAHN_TOUR_STEPS = [

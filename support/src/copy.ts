@@ -197,8 +197,16 @@ const LESSON_EN: Record<string, { title: string; body: string }> = {
     body: "A preloaded example. Not a bank extract, not live client data. The numbers are made in the browser.",
   },
   "lecke-02": {
-    title: "Three bands",
-    body: "Controls on top, work in the middle, modules below. The tabs swap the Slot / workspace.",
+    title: "Dashboard handling",
+    body: "Controls on top, work in the middle, modules below. The tabs swap the Slot / workspace. KPI is the four headline numbers; What-if switches the P-R-O path; break-even is the first month the chosen path is no longer losing money.",
+  },
+  "lecke-want": {
+    title: "Need or investment",
+    body: "NEED: required operations (overhead, payroll, materials). WANT: optional desire — the monthly cap can be locked. INVESTMENT: spend that should earn later. Cashflow is the real movement; do not spend the VAT reserve; idle cash just sits; JIT fills the 60-day cover first.",
+  },
+  "lecke-cashflow": {
+    title: "Cashflow logic",
+    body: "In, out, lock — the movement, not the balance.",
   },
   "lecke-03": { title: "PDCA", body: "PLAN → DO → CHECK → ACT. The dial turns to the next phase pair." },
   "lecke-04": { title: "Shortcuts", body: "The keyboard icon opens the list. Save: Ctrl/Cmd+S." },

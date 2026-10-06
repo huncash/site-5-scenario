@@ -1,3 +1,4 @@
+import { canonicalizeSupportSlug } from "@/lib/supportRoutes";
 import { applyViewPrefsToSearch } from "@/lib/viewPrefs";
 
 export const SUPPORT_ORIGIN_PROD = "https://support.szcenario.hu";
@@ -6,6 +7,14 @@ export const SUPPORT_SLA =
   "Átlagos válaszadási idő: 24 órán belül, kizárólag írásban a pontosabb és gyorsabb ügyintézés érdekében.";
 
 export type SupportLayer = "tippek" | "gyik" | "ticket";
+
+/** /support vagy /support/* → belső slug (home | pricing | lecke-…). */
+export function supportPathSlug(pathname: string): string {
+  const path = (pathname.replace(/\/+$/, "") || "/");
+  const inner = path === "/support" ? "/" : path.startsWith("/support/") ? path.slice("/support".length) : path;
+  const slug = inner.replace(/^\//, "");
+  return slug || "home";
+}
 
 export function isSupportHost(hostname?: string, pathname?: string): boolean {
   const h = (hostname ?? (typeof window !== "undefined" ? window.location.hostname : "")).toLowerCase();
@@ -46,7 +55,8 @@ export function supportPricingHref(anchor: SupportPricingAnchor): string {
 
 export function supportPageUrl(slug: string): string {
   const origin = isSupportHost() ? supportPublicOrigin() : SUPPORT_ORIGIN_PROD;
-  const path = !slug || slug === "home" ? "/" : `/${slug.replace(/^\/+/, "")}`;
+  const canonical = !slug || slug === "home" ? "home" : canonicalizeSupportSlug(slug);
+  const path = canonical === "home" ? "/" : `/${canonical.replace(/^\/+/, "")}`;
   const url = new URL(path, `${origin}/`);
   applyViewPrefsToSearch(url);
   return url.toString();

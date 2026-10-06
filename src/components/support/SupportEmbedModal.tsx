@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 
+import { OnePointLesson } from "@/components/support/OnePointLesson";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useI18n } from "@/i18n";
+import { oplByPath } from "@/lib/opl";
+import { resolveSupportSlug } from "@/lib/supportRoutes";
 import { supportEmbedUrl } from "@/lib/support";
 
 export function SupportEmbedFrame({
@@ -16,11 +19,14 @@ export function SupportEmbedFrame({
   fallback?: ReactNode;
 }) {
   const { locale, t } = useI18n();
+  const route = resolveSupportSlug(slug);
+  const opl = oplByPath(route.canonical);
   const [failed, setFailed] = useState(false);
   const timer = useRef<number | null>(null);
   const src = `${supportEmbedUrl(slug)}#${locale}`;
 
   useEffect(() => {
+    if (opl) return;
     setFailed(false);
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setFailed(true);
@@ -30,7 +36,15 @@ export function SupportEmbedFrame({
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [src]);
+  }, [src, opl]);
+
+  if (opl) {
+    return (
+      <div data-support-embed="local" className="min-h-0 overflow-y-auto pr-1">
+        <OnePointLesson lesson={opl} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-[min(70vh,32rem)] overflow-hidden rounded-md bg-[#0b1220]">
@@ -69,47 +83,18 @@ export function SupportEmbedModal({
   title: string;
   fallback?: ReactNode;
 }) {
-  const { t } = useI18n();
-  const tClose = t("chrome.close");
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onOpenChange]);
-
-  if (!open || typeof document === "undefined") return null;
-
-  return createPortal(
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-3">
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/80"
-        aria-label={tClose}
-        onClick={() => onOpenChange(false)}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative z-[91] w-full max-w-3xl rounded-lg border border-slate-700 bg-background p-3 shadow-2xl"
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-3 overflow-y-auto sm:max-w-xl"
+        data-support-slideover=""
       >
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-slate-100">{title}</div>
-          <button
-            type="button"
-            className="rounded-md px-1.5 text-slate-400 hover:text-slate-100"
-            aria-label={tClose}
-            onClick={() => onOpenChange(false)}
-          >
-            ×
-          </button>
-        </div>
+        <SheetHeader>
+          <SheetTitle className="text-left">{title}</SheetTitle>
+        </SheetHeader>
         <SupportEmbedFrame slug={slug} title={title} fallback={fallback} />
-      </div>
-    </div>,
-    document.body,
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -1278,7 +1278,7 @@ function SettingsPage() {
                   <div className="min-w-0">
                     <div className="text-sm font-medium">KPI Quick Bar / Gyors mutatók sáv megjelenítése</div>
                     <div className="mt-0.5 text-[11px] text-muted-foreground">
-                      A fejléc alatti 5 cellás gyors sáv (későbbi KPI-k / gyorsgombok helye).
+                      A fejléc alatti 4 gyorscsempe: KPI mutató #1–#4 — egyedi beállítás.
                     </div>
                   </div>
                   <Switch

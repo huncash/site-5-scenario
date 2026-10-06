@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, KeyRound, LifeBuoy, Plug } from "lucide-react";
 
 import { SiteFooter } from "@/components/SiteFooter";
@@ -7,14 +8,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PRICING_CARDS_GRID } from "@/components/home/pricingLayout";
 import { useI18n, type MessageKey } from "@/i18n";
-import { isSupportHost, supportPageUrl, supportPricingHref } from "@/lib/support";
+import { OnePointLesson } from "@/components/support/OnePointLesson";
+import { SupportLessonToc } from "@/components/support/SupportLessonToc";
+import { oplByPath } from "@/lib/opl";
+import { isSupportHost, supportPageUrl, supportPathSlug, supportPricingHref } from "@/lib/support";
+import { resolveSupportSlug, type SupportLessonIndex } from "@/lib/supportRoutes";
 import { cn } from "@/lib/utils";
 import { withViewPrefs } from "@/lib/viewPrefs";
 
 function branchHref(slug: string, localNav: boolean): string {
   if (slug.startsWith("#")) return slug;
+  const clean = slug.replace(/^\/+/, "");
+  const path = typeof window !== "undefined" ? window.location.pathname : "";
+  if (path === "/support" || path.startsWith("/support/")) {
+    return withViewPrefs(`/support/${clean}`);
+  }
   if (localNav || (typeof window !== "undefined" && isSupportHost())) {
-    return withViewPrefs(`/${slug.replace(/^\/+/, "")}`);
+    return withViewPrefs(`/${clean}`);
   }
   return supportPageUrl(slug);
 }
@@ -195,6 +205,8 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
           </div>
         </section>
 
+        <SupportLessonToc hrefFor={(path) => branchHref(path, localNav)} />
+
         <section id="faq" className="scroll-mt-24 rounded-xl border border-border/60 bg-card/40 px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.faqTitle")}</h2>
@@ -221,4 +233,51 @@ export function SupportSurface({ localNav = false }: { localNav?: boolean } = {}
       <SiteFooter />
     </div>
   );
+}
+
+function SupportLessonPage({ lesson }: { lesson: SupportLessonIndex }) {
+  const { t, locale } = useI18n();
+  const opl = oplByPath(lesson.path);
+  const title = locale === "en" ? lesson.titleEn : lesson.titleHu;
+  const summary = locale === "en" ? lesson.summaryEn : lesson.summaryHu;
+  return (
+    <div className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background text-foreground">
+      <header className="sticky top-0 z-30 border-b border-border bg-background">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <a href={withViewPrefs("/")} className="text-sm font-semibold text-foreground">
+            {t("brand.name")}
+          </a>
+          <ViewSettingsMenu />
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 pb-16">
+        {opl ? (
+          <OnePointLesson lesson={opl} />
+        ) : (
+          <>
+            <p className="font-mono text-[11px] text-muted-foreground">/{lesson.path}</p>
+            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <p className="text-[15px] leading-relaxed text-muted-foreground">{summary}</p>
+          </>
+        )}
+        <SupportLessonToc hrefFor={(path) => branchHref(path, true)} compact />
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+/** support.szcenario.hu és /support/* — landing vagy kanonikus lecke-aloldal. */
+export function SupportHost() {
+  const [path, setPath] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const route = useMemo(() => resolveSupportSlug(supportPathSlug(path)), [path]);
+  if (route.kind === "lesson" && route.lesson) {
+    return <SupportLessonPage lesson={route.lesson} />;
+  }
+  return <SupportSurface localNav />;
 }

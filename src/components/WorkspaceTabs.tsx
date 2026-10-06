@@ -285,7 +285,12 @@ export function WorkspacePanels({
           {/* LEFT COLUMN */}
           <section className="pdca-col">
             <div className="shrink-0 text-[11px] font-semibold uppercase tracking-wider">
-              <LeanTerm className={headerLeftCls} exact={phaseExact(leftPhase)} title={headerLeft}>
+              <LeanTerm
+                className={headerLeftCls}
+                termId={leftPhase.toLowerCase() as "plan" | "do" | "check" | "act"}
+                exact={phaseExact(leftPhase)}
+                title={headerLeft}
+              >
                 {headerLeft}
               </LeanTerm>
             </div>
@@ -296,7 +301,12 @@ export function WorkspacePanels({
           {!isFull ? (
             <section className="pdca-col">
               <div className="shrink-0 text-left text-[11px] font-semibold uppercase tracking-wider">
-                <LeanTerm className={headerRightCls} exact={phaseExact(rightPhase)} title={headerRight}>
+                <LeanTerm
+                  className={headerRightCls}
+                  termId={rightPhase.toLowerCase() as "plan" | "do" | "check" | "act"}
+                  exact={phaseExact(rightPhase)}
+                  title={headerRight}
+                >
                   {headerRight}
                 </LeanTerm>
               </div>
@@ -317,10 +327,22 @@ export function WorkspacePanels({
     >
       <div className="mt-2 grid grid-cols-1 gap-3 xl:grid-cols-2 xl:gap-6">
         <div className="text-xs font-semibold uppercase tracking-wider">
-          <span className={headerLeftCls}>{headerLeft}</span>
+          <LeanTerm
+            className={headerLeftCls}
+            termId={leftPhase.toLowerCase() as "plan" | "do" | "check" | "act"}
+            title={headerLeft}
+          >
+            {headerLeft}
+          </LeanTerm>
         </div>
         <div className="text-left text-xs font-semibold uppercase tracking-wider">
-          <span className={headerRightCls}>{headerRight}</span>
+          <LeanTerm
+            className={headerRightCls}
+            termId={rightPhase.toLowerCase() as "plan" | "do" | "check" | "act"}
+            title={headerRight}
+          >
+            {headerRight}
+          </LeanTerm>
         </div>
       </div>
 
@@ -332,11 +354,7 @@ export function WorkspacePanels({
             {checkSummary ? (
               <div className="grid gap-3">
                 <div className="flex items-center justify-between gap-4">
-                  <LeanTerm
-                    className="text-xs text-muted-foreground"
-                    title="MUDA score"
-                    exact="veszteség-pont — 0–100: minél magasabb, annál több a pazarlás."
-                  >
+                  <LeanTerm className="text-xs text-muted-foreground" termId="muda">
                     MUDA score
                   </LeanTerm>
                   <Badge variant="secondary" className="text-[10px]">
@@ -348,15 +366,15 @@ export function WorkspacePanels({
                   <span className="font-mono text-slate-200">{checkSummary.dataWastePct}%</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Súrlódás:{" "}
+                  <LeanTerm termId="friction">Súrlódás</LeanTerm>:{" "}
                   <span className="font-mono text-slate-200">
                     {formatMoney(Math.round(checkSummary.frictionGross))}
                   </span>{" "}
-                  · Holtpénz:{" "}
+                  · <LeanTerm termId="idleCash">Holtpénz</LeanTerm>:{" "}
                   <span className="font-mono text-slate-200">{formatMoney(Math.round(checkSummary.idleCash))}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Céltartalék 60 nap:{" "}
+                  <LeanTerm termId="runway">Céltartalék 60 nap</LeanTerm>:{" "}
                   <span className="font-mono text-slate-200">
                     {checkSummary.runway60Pct == null ? "—" : `${checkSummary.runway60Pct}%`}
                   </span>

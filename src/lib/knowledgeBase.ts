@@ -88,16 +88,16 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "Case vs Slot – mi a különbség?",
     summary:
-      "A Case a komplett, elmentett döntési és szimulációs modell; a Slot a Case-en belüli elkülönített adatterület (Magán, Vállalkozás, Projekt).",
+      "A Case az asztal. A Slot a fül rajta: Magán, Vállalkozás, Projekt — külön kassza.",
     body: `🎯 Fogalom
-- **Case:** a komplett, elmentett döntési és szimulációs modell.
-- **Slot:** a Case-en belüli elkülönített adatterület (a felület felső lapfülei). Típusai: Magán, Vállalkozás, Projekt.
+- **Case:** az asztal, amin dolgozol.
+- **Slot:** a fül az asztalon (Magán, Vállalkozás, Projekt). A tétel oda esik, amelyik nyitva van.
 
 ⚙️ Kapacitás
 - ${capacityTipHu()}
 
 💡 Tip
-- Ne keverd a Slotot a P-R-O Szcenárióval: a Slot a tér, a P-R-O a három egyidejűleg futó görbe azon a téren belül.`,
+- A Slot a fiók. A P-R-O a három világ abban a fiókban: rossz / közepes / jó. Ne keverd a kettőt.`,
     tags: ["case", "slot", "fogalom", "kapacitás"],
   },
   {
@@ -105,16 +105,16 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     category: "concepts",
     title: "P-R-O Szcenárió – mit jelent?",
     summary:
-      "Pesszimista · Realista · Optimista — a három egyidejűleg futó szimulációs görbe minden Slotban.",
+      "Rossz / közepes / jó kimenet — ugyanaz a múlt, három számolás. Nem megmondja a jövőt.",
     body: `🎯 Fogalom
-- A **P-R-O Szcenárió** a Pesszimista, Realista és Optimista rövidítése.
-- A motor minden Slotban automatikusan ezt a három egyidejűleg futó szimulációs görbét számolja.
+- A **P-R-O** három gomb: Pesszimista, Realista, Optimista.
+- Ugyanazok a tételek, három világ. Azt mutatja: ha rosszul, ha átlagosan, ha jól alakul, meddig bírja a kassza.
 
 ⚙️ Miért nem egy szám?
-- A cél a teljes kockázati mozgástér, nem egyetlen „jóslat”.
+- Egy szám hazudna. A kérdés: melyik ágon meddig bírod, és hol vágsz.
 
 💡 Tip
-- A grafikon nem a jövőt mutatja: a múlt adataidból számolt szórás és hibahatár.`,
+- Ne az „igazit” keresd a grafikonon. Olvasd a P sávot: ott fogy el először a levegő.`,
     tags: ["pro", "p-r-o", "szcenárió", "fogalom"],
   },
   {
@@ -216,16 +216,16 @@ Mentéskor:
     category: "cashflow",
     title: "Cashflow & megtakarítások – mit jelent a „szabad keret”?",
     summary:
-      "A szabad keret az elkölthető pénz: banki egyenlegből levonjuk a megtakarítások/perselyek és célok által lekötött részt (ahol releváns).",
+      "Ami ÁFA és persely után elkölthető. A bruttó nem a tied — a fénykép sem a történet.",
     body: `🎯 Mire jó?
-- Hogy gyors döntést tudj hozni: „mennyi pénz költhető el biztonságosan”, miközben a célokra félretett keret nem „keveredik bele”.
+- Gyors döntés: mennyi mehet ki anélkül, hogy a bevallás vagy a cél üresen marad.
 
 ⚙️ Hogyan működik?
-- Szabad keret ≈ (banki bruttó egyenleg) − (megtakarítások/perselyek) − (célokra lekötött rész), ahol ez releváns.
-- A persely hozzárendelés a pozitív tételekből épít cél-keretet; a kiadások közben a valós cashflow-t csökkentik.
+- Szabad keret ≈ ami a számlán van − perselyek − zárolt ÁFA.
+- A persely félretett pénz. A kiadás a cashflow-ból megy ki.
 
-💡 Pro Tip / Legjobb gyakorlat
-- Ha minden hónapban félreteszel (akár kis összeget is), a szabad keret stabilabb lesz, és a „meglepetés kiadások” kevésbé rántják meg a működést.`,
+💡 Tip
+- Először a 60 nap. Aztán a persely. Ha a runway 0, ne új WANT-ot nyiss — ACT kell.`,
     tags: ["szabad keret", "persely", "célok", "cashflow"],
   },
   {

@@ -2,48 +2,96 @@ import { useMemo, useState, type ReactNode } from "react";
 import { GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
+import {
+  glossaryCopy,
+  glossarySupportHref,
+  glossaryTerm,
+  glossaryTooltip,
+  type GlossaryTermId,
+} from "@/lib/glossary";
 import { kbById, type KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
+import { oplByPath } from "@/lib/opl";
+import { supportPageUrl } from "@/lib/support";
+import { supportSlugForKb } from "@/lib/supportRoutes";
 import { useSupportEmbedOptional } from "@/components/support/SupportEmbedProvider";
 
-/** Címke + hover (`data-exact`) + kattintható sapka. Lean fogalmakhoz. */
+/** Címke + hover (`data-exact`) + kattintható sapka. Lean / glossary fogalmakhoz. */
 export function LeanTerm({
   children,
   exact,
   summary,
   className,
   title,
+  termId,
 }: {
   children: ReactNode;
-  exact: string;
+  exact?: string;
   summary?: string;
   className?: string;
   title?: string;
+  termId?: GlossaryTermId;
 }) {
+  const { locale } = useI18n();
+  const copy = termId ? glossaryCopy(termId, locale) : null;
+  const hint = termId ? glossaryTooltip(termId, locale) : exact ?? summary ?? "";
   return (
-    <span className={cn("inline-flex min-w-0 max-w-full items-center", className)} data-exact={exact}>
+    <span className={cn("inline-flex min-w-0 max-w-full items-center", className)} data-exact={hint}>
       <span className="min-w-0">{children}</span>
-      <HelpIcon title={title} summary={summary ?? exact} />
+      <HelpIcon termId={termId} title={title ?? copy?.term} summary={summary ?? hint} kbId={termId ? glossaryTerm(termId).kbId : undefined} />
     </span>
+  );
+}
+
+/** Szakmai név + kezdő sor + support-linkelt sapka. */
+export function GlossaryLabel({
+  id,
+  className,
+  showPlain = true,
+}: {
+  id: GlossaryTermId;
+  className?: string;
+  showPlain?: boolean;
+}) {
+  const { locale } = useI18n();
+  const copy = glossaryCopy(id, locale);
+  return (
+    <LeanTerm termId={id} className={className} title={copy.term}>
+      <span className="min-w-0">
+        <span>{copy.term}</span>
+        {showPlain ? (
+          <span className="mt-0.5 block font-normal normal-case tracking-normal text-muted-foreground">{copy.plain}</span>
+        ) : null}
+      </span>
+    </LeanTerm>
   );
 }
 
 export function HelpIcon({
   kbId,
+  termId,
   summary,
   title,
   className,
   size = "sm",
 }: {
   kbId?: KnowledgeBaseArticleId;
+  termId?: GlossaryTermId;
   summary?: string;
   title?: string;
   className?: string;
   size?: "sm" | "md";
 }) {
+  const { locale } = useI18n();
   const [open, setOpen] = useState(false);
-  const article = useMemo(() => (kbId ? kbById(kbId) : null), [kbId]);
-  const tooltipText = summary ?? article?.summary ?? "Súgó";
+  const resolvedKb = termId ? (kbId ?? glossaryTerm(termId).kbId) : kbId;
+  const article = useMemo(() => (resolvedKb ? kbById(resolvedKb) : null), [resolvedKb]);
+  const tooltipText = termId ? glossaryTooltip(termId, locale) : summary ?? article?.summary ?? "Súgó";
+  const kbLesson = resolvedKb ? supportSlugForKb(resolvedKb) : null;
+  const localSlug = termId ? glossaryTerm(termId).supportSlug : kbLesson;
+  const localOpl = localSlug ? oplByPath(localSlug) : null;
+  const supportHref = termId ? glossarySupportHref(termId) : kbLesson ? supportPageUrl(kbLesson) : null;
   const embed = useSupportEmbedOptional();
 
   const btnCls = size === "md" ? "h-8 w-8" : "h-6 w-6";
@@ -81,13 +129,34 @@ export function HelpIcon({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="whitespace-pre-wrap break-words">{tooltipText}</div>
-        {embed ? (
+        {embed && localOpl ? (
           <button
             type="button"
             className="mt-2 text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
             onClick={() => {
               setOpen(false);
-              embed.openEmbed(kbId ? `kb/${kbId}` : "tippek", article?.title ?? title ?? "Súgó");
+              embed.openEmbed(localOpl.path, locale === "en" ? localOpl.titleEn : localOpl.titleHu);
+            }}
+          >
+            {locale === "en" ? "Open lesson in panel" : "Lecke a panelen"}
+          </button>
+        ) : supportHref ? (
+          <a
+            href={supportHref}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-block text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
+            onClick={() => setOpen(false)}
+          >
+            {locale === "en" ? "Open on Support" : "Részletek a Supporton"}
+          </a>
+        ) : embed ? (
+          <button
+            type="button"
+            className="mt-2 text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
+            onClick={() => {
+              setOpen(false);
+              embed.openEmbed(resolvedKb ? `kb/${resolvedKb}` : "tippek", article?.title ?? title ?? "Súgó");
             }}
           >
             Lecke megnyitása

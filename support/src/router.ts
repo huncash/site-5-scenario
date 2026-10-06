@@ -1,5 +1,8 @@
 /** Support SPA útvonalak — skálázható slug tábla (App Router-szerű szerep). */
 
+import { canonicalizeSupportSlug, resolveSupportSlug } from "@/lib/supportRoutes";
+import { applyViewPrefsToSearch, withViewPrefs } from "@/lib/viewPrefs";
+
 export type SupportSlug =
   | "home"
   | "tippek"
@@ -8,6 +11,8 @@ export type SupportSlug =
   | "pricing"
   | "kb/kahn-rand"
   | (string & {});
+
+export { canonicalizeSupportSlug, resolveSupportSlug };
 
 export function pathOf(pathname = typeof window !== "undefined" ? window.location.pathname : "/"): string {
   return pathname.replace(/\/+$/, "") || "/";
@@ -35,16 +40,15 @@ export function parseSupportPath(pathname: string): { embed: boolean; slug: Supp
   return { embed: false, slug: path.replace(/^\//, "") };
 }
 
-import { applyViewPrefsToSearch, withViewPrefs } from "@/lib/viewPrefs";
-
 export function supportHref(slug: SupportSlug | "", opts?: { embed?: boolean; lang?: string }): string {
+  const canonical = slug && slug !== "home" ? canonicalizeSupportSlug(slug) : "home";
   const mount = supportMountPrefix();
   const inner = opts?.embed
-    ? slug && slug !== "home"
-      ? `/embed/${slug}`
+    ? canonical && canonical !== "home"
+      ? `/embed/${canonical}`
       : "/embed"
-    : slug && slug !== "home"
-      ? `/${slug}`
+    : canonical && canonical !== "home"
+      ? `/${canonical}`
       : "/";
   const base = inner === "/" ? mount || "/" : `${mount}${inner}`;
   let href = base;

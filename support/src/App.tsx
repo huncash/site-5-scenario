@@ -5,6 +5,10 @@ import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { useI18n } from "@/i18n";
 import { LangSwitch } from "@/i18n/miniLocale";
 import { enterpriseInquiryMailto } from "@/lib/enterpriseSchedule";
+import { OnePointLesson } from "@/components/support/OnePointLesson";
+import { SupportLessonToc } from "@/components/support/SupportLessonToc";
+import { oplByPath } from "@/lib/opl";
+import { resolveSupportSlug } from "@/lib/supportRoutes";
 import { lessonBySlug } from "./content";
 import {
   localizeLesson,
@@ -13,7 +17,6 @@ import {
   supportKahn,
   supportLessons,
   supportPricingTiers,
-  supportTheory,
   supportTips,
 } from "./copy";
 import { Markdown } from "./markdown";
@@ -293,27 +296,14 @@ function SelfServeHome({ locale, embed }: { locale: Locale; embed: boolean }) {
         <a href={supportHref("pricing", { embed, lang: locale })}>{t.pricingNav}</a>
         <a href={supportHref("tippek", { embed, lang: locale })}>{t.tips}</a>
         <a href={supportHref("gyik", { embed, lang: locale })}>{t.faq}</a>
-        {supportLessons(locale).map((l) => (
-          <a key={l.slug} href={supportHref(l.slug, { embed, lang: locale })}>
-            {l.title}
-          </a>
-        ))}
       </div>
 
       <KahnBonbon locale={locale} />
+      <SupportLessonToc
+        compact
+        hrefFor={(path) => supportHref(path, { embed, lang: locale })}
+      />
       <FaqSearch locale={locale} />
-
-      <div className="section-block" id="leckek">
-        <h2>{t.lessons}</h2>
-        <p className="note">{t.lessonsNote}</p>
-        <div className="nav">
-          {supportTheory(locale).map((l) => (
-            <a key={l.slug} href={supportHref(l.slug, { lang: locale })}>
-              {l.title}
-            </a>
-          ))}
-        </div>
-      </div>
 
       {videoLessons.length ? (
         <div className="section-block">
@@ -370,11 +360,21 @@ export function App() {
   }, []);
 
   const { embed, slug } = useMemo(() => parseSupportPath(path), [path]);
-  if (!embed && slug === "home") {
+  const route = useMemo(() => resolveSupportSlug(slug), [slug]);
+
+  useEffect(() => {
+    if (route.kind !== "lesson" || route.slug === route.canonical) return;
+    const next = supportHref(route.canonical, { embed, lang: locale });
+    if (`${window.location.pathname}${window.location.search}` === next) return;
+    window.history.replaceState({}, "", next);
+  }, [embed, locale, route]);
+
+  if (!embed && route.kind === "home") {
     return <SupportSurface localNav />;
   }
 
-  const rawLesson = lessonBySlug(slug.startsWith("kb/") ? slug.slice(3) : slug);
+  const opl = oplByPath(route.canonical);
+  const rawLesson = lessonBySlug(route.canonical);
   const lesson = rawLesson ? localizeLesson(locale, rawLesson) : null;
   const wrap = embed ? "embed" : "full";
 
@@ -396,6 +396,8 @@ export function App() {
     );
   } else if (slug === "tippek") {
     body = <TipsPage locale={locale} />;
+  } else if (opl) {
+    body = <OnePointLesson lesson={opl} />;
   } else if (lesson) {
     body = (
       <article className="article">
