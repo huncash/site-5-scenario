@@ -1,5 +1,5 @@
 /**
- * JIT örökös modulárak — forrás: `JIT_ADDON_PRICES` (`src/config/plans.ts`).
+ * JIT egyszeri díjas modulárak — forrás: `JIT_ADDON_PRICES` (`src/config/plans.ts`).
  */
 
 import {
@@ -13,7 +13,7 @@ export { JIT_ADDON_MIN_COMMITMENT_DAYS };
 
 export type JitAddon = {
   id: JitAddonId;
-  /** Nettó Ft / örökös modul (egyszeri). */
+  /** Nettó Ft / egyszeri díjas modul. */
   priceHuf: number;
   labelHu: string;
   labelEn: string;
@@ -64,6 +64,18 @@ export const PUBLIC_JIT_ADDONS = JIT_ADDONS.filter((a) => a.public && a.priceHuf
 export const JIT_ADDON_BY_ID: Record<JitAddonId, JitAddon> = Object.fromEntries(
   JIT_ADDONS.map((a) => [a.id, a]),
 ) as Record<JitAddonId, JitAddon>;
+
+export function parseCheckoutAddons(...raw: Array<string | null | undefined>): JitAddonId[] {
+  const out: JitAddonId[] = [];
+  for (const chunk of raw) {
+    if (!chunk) continue;
+    for (const part of chunk.split(",")) {
+      const id = part.trim();
+      if (isJitAddonId(id) && !out.includes(id)) out.push(id);
+    }
+  }
+  return out;
+}
 
 export function isJitAddonId(v: unknown): v is JitAddonId {
   return (

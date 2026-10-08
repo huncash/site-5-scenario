@@ -12,13 +12,13 @@ import {
   addonNetForTier,
   chargeHuf,
   isBillTier,
-  isJitAddonId,
   isSlotPackId,
   JIT_ADDON_LABELS,
   SLOT_PACK_LABELS,
   slotPackAllowedForTier,
   slotPackNetForInterval,
 } from "../server/catalog";
+import { parseCheckoutAddons } from "@/content/pricing/addons";
 import {
   countryFromTaxId,
   countryLabel,
@@ -347,8 +347,8 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
   const plan = isPublicPlanId(planTier) || planTier === "campus" ? getPlan(planTier) : getPlan("pro");
   const vat = resolveVat({ country, taxId });
   let dueNet = chargeHuf(planTier, interval);
-  if (addon && isJitAddonId(addon) && addon !== slotPack) {
-    dueNet += addonNetForTier(addon, planTier);
+  for (const extra of parseCheckoutAddons(addon)) {
+    if (extra !== slotPack) dueNet += addonNetForTier(extra, planTier);
   }
   if (slotPack && isSlotPackId(slotPack) && slotPackAllowedForTier(planTier)) {
     dueNet += slotPackNetForInterval(slotPack, interval);
@@ -370,8 +370,8 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
     planTier === "campus"
       ? t.nextRenewal.replace("{date}", formatRenewalDate(nextRenewalDate(interval), locale))
       : locale === "en"
-        ? "Year-1 perpetual license. Optional updates: Y2 75% / Y3 60% of Year-1, then free."
-        : "1. évi örökös licenc. Opcionális frissítés: 2. év 75% / 3. év 60% az 1. évi árból, majd díjmentes.";
+        ? "Year-1 one-time software licence. Optional engine updates: Y2 75% / Y3 60% of Year-1, then at no extra charge."
+        : "1. évi egyszeri szoftverlicenc. Opcionális motorfrissítés: 2. év 75% / 3. év 60% az 1. évi árból, majd nincs külön díj.";
   const composedName = composeBuyerName({
     partnerKind: buyerKind,
     lastName,
@@ -1026,11 +1026,11 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
               ))}
             </ul>
           ) : null}
-          {addon && isJitAddonId(addon) ? (
-            <div className="hint" style={{ marginTop: 8 }}>
-              {JIT_ADDON_LABELS[addon]}
+          {parseCheckoutAddons(addon).map((id) => (
+            <div key={id} className="hint" style={{ marginTop: 8 }}>
+              {JIT_ADDON_LABELS[id]}
             </div>
-          ) : null}
+          ))}
           {slotPack && isSlotPackId(slotPack) && slotPack !== addon ? (
             <div className="hint" style={{ marginTop: 8 }}>
               {SLOT_PACK_LABELS[slotPack]}

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { CapacityHudBar } from "@/components/labs/CapacityHudBar";
+import { LabsSalesFunnel } from "@/components/labs/LabsSalesFunnel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n, type MessageKey } from "@/i18n";
 import { useDashboardLab } from "@/hooks/useDashboardLabs";
@@ -450,6 +451,7 @@ export function LabsOverlay({
               </h2>
               <CapacityHudBar statusOnly workspaceIds={workspaceIds} profileCount={profileCount} />
             </div>
+            <LabsSalesFunnel />
             <p className="sr-only">{t("labs.overlayLead")}</p>
 
             <div

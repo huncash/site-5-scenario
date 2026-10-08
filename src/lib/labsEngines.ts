@@ -1,3 +1,4 @@
+import { activateDemoCaseLicense } from "@/lib/engineFrames";
 import type { MeshRepository } from "@/lib/mesh/meshRepository";
 import type { MeshSchema } from "@/lib/mesh/schema";
 import {
@@ -8,6 +9,8 @@ import {
   type EngineOnMap,
   type LabsEngineId,
 } from "@/lib/labsTechTree";
+
+export const ALL_ENGINES_ON: EngineOnMap = { economic: true, resilience: true, education: true };
 
 const ENGINE_IDS: readonly LabsEngineId[] = ["economic", "resilience", "education"];
 
@@ -39,6 +42,14 @@ export async function writeEngineOn(
     await repo.save("labsEngines", { id, on: next[id] });
   }
   return next;
+}
+
+/** Demó eset: mindhárom motor licencelt és bekapcsolt. */
+export async function activateDemoCaseEngines(
+  repo: MeshRepository<MeshSchema>,
+): Promise<EngineOnMap> {
+  activateDemoCaseLicense();
+  return writeEngineOn(repo, ALL_ENGINES_ON);
 }
 
 export async function toggleEngine(

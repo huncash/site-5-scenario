@@ -1,14 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { ACCESS_ROLE } from "@/lib/accessRole";
 import { readCapacityHud } from "@/lib/capacityHud";
 import {
   canCrossEngineShare,
   canExportEducationPack,
+  demoCaseEnginesActive,
   engineAddonQuotaDelta,
   grantAllExtraEngines,
   grantEngineOnLicense,
   licensedEngines,
+  markDemoCaseEngines,
   quotasUnchangedByEngine,
 } from "@/lib/engineFrames";
 import type { LicenseEntitlement } from "@/lib/license";
@@ -28,10 +30,19 @@ function lic(over: Partial<LicenseEntitlement> = {}): LicenseEntitlement {
 }
 
 describe("engineFrames", () => {
+  afterEach(() => {
+    markDemoCaseEngines(false);
+  });
+
   it("keeps economic on the license and does not add quota when granting education / BCP", () => {
     const before = lic();
     const afterEdu = grantEngineOnLicense(before, "education");
     const afterBcp = grantEngineOnLicense(afterEdu, "resilience");
+    expect(licensedEngines(before)).toEqual(["economic"]);
+    markDemoCaseEngines(true);
+    expect(demoCaseEnginesActive()).toBe(true);
+    expect(licensedEngines(before)).toEqual(["economic", "education", "resilience"]);
+    markDemoCaseEngines(false);
     expect(licensedEngines(before)).toEqual(["economic"]);
     expect(licensedEngines(afterBcp)).toEqual(["economic", "education", "resilience"]);
     expect(licensedEngines(grantAllExtraEngines(before))).toEqual([

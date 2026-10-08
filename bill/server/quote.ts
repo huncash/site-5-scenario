@@ -11,6 +11,7 @@ import {
   type BillInterval,
   type BillTier,
 } from "./catalog.ts";
+import { parseCheckoutAddons } from "../../src/content/pricing/addons.ts";
 import { evaluateBundleLockFromCart, type BundleLockDecision } from "../../src/lib/bundleLock.ts";
 import { resolveVat, splitVat, type VatDecision } from "./vat.ts";
 
@@ -50,9 +51,10 @@ export function packageLines(
       netUnitPrice: chargeHuf(tier, interval),
     },
   ];
-  const addon = extras.addon;
   const slotPack = extras.slotPack;
-  if (addon && isJitAddonId(addon) && addon !== slotPack) {
+  for (const addon of parseCheckoutAddons(extras.addon)) {
+    if (addon === slotPack) continue;
+    if (!isJitAddonId(addon)) continue;
     lines.push({
       name: `Szcenárió — ${JIT_ADDON_LABELS[addon]}`,
       quantity: 1,

@@ -14,7 +14,12 @@ import {
   makeVerifier,
   randomSaltB64,
 } from "@/lib/crypto";
+import { markDemoCaseEngines } from "@/lib/engineFrames";
 import { localdb, type Profile } from "@/lib/localdb";
+
+function syncDemoCaseEngines(name: unknown) {
+  markDemoCaseEngines(String(name ?? "").trim().startsWith("DEMO "));
+}
 
 type VaultState =
   | { status: "loading" }
@@ -51,6 +56,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     const profiles = await localdb.listProfiles();
     if (profiles.length === 0) {
       localdb.setActiveProfile(null);
+      markDemoCaseEngines(false);
       setState({ status: "no-profiles" });
       return;
     }
@@ -65,6 +71,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         const key = await importRawKey(cachedKey);
         if (await checkVerifier(key, cachedProfile.verifier)) {
           localdb.setActiveProfile(cachedProfile.id);
+          syncDemoCaseEngines(cachedProfile.name);
           setState({ status: "unlocked", profile: cachedProfile, key });
           return;
         }
@@ -76,6 +83,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     }
 
     localdb.setActiveProfile(null);
+    markDemoCaseEngines(false);
     setState({ status: "picker", profiles });
   }, []);
 
@@ -119,6 +127,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     if (!ok) return false;
     localdb.setActiveProfile(state.profile.id);
     await cacheKey(key, state.profile.id);
+    syncDemoCaseEngines(state.profile.name);
     setState({ status: "unlocked", profile: state.profile, key });
     return true;
   };
@@ -131,6 +140,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     if (!ok) return false;
     localdb.setActiveProfile(profile.id);
     await cacheKey(key, profile.id);
+    syncDemoCaseEngines(profile.name);
     setState({ status: "unlocked", profile, key });
     return true;
   };
@@ -139,6 +149,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(SS_KEY);
     sessionStorage.removeItem(SS_PROFILE);
     localdb.setActiveProfile(null);
+    markDemoCaseEngines(false);
     await bootstrap();
   };
 
@@ -146,6 +157,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(SS_KEY);
     sessionStorage.removeItem(SS_PROFILE);
     localdb.setActiveProfile(null);
+    markDemoCaseEngines(false);
     const profiles = await localdb.listProfiles();
     if (profiles.length === 0) setState({ status: "no-profiles" });
     else setState({ status: "picker", profiles });

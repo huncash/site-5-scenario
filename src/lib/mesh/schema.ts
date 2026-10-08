@@ -32,6 +32,12 @@ export type EngineInterestRow = {
   updatedAt: number;
 };
 
+export type SalesCartRow = {
+  id: string;
+  lines: Array<{ sku: string; qty: number }>;
+  updatedAt: number;
+};
+
 export type ForumNoteRow = {
   id: string;
   createdAt: number;
@@ -55,4 +61,5 @@ export type MeshSchema = {
   labsEngines: StoreDefinition<string, LabsEnginePref>;
   engineInterest: StoreDefinition<string, EngineInterestRow>;
   forumNotes: StoreDefinition<string, ForumNoteRow>;
+  salesCarts: StoreDefinition<string, SalesCartRow>;
 };

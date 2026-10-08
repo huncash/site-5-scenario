@@ -100,6 +100,8 @@ export function billCheckoutUrl(opts: {
   slotPack?: string;
   /** JIT egység-modul: case_plus_1 | slot_plus_1 | seat_plus_1 | guest_plus_1 | edge_sensor */
   addon?: string;
+  /** Több egyszeri modul — vesszős lista a queryben. */
+  addons?: string[];
   country?: string;
   partnerKind?: "b2c" | "b2b";
   utm?: CampaignUtm;
@@ -118,7 +120,10 @@ export function billCheckoutUrl(opts: {
     "";
   if (pendingReferral) url.searchParams.set("referral", pendingReferral.toUpperCase());
   if (opts.slotPack) url.searchParams.set("slotPack", opts.slotPack);
-  if (opts.addon) url.searchParams.set("addon", opts.addon);
+  const addonList = [...(opts.addons ?? []), opts.addon].filter((x): x is string => Boolean(x));
+  const uniqueAddons = [...new Set(addonList)];
+  if (uniqueAddons.length === 1) url.searchParams.set("addon", uniqueAddons[0]!);
+  else if (uniqueAddons.length > 1) url.searchParams.set("addon", uniqueAddons.join(","));
   if (opts.partnerKind) url.searchParams.set("partnerKind", opts.partnerKind);
   const stored = typeof window !== "undefined" ? readCampaignAttribution() : null;
   applyAttributionSearchParams(

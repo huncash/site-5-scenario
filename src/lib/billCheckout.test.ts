@@ -28,7 +28,7 @@ describe("bill catalog from plans.ts", () => {
     expect(chargeHuf("pro", "yearly")).toBe(399_000);
     expect(chargeHuf("pro", "monthly")).toBe(399_000);
     expect(invoicePackageName("pro", "yearly")).toContain("Pro Szcenárió");
-    expect(invoicePackageName("pro", "yearly")).toContain("örökös licenc");
+    expect(invoicePackageName("pro", "yearly")).toContain("egyszeri szoftverlicenc");
     expect(JIT_ADDON_HUF.case_plus_1).toBe(49_000);
   });
 
@@ -85,7 +85,7 @@ describe("szamlazz dijbekero xml", () => {
     } satisfies Order;
 
     const built = linesFromOrder(order);
-    expect(built[0]?.name).toBe("Szcenárió — Pro Szcenárió (örökös licenc, 1. év)");
+    expect(built[0]?.name).toBe("Szcenárió — Pro Szcenárió (egyszeri szoftverlicenc, 1. év)");
     expect(built[0]?.netUnitPrice).toBe(399_000);
 
     const xml = buildSzamlazzXml(order, "dijbekero");

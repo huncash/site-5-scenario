@@ -23,8 +23,8 @@ function PriceLines(props: { monthly: number; interval: BillingInterval }) {
   }
   return (
     <div className="mt-2">
-      <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthly)} (Éves hűség-licenc)</div>
-      <div className="mt-0.5 text-[11px] text-slate-300">2. év: −25% · 3. év: −40% · 4. évtől: örökélet</div>
+      <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthly)} (egyszeri szoftverlicenc)</div>
+      <div className="mt-0.5 text-[11px] text-slate-300">2. év: −25% · 3. év: −40% · 4. évtől: nincs külön díj</div>
     </div>
   );
 }

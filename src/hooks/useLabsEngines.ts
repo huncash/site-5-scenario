@@ -1,24 +1,39 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { isDemoProfileName } from "@/lib/demoSession";
 import { activateAllLicenseEngines } from "@/lib/engineFrames";
 import { incrementEngineInterest, noteEngineSwitch } from "@/lib/engineInterest";
-import { labsEngineQueryKey, readEngineOn, toggleEngine, writeEngineOn } from "@/lib/labsEngines";
+import {
+  activateDemoCaseEngines,
+  ALL_ENGINES_ON,
+  labsEngineQueryKey,
+  readEngineOn,
+  toggleEngine,
+  writeEngineOn,
+} from "@/lib/labsEngines";
 import { resolveEngineOn, type LabsEngineId } from "@/lib/labsTechTree";
 import { useMeshRepository } from "@/lib/mesh/meshRepository";
+import { useVault } from "@/lib/vault";
 
 export function useLabsEngines() {
   const repo = useMeshRepository();
   const qc = useQueryClient();
   const key = labsEngineQueryKey();
+  const { state } = useVault();
+  const demo = state.status === "unlocked" && isDemoProfileName(state.profile.name);
 
   useEffect(() => {
+    if (demo) {
+      void activateDemoCaseEngines(repo).then((on) => qc.setQueryData(key, on));
+      return;
+    }
     if (!import.meta.env.DEV) return;
     activateAllLicenseEngines();
-    void writeEngineOn(repo, { economic: true, resilience: true, education: true }).then((on) => {
+    void writeEngineOn(repo, ALL_ENGINES_ON).then((on) => {
       qc.setQueryData(key, on);
     });
-  }, [repo, qc, key]);
+  }, [demo, repo, qc, key]);
 
   const q = useQuery({
     queryKey: key,

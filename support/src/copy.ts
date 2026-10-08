@@ -96,7 +96,7 @@ const hu = {
   pricingAddonBuy: "Vásárlás a számlázáson",
   pricingAddonsTitle: "Bővítő modulok",
   pricingAddonsBody:
-    "Örökös bővítők a párhuzamosan nyitott Case-ekre, Slotokra, Seat-ekre, vendégfiókokra és a helyi Edge-bekötésre — ezek kapacitást adnak a licenckerethez. A gazdasági, oktatási és BCP motor ugyanerre a keretre ül; motorfelvétel nem nyit új asztalt. A vásárlás a számlázási aloldalon történik.",
+    "Egyszeri díjas bővítők a párhuzamosan nyitott Case-ekre, Slotokra, Seat-ekre, vendégfiókokra és a helyi Edge-bekötésre — ezek kapacitást adnak a licenckerethez. A gazdasági, oktatási és BCP motor ugyanerre a keretre ül; motorfelvétel nem nyit új asztalt. A vásárlás a számlázási aloldalon történik.",
   pricingOwnLineTitle: "Opcionális saját vonal",
   pricingOwnLineWhen: "Egyedi asztali és app-kiadásokban · kapcsolható, soha nem kötelező",
   pricingOwnLineLead:
@@ -111,14 +111,14 @@ const hu = {
   ],
   pricingOwnLineClose:
     "A kapcsoló a beállításokban jelenik meg az egyedi igényű asztali és app-kiadásokban. Senkire nem erőltetjük, és nem része a nyilvános belépőígéretnek.",
-  pricingAddonPriceMeta: "Ft nettó, örökös",
+  pricingAddonPriceMeta: "Ft nettó, egyszeri díj",
   pricingEconomicTitle: "Gazdasági szcenárió motor",
   pricingEconomicWhen: "Elérhető",
   pricingEconomicBody:
     "A gazdasági szcenárió motor a böngésződben, a saját gépeden fut. Basic, Pro és Enterprise ezen a motoron dolgozik — a webes Case és Slot azonnal él. A motor a licenc Case / Slot / Seat / Guest keretét használja; külön kvótát nem nyit.",
   pricingLoyaltyTitle: "Hároméves lépcsőzetes hűségmodell",
   pricingLoyaltyYears: [
-    "1. év: A belépő listaár 100%-a egyszeri vásárlásként — a megvásárolt verzió véglegesen a tiéd marad.",
+    "1. év: A belépő listaár 100%-a egyszeri szoftverlicencként — a megvásárolt verzió a tiéd marad, ismétlődő terhelés nélkül.",
     "2. év: Kedvezményes frissítési díj (−25%).",
     "3. év: Kedvezményes frissítési díj (−40%).",
     "4. évtől: Minden jövőbeni frissítés teljesen díjmentes.",
@@ -232,7 +232,7 @@ const en: typeof hu = {
   pricingAddonBuy: "Purchase on billing",
   pricingAddonsTitle: "Add-on modules",
   pricingAddonsBody:
-    "Perpetual add-ons for concurrently open Cases, Slots, Seats, guest accounts and local Edge intake — they add capacity to the licence frame. The economic, education and BCP engines sit on that same frame; adding an engine does not open a new desk. Purchase is on the billing page.",
+    "One-time add-ons for concurrently open Cases, Slots, Seats, guest accounts and local Edge intake — they add capacity to the licence frame. The economic, education and BCP engines sit on that same frame; adding an engine does not open a new desk. Purchase is on the billing page.",
   pricingOwnLineTitle: "Optional own line",
   pricingOwnLineWhen: "Custom desktop and app editions · optional, never required",
   pricingOwnLineLead:
@@ -247,14 +247,14 @@ const en: typeof hu = {
   ],
   pricingOwnLineClose:
     "The switch appears in settings on custom desktop and app editions. We do not force it on anyone, and it is not part of the public entry promise.",
-  pricingAddonPriceMeta: "HUF net, perpetual",
+  pricingAddonPriceMeta: "HUF net, one-time fee",
   pricingEconomicTitle: "Economic scenario engine",
   pricingEconomicWhen: "Available",
   pricingEconomicBody:
     "The economic scenario engine runs in your browser, on your machine. Basic, Pro and Enterprise work on this engine — web Case and Slot are live at once. The engine uses the licence Case / Slot / Seat / Guest frame; it does not open a separate quota.",
   pricingLoyaltyTitle: "Three-year tiered loyalty model",
   pricingLoyaltyYears: [
-    "Year 1: 100% of the entry list price as a one-time purchase — the purchased version stays yours permanently.",
+    "Year 1: 100% of the entry list price as a one-time software licence — the purchased version stays yours, with no recurring charge.",
     "Year 2: discounted update fee (−25%).",
     "Year 3: discounted update fee (−40%).",
     "From year 4: every future update is free.",
@@ -592,9 +592,9 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "basic",
         title: "Basic plan",
-        priceLine: "net €199 in year 1 — one-time fee [perpetual licence + 1 year of update rights]",
+        priceLine: "net €199 in year 1 — one-time software licence [year-1 purchase + 1 year of update rights]",
         ladder:
-          "On the loyalty model: year 2 €149 (−25%): +1 year of update rights, year 3 €119 (−40%) +1 year of update rights, and from year 4 updates for life.",
+          "On the loyalty model: year 2 €149 (−25%): +1 year of update rights, year 3 €119 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
           "The Basic plan is designed for a single decision-maker: one concurrently active case, three active slots, plus one editor and one guest account. It includes full master-data handling, manual entry, file import (CSV, XML) and personal-wealth tracking. The app starts at once in your browser. Case / Slot / Seat / Guest are the licence quota; adding an education or BCP engine does not add quota. Inactive data may be overwritten without limit, and all computation runs entirely on your own machine.",
         contentsTitle: "What the Basic plan includes:",
@@ -612,11 +612,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "pro",
         title: "Pro plan (Recommended)",
-        priceLine: "€399 in year 1 — one-time net list entry [perpetual licence + 1 year of update rights].",
+        priceLine: "€399 in year 1 — one-time net list entry [software licence + 1 year of update rights].",
         ladder:
-          "On the loyalty model: year 2 €299 (−25%): +1 year of update rights, year 3 €239 (−40%) +1 year of update rights, and from year 4 updates for life.",
+          "On the loyalty model: year 2 €299 (−25%): +1 year of update rights, year 3 €239 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
-          "The Pro plan starts with 2 parallel empty active cases, each with 1 personal, 1 business and 1 project workspace, including shared movables and property if you need them. Schedulable local CSV/XML import is included. Processing stays on your machine throughout, with layered encryption. The Pro Desktop early-access build arriving in spring 2027 is free with Pro, and is not a condition of using the web app today. Case / Slot / Seat / Guest are the licence quota; adding an education or BCP engine does not add quota. Extras remain perpetual capacity modules.",
+          "The Pro plan starts with 2 parallel empty active cases, each with 1 personal, 1 business and 1 project workspace, including shared movables and property if you need them. Schedulable local CSV/XML import is included. Processing stays on your machine throughout, with layered encryption. The Pro Desktop early-access build arriving in spring 2027 is free with Pro, and is not a condition of using the web app today. Case / Slot / Seat / Guest are the licence quota; adding an education or BCP engine does not add quota. Extras remain one-time capacity modules.",
         contentsTitle: "What the Pro plan includes:",
         bullets: [
           "2 active cases (no demo data): 3 active workspaces per case (e.g. Personal, Business, Project), including shared movables and property",
@@ -624,7 +624,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
           "5 guest accounts (read-only; rights may be narrowed to a named person)",
           "Local CSV/XML import, watched folder and your own rules on your machine",
           "Pro Desktop early access in spring 2027, free with Pro",
-          "Extra active-case module: +€49 (yours for life)",
+          "Extra active-case module: +€49 (one-time capacity module)",
           "Three outcome paths (pessimistic, realistic, optimistic)",
           "Built-in methods, primers and guides: from first project planning to running projects",
         ],
@@ -634,9 +634,9 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "enterprise",
         title: "Enterprise & Teams",
-        priceLine: "€799 in year 1 — one-time net list entry [perpetual licence + 1 year of update rights].",
+        priceLine: "€799 in year 1 — one-time net list entry [software licence + 1 year of update rights].",
         ladder:
-          "On the loyalty model: year 2 €599 (−25%): +1 year of update rights, year 3 €479 (−40%) +1 year of update rights, and from year 4 updates for life.",
+          "On the loyalty model: year 2 €599 (−25%): +1 year of update rights, year 3 €479 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
           "The Enterprise plan provides team seats, several parallel active cases, automated accounting and bank-statement import (CSV, XML), and optional local sensor or Edge intake. Imported data stays closed on your machine. Case / Slot / Seat / Guest are the licence quota; adding an education or BCP engine does not add quota. The Enterprise Desktop add-on is in preparation (free access at launch) and does not affect launching existing web cases and slots. Because this plan needs a conversation, there is no self-serve checkout — please contact us for a quote.",
         contentsTitle: "What the Enterprise plan includes:",
@@ -659,9 +659,9 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "basic",
       title: "Basic csomag",
-      priceLine: "nettó 199 000 Ft az 1. évben — egyszeri díj [örökéletű licensz +1 évre frissítés jogosultság]",
+      priceLine: "nettó 199 000 Ft az 1. évben — egyszeri díj [egyszeri szoftverlicenc +1 évre frissítés jogosultság]",
       ladder:
-        "A hűségmodell alapján: 2. év 149 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 119 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 149 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 119 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:
         "A Basic csomagot egyetlen döntéshozónak terveztük: egyidejűleg egy aktív esetet, három aktív slotot, valamint egy szerkesztői fiókot és egy vendégfiókot biztosít. Tartalmazza a teljes törzsadatkezelést, a kézi rögzítést, a fájl-alapú importot (CSV, XML) és a magánvagyon nyomon követését. Az alkalmazás azonnal elindul a böngésződben. A Case / Slot / Seat / Guest a licenc kvótája; oktatási vagy BCP motorfelvétel külön kvótát nem ad. Az inaktív adatok korlátozás nélkül, szabadon felülírhatók, a számítások pedig teljes egészében a saját gépeden futnak le.",
       contentsTitle: "A Basic csomag tartalma:",
@@ -679,11 +679,11 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "pro",
       title: "Pro csomag (Ajánlott)",
-      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [örökéletű licensz +1 évre frissítés jogosultság].",
+      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [egyszeri szoftverlicenc +1 évre frissítés jogosultság].",
       ladder:
-        "A hűségmodell alapján: 2. év 299 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 239 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 299 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 239 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:
-        "A Pro csomag már 2 párhuzamos aktív üres esettel indít, esetenként 1 magán, 1 vállalkozás, és egy projekt munkaterülettel, akár közös ingóság, és vagy ingatlan kezeléssel. Beütemezhető helyi CSV/XML import biztosítással. Az adatok feldolgozása mindvégig a te gépeden történik többszörös titkosítással. A 2027 tavaszán érkező Pro Desktop early access változat ingyenesen jár a Pro csomag mellé, de ez nem feltétele a jelenlegi webes használatnak. A Case / Slot / Seat / Guest a licenc kvótája; oktatási vagy BCP motorfelvétel külön kvótát nem ad. A bővítők örökös kapacitásmodulok maradnak.",
+        "A Pro csomag már 2 párhuzamos aktív üres esettel indít, esetenként 1 magán, 1 vállalkozás, és egy projekt munkaterülettel, akár közös ingóság, és vagy ingatlan kezeléssel. Beütemezhető helyi CSV/XML import biztosítással. Az adatok feldolgozása mindvégig a te gépeden történik többszörös titkosítással. A 2027 tavaszán érkező Pro Desktop early access változat ingyenesen jár a Pro csomag mellé, de ez nem feltétele a jelenlegi webes használatnak. A Case / Slot / Seat / Guest a licenc kvótája; oktatási vagy BCP motorfelvétel külön kvótát nem ad. A bővítők egyszeri díjas kapacitásmodulok maradnak.",
       contentsTitle: "A Pro csomag tartalma:",
       bullets: [
         "2 aktív eset (demó adat mentes): esetenként 3 aktív munkaterület (pl. Magán, Vállalkozás, Projekt), akár közös ingóság- és ingatlan kezeléssel",
@@ -691,7 +691,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
         "5 vendégfiók (olvasói hozzáférés, akár konkrét személyre szűkítve)",
         "Helyi CSV/XML import, figyelt mappa és saját szabályok a gépeden",
         "Pro Desktop early access 2027 tavaszán, a Pro csomag mellé ingyen",
-        "Extra aktív eset modul: +49 000 Ft (örökös tulajdon)",
+        "Extra aktív eset modul: +49 000 Ft (egyszeri díjas kapacitásmodul)",
         "Három kimeneti pálya (pesszimista, realista, optimista)",
         "Beépített módszertanok, segédletek, és útmutatások: Első projekt tervezéstől – projektek vezetéséig",
       ],
@@ -701,9 +701,9 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "enterprise",
       title: "Enterprise & Csapatok",
-      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [örökéletű licensz +1 évre frissítés jogosultság].",
+      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [egyszeri szoftverlicenc +1 évre frissítés jogosultság].",
       ladder:
-        "A hűségmodell alapján: 2. év 599 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 479 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől pedig örökéletű frissítés jár.",
+        "A hűségmodell alapján: 2. év 599 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 479 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:
         "Az Enterprise csomag csapathelyeket, több párhuzamos aktív esetet, automatizált könyvelési és bankkivonat-importot (CSV, XML), valamint opcionális helyi érzékelő- vagy Edge-bekötést nyújt. Az importált adatok zártan a gépeden maradnak. A Case / Slot / Seat / Guest a licenc kvótája; oktatási vagy BCP motorfelvétel külön kvótát nem ad. Az Enterprise Desktop bővítő modul előkészítés alatt áll, de ez nem befolyásolja a meglévő webes esetek és slotok indítását. Mivel ez a csomag egyedi egyeztetést igényel, nincs önkiszolgáló checkout — kérjük, vedd fel velünk a kapcsolatot az ajánlatért.",
       contentsTitle: "Az Enterprise csomag tartalma:",

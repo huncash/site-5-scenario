@@ -21,6 +21,8 @@ import {
   SCENARIO_DOOR_STEP_KEY,
   type ScenarioDoorStep,
 } from "@/lib/doorStep";
+import { activateDemoCaseEngines } from "@/lib/labsEngines";
+import { getMeshRepository } from "@/lib/mesh/meshRepository";
 
 export { readScenarioDoorStep, writeScenarioDoorStep, SCENARIO_DOOR_STEP_KEY, type ScenarioDoorStep };
 
@@ -145,6 +147,11 @@ export async function enterRememberedOrFirstDemo(vault: {
   return segmentId;
 }
 
+async function armDemoEngines() {
+  if (typeof window === "undefined") return;
+  await activateDemoCaseEngines(getMeshRepository());
+}
+
 export async function enterDemoSegment(
   segmentId: DemoSegmentId,
   vault: {
@@ -174,6 +181,7 @@ export async function enterDemoSegment(
     }
     writeScenarioDoorStep(doorStepForSegment(segmentId));
     writeCaseEntryTab(caseEntryTabForSegment(segmentId));
+    await armDemoEngines();
     return;
   }
 
@@ -186,4 +194,5 @@ export async function enterDemoSegment(
   await seedDemoDataForSegment(segmentId);
   writeScenarioDoorStep(doorStepForSegment(segmentId));
   writeCaseEntryTab(caseEntryTabForSegment(segmentId));
+  await armDemoEngines();
 }

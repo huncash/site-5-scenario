@@ -212,7 +212,32 @@ describe("pre-flight public promise", () => {
     expect(blob).not.toMatch(/lásd #|see #/i);
     expect(supportPricingTiers("hu").find((t) => t.id === "pro")?.bullets.join(" ")).toMatch(/2027/);
     expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.modules).toContain("Pénzáramlás");
-    expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.priceLine).toMatch(/örökéletű licensz/);
+    expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.priceLine).toMatch(/egyszeri szoftverlicenc/);
+    const publicPrice = [
+      ...supportPricingTiers("hu").flatMap((t) => [t.priceLine, t.ladder, t.detail, ...t.bullets]),
+      ...supportPricingTiers("en").flatMap((t) => [t.priceLine, t.ladder, t.detail, ...t.bullets]),
+      supportCopy("hu").pricingAddonPriceMeta,
+      supportCopy("en").pricingAddonPriceMeta,
+    ].join("\n");
+    expect(publicPrice).not.toMatch(/élethosszig tartó tagság|lifetime membership|éves előfizetés|havi előfizetés|yearly subscription|monthly subscription|updates for life|yours for life/i);
     expect(supportPricingTiers("hu").find((t) => t.id === "enterprise")?.contentsTitle).toMatch(/Enterprise csomag tartalma/);
+  });
+
+  it("keeps homepage and Labs funnel on one-time licence language", () => {
+    const blob = [
+      hu.pricing.once,
+      hu.pricing.yearlySub,
+      hu.pricing.loyaltyFooterTitle,
+      hu.labs.funnelLead,
+      hu.labs.cartHint,
+      en.pricing.once,
+      en.pricing.yearlySub,
+      en.pricing.loyaltyFooterTitle,
+      en.labs.funnelLead,
+      en.labs.cartHint,
+    ].join("\n");
+    expect(hu.pricing.once).toMatch(/Egyszeri díj/);
+    expect(hu.labs.funnelLead).toMatch(/Egyszeri szoftverlicenc/);
+    expect(blob).not.toMatch(/élethosszig tartó tagság|lifetime membership|éves előfizetés|havi előfizetés|yearly subscription|monthly subscription|updates for life|yours for life/i);
   });
 });

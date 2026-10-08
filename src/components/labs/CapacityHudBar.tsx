@@ -10,7 +10,9 @@ import {
   readCapacityHud,
   type CapacityFraction,
 } from "@/lib/capacityHud";
-import { jitAddonCartHref, nextPackageCartHref } from "@/lib/entitlement";
+import { useSalesCart } from "@/hooks/useSalesCart";
+import { nextPackageCartHref } from "@/lib/entitlement";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { JitAddonId } from "@/config/plans";
 
@@ -59,6 +61,10 @@ export function CapacityHudBar({
   const { t } = useI18n();
   const hud = readCapacityHud({ profileCount, workspaceIds });
   const nextPack = nextPackageCartHref();
+  const sales = useSalesCart();
+  const putAddon = (id: JitAddonId) => {
+    void sales.add(id).then(() => toast.message(t("labs.cartSaved")));
+  };
 
   const addons: Array<{ id: JitAddonId; label: string }> = [
     { id: "case_plus_1", label: t("labs.addCase") },
@@ -88,7 +94,7 @@ export function CapacityHudBar({
             key={a.id}
             type="button"
             className="flex w-full rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-accent"
-            onClick={() => goCart(jitAddonCartHref(a.id))}
+            onClick={() => putAddon(a.id)}
           >
             {a.label}
           </button>
@@ -126,7 +132,7 @@ export function CapacityHudBar({
                       type="button"
                       className="flex w-full flex-col items-center gap-0.5 rounded-md px-0.5 py-0.5 text-center hover:bg-accent/60"
                       aria-label={`${name} ${frac}`}
-                      onClick={() => goCart(jitAddonCartHref(HUD_ADDON[row.id]))}
+                      onClick={() => putAddon(HUD_ADDON[row.id])}
                     >
                       <span className="text-[10px] leading-none text-muted-foreground">{name}</span>
                       <span className="font-mono text-[11px] tabular-nums leading-none text-foreground">

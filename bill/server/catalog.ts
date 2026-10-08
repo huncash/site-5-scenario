@@ -117,7 +117,7 @@ export function invoicePackageName(tier: BillTier, interval: BillInterval): stri
     const span = interval === "yearly" ? "12 hó" : "1 hó";
     return `Szcenárió — ${LABELS.campus} (${span})`;
   }
-  return `Szcenárió — ${LABELS[tier]} (örökös licenc, 1. év)`;
+  return `Szcenárió — ${LABELS[tier]} (egyszeri szoftverlicenc, 1. év)`;
 }
 
 export function addonNetForTier(addon: JitAddonId, tier: BillTier): number {

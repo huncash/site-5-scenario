@@ -11,7 +11,7 @@ import { isSlotPackId } from "@/lib/scenarioSlots";
 export type EntitlementId = DashboardLabId | JitAddonId;
 
 export const ENTITLEMENT_CONVERSION_BODY =
-  "Ez az örökös bővítmény modul (vagy Pro/Enterprise funkció) jelenleg nincs aktíválva a licencroster-edben. Szeretnéd hozzáadni egyszeri, örökös áron a fiókodhoz?";
+  "Ez a bővítő modul (vagy Pro/Enterprise funkció) jelenleg nincs a licenceden. Hozzáadod egyszeri díjjal?";
 
 export const ENTITLEMENT_CHECKOUT_CTA = "Tovább a pénztárhoz";
 

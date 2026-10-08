@@ -102,8 +102,8 @@ export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
   }
   if (plan.id === "pro") {
     return locale === "en"
-      ? "Starts at once in the browser. Business and project slots, custom rules, watched folder, local CSV/XML import. Desktop early access spring 2027, free. Need more than 2 concurrent cases? Extra active Case module (+€49 perpetual)."
-      : "Azonnal a böngészőben. Vállalkozás és projekt, saját szabály, figyelt mappa, helyi CSV/XML import. Asztali early access 2027 tavaszán, ingyen. 2-nél több párhuzamos case-hez: Extra aktív Case modul (+49 000 Ft / örökös).";
+      ? "Starts at once in the browser. Business and project slots, custom rules, watched folder, local CSV/XML import. Desktop early access spring 2027, free. Need more than 2 concurrent cases? Extra active Case module (+€49 one-time fee)."
+      : "Azonnal a böngészőben. Vállalkozás és projekt, saját szabály, figyelt mappa, helyi CSV/XML import. Asztali early access 2027 tavaszán, ingyen. 2-nél több párhuzamos case-hez: Extra aktív Case modul (+49 000 Ft, egyszeri díj).";
   }
   return locale === "en"
     ? "Starts at once in the browser: 1 active case, 3 active slots (three base paths)."
@@ -147,9 +147,9 @@ export function buildPricingCompareRows(locale: Locale = "hu"): PricingCompareRo
       id: "license",
       feature: L ? "License model" : "Licencmodell",
       cells: {
-        starter: L ? "Gradual perpetual" : "Éves hűség-licenc",
-        pro: L ? "Gradual perpetual" : "Éves hűség-licenc",
-        expert: L ? "Gradual perpetual" : "Éves hűség-licenc",
+        starter: L ? "One-time software licence" : "Egyszeri szoftverlicenc",
+        pro: L ? "One-time software licence" : "Egyszeri szoftverlicenc",
+        expert: L ? "One-time software licence" : "Egyszeri szoftverlicenc",
       },
     },
     {

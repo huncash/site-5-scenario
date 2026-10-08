@@ -17,10 +17,41 @@ export type EngineShareDecision =
   | { ok: true; channel: EngineShareChannel }
   | { ok: false; reason: "fusion" | "guest" | "channel" | "direction"; message: string };
 
-export function licensedEngines(lic: LicenseEntitlement | null | undefined): LabsEngineId[] {
+const DEMO_CASE_ENGINES_KEY = "szcenario:demo-case-engines";
+const ALL_LICENSED_ENGINES: LabsEngineId[] = ["economic", "education", "resilience"];
+
+let demoCaseEngines = false;
+
+export function markDemoCaseEngines(on: boolean) {
+  demoCaseEngines = on;
+  if (typeof window === "undefined") return;
+  try {
+    if (on) window.sessionStorage.setItem(DEMO_CASE_ENGINES_KEY, "1");
+    else window.sessionStorage.removeItem(DEMO_CASE_ENGINES_KEY);
+  } catch {
+    /* ignore */
+  }
+  window.dispatchEvent(new Event("szcenario:license"));
+}
+
+export function demoCaseEnginesActive(): boolean {
+  if (typeof window === "undefined") return demoCaseEngines;
+  try {
+    return window.sessionStorage.getItem(DEMO_CASE_ENGINES_KEY) === "1" || demoCaseEngines;
+  } catch {
+    return demoCaseEngines;
+  }
+}
+
+function tokenEngines(lic: LicenseEntitlement | null | undefined): LabsEngineId[] {
   const extra = (lic?.engines ?? []).filter(isLabsEngineId);
   const set = new Set<LabsEngineId>(["economic", ...extra]);
-  return ["economic", "education", "resilience"].filter((id) => set.has(id));
+  return ALL_LICENSED_ENGINES.filter((id) => set.has(id));
+}
+
+export function licensedEngines(lic: LicenseEntitlement | null | undefined): LabsEngineId[] {
+  if (demoCaseEnginesActive()) return ALL_LICENSED_ENGINES;
+  return tokenEngines(lic);
 }
 
 /** Motor felvétele ugyanarra a tokenre — kvóta érintetlen. */
@@ -29,7 +60,7 @@ export function grantEngineOnLicense(
   engine: LabsEngineId,
 ): LicenseEntitlement {
   if (engine === "economic") return lic;
-  const engines = licensedEngines({ ...lic, engines: [...(lic.engines ?? []), engine] });
+  const engines = tokenEngines({ ...lic, engines: [...(lic.engines ?? []), engine] });
   return { ...lic, engines: engines.filter((id) => id !== "economic") };
 }
 
@@ -53,6 +84,14 @@ export function activateAllLicenseEngines(): LicenseEntitlement | null {
   if (already) return lic;
   writeLicense(next);
   return next;
+}
+
+/** Demó eset: a három motor látszik; fizetős tokent nem írjuk felül. */
+export function activateDemoCaseLicense(): LicenseEntitlement | null {
+  markDemoCaseEngines(true);
+  const lic = readLicense();
+  if (!lic || lic.status === "local") return activateAllLicenseEngines();
+  return lic;
 }
 
 export function engineAddonQuotaDelta(): { cases: 0; slots: 0; seats: 0; guests: 0 } {
