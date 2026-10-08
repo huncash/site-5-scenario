@@ -17,7 +17,7 @@ const hu = {
   brand: "Szcenárió · support",
   homeTitle: "Szcenárió support",
   homeLead:
-    "Először a tudásbázis és a GYIK. A Szcenárió a saját eszközödön számol: a fejlesztők nem látják és nem gyűjtik az adataidat. Nincs telefonos ügyintézés.",
+    "Először a tudásbázis és a GYIK. A szimuláció a saját eszközödön fut; a fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek. Nincs telefonos ügyintézés.",
   tips: "Tippek",
   faq: "GYIK",
   faqTitle: "Gyakran Ismételt Kérdések",
@@ -92,11 +92,12 @@ const hu = {
   pricingRoadmapEducationBody:
     "Nem egy statikus oktatási környezetet szimulálunk, hanem fordítva: valódi, kritikus döntési helyzetek szimulációjával tanítunk meg gondolkodni, ahol a lépéseknek mérhető következményei vannak a rendszerben. Az oktatási motor a meglévő Case / Slot keretre ül — moduláris legó, külön licenckvótát nem ad. Helyben fut, Poka-Yoke zárral; külső felhős adatbázist nem használunk.",
   pricingAddonStatus:
-    "Ez a modul most nem indítható. Előkészítés alatt áll, és megvásárolható bővítőként. További részletek a támogatási, míg a vásárlási folyamat a számlázási aloldalunkon található.",
+    "Ez a modul most nem indítható — előkészítés alatt áll. Kosárba nem tehető; az indulásról helyi emlékeztetőt kérhetsz. További részletek a támogatási oldalon.",
   pricingAddonBuy: "Vásárlás a számlázáson",
+  pricingNotifySoon: "Értesítést kérek az indulásról",
   pricingAddonsTitle: "Bővítő modulok",
   pricingAddonsBody:
-    "Egyszeri díjas bővítők a párhuzamosan nyitott Case-ekre, Slotokra, Seat-ekre, vendégfiókokra és a helyi Edge-bekötésre — ezek kapacitást adnak a licenckerethez. A gazdasági, oktatási és BCP motor ugyanerre a keretre ül; motorfelvétel nem nyit új asztalt. A vásárlás a számlázási aloldalon történik.",
+    "Egyszeri díjas bővítők a párhuzamosan nyitott ügyfélfiókokra, munkaterületekre, szerkesztőkre, vendégfiókokra és a helyi Edge-bekötésre — ezek kapacitást adnak a licenckerethez. Könyvelőknek és pénzügyi tanácsadóknak külön asztal: tizennyolc párhuzamos ügyfélfiók és vendégkeret. A gazdasági, oktatási és BCP motor ugyanerre a keretre ül; motorfelvétel nem nyit új asztalt. A vásárlás a számlázási aloldalon történik.",
   pricingOwnLineTitle: "Opcionális saját vonal",
   pricingOwnLineWhen: "Egyedi asztali és app-kiadásokban · kapcsolható, soha nem kötelező",
   pricingOwnLineLead:
@@ -111,7 +112,7 @@ const hu = {
   ],
   pricingOwnLineClose:
     "A kapcsoló a beállításokban jelenik meg az egyedi igényű asztali és app-kiadásokban. Senkire nem erőltetjük, és nem része a nyilvános belépőígéretnek.",
-  pricingAddonPriceMeta: "Ft nettó, egyszeri díj",
+  pricingAddonPriceMeta: "bruttó + nettó + ÁFA, egyszeri szoftverlicenc",
   pricingEconomicTitle: "Gazdasági szcenárió motor",
   pricingEconomicWhen: "Elérhető",
   pricingEconomicBody:
@@ -133,7 +134,7 @@ const hu = {
     "A Case, a Slot, a Seat és a Guest a licenc kvótája: hány asztal, fül, szerkesztő és vendég lehet egyszerre nyitva. A gazdasági, oktatási és működésfolytonossági motor ugyanerre a keretre ül rá — moduláris legó, nem új asztal. Extra Case, extra Slot vagy extra Seat kapacitást ad; motorfelvétel kvótát nem. A számolás a saját eszközödön marad, Poka-Yoke zárral; külső felhős adatbázist nem használunk.",
   pricingLocalTitle: "Lokális bankkivonat-import és Edge",
   pricingLocalBody:
-    "A bankkivonatok (CSV, XML formátumban) kizárólag a saját gépeden, a Mesh Data Manager kerete között dolgozódnak fel — kézi feltöltéssel, vagy a Pro csomagban egy általad megadott figyelt mappából. Nincs kötelező felhőkapcsolat, nincs külső szerveren tárolt adatbázis. A fejlesztők soha nem látják és nem gyűjtik a pénzügyi adataidat se. Az opcionális helyi bekötések szintén nálad maradnak, semmilyen használati statisztikát nem küldünk vissza. A megvásárolt motor a te hardvereden él és dolgozik.",
+    "A bankkivonatok (CSV, XML formátumban) kizárólag a saját gépeden, a Mesh Data Manager kerete között dolgozódnak fel — kézi feltöltéssel, vagy a Pro csomagban egy általad megadott figyelt mappából. Nincs kötelező felhőkapcsolat a szimulációhoz. A szimulációs adatok helyi tárhelyen futnak; a fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek. Az opcionális helyi bekötések nálad maradnak. A megvásárolt motor a te hardvereden él és dolgozik.",
   pricingWorkflowTitle: "Így működik a gyakorlatban",
   pricingWorkflowBody:
     "A folyamat logikus lépésekből épül fel. Első lépésként rögzíted a törzsadatokat: a profilodat, a magánvagyontárgyakat és az ingatlanokat, amelyek titkosítva, kizárólag helyben tárolódnak. Ezt követően érkezik meg a bankkivonat a Mesh Data Managerbe: a Basic csomagban kézi CSV vagy XML fájlformátumban, a Pro csomagban pedig figyelt mappából és saját szabályok alapján. A helyzetkép ekkor áll össze: a tételek a megadott szabályok szerint a megfelelő kategóriákba rendeződnek.",
@@ -153,7 +154,7 @@ const en: typeof hu = {
   brand: "Szcenárió · support",
   homeTitle: "Szcenárió support",
   homeLead:
-    "Start with the knowledge base and FAQ. Szcenárió calculates on your device: developers do not see or collect your data. No phone desk.",
+    "Start with the knowledge base and FAQ. The simulation runs on your device; payment, billing and support data are processed as the law requires. No phone desk.",
   tips: "Tips",
     faq: "FAQ",
     faqTitle: "Frequently Asked Questions",
@@ -228,11 +229,12 @@ const en: typeof hu = {
   pricingRoadmapEducationBody:
     "We do not simulate a static classroom. Quite the reverse: we teach people to think through genuine, critical decision situations, where steps have measurable consequences in the system. The education engine sits on the existing Case / Slot frame — modular Lego, no extra licence quota. It runs locally, behind a Poka-Yoke lock; there is no external cloud database.",
   pricingAddonStatus:
-    "This module cannot be started now. It is in preparation, and can be purchased as an add-on. Further details are on the support page, while the purchase process is on billing.",
+    "This module cannot be started now — it is in preparation. It cannot be added to the cart; you can save a local reminder for launch. Further details are on the support page.",
   pricingAddonBuy: "Purchase on billing",
+  pricingNotifySoon: "Notify me at launch",
   pricingAddonsTitle: "Add-on modules",
   pricingAddonsBody:
-    "One-time add-ons for concurrently open Cases, Slots, Seats, guest accounts and local Edge intake — they add capacity to the licence frame. The economic, education and BCP engines sit on that same frame; adding an engine does not open a new desk. Purchase is on the billing page.",
+    "One-time add-ons for concurrently open client files, workspaces, editors, guest accounts and local Edge intake — they add capacity to the licence frame. Accountants and financial advisors have a dedicated desk: eighteen parallel client files and guest seats. The economic, education and BCP engines sit on that same frame; adding an engine does not open a new desk. Purchase is on the billing page.",
   pricingOwnLineTitle: "Optional own line",
   pricingOwnLineWhen: "Custom desktop and app editions · optional, never required",
   pricingOwnLineLead:
@@ -247,7 +249,7 @@ const en: typeof hu = {
   ],
   pricingOwnLineClose:
     "The switch appears in settings on custom desktop and app editions. We do not force it on anyone, and it is not part of the public entry promise.",
-  pricingAddonPriceMeta: "HUF net, one-time fee",
+  pricingAddonPriceMeta: "gross + net + VAT, one-time software licence",
   pricingEconomicTitle: "Economic scenario engine",
   pricingEconomicWhen: "Available",
   pricingEconomicBody:
@@ -269,7 +271,7 @@ const en: typeof hu = {
     "Case, Slot, Seat and Guest are the licence quota: how many desks, tabs, editors and guests may be open at once. The economic, education and continuity engines sit on that same frame — modular Lego, not a new desk. Extra Case, extra Slot or extra Seat add capacity; adding an engine does not add quota. Calculation stays on your device, behind a Poka-Yoke lock; there is no external cloud database.",
   pricingLocalTitle: "Local bank-statement import and Edge",
   pricingLocalBody:
-    "Bank statements (CSV, XML) are processed only on your own machine, inside Mesh Data Manager — by hand, or on Pro from a watched folder you choose. No required cloud link, no database stored on an external server. Developers never see or collect your financial data either. Optional local hook-ups also stay with you; we send back no usage statistics. The purchased engine lives and works on your hardware.",
+    "Bank statements (CSV, XML) are processed only on your own machine, inside Mesh Data Manager — by hand, or on Pro from a watched folder you choose. No required cloud link for the simulation. Simulation data runs in local storage; payment, billing and support data are processed as the law requires. Optional local hook-ups stay with you. The purchased engine lives and works on your hardware.",
   pricingWorkflowTitle: "How it works in practice",
   pricingWorkflowBody:
     "The sequence is a set of clear steps. First you record master data: your profile, personal assets and property, stored encrypted and only locally. Then the bank statement arrives in Mesh Data Manager: on Basic as a hand-chosen CSV or XML file, on Pro from a watched folder and your own rules. That is when the picture comes together: lines fall into the right categories under the rules you set.",
@@ -286,7 +288,7 @@ const en: typeof hu = {
 };
 
 const TIPS_EN = [
-  { q: "Where is my data?", a: "On your device. Developers never see or collect it. Save to a file, like a spreadsheet used to be — or invite a guest." },
+  { q: "Where is my data?", a: "Simulation data runs on your device, in the browser / local storage. Payment, billing and support data are processed as the law requires. Save to a file, like a spreadsheet used to be — or invite a guest." },
   { q: "Is there phone support?", a: "No. Writing only, by ticket." },
   { q: "How fast is the reply?", a: "On average within 24 hours, in writing." },
   { q: "Where is the video?", a: "On YouTube. This server does not store video files." },
@@ -333,7 +335,7 @@ const FAQ_CHECKLIST_EN: FaqItem[] = [
   {
     id: "check-save",
     q: "How do I save or restore my data?",
-    a: "In **Settings** you save to a local file and restore from the same place. There is no cloud account: what is on this machine is yours. Developers never see or collect it.",
+    a: "In **Settings** you save to a local file and restore from the same place. There is no cloud account for the simulation: modelled numbers stay on this machine. Payment, billing and support data are processed as the law requires.",
   },
   {
     id: "check-lock",
@@ -354,7 +356,7 @@ const FAQ_GENERAL_EN: FaqItem[] = [
   { q: "Does it work offline?", a: "The app does. The support iframe needs a network; offline, local help stays." },
   {
     q: "Do developers see my data?",
-    a: "No. Szcenárió calculates on your own device. The statement goes into Mesh Data Manager locally. Developers never see or collect modelled data at any level.",
+    a: "Simulation data runs on your own device. The statement goes into Mesh Data Manager locally. Payment, billing and support data are processed as the law requires — they are not used to model your case.",
   },
   {
     q: "Why is it called Szcenárió — more than a good year and a bad year?",
@@ -592,7 +594,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "basic",
         title: "Basic plan",
-        priceLine: "net €199 in year 1 — one-time software licence [year-1 purchase + 1 year of update rights]",
+        priceLine: "gross €253 in year 1 — one-time software licence (net €199 + 27% VAT), with 1 year of update support",
         ladder:
           "On the loyalty model: year 2 €149 (−25%): +1 year of update rights, year 3 €119 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
@@ -612,7 +614,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "pro",
         title: "Pro plan (Recommended)",
-        priceLine: "€399 in year 1 — one-time net list entry [software licence + 1 year of update rights].",
+        priceLine: "gross €507 in year 1 — one-time software licence (net €399 + 27% VAT), with 1 year of update support.",
         ladder:
           "On the loyalty model: year 2 €299 (−25%): +1 year of update rights, year 3 €239 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
@@ -634,7 +636,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
       {
         id: "enterprise",
         title: "Enterprise & Teams",
-        priceLine: "€799 in year 1 — one-time net list entry [software licence + 1 year of update rights].",
+        priceLine: "gross €1,015 in year 1 — one-time software licence (net €799 + 27% VAT), with 1 year of update support.",
         ladder:
           "On the loyalty model: year 2 €599 (−25%): +1 year of update rights, year 3 €479 (−40%) +1 year of update rights, and from year 4 further engine updates at no extra charge.",
         detail:
@@ -659,7 +661,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "basic",
       title: "Basic csomag",
-      priceLine: "nettó 199 000 Ft az 1. évben — egyszeri díj [egyszeri szoftverlicenc +1 évre frissítés jogosultság]",
+      priceLine: "bruttó 252 730 Ft az 1. évben — egyszeri szoftverlicenc (nettó 199 000 Ft + 27% ÁFA), 1 év frissítési támogatással",
       ladder:
         "A hűségmodell alapján: 2. év 149 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 119 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:
@@ -679,7 +681,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "pro",
       title: "Pro csomag (Ajánlott)",
-      priceLine: "399 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [egyszeri szoftverlicenc +1 évre frissítés jogosultság].",
+      priceLine: "bruttó 506 730 Ft az 1. évben — egyszeri szoftverlicenc (nettó 399 000 Ft + 27% ÁFA), 1 év frissítési támogatással.",
       ladder:
         "A hűségmodell alapján: 2. év 299 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 239 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:
@@ -701,7 +703,7 @@ export function supportPricingTiers(locale: Locale): SupportPricingTier[] {
     {
       id: "enterprise",
       title: "Enterprise & Csapatok",
-      priceLine: "799 000 Ft az 1. évben — egyszeri, nettó listaáras belépő [egyszeri szoftverlicenc +1 évre frissítés jogosultság].",
+      priceLine: "bruttó 1 014 730 Ft az 1. évben — egyszeri szoftverlicenc (nettó 799 000 Ft + 27% ÁFA), 1 év frissítési támogatással.",
       ladder:
         "A hűségmodell alapján: 2. év 599 000 Ft (−25%): +1 évre frissítés jogosultság, 3. év 479 000 Ft (−40%) +1 évre frissítés jogosultság, a 4. évtől a további motorfrissítésnek nincs külön díja.",
       detail:

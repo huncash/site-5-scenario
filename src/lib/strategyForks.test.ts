@@ -21,7 +21,10 @@ describe("strategyPlanPath + forks", () => {
 
   it("inflation: lock vs float+pass vs float+cut updates runway, margin and extra COGS", () => {
     const idle = resolveInflationPlanPro(null, null);
-    expect(idle.every((c) => c.runwayMonths == null)).toBe(true);
+    expect(idle.find((c) => c.tone === "pess")!.runwayMonths).toBe(8);
+    expect(idle.every((c) => c.runwayMonths != null && c.exitPenaltyHuf != null && c.monthlyObligationHuf != null)).toBe(
+      true,
+    );
 
     const lock = resolveInflationPlanPro("lock", "pass");
     expect(lock.every((c) => c.monthlyObligationHuf === 0)).toBe(true);

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { Construction } from "lucide-react";
 
+import { NotifyLaunchButton } from "@/components/legal/NotifyLaunchButton";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -83,7 +84,7 @@ export function FeatureComingSoonDialog({
   onOpenChange,
   title,
   purpose,
-  featureId: _featureId,
+  featureId,
   kind = "soon",
 }: {
   open: boolean;
@@ -93,7 +94,6 @@ export function FeatureComingSoonDialog({
   featureId?: string;
   kind?: "soon" | "upgrade";
 }) {
-  void _featureId;
   const upgrade = kind === "upgrade";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,7 +115,7 @@ export function FeatureComingSoonDialog({
           <p className="text-xs leading-relaxed text-muted-foreground">
             {upgrade
               ? "A számok a gépeden maradnak. A Basic a magánvagyon, a kézi rögzítés és a fájl-import asztala. A Pro a vállalkozás, a projekt, a figyelt mappa és a saját szabály."
-              : "A belépési pont megvan. A modul a saját eszközödön fog futni — nincs felhős adatbázis."}
+              : "A belépési pont megvan. A modul a saját eszközödön, a böngészőben / helyi tárhelyen fog futni. A fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek."}
           </p>
           {upgrade ? (
             <a
@@ -127,10 +127,16 @@ export function FeatureComingSoonDialog({
           ) : null}
         </div>
 
-        <DialogFooter>
-          <Button type="button" className="w-full sm:w-auto" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onOpenChange(false)}>
             Megértettem / Bezárás
           </Button>
+          {upgrade ? null : (
+            <NotifyLaunchButton
+              featureId={featureId ? `soon:${featureId}` : `soon:${title}`}
+              onSaved={() => onOpenChange(false)}
+            />
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

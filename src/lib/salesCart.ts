@@ -3,7 +3,7 @@
  * Vendég: cart:guest (Mesh localStore). Belépett: cart:{token} ugyanazon a gépen.
  */
 import { PLANS_CONFIG, type JitAddonId, type PublicPlanId } from "@/config/plans";
-import { JIT_ADDON_BY_ID, isJitAddonId, parseCheckoutAddons } from "@/content/pricing/addons";
+import { isComingSoonJitAddon, JIT_ADDON_BY_ID, isJitAddonId, parseCheckoutAddons } from "@/content/pricing/addons";
 export { parseCheckoutAddons };
 import { billCheckoutUrl } from "@/lib/billing";
 import { engineFunnelHref } from "@/lib/engineView";
@@ -48,6 +48,15 @@ const PLAN_LABEL: Record<SalesPlanSku, { hu: string; en: string }> = {
   starter: { hu: "Basic csomag — egyszeri szoftverlicenc (1. év)", en: "Basic pack — one-time software licence (year 1)" },
   pro: { hu: "Pro csomag — egyszeri szoftverlicenc (1. év)", en: "Pro pack — one-time software licence (year 1)" },
 };
+
+export function addonQueryFromCart(cart: SalesCart): string {
+  const parts: string[] = [];
+  for (const line of cart.lines) {
+    if (!isJitAddonId(line.sku) || isComingSoonJitAddon(line.sku)) continue;
+    for (let i = 0; i < line.qty; i += 1) parts.push(line.sku);
+  }
+  return parts.join(",");
+}
 
 const ENGINE_LABEL: Record<SalesEngineSku, { hu: string; en: string }> = {
   education: { hu: "Oktatási motor (egyszeri bővítő)", en: "Education engine (one-time add-on)" },
@@ -118,6 +127,7 @@ export function setPlan(cart: SalesCart, plan: SalesPlanSku): SalesCart {
 }
 
 export function addSku(cart: SalesCart, sku: SalesCartSku, qty = 1): SalesCart {
+  if (isJitAddonId(sku) && isComingSoonJitAddon(sku)) return cart;
   if (isSalesPlanSku(sku)) return setPlan(cart, sku);
   return {
     ...cart,
@@ -170,13 +180,14 @@ export function quoteCart(cart: SalesCart): SalesQuote {
       continue;
     }
     if (isJitAddonId(line.sku)) {
+      if (isComingSoonJitAddon(line.sku)) continue;
       addons.push(line.sku);
       const addon = JIT_ADDON_BY_ID[line.sku];
       lines.push({
         sku: line.sku,
         qty: line.qty,
-        labelHu: `${addon.labelHu} — egyszeri díj`,
-        labelEn: `${addon.labelEn} — one-time fee`,
+        labelHu: `${addon.labelHu} — egyszeri szoftverlicenc`,
+        labelEn: `${addon.labelEn} — one-time software licence`,
         netHuf: addon.priceHuf * line.qty,
         oneTime: true,
         quoteOnly: false,
@@ -206,24 +217,16 @@ export function quoteCart(cart: SalesCart): SalesQuote {
 
 export function checkoutHrefFromCart(cart: SalesCart): string {
   const q = quoteCart(cart);
-  if (q.plan) {
+  const addon = addonQueryFromCart(cart);
+  if (q.plan || q.addons.length) {
     return billCheckoutUrl({
-      tier: q.plan,
+      tier: q.plan ?? "pro",
       interval: "yearly",
-      addon: q.addons[0],
-      addons: q.addons.length > 1 ? q.addons : undefined,
-    });
-  }
-  if (q.addons[0]) {
-    return billCheckoutUrl({
-      tier: "pro",
-      interval: "yearly",
-      addon: q.addons[0],
-      addons: q.addons.length > 1 ? q.addons : undefined,
+      addon: addon || undefined,
     });
   }
   const engine = q.engines[0];
   if (engine) return engineFunnelHref(engine);
-  return billCheckoutUrl({ tier: "pro", interval: "yearly" });
+  return "";
 }
 

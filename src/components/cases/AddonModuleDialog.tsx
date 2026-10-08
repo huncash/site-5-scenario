@@ -1,3 +1,4 @@
+import { NotifyLaunchButton } from "@/components/legal/NotifyLaunchButton";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,17 +9,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/i18n";
-import { billCheckoutUrl } from "@/lib/billing";
 import { supportPricingHref } from "@/lib/support";
 
 type Props = {
   open: boolean;
   title: string;
+  notifyId?: string;
   onOpenChange: (open: boolean) => void;
 };
 
-export function AddonModuleDialog({ open, title, onOpenChange }: Props) {
+export function AddonModuleDialog({ open, title, notifyId, onOpenChange }: Props) {
   const { t } = useI18n();
+  const featureId = notifyId || title;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg border-border bg-card text-foreground sm:rounded-xl">
@@ -36,9 +38,7 @@ export function AddonModuleDialog({ open, title, onOpenChange }: Props) {
           <Button type="button" variant="outline" asChild>
             <a href={supportPricingHref("desktop-engines")}>{t("door.addonCtaSupport")}</a>
           </Button>
-          <Button type="button" className="btn-cta" asChild>
-            <a href={billCheckoutUrl({ tier: "pro", interval: "yearly" })}>{t("door.addonCtaBuy")}</a>
-          </Button>
+          <NotifyLaunchButton featureId={`soon:${featureId}`} onSaved={() => onOpenChange(false)} />
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -141,7 +141,8 @@ export type JitAddonId =
   | "slot_plus_1"
   | "seat_plus_1"
   | "guest_plus_1"
-  | "edge_sensor";
+  | "edge_sensor"
+  | "advisor_desk";
 
 /** Aktuális motor / engine verzió (licenc kompatibilitás). */
 export const ENGINE_VERSION = "0.1.4";
@@ -171,7 +172,12 @@ export const JIT_ADDON_PRICES: Record<JitAddonId, number> = {
   seat_plus_1: 79_000,
   guest_plus_1: 19_000,
   edge_sensor: 99_000,
+  advisor_desk: 249_000,
 };
+
+/** Könyvelői / tanácsadói asztal: párhuzamos ügyfélfiók-keret. */
+export const ADVISOR_CASE_FRAME = 18;
+export const ADVISOR_GUEST_FRAME = 18;
 
 /** Enterprise önkiszolgáló Case modul (eltér a Pro Case upsell-től). */
 export const ENTERPRISE_CASE_ADDON_HUF = 39_000;

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -41,15 +41,22 @@ import { getPdcaCycleSum } from "@/lib/pdcaCycle";
 import { useVault } from "@/lib/vault";
 import { toast } from "sonner";
 import { DEMO_SELECTOR_HASH, preferDemoSelectorHome } from "@/lib/demoSelector";
+import { BackupCueBanner } from "@/components/BackupCueBanner";
+import { usedLiveCaseCount } from "@/lib/advisorDesk";
+import { stampBackupExport } from "@/lib/backupCue";
 import { isDemoProfileName } from "@/lib/demoSession";
+import { getMeshRepository } from "@/lib/mesh/meshRepository";
 import { useOnboardingTour } from "@/components/onboarding/OnboardingTourProvider";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { DesktopAppPanel } from "@/components/desktop/DesktopAppPanel";
 import { SupportModal } from "@/components/support/SupportModal";
 import { SupportMainContent } from "@/components/SupportSurface";
 import { useI18n } from "@/i18n";
+import { useLeanView } from "@/lib/leanView";
+import { cycleLabel } from "@/lib/simpleLabels";
 import { cn } from "@/lib/utils";
 import { LabsOverlay } from "@/components/labs/LabsOverlay";
+import { LABS_OVERLAY_OPEN_EVENT } from "@/lib/labsOverlay";
 import { useDashboardLab } from "@/hooks/useDashboardLabs";
 import { keepLang, langSearch, withInheritedLang } from "@/lib/langSearch";
 
@@ -85,12 +92,18 @@ export function ProfileHeader({
   onRotatePdca?: () => void;
 }) {
   const { lock, state } = useVault();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { lean } = useLeanView();
   const router = useRouter();
   const { openComingSoon } = useFeatureComingSoon();
   const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [labsOverlayOpen, setLabsOverlayOpen] = useState(false);
+  useEffect(() => {
+    const open = () => setLabsOverlayOpen(true);
+    window.addEventListener(LABS_OVERLAY_OPEN_EVENT, open);
+    return () => window.removeEventListener(LABS_OVERLAY_OPEN_EVENT, open);
+  }, []);
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [omni, setOmni] = useState("");
@@ -125,7 +138,7 @@ export function ProfileHeader({
     queryKey: ["profiles"],
     queryFn: () => localdb.listProfiles(),
   });
-  const profileCount = Math.max(1, profilesQ.data?.length ?? 1);
+  const profileCount = usedLiveCaseCount(profilesQ.data);
   const workspaceIds = workspaces.map((w) => w.id);
 
   const openOmniSearch = useCallback(() => {
@@ -233,10 +246,10 @@ export function ProfileHeader({
                       onClick={() => {
                         setProfileOpen((v) => !v);
                       }}
-                      aria-label={t("chrome.pdcaCycles", { n: String(pdcaSum) })}
+                      aria-label={t(lean ? "chrome.pdcaCycles" : "chrome.cycleCount", { n: String(pdcaSum) })}
                       title={t("chrome.profilePanel")}
                     >
-                      <span className="text-muted-foreground leading-none">PDCA</span>
+                      <span className="text-muted-foreground leading-none">{cycleLabel(lean, locale)}</span>
                       <span className="leading-none">#{pdcaSum}</span>
                     </button>
                   </PopoverTrigger>
@@ -257,7 +270,7 @@ export function ProfileHeader({
                           )}
                         </div>
                         <div className="shrink-0 rounded-md border border-border bg-card/50 px-2 py-1 text-[10px] font-mono tabular-nums text-foreground">
-                          PDCA #{pdcaSum}
+                          {cycleLabel(lean, locale)} #{pdcaSum}
                         </div>
                       </div>
 
@@ -310,15 +323,20 @@ export function ProfileHeader({
                   <button
                     type="button"
                     className={cn(
-                      "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-card/40 text-foreground hover:bg-accent",
-                      labsOverlayOpen ? "border-cyan-300/70 text-cyan-100" : "border-border",
+                      "inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border px-2 text-foreground hover:bg-accent",
+                      labsOverlayOpen
+                        ? "border-cyan-300/70 bg-cyan-500/15 text-cyan-100"
+                        : visitorShell
+                          ? "btn-cta border-transparent px-2.5 font-semibold"
+                          : "border-border bg-card/40",
                     )}
-                    aria-label={t("labs.overlayTitle")}
-                    title={t("labs.overlayTitle")}
+                    aria-label={t("labs.configCta")}
+                    title={t("labs.configCta")}
                     aria-expanded={labsOverlayOpen}
                     aria-controls="labs-tree-panel"
                   >
                     <FlaskConical className="h-4 w-4" />
+                    <span className="text-[11px] font-medium">{t("labs.overlayTitle")}</span>
                   </button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -456,6 +474,7 @@ export function ProfileHeader({
                                   ? `mesh_backup_full_${ymdDash()}.json`
                                   : `mesh_backup_${String(wsName).replaceAll(" ", "_")}_${ymdDash()}.json`;
                               downloadText(fn, txt);
+                              void stampBackupExport(getMeshRepository());
                               toast.success(t("chrome.quickSaved"));
                             } catch (e: any) {
                               toast.error(e?.message || t("chrome.quickSaveFail"));
@@ -671,6 +690,7 @@ export function ProfileHeader({
 
       </div>
     </header>
+    {visitorShell ? null : <BackupCueBanner />}
     </>
   );
 }

@@ -13,9 +13,10 @@ import { FooterRopeMark } from "@/components/rope/FooterRopeMark";
 import { RopeSlogan } from "@/components/rope/RopeSlogan";
 import { planCardBullets } from "@/config/planCopy";
 import { PLANS_CONFIG, type PlanConfig, type PublicPlanId } from "@/config/plans";
+import { NotifyLaunchButton } from "@/components/legal/NotifyLaunchButton";
 import { PUBLIC_JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
 import { CAMPUS_MONTHLY_HUF, formatHuf, TIER_CORE, type TierId } from "@/content/pricing/tiers";
-import { resolveVat, SELLER_COUNTRY } from "@/content/pricing/vat";
+import { publicGrossFromNet, resolveVat, SELLER_COUNTRY, splitVat } from "@/content/pricing/vat";
 import { billCheckoutUrl } from "@/lib/billing";
 import { isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -45,21 +46,30 @@ const SUPPORT_PRICING_ANCHOR: Record<PublicPlanId, SupportPricingAnchor> = {
   expert: "enterprise",
 };
 
-/** Csak az 1. évi belépőár — Egyszeri díj. */
+/** 1. évi belépőár: bruttó kiemelve, nettó + ÁFA, egyszeri szoftverlicenc. */
 function EntryPrice(props: { plan: PlanConfig }) {
-  const { t, locale } = useI18n();
+  const { t, locale, money } = useI18n();
   const { plan } = props;
   if (plan.customPricing || plan.priceHuf <= 0) {
     return <div className="text-lg font-semibold text-foreground">{t("pricing.customPrice")}</div>;
   }
-  const line =
-    locale === "en" && plan.priceEur > 0
-      ? `€${plan.priceEur.toLocaleString("en-IE")}`
-      : `${plan.priceHuf.toLocaleString("hu-HU")} Ft`;
+  const vatRate = 27;
+  const euro = locale === "en" && plan.priceEur > 0;
+  const gross = euro ? splitVat(plan.priceEur, vatRate).gross : publicGrossFromNet(plan.priceHuf, vatRate);
+  const net = euro ? plan.priceEur : plan.priceHuf;
+  const headline = euro ? `€${gross.toLocaleString("en-IE")}` : money(gross);
+  const netLine = euro ? `€${net.toLocaleString("en-IE")}` : money(net);
   return (
     <div>
-      <div className="text-lg font-semibold tracking-tight text-foreground">{line}</div>
-      <div className="mt-0.5 text-[12px] text-muted-foreground">{t("pricing.once")}</div>
+      <div className="text-lg font-semibold tracking-tight text-foreground">
+        {t("pricing.gross")} {headline}
+      </div>
+      <div className="mt-0.5 text-[12px] text-muted-foreground">
+        {t("pricing.once")} · {t("pricing.onceTerm")}
+      </div>
+      <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+        ({t("pricing.net")} {netLine} + {vatRate}% {t("pricing.vatShort")})
+      </div>
     </div>
   );
 }
@@ -204,37 +214,45 @@ export function HomePricing(props: { campus?: boolean }) {
           {t("pricing.jitTitle")}
         </summary>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {PUBLIC_JIT_ADDONS.map((a) => (
-            <a
-              key={a.id}
-              href={billCheckoutUrl({
-                tier: "pro",
-                interval: checkoutInterval,
-                addon: a.id,
-                slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
-              })}
-              className="rounded-lg border border-border/50 px-3 py-2 text-[12px] text-foreground hover:border-cyan-400/40"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.assign(
-                  billCheckoutUrl({
-                    tier: "pro",
-                    interval: checkoutInterval,
-                    addon: a.id,
-                    slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
-                  }),
-                );
-              }}
-            >
-              <div className="font-medium">{jitAddonLabel(a, locale)}</div>
-              <AddonPriceLine
-                monthlyNetHuf={a.priceHuf}
-                interval="once"
-                vatRate={marketingVat.rate}
-                className="mt-0.5"
-              />
-            </a>
-          ))}
+          {PUBLIC_JIT_ADDONS.map((a) =>
+            a.comingSoon ? (
+              <div key={a.id} className="rounded-lg border border-dashed border-border/50 px-3 py-2 text-[12px] text-foreground">
+                <div className="font-medium">{jitAddonLabel(a, locale)}</div>
+                <p className="mt-1 text-[11px] text-muted-foreground">{t("door.addonModalLead")}</p>
+                <NotifyLaunchButton featureId={`jit:${a.id}`} size="sm" className="mt-2" />
+              </div>
+            ) : (
+              <a
+                key={a.id}
+                href={billCheckoutUrl({
+                  tier: "pro",
+                  interval: checkoutInterval,
+                  addon: a.id,
+                  slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+                })}
+                className="rounded-lg border border-border/50 px-3 py-2 text-[12px] text-foreground hover:border-cyan-400/40"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.assign(
+                    billCheckoutUrl({
+                      tier: "pro",
+                      interval: checkoutInterval,
+                      addon: a.id,
+                      slotPack: a.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+                    }),
+                  );
+                }}
+              >
+                <div className="font-medium">{jitAddonLabel(a, locale)}</div>
+                <AddonPriceLine
+                  monthlyNetHuf={a.priceHuf}
+                  interval="once"
+                  vatRate={marketingVat.rate}
+                  className="mt-0.5"
+                />
+              </a>
+            ),
+          )}
         </div>
       </details>
     </section>

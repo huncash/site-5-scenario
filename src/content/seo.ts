@@ -3,10 +3,10 @@
 export const SEO_HOME_TITLE =
   "Szcenárió — Helyi irányító-szimuláció a böngészőben · a számok nálad maradnak";
 export const SEO_HOME_DESCRIPTION =
-  "Lokális irodai és vállalati irányító-szimuláció a böngészőben. A fejlesztők soha nem látják és nem gyűjtik az adataidat. Nincs felhős adatbázis. Mesh Data Manager a gépeden. Basic vagy Pro: asztali early access 2027-ben, ingyen.";
+  "Lokális irodai és vállalati irányító-szimuláció a böngészőben. A szimulációs adatok helyben futnak; a fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek. Mesh Data Manager a gépeden. Basic vagy Pro: asztali early access 2027-ben, ingyen.";
 export const SEO_OG_TITLE = "Szcenárió — A számok a gépeden maradnak · a böngésződben";
 export const SEO_OG_DESCRIPTION =
-  "Zéró adatgyűjtés. Mentés fájllal vagy meghívott vendéggel. Azonnal a böngészőben; helyi adat, nincs felhős adatbázis. Asztali early access 2027 tavaszán, ingyen.";
+  "Szimuláció a böngészőben / helyi tárhelyen. Fizetés, számlázás és support a jogszabályok szerint. Mentés fájllal vagy meghívott vendéggel. Asztali early access 2027 tavaszán, ingyen.";
 
 export type SeoPageId = "home" | "school" | "support" | "pricing" | "gdpr" | "about" | "aszf";
 

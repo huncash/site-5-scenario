@@ -51,7 +51,7 @@ export const ASZF_SECTIONS_HU: AszfSection[] = [
     title: "5. Jótállás és kellékszavatosság",
     paragraphs: [
       "B2C: a fogyasztóra a jogszabály szerinti fogyasztóvédelmi és kellékszavatossági szabályok vonatkoznak.",
-      "B2B: a Ptk. általános kellékszavatossági szabályai érvényesek; törvényi kötelező jótállás nincs. A szoftver „ahogy van” jellegű hozzáférés, a modellezés nem minősül pénzügyi vagy jogi tanácsadásnak.",
+      "B2B: a Ptk. általános kellékszavatossági szabályai érvényesek; törvényi kötelező jótállás nincs. A szoftver „ahogy van” jellegű hozzáférés. Oktatási és szimulációs célú eszköz; nem minősül pénzügyi, hitel- vagy befektetési tanácsadásnak, hitelközvetítésnek.",
     ],
   },
   {

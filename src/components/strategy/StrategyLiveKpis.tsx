@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { LeanTerm } from "@/components/HelpIcon";
 import { BulletGraph } from "@/components/lean-viz/LeanCharts";
 import { formatMoney } from "@/lib/finance";
+import { kpisNeverEmpty } from "@/lib/bisztroPreview";
 import { resolveStrategyForkPro, strategyForkTree, type StrategyForkKind } from "@/lib/strategyForks";
 import { useStrategyPlanPath } from "@/lib/strategyPlanPath";
 
@@ -10,10 +11,10 @@ const ink = "text-[var(--text-main)]";
 const inkMuted = "text-[var(--text-muted)]";
 
 function dash(n: number | null, kind: "runway" | "money" | "pct" | "monthly"): string {
-  if (n == null) return "—";
-  if (kind === "runway") return `${n} hó`;
-  if (kind === "pct") return `${n}%`;
-  const money = formatMoney(n, "HUF");
+  const v = kpisNeverEmpty(n);
+  if (kind === "runway") return `${v} hó`;
+  if (kind === "pct") return `${v}%`;
+  const money = formatMoney(v, "HUF");
   return kind === "monthly" ? `${money}/hó` : money;
 }
 

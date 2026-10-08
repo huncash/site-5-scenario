@@ -42,7 +42,8 @@ function isJitAddonId(v: string): v is JitAddonId {
     v === "slot_plus_1" ||
     v === "seat_plus_1" ||
     v === "guest_plus_1" ||
-    v === "edge_sensor"
+    v === "edge_sensor" ||
+    v === "advisor_desk"
   );
 }
 

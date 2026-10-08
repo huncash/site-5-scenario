@@ -30,6 +30,7 @@ export const PUBLIC_JIT_ROWS = [
   { id: "seat_plus_1" as const, labelHu: "+1 Extra szerkesztő", priceHuf: JIT_ADDON_PRICES.seat_plus_1 },
   { id: "guest_plus_1" as const, labelHu: "+1 Extra vendégfiók", priceHuf: JIT_ADDON_PRICES.guest_plus_1 },
   { id: "edge_sensor" as const, labelHu: "Szenzoros / Edge adatgyűjtő", priceHuf: JIT_ADDON_PRICES.edge_sensor },
+  { id: "advisor_desk" as const, labelHu: "Könyvelői / tanácsadói asztal — 18 ügyfélfiók", priceHuf: JIT_ADDON_PRICES.advisor_desk },
 ] as const;
 
 const CAP_LABEL: Record<CapacityKey, string> = {

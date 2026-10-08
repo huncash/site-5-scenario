@@ -72,7 +72,10 @@ describe("strategyCases", () => {
 
   it("live PLAN matrix: organic vs loan A vs loan B updates runway, penalty and monthly load", () => {
     const idle = resolveKahnPlanPro(null, null);
-    expect(idle.every((c) => c.runwayMonths == null && c.exitPenaltyHuf == null)).toBe(true);
+    expect(idle.find((c) => c.tone === "real")!.runwayMonths).toBe(11);
+    expect(idle.every((c) => c.runwayMonths != null && c.exitPenaltyHuf != null && c.monthlyObligationHuf != null)).toBe(
+      true,
+    );
 
     const organic = resolveKahnPlanPro("organic", "cheap");
     expect(organic.every((c) => c.exitPenaltyHuf === 0)).toBe(true);

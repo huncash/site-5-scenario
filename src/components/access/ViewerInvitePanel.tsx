@@ -85,9 +85,9 @@ export function ViewerInvitePanel() {
       <div>
         <h2 className="text-sm font-semibold text-foreground">Guest Code Slotok</h2>
         <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-          N egyedi, anonim vendégkód (1 kód / Guest Slot). Nincs e-mail, nincs név. Csomagkeret:{" "}
+          N egyedi, anonim vendégkód (1 kód / Guest Slot). Nincs e-mail, nincs név. Aktív vendégfiókok:{" "}
           <span className="font-medium text-foreground">
-            {activeCount} / {limit}
+            {activeCount} / {limit} keret
           </span>
           . Egy kód = egy aktív eszköz-session; egyedi visszavonás nem érinti a többi Slotot.
         </p>

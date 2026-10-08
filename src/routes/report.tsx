@@ -2,19 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { Printer } from "lucide-react";
+import { Download, Printer } from "lucide-react";
+import { toast } from "sonner";
 
 import { ProfileHeader } from "@/components/ProfileHeader";
+import { SimLegalDisclaimer } from "@/components/legal/SimLegalDisclaimer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/i18n";
+import { buildAdvisorClientReport } from "@/lib/advisorClientReport";
 import { localdb } from "@/lib/localdb";
 import { useVault } from "@/lib/vault";
 import { decryptJSON } from "@/lib/crypto";
 import { categoryLabel, formatMoney, type Transaction } from "@/lib/finance";
 import { computeQuarterLockedVat } from "@/lib/financeCore";
+import { useKahnPlanPath } from "@/lib/kahnPlanPath";
 import { parseLangSearch } from "@/lib/langSearch";
 import { isSchoolHost, SCHOOL_WATERMARK } from "@/lib/school";
+import { KAHN_FORK, kahnReserveTargetHuf, resolveKahnPlanPro } from "@/lib/strategyCases";
 
 export const Route = createFileRoute("/report")({
   component: ReportPage,
@@ -52,11 +58,17 @@ type TxnPayload = {
 };
 
 function ReportPage() {
+  const { t } = useI18n();
   const { state } = useVault();
   const vaultKey = state.status === "unlocked" ? state.key : null;
   const { workspace } = Route.useSearch();
   const profileId = state.status === "unlocked" ? state.profile.id : "";
   const profileName = state.status === "unlocked" ? state.profile.name : "—";
+  const { financing, contract } = useKahnPlanPath();
+  const live = useMemo(() => resolveKahnPlanPro(financing, contract), [financing, contract]);
+  const pess = live.find((c) => c.tone === "pess") ?? live[live.length - 1];
+  const reserve = kahnReserveTargetHuf();
+  const preparedAt = useMemo(() => new Date().toISOString(), []);
 
   const txnsQ = useQuery({
     queryKey: ["transactions"],
@@ -140,16 +152,52 @@ function ReportPage() {
       <main className="mx-auto w-full max-w-[98%] flex-1 overflow-y-auto px-2 py-6 sm:px-4 custom-scrollbar print-container">
         <div className="flex flex-wrap items-end justify-between gap-3 print-hidden">
           <div>
-            <div className="text-xl font-semibold tracking-tight">📊 Vezetői riport</div>
+            <div className="text-xl font-semibold tracking-tight">{t("report.title")}</div>
+            <p className="mt-1 max-w-xl text-xs text-muted-foreground">{t("report.lead")}</p>
             <div className="mt-1 text-xs text-muted-foreground">
-              Workspace: <span className="font-mono text-foreground">{workspace}</span>
+              {t("report.profile")}: <span className="font-medium text-foreground">{profileName}</span>
+              {" · "}
+              {t("report.workspace")}: <span className="font-mono text-foreground">{workspace}</span>
+              {" · "}
+              {t("report.generated")}:{" "}
+              <span className="font-mono text-foreground">{preparedAt.slice(0, 10)}</span>
             </div>
           </div>
-          <Button type="button" onClick={() => window.print()} title="Nyomtatás / PDF mentése">
-            <Printer className="mr-2 h-4 w-4" />
-            Nyomtatás / PDF mentése
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const payload = buildAdvisorClientReport({
+                  profileName,
+                  workspace,
+                  cash: kpis,
+                  financing,
+                  contract,
+                  generatedAt: preparedAt,
+                });
+                const blob = new Blob([JSON.stringify(payload, null, 2)], {
+                  type: "application/json;charset=utf-8",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `szcenario_riport_${profileName.replaceAll(" ", "_")}_${preparedAt.slice(0, 10)}.json`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                toast.success(t("report.jsonSaved"));
+              }}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t("report.json")}
+            </Button>
+            <Button type="button" onClick={() => window.print()} title={t("report.print")}>
+              <Printer className="mr-2 h-4 w-4" />
+              {t("report.print")}
+            </Button>
+          </div>
         </div>
+        <SimLegalDisclaimer className="mt-4 print-card" />
         {isSchoolHost() ? (
           <p className="school-print-stamp mt-4 rounded-md border border-border/70 bg-background px-3 py-2 text-sm font-semibold tracking-wide text-foreground">
             {SCHOOL_WATERMARK}
@@ -191,6 +239,61 @@ function ReportPage() {
               <div className="mt-1 text-xs text-muted-foreground">
                 ⚙️ Hogyan működik? A negyedéves áfa logika alapján becsült, kötelezettségként kezelt tartalék.
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <Card className="print-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("report.runwayTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-semibold tabular-nums">
+                {t("report.months", { n: String(pess?.runwayMonths ?? 0) })}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {t("report.minRunway")}: {t("report.months", { n: String(KAHN_FORK.minRunwayMonths) })}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="print-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("report.riskTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("report.penalty")}</span>
+                <span className="font-mono">{formatMoney(Math.round(pess?.exitPenaltyHuf ?? 0), CURRENCY)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("report.monthly")}</span>
+                <span className="font-mono">
+                  {formatMoney(Math.round(pess?.monthlyObligationHuf ?? reserve), CURRENCY)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("report.reserve")}</span>
+                <span className="font-mono">{formatMoney(Math.round(reserve), CURRENCY)}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="print-card md:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("report.stressTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              {live.map((row) => (
+                <div key={row.tone} className="rounded-md border border-border/60 bg-muted/20 px-2 py-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{row.label}</span>
+                    <span className="font-mono tabular-nums">
+                      {t("report.months", { n: String(row.runwayMonths ?? 0) })}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{row.strategy}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>

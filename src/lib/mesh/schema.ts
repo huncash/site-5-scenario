@@ -38,6 +38,18 @@ export type SalesCartRow = {
   updatedAt: number;
 };
 
+export type ModuleNotifyRow = {
+  id: string;
+  at: number;
+};
+
+export type BackupCueRow = {
+  id: "cue";
+  firstSeenAt: number;
+  lastExportAt: number;
+  snoozeUntil: number;
+};
+
 export type ForumNoteRow = {
   id: string;
   createdAt: number;
@@ -62,4 +74,6 @@ export type MeshSchema = {
   engineInterest: StoreDefinition<string, EngineInterestRow>;
   forumNotes: StoreDefinition<string, ForumNoteRow>;
   salesCarts: StoreDefinition<string, SalesCartRow>;
+  moduleNotify: StoreDefinition<string, ModuleNotifyRow>;
+  backupCue: StoreDefinition<string, BackupCueRow>;
 };

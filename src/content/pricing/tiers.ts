@@ -77,7 +77,8 @@ export const PRICING_SEAT_DEF =
 export const PRICING_IOT_NOTE =
   "Ipari IoT Integráció: valós idejű gyártósori és üzemviteli adatok (Modbus, MQTT, OPC-UA) fogadására felkészített architektúra — egyedi projektkeretben.";
 
-export const PRICING_NET_NOTE = "A feltüntetett árak nettó összegek, az ÁFA-t nem tartalmazzák.";
+export const PRICING_NET_NOTE =
+  "A kiemelt ár bruttó (27% ÁFA), magánszemélynek és egyéni vállalkozónak ez a fizetendő. Alatta a nettó + ÁFA. Az összeg egyszeri szoftverlicenc, 1. évi frissítési támogatással.";
 
 export const PRICING_CASE_RESET_FAQ = {
   q: "Hogyan törölhetők vagy indíthatók újra a Case adatok az eszközön?",

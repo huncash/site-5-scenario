@@ -4,7 +4,11 @@ import type { KahnContractId, KahnFinancingId } from "@/lib/strategyCases";
 
 type Listener = () => void;
 
-let financing: KahnFinancingId | null = null;
+/** Bisztró minta: organikus tartás — azonnal számolt runway / kilépés / havi teher. */
+const DEFAULT_FINANCING: KahnFinancingId = "organic";
+const DEFAULT_LOAN_CONTRACT: KahnContractId = "flex";
+
+let financing: KahnFinancingId | null = DEFAULT_FINANCING;
 let contract: KahnContractId | null = null;
 const listeners = new Set<Listener>();
 
@@ -19,6 +23,7 @@ export function readKahnPlanPath() {
 export function setKahnFinancing(next: KahnFinancingId) {
   financing = next;
   if (next === "organic") contract = null;
+  else if (!contract) contract = DEFAULT_LOAN_CONTRACT;
   emit();
 }
 
@@ -29,7 +34,7 @@ export function setKahnContract(next: KahnContractId) {
 }
 
 export function resetKahnPlanPath() {
-  financing = null;
+  financing = DEFAULT_FINANCING;
   contract = null;
   emit();
 }

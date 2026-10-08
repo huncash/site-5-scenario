@@ -137,6 +137,8 @@ import { useVault } from "@/lib/vault";
 import { localdb, type BankRawRow, type EncGoalRow, type EncTxnRow, type Profile } from "@/lib/localdb";
 import { currencyUnit } from "@/i18n/currency";
 import { useI18n } from "@/i18n";
+import { useLeanView } from "@/lib/leanView";
+import { expenseTypeLabel, wasteLabel } from "@/lib/simpleLabels";
 import { useSurfaceTx } from "@/i18n/surfaceTx";
 import { cn } from "@/lib/utils";
 import { getWorkspaceTransactionsGuard } from "@/lib/workspaceGuard";
@@ -731,7 +733,7 @@ export function FinanceDashboard({
   const [whatIfScenario, setWhatIfScenario] = useState<WhatIfScenario>("realistic");
   const [vizSpan, setVizSpan] = useState<VizSpan>(6);
   const [vizShift, setVizShift] = useState(0);
-  const [leanView, setLeanView] = useState<boolean>(false);
+  const { lean: leanView, toggle: toggleLean } = useLeanView();
   const [viewMode, setViewMode] = useState<"split" | "full">("split");
   const [preferBankImport, setPreferBankImport] = useState(false);
   const [bankImportNudge, setBankImportNudge] = useState(false);
@@ -1030,16 +1032,6 @@ export function FinanceDashboard({
     localStorage.setItem("pdca_mode", pdcaMode);
   }, [pdcaMode]);
 
-  useEffect(() => {
-    if (typeof sessionStorage === "undefined") return;
-    const v = sessionStorage.getItem("ui:leanView");
-    if (v == null) setLeanView(true);
-    else setLeanView(v === "1");
-  }, []);
-  useEffect(() => {
-    if (typeof sessionStorage === "undefined") return;
-    sessionStorage.setItem("ui:leanView", leanView ? "1" : "0");
-  }, [leanView]);
 
   useEffect(() => {
     if (typeof sessionStorage === "undefined") return;
@@ -7118,8 +7110,8 @@ export function FinanceDashboard({
               const parts: string[] = [];
               const muda = String((t as any).muda_type ?? "").trim();
               const exp = String((t as any).expense_type ?? "").trim();
-              if (muda) parts.push(`MUDA: ${muda}`);
-              if (exp) parts.push(`Lean: ${exp}`);
+              if (muda) parts.push(`${wasteLabel(leanView, locale)}: ${muda}`);
+              if (exp) parts.push(`${expenseTypeLabel(exp, leanView, locale) || exp}`);
               const cat = String(t.category ?? "").trim();
               if (!cat) parts.push("Hiányzó kategória");
               if (!t.bank_raw_id) parts.push("Kézi tétel (nincs bank link)");
@@ -7730,7 +7722,7 @@ export function FinanceDashboard({
                   headerRight={
                     rate ? (
                       <span className="font-mono text-xs text-emerald-100">
-                        MUDA: {formatMoney(Math.round(rate.currentMonthMuda), CURRENCY)} · 3h átlag:{" "}
+                        {wasteLabel(leanView, locale)}: {formatMoney(Math.round(rate.currentMonthMuda), CURRENCY)} · 3h átlag:{" "}
                         {formatMoney(Math.round(rate.prev3AvgMuda), CURRENCY)}
                       </span>
                     ) : (
@@ -7742,10 +7734,10 @@ export function FinanceDashboard({
                     <div className="mt-2 rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                       <LeanTerm
                         className="text-[11px] text-slate-300"
-                        title={tx("MUDA-ráta")}
+                        title={leanView ? tx("MUDA-ráta") : t("dash.wasteRate")}
                         exact="veszteség-arány — mennyivel kevesebb vagy több a pazarlás ebben a hónapban, mint az előző három hónap átlaga."
                       >{
-                        tx("MUDA-ráta")
+                        leanView ? tx("MUDA-ráta") : t("dash.wasteRate")
                       }</LeanTerm>
                       <div className="mt-0.5 font-mono text-slate-100">
                         {rate.reductionHuf >= 0 ? (
@@ -7851,6 +7843,9 @@ export function FinanceDashboard({
             </span>
           }
         >
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            {t("door.personalTuneLead")}
+          </p>
           <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
             <div
               className="rounded-md border border-slate-700/60 bg-slate-900/40 p-2"
@@ -7873,10 +7868,10 @@ export function FinanceDashboard({
             >
               <LeanTerm
                 className="text-[11px] text-slate-300"
-                title="Vágy"
-                exact="Extra, nem kötelező költés."
+                title={leanView ? "Vágy" : t("dash.flexSpend")}
+                exact={t("dash.flexSpendExact")}
               >
-                Vágy
+                {leanView ? "Vágy" : t("dash.flexSpend")}
               </LeanTerm>
               <div className="mt-0.5 font-mono text-slate-100">
                 {formatMoney(Math.round(mirrorSummary.wants), CURRENCY)} · {mirrorSummary.wantsPct.toFixed(0)}%
@@ -7920,10 +7915,10 @@ export function FinanceDashboard({
               aria-expanded={mudaOpen}
             >
               <LeanTerm
-                title={tx("Észlelt MUDA")}
+                title={leanView ? tx("Észlelt MUDA") : t("dash.spottedWaste")}
                 exact="veszteség — pazarlás a tételeken (impulzus, díj, selejt, dupla előfizetés)."
               >{
-                tx("Észlelt MUDA")
+                leanView ? tx("Észlelt MUDA") : t("dash.spottedWaste")
               }</LeanTerm>
               <span className="font-mono text-rose-200">{formatMoney(Math.round(mirrorSummary.muda), CURRENCY)}</span>
             </button>
@@ -7931,7 +7926,7 @@ export function FinanceDashboard({
               <div className="mt-2 space-y-2 rounded-md border border-rose-500/25 bg-rose-950/20 p-2">
                 {mirrorSummary.mudaHits.length === 0 ? (
                   <p className="text-[11px] leading-relaxed text-slate-400">
-                    Nincs megjelölt pazarlás ebben a nézetben. A MUDA a tételen beállított
+                    Nincs megjelölt pazarlás ebben a nézetben. A tételen beállított
                     típus (impulzus, díj, selejt, dupla előfizetés).
                   </p>
                 ) : (
@@ -8178,10 +8173,10 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title={tx("Évesített MUDA")}
+                  title={leanView ? tx("Évesített MUDA") : t("dash.annualWaste")}
                   exact="veszteség — ha a mostani pazarlás így marad, ennyi forint megy el egy év alatt."
                 >{
-                  tx("Évesített MUDA")
+                  leanView ? tx("Évesített MUDA") : t("dash.annualWaste")
                 }</LeanTerm>
                 <div className="mt-0.5 font-mono text-rose-200">
                   {formatMoney(Math.round(multiYear.annualizedMuda), CURRENCY)}/év
@@ -8190,10 +8185,10 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title={tx("Évesített WANT")}
+                  title={leanView ? tx("Évesített WANT") : t("dash.annualFlex")}
                   exact="vágy — ha a mostani extra (nem kötelező) költés így marad, ennyi egy év alatt."
                 >{
-                  tx("Évesített WANT")
+                  leanView ? tx("Évesített WANT") : t("dash.annualFlex")
                 }</LeanTerm>
                 <div className="mt-0.5 font-mono text-amber-200">
                   {formatMoney(Math.round(multiYear.annualizedWants), CURRENCY)}/év
@@ -8231,10 +8226,10 @@ export function FinanceDashboard({
         ) : null}
         <div className="flex items-center justify-between">
           <LeanTerm
-            title="MUDA score"
+            title={leanView ? "MUDA score" : t("dash.waste")}
             exact="veszteség-pont — 0–100: minél magasabb, annál több a pazarlás."
           >
-            MUDA score
+            {leanView ? "MUDA score" : `${t("dash.waste")} score`}
           </LeanTerm>
           <span className="font-mono text-slate-200">{checkSummary ? `${checkSummary.mudaScore}/100` : "—"}</span>
         </div>
@@ -10239,10 +10234,10 @@ export function FinanceDashboard({
                         variant={leanView ? "secondary" : "outline"}
                         size="sm"
                         className="h-9"
-                        onClick={() => setLeanView((v) => !v)}
-                        title={tx("☯️ Lean nézet be/ki")}
+                        onClick={toggleLean}
+                        title={leanView ? t("view.expertOn") : t("view.expertOff")}
                       >
-                        ☯️ Lean Nézet: {leanView ? "BE" : "KI"}
+                        {leanView ? t("view.expert") : t("view.simple")}
                       </Button>
                       <Button type="button" variant="outline" size="sm" className="h-9" title={tx("Nézet: táblázat")} disabled>
                         táblázat

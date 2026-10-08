@@ -1,3 +1,4 @@
+import { SimLegalDisclaimer } from "@/components/legal/SimLegalDisclaimer";
 import { caseTitle, formatCurrency, useI18n } from "@/i18n";
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
 import { useState } from "react";
@@ -174,6 +175,7 @@ export function EducationCasePanel(props: {
         </span>
       }
     >
+      <SimLegalDisclaimer className="mb-2" />
       <p className="text-[12px] leading-snug text-[var(--text-main)]">{phaseHint}</p>
       {study ? (
         <LabSection id="labs-anon" className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-2 text-[11px] leading-snug">

@@ -44,10 +44,15 @@ describe("pre-flight public promise", () => {
 
   it("states that business data stays on the device, not the company server", () => {
     expect(hu.legal.pageLead).toMatch(/nem megy a cég szerverére/);
-    expect(hu.legal.localBody).toMatch(/nem menti szerverre/);
-    expect(hu.legal.bannerBody).toMatch(/cég szerverére/);
-    expect(hu.legal.bannerBody).toMatch(/soha nem látják/);
+    expect(hu.legal.localBody).toMatch(/nem menti központi szerverre/);
+    expect(hu.legal.bannerBody).toMatch(/helyi tárhelyen/);
+    expect(hu.legal.bannerBody).toMatch(/jogszabályok szerint/);
+    expect(hu.legal.aiActTitle).toBe("AI-átláthatósági tájékoztató");
+    expect(hu.legal.aiActBody).toMatch(/Lean AI Consultant/);
+    expect(hu.legal.aiActBody).toMatch(/Smart Recommender/);
+    expect(hu.legal.simDisclaimer).toMatch(/nem minősül pénzügyi, hitel- vagy befektetési tanácsadásnak, hitelközvetítésnek/);
     expect(en.legal.pageLead).toMatch(/company server/);
+    expect(en.legal.aiActTitle).toMatch(/AI transparency notice/i);
   });
 
   it("sends Basic and Pro order buttons to the bill checkout origin", () => {
@@ -152,15 +157,15 @@ describe("pre-flight public promise", () => {
     expect(workflow).toMatch(/ellenőrzöl/);
     expect(workflow).toMatch(/helyi műszerfalon/);
     expect(workflow).not.toMatch(/demó/i);
-    expect(hu.pricingLocalBody).toMatch(/pénzügyi adataidat se/);
+    expect(hu.pricingLocalBody).toMatch(/szimulációs adatok helyi tárhelyen/);
+    expect(hu.pricingLocalBody).toMatch(/jogszabályok szerint/);
     expect(hu.pricingLoyaltyTitle).not.toMatch(/#/);
     expect(hu.pricingActiveTitle).not.toMatch(/#/);
     expect(hu.pricingWorkflowTitle).not.toMatch(/#/);
     expect(hu.pricingLocalTitle).not.toMatch(/#/);
     expect(hu.pricingRoadmapTitle).not.toMatch(/#/);
-    expect(hu.pricingAddonStatus).toBe(
-      "Ez a modul most nem indítható. Előkészítés alatt áll, és megvásárolható bővítőként. További részletek a támogatási, míg a vásárlási folyamat a számlázási aloldalunkon található.",
-    );
+    expect(hu.pricingAddonStatus).toMatch(/Kosárba nem tehető/);
+    expect(hu.pricingNotifySoon).toMatch(/Értesítést kérek az indulásról/);
     expect(hu.pricingRoadmapDesktopWhen).toMatch(/I\. negyedév vége/);
     expect(hu.pricingRoadmapBcpWhen).toBe("Elérhető");
     expect(hu.pricingRoadmapEducationWhen).toBe("Elérhető");
@@ -213,6 +218,8 @@ describe("pre-flight public promise", () => {
     expect(supportPricingTiers("hu").find((t) => t.id === "pro")?.bullets.join(" ")).toMatch(/2027/);
     expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.modules).toContain("Pénzáramlás");
     expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.priceLine).toMatch(/egyszeri szoftverlicenc/);
+    expect(supportPricingTiers("hu").find((t) => t.id === "basic")?.priceLine).toMatch(/bruttó 252 730/);
+    expect(supportPricingTiers("hu").find((t) => t.id === "pro")?.priceLine).toMatch(/bruttó 506 730/);
     const publicPrice = [
       ...supportPricingTiers("hu").flatMap((t) => [t.priceLine, t.ladder, t.detail, ...t.bullets]),
       ...supportPricingTiers("en").flatMap((t) => [t.priceLine, t.ladder, t.detail, ...t.bullets]),
@@ -236,7 +243,9 @@ describe("pre-flight public promise", () => {
       en.labs.funnelLead,
       en.labs.cartHint,
     ].join("\n");
-    expect(hu.pricing.once).toMatch(/Egyszeri díj/);
+    expect(hu.pricing.once).toMatch(/egyszeri szoftverlicenc/i);
+    expect(hu.pricing.netNote).toMatch(/bruttó/);
+    expect(hu.pricing.netNote).toMatch(/ÁFA/);
     expect(hu.labs.funnelLead).toMatch(/Egyszeri szoftverlicenc/);
     expect(blob).not.toMatch(/élethosszig tartó tagság|lifetime membership|éves előfizetés|havi előfizetés|yearly subscription|monthly subscription|updates for life|yours for life/i);
   });

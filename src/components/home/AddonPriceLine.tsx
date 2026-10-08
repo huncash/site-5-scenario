@@ -2,7 +2,7 @@ import { publicGrossFromNet } from "@/content/pricing/vat";
 import { useI18n } from "@/i18n";
 import type { BillingInterval } from "@/lib/funnelOrder";
 
-/** Add-on ár: kerekített bruttó + nettó alcím. Perpetual: egyszeri (once). */
+/** Add-on ár: kerekített bruttó + nettó + ÁFA. Egyszeri szoftverlicenc (once). */
 export function AddonPriceLine(props: {
   monthlyNetHuf: number;
   interval: BillingInterval | "once";
@@ -25,7 +25,7 @@ export function AddonPriceLine(props: {
         {t("pricing.gross")} {money(gross)} {per}
       </div>
       <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-        {t("pricing.net")} {money(dueNet)} + {t("pricing.vatShort")}
+        {t("pricing.net")} {money(dueNet)} + {Math.round(props.vatRate)}% {t("pricing.vatShort")}
       </div>
     </div>
   );

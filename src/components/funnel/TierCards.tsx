@@ -1,5 +1,6 @@
 import type { TierId, TierOffer } from "@/content/pricing/tiers";
 import { formatHuf, PRICING_IOT_NOTE, PRICING_NET_NOTE, TIER_COMPARE_ROWS, TIER_MONTHLY_HUF, yearlyPriceHuf } from "@/content/pricing/tiers";
+import { publicGrossFromNet } from "@/content/pricing/vat";
 import { getPlan } from "@/config/plans";
 import { PricingFootnotes } from "@/components/home/PricingFootnotes";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +24,13 @@ function PriceLines(props: { monthly: number; interval: BillingInterval }) {
   }
   return (
     <div className="mt-2">
-      <div className="text-[15px] font-semibold text-slate-100">{formatHuf(monthly)} (egyszeri szoftverlicenc)</div>
-      <div className="mt-0.5 text-[11px] text-slate-300">2. év: −25% · 3. év: −40% · 4. évtől: nincs külön díj</div>
+      <div className="text-[15px] font-semibold text-slate-100">
+        bruttó {formatHuf(publicGrossFromNet(monthly, 27))} — egyszeri szoftverlicenc
+      </div>
+      <div className="mt-0.5 text-[11px] text-slate-300">
+        nettó {formatHuf(monthly)} + 27% ÁFA · 1. év frissítési támogatással
+      </div>
+      <div className="mt-0.5 text-[11px] text-slate-400">2. év: −25% · 3. év: −40% · 4. évtől: nincs külön díj</div>
     </div>
   );
 }

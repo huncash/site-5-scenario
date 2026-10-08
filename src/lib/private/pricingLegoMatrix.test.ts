@@ -58,6 +58,7 @@ describe("pricing Lego matrix", () => {
       seat_plus_1: 79_000,
       guest_plus_1: 19_000,
       edge_sensor: 99_000,
+      advisor_desk: 249_000,
     });
     expect(ENTERPRISE_CASE_ADDON_HUF).toBe(39_000);
     expect(buildPlanLego("expert").lines.find((l) => l.key === "cases")!.unitHuf).toBe(49_000);

@@ -5,8 +5,8 @@ import { szummaSnapshotLabel } from "@/lib/caseSnapshot";
 
 describe("capacityHud", () => {
   it("formats used/summa fractions with a finite license frame", () => {
-    expect(formatCapacityFraction(1, 2)).toBe("1/2");
-    expect(formatCapacityFraction(0, "unlimited")).toBe("0/24");
+    expect(formatCapacityFraction(1, 2)).toBe("1 / 2");
+    expect(formatCapacityFraction(0, "unlimited")).toBe("0 / 24");
     expect(formatCapacityFraction(1, "unlimited")).not.toMatch(/∞/);
   });
 
@@ -27,7 +27,7 @@ describe("capacityHud", () => {
     expect(hud.seats.label).toBe("Seat");
     expect(hud.guests.label).toBe("Guest");
     expect(typeof hud.cases.limit).toBe("number");
-    expect(formatCapacityFraction(hud.seats.used, hud.seats.limit)).toMatch(/^1\//);
+    expect(formatCapacityFraction(hud.seats.used, hud.seats.limit)).toMatch(/^1 \//);
     expect(formatCapacityFraction(hud.cases.used, hud.cases.limit)).not.toMatch(/∞/);
   });
 });

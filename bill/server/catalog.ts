@@ -67,6 +67,7 @@ export const JIT_ADDON_LABELS: Record<JitAddonId, string> = {
   seat_plus_1: "+1 Extra szerkesztő",
   guest_plus_1: "+1 Extra vendégfiók",
   edge_sensor: "Szenzoros / Edge adatgyűjtő modul",
+  advisor_desk: "Könyvelői / tanácsadói asztal — 18 ügyfélfiók",
 };
 
 export function isJitAddonId(v: unknown): v is JitAddonId {
@@ -75,7 +76,8 @@ export function isJitAddonId(v: unknown): v is JitAddonId {
     v === "slot_plus_1" ||
     v === "seat_plus_1" ||
     v === "guest_plus_1" ||
-    v === "edge_sensor"
+    v === "edge_sensor" ||
+    v === "advisor_desk"
   );
 }
 

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { HierarchicalCaseChooser } from "@/components/cases/HierarchicalCaseChooser";
+import { LabsOverlay } from "@/components/labs/LabsOverlay";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
@@ -40,6 +41,7 @@ import {
   scenarioKindOf,
 } from "@/lib/scenarioCatalog";
 import { ProChartCallout, ProChartSketch } from "@/components/home/ProChartExplain";
+import { BisztroRunwayHero } from "@/components/strategy/BisztroRunwayHero";
 import { KahnEvolvePanel } from "@/components/strategy/KahnEvolvePanel";
 import { useI18n } from "@/i18n";
 import { useVault } from "@/lib/vault";
@@ -55,7 +57,7 @@ export function ScenarioDoor() {
   const [error, setError] = useState<string | null>(null);
   const [campus, setCampus] = useState(false);
   const [campaignId, setCampaignId] = useState<CampaignId | null>(null);
-  const [addonTitle, setAddonTitle] = useState<string | null>(null);
+  const [addonKind, setAddonKind] = useState<(typeof LATER_SCENARIO_KINDS)[number] | null>(null);
   const inFlight = useRef(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const campaign = campaignId ? CAMPAIGN_FUNNELS[campaignId] : null;
@@ -217,10 +219,25 @@ export function ScenarioDoor() {
                 </p>
               </div>
               {school ? null : (
-              <div className="pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Button
                   type="button"
                   className="btn-cta h-11 px-5 text-[14px] font-semibold"
+                  onClick={() => {
+                    const root = scrollerRef.current;
+                    const el = document.getElementById("konfiguracio");
+                    if (!root || !el) return;
+                    const top =
+                      el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop - 12;
+                    root.scrollTo({ top, behavior: "smooth" });
+                  }}
+                >
+                  {t("labs.configCta")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 px-5 text-[14px] font-semibold"
                   onClick={() => {
                     const root = scrollerRef.current;
                     const el = document.getElementById("pricing") ?? document.getElementById("csomagok");
@@ -259,6 +276,7 @@ export function ScenarioDoor() {
                   {t("door.kahnBridge")}
                 </p>
               </div>
+              <BisztroRunwayHero />
               <button
                 type="button"
                 disabled={busyId !== null}
@@ -343,7 +361,7 @@ export function ScenarioDoor() {
                     key={id}
                     type="button"
                     className="rounded-2xl border border-dashed border-white/15 bg-card/80 p-4 text-left"
-                    onClick={() => setAddonTitle(t(LATER_KIND_TITLE_KEY[id]))}
+                    onClick={() => setAddonKind(id)}
                   >
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       {t("door.addonBadge")}
@@ -354,10 +372,11 @@ export function ScenarioDoor() {
                 ))}
               </div>
               <AddonModuleDialog
-                open={addonTitle !== null}
-                title={addonTitle ?? ""}
+                open={addonKind !== null}
+                title={addonKind ? t(LATER_KIND_TITLE_KEY[addonKind]) : ""}
+                notifyId={addonKind ?? undefined}
                 onOpenChange={(next) => {
-                  if (!next) setAddonTitle(null);
+                  if (!next) setAddonKind(null);
                 }}
               />
                 </>
@@ -431,6 +450,26 @@ export function ScenarioDoor() {
 
             {school ? null : (
               <>
+            <section id="konfiguracio" className="scroll-mt-24 space-y-3" aria-labelledby="door-config-heading">
+              <div>
+                <h2
+                  id="door-config-heading"
+                  className="text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl"
+                >
+                  {t("labs.doorTitle")}
+                </h2>
+                <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-muted-foreground">
+                  {t("labs.doorLead")}
+                </p>
+              </div>
+              <LabsOverlay
+                open
+                onOpenChange={() => undefined}
+                workspaceIds={["personal"]}
+                profileCount={1}
+                variant="page"
+              />
+            </section>
             <HomeProductShots />
             <Suspense fallback={null}>
               <HomePricing campus={campus} />

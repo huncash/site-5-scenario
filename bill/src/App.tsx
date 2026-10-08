@@ -18,7 +18,7 @@ import {
   slotPackAllowedForTier,
   slotPackNetForInterval,
 } from "../server/catalog";
-import { parseCheckoutAddons } from "@/content/pricing/addons";
+import { parseCheckoutAddonLines } from "@/content/pricing/addons";
 import {
   countryFromTaxId,
   countryLabel,
@@ -347,8 +347,8 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
   const plan = isPublicPlanId(planTier) || planTier === "campus" ? getPlan(planTier) : getPlan("pro");
   const vat = resolveVat({ country, taxId });
   let dueNet = chargeHuf(planTier, interval);
-  for (const extra of parseCheckoutAddons(addon)) {
-    if (extra !== slotPack) dueNet += addonNetForTier(extra, planTier);
+  for (const extra of parseCheckoutAddonLines(addon)) {
+    if (extra.id !== slotPack) dueNet += addonNetForTier(extra.id, planTier) * extra.qty;
   }
   if (slotPack && isSlotPackId(slotPack) && slotPackAllowedForTier(planTier)) {
     dueNet += slotPackNetForInterval(slotPack, interval);
@@ -1026,9 +1026,10 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
               ))}
             </ul>
           ) : null}
-          {parseCheckoutAddons(addon).map((id) => (
-            <div key={id} className="hint" style={{ marginTop: 8 }}>
-              {JIT_ADDON_LABELS[id]}
+          {parseCheckoutAddonLines(addon).map((extra) => (
+            <div key={extra.id} className="hint" style={{ marginTop: 8 }}>
+              {JIT_ADDON_LABELS[extra.id]}
+              {extra.qty > 1 ? ` × ${extra.qty}` : ""}
             </div>
           ))}
           {slotPack && isSlotPackId(slotPack) && slotPack !== addon ? (

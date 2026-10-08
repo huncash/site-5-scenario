@@ -106,7 +106,7 @@ export const LABS_MESH_DESK = {
 
 /** JIT kapacitás-bővítők a fán — nem külön HUD-sáv. Edge = labs-edge bogyó. */
 export const LABS_JIT_ADDONS: ReadonlyArray<{
-  id: Exclude<JitAddonId, "edge_sensor">;
+  id: Exclude<JitAddonId, "edge_sensor" | "advisor_desk">;
   pos: LabsTreePoint;
 }> = [
   { id: "case_plus_1", pos: { x: 150, y: 268 } },

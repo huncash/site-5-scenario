@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { SimLegalDisclaimer } from "@/components/legal/SimLegalDisclaimer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -161,6 +162,7 @@ export function LoanDialog({
         <DialogHeader>
           <DialogTitle>{editing ? t("loan.editTitle") : t("loan.newTitle")}</DialogTitle>
           <div className="text-[11px] text-muted-foreground">{t("loan.slotNote", { name: workspaceName })}</div>
+          <SimLegalDisclaimer />
         </DialogHeader>
 
         <div className="grid gap-5">

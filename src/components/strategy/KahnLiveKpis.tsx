@@ -1,23 +1,28 @@
 import { useMemo } from "react";
 
 import { LeanTerm } from "@/components/HelpIcon";
+import { SimLegalDisclaimer } from "@/components/legal/SimLegalDisclaimer";
 import { BulletGraph } from "@/components/lean-viz/LeanCharts";
 import { formatMoney } from "@/lib/finance";
+import { kpisNeverEmpty } from "@/lib/bisztroPreview";
 import { KAHN_JARGON } from "@/lib/kahnCrossTab";
 import { useKahnPlanPath } from "@/lib/kahnPlanPath";
+import { useLeanView } from "@/lib/leanView";
+import { penaltyLabel } from "@/lib/simpleLabels";
 import { KAHN_FORK, kahnReserveTargetHuf, resolveKahnPlanPro } from "@/lib/strategyCases";
 
 const ink = "text-[var(--text-main)]";
 const inkMuted = "text-[var(--text-muted)]";
 
 function dash(n: number | null, kind: "runway" | "money" | "monthly"): string {
-  if (n == null) return "—";
-  if (kind === "runway") return `${n} hó`;
-  const money = formatMoney(n, "HUF");
+  const v = kpisNeverEmpty(n);
+  if (kind === "runway") return `${v} hó`;
+  const money = formatMoney(v, "HUF");
   return kind === "monthly" ? `${money}/hó` : money;
 }
 
 export function KahnLiveKpis() {
+  const { lean } = useLeanView();
   const { financing, contract } = useKahnPlanPath();
   const live = useMemo(() => resolveKahnPlanPro(financing, contract), [financing, contract]);
   const pess = live.find((c) => c.tone === "pess")!;
@@ -25,6 +30,7 @@ export function KahnLiveKpis() {
 
   return (
     <>
+      <SimLegalDisclaimer className="mb-2" />
       <div className="grid grid-cols-1 gap-2 min-w-0 lg:grid-cols-3">
         <div className="tile-lift rounded-lg bg-background p-2.5">
           <LeanTerm
@@ -44,7 +50,7 @@ export function KahnLiveKpis() {
             exact={KAHN_JARGON.penalty.exactHu}
             summary={KAHN_JARGON.penalty.exactHu}
           >
-            Kötbér
+            {penaltyLabel(lean)}
           </LeanTerm>
           <div className={`kpi-value mt-1 font-mono text-sm ${ink}`}>{dash(pess.exitPenaltyHuf, "money")}</div>
         </div>
@@ -58,7 +64,7 @@ export function KahnLiveKpis() {
             Tartalék / teher
           </LeanTerm>
           <div className={`kpi-value mt-1 font-mono text-sm ${ink}`}>
-            {pess.monthlyObligationHuf == null ? dash(reserve, "money") : dash(pess.monthlyObligationHuf, "monthly")}
+            {dash(pess.monthlyObligationHuf ?? reserve, "monthly")}
           </div>
         </div>
       </div>

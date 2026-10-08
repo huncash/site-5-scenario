@@ -1,5 +1,5 @@
 import { MASTER_BASELINE } from "@/lib/masterBaseline";
-import type { KahnForkNode, KahnProLive, StrategyTone } from "@/lib/strategyCases";
+import type { KahnForkNode, KahnProLive } from "@/lib/strategyCases";
 
 export type StrategyForkKind = "inflation" | "market" | "newline";
 
@@ -24,15 +24,6 @@ export type StrategyForkTree = {
 function formatHuf(n: number) {
   return `${Math.round(n).toLocaleString("hu-HU")} Ft`;
 }
-
-const empty = (label: string, tone: StrategyTone, strategy: string): KahnProLive => ({
-  tone,
-  label,
-  runwayMonths: null,
-  exitPenaltyHuf: null,
-  monthlyObligationHuf: null,
-  strategy,
-});
 
 const CORE_DRAIN = Math.round(MASTER_BASELINE.monthlyRevenueNet * 0.11);
 const ENTRY_COST = 420_000;
@@ -176,13 +167,18 @@ export function strategyForkTree(kind: StrategyForkKind): StrategyForkTree {
   return newLineForkTree();
 }
 
+function filled(cards: KahnProLive[]): KahnProLive[] {
+  return cards.map((c) => ({
+    ...c,
+    runwayMonths: c.runwayMonths ?? 0,
+    exitPenaltyHuf: c.exitPenaltyHuf ?? 0,
+    monthlyObligationHuf: c.monthlyObligationHuf ?? 0,
+  }));
+}
+
 export function resolveInflationPlanPro(primary: string | null, secondary: string | null): KahnProLive[] {
   if (!primary) {
-    return [
-      empty("Bővítés", "opt", "Válaszd a beszerzési pályát."),
-      empty("Tartás", "real", "Válaszd a beszerzési pályát."),
-      empty("Tartalék", "pess", "Válaszd a beszerzési pályát."),
-    ];
+    return resolveInflationPlanPro("lock", null);
   }
   if (primary === "lock") {
     return [
@@ -192,11 +188,11 @@ export function resolveInflationPlanPro(primary: string | null, secondary: strin
     ];
   }
   if (!secondary) {
-    return [
-      { tone: "opt", label: "Bővítés", runwayMonths: 9, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "Nyitott ár. Válaszd az áthárítást vagy a vágást." },
-      { tone: "real", label: "Tartás", runwayMonths: 7, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "A 2. fordulat a fedezetet dönti el." },
-      { tone: "pess", label: "Tartalék", runwayMonths: 5, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "Áthárítás: extra COGS. Vágás: stop-loss." },
-    ];
+    return filled([
+      { tone: "opt", label: "Bővítés", runwayMonths: 9, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Nyitott ár. Válaszd az áthárítást vagy a vágást." },
+      { tone: "real", label: "Tartás", runwayMonths: 7, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "A 2. fordulat a fedezetet dönti el." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 5, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Áthárítás: extra COGS. Vágás: stop-loss." },
+    ]);
   }
   if (secondary === "pass") {
     return [
@@ -214,11 +210,7 @@ export function resolveInflationPlanPro(primary: string | null, secondary: strin
 
 export function resolveMarketPlanPro(primary: string | null, secondary: string | null): KahnProLive[] {
   if (!primary) {
-    return [
-      empty("Bővítés", "opt", "Válaszd a belépés ütemét."),
-      empty("Tartás", "real", "Válaszd a belépés ütemét."),
-      empty("Tartalék", "pess", "Válaszd a belépés ütemét."),
-    ];
+    return resolveMarketPlanPro("now", null);
   }
   if (primary === "now") {
     return [
@@ -228,11 +220,11 @@ export function resolveMarketPlanPro(primary: string | null, secondary: string |
     ];
   }
   if (!secondary) {
-    return [
-      { tone: "opt", label: "Bővítés", runwayMonths: 8, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "Ütemezett. Válaszd: core viszi, vagy stop-loss." },
-      { tone: "real", label: "Tartás", runwayMonths: 7, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "A 2. fordulat a havi terhet dönti el." },
-      { tone: "pess", label: "Tartalék", runwayMonths: 5, exitPenaltyHuf: null, monthlyObligationHuf: null, strategy: "Core: havi teher. Stop-loss: kilépés." },
-    ];
+    return filled([
+      { tone: "opt", label: "Bővítés", runwayMonths: 8, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Ütemezett. Válaszd: core viszi, vagy stop-loss." },
+      { tone: "real", label: "Tartás", runwayMonths: 7, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "A 2. fordulat a havi terhet dönti el." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 5, exitPenaltyHuf: 0, monthlyObligationHuf: 0, strategy: "Core: havi teher. Stop-loss: kilépés." },
+    ]);
   }
   if (secondary === "core") {
     return [
@@ -250,11 +242,7 @@ export function resolveMarketPlanPro(primary: string | null, secondary: string |
 
 export function resolveNewLinePlanPro(primary: string | null, secondary: string | null): KahnProLive[] {
   if (!primary) {
-    return [
-      empty("Bővítés", "opt", "Válaszd: tervezett ütem vagy berobbanás."),
-      empty("Tartás", "real", "Válaszd: tervezett ütem vagy berobbanás."),
-      empty("Tartalék", "pess", "Válaszd: tervezett ütem vagy berobbanás."),
-    ];
+    return resolveNewLinePlanPro("planned", null);
   }
   if (primary === "planned") {
     return [
@@ -264,11 +252,11 @@ export function resolveNewLinePlanPro(primary: string | null, secondary: string 
     ];
   }
   if (!secondary) {
-    return [
-      { tone: "opt", label: "Bővítés", runwayMonths: 5, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "Berobbanás. Válaszd: megállj vagy tovább." },
-      { tone: "real", label: "Tartás", runwayMonths: 4, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "Az első 60 nap előfinanszírozás." },
-      { tone: "pess", label: "Tartalék", runwayMonths: 3, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: null, strategy: "A 2. fordulat a lyukat dönti el." },
-    ];
+    return filled([
+      { tone: "opt", label: "Bővítés", runwayMonths: 5, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "Berobbanás. Válaszd: megállj vagy tovább." },
+      { tone: "real", label: "Tartás", runwayMonths: 4, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "Az első 60 nap előfinanszírozás." },
+      { tone: "pess", label: "Tartalék", runwayMonths: 3, exitPenaltyHuf: LINE_STOCK, monthlyObligationHuf: 0, strategy: "A 2. fordulat a lyukat dönti el." },
+    ]);
   }
   if (secondary === "halt") {
     return [

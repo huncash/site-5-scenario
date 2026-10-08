@@ -8,9 +8,18 @@ describe("kahnPlanPath", () => {
     resetKahnPlanPath();
   });
 
+  it("starts on the Bisztró organic path so KPIs are filled", () => {
+    expect(readKahnPlanPath()).toEqual({ financing: "organic", contract: null });
+    const live = resolveKahnPlanPro(readKahnPlanPath().financing, readKahnPlanPath().contract);
+    expect(live.every((c) => c.runwayMonths != null && c.exitPenaltyHuf != null && c.monthlyObligationHuf != null)).toBe(
+      true,
+    );
+  });
+
   it("organic clears the A/B contract; loan A vs B stay distinct", () => {
     resetKahnPlanPath();
     setKahnFinancing("loan");
+    expect(readKahnPlanPath().contract).toBe("flex");
     setKahnContract("cheap");
     expect(readKahnPlanPath()).toEqual({ financing: "loan", contract: "cheap" });
 

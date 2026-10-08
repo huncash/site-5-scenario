@@ -70,5 +70,6 @@ export function useSalesCart() {
     pickPack,
     checkoutHref: checkoutHrefFromCart(cart),
     pending: persist.isPending,
+    ready: q.isFetched,
   };
 }

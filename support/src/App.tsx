@@ -8,6 +8,7 @@ import { billCheckoutUrl } from "@/lib/billing";
 import { enterpriseInquiryHref } from "@/lib/enterpriseSchedule";
 import { supportPageUrl, supportTierHref } from "@/lib/support";
 import { PUBLIC_JIT_ADDONS, jitAddonLabel } from "@/content/pricing/addons";
+import { publicGrossFromNet } from "@/content/pricing/vat";
 import { OnePointLesson } from "@/components/support/OnePointLesson";
 import { SupportLessonToc } from "@/components/support/SupportLessonToc";
 import { SupportTicketForm } from "@/components/support/SupportTicketForm";
@@ -350,17 +351,26 @@ function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }
         <ul className="plan-bullets">
           {PUBLIC_JIT_ADDONS.map((addon) => (
             <li key={addon.id}>
-              {jitAddonLabel(addon, locale)} — {addon.priceHuf.toLocaleString(locale === "en" ? "en-IE" : "hu-HU")}{" "}
-              {t.pricingAddonPriceMeta}
+              {jitAddonLabel(addon, locale)} — {locale === "en" ? "gross " : "bruttó "}
+              {publicGrossFromNet(addon.priceHuf, 27).toLocaleString(locale === "en" ? "en-IE" : "hu-HU")}
+              {locale === "en" ? " HUF" : " Ft"}
+              {" "}
+              ({locale === "en" ? "net " : "nettó "}
+              {addon.priceHuf.toLocaleString(locale === "en" ? "en-IE" : "hu-HU")}
+              {locale === "en" ? " + 27% VAT" : " + 27% ÁFA"})
               {" · "}
-              <a href={billCheckoutUrl({
-                  tier: "pro",
-                  interval: "yearly",
-                  addon: addon.id,
-                  slotPack: addon.id === "slot_plus_1" ? "slot_plus_1" : undefined,
-                })}>
-                {t.pricingOrder}
-              </a>
+              {addon.comingSoon ? (
+                <span>{t.pricingNotifySoon}</span>
+              ) : (
+                <a href={billCheckoutUrl({
+                    tier: "pro",
+                    interval: "yearly",
+                    addon: addon.id,
+                    slotPack: addon.id === "slot_plus_1" ? "slot_plus_1" : undefined,
+                  })}>
+                  {t.pricingOrder}
+                </a>
+              )}
             </li>
           ))}
         </ul>

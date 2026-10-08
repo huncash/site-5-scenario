@@ -5,6 +5,7 @@ import {
   JIT_ADDON_MIN_COMMITMENT_DAYS,
   PUBLIC_JIT_ADDONS,
   jitExampleBundleHuf,
+  parseCheckoutAddonLines,
   slotPackPriceFromUnit,
 } from "@/content/pricing/addons";
 import { PLANS_CONFIG } from "@/config/plans";
@@ -25,14 +26,25 @@ describe("JIT perpetual add-on pricing", () => {
       "seat_plus_1",
       "guest_plus_1",
       "edge_sensor",
+      "advisor_desk",
     ]);
+    expect(JIT_ADDON_BY_ID.advisor_desk.priceHuf).toBe(249_000);
+    expect(JIT_ADDON_BY_ID.advisor_desk.comingSoon).toBeFalsy();
     expect(JIT_ADDON_BY_ID.edge_sensor.priceHuf).toBe(99_000);
+    expect(JIT_ADDON_BY_ID.edge_sensor.comingSoon).toBe(true);
     expect(JIT_ADDON_MIN_COMMITMENT_DAYS).toBe(0);
   });
 
   it("Slot + Seat bundle is below Pro license list price", () => {
     expect(jitExampleBundleHuf()).toBe(128_000);
     expect(jitExampleBundleHuf()).toBeLessThan(PLANS_CONFIG.pro.priceHuf);
+  });
+
+  it("counts repeated checkout addon ids as quantity", () => {
+    expect(parseCheckoutAddonLines("case_plus_1,case_plus_1,slot_plus_1")).toEqual([
+      { id: "case_plus_1", qty: 2 },
+      { id: "slot_plus_1", qty: 1 },
+    ]);
   });
 
   it("slot packs are unit × qty", () => {
@@ -45,6 +57,8 @@ describe("JIT perpetual add-on pricing", () => {
     expect(publicGrossFromNet(49_000, 27)).toBe(62_230);
     expect(publicGrossFromNet(79_000, 27)).toBe(100_330);
     expect(publicGrossFromNet(99_000, 27)).toBe(125_730);
+    expect(publicGrossFromNet(199_000, 27)).toBe(252_730);
+    expect(publicGrossFromNet(399_000, 27)).toBe(506_730);
     expect(roundCommercialGrossHuf(6_223)).toBe(6_220);
   });
 });

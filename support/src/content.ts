@@ -218,7 +218,7 @@ export const KAHN_BONBON = {
 } as const;
 
 export const TIPS = [
-  { q: "Hol vannak az adataim?", a: "A saját eszközödön. A fejlesztők soha nem látják és nem gyűjtik. Mentés fájlba, mint régen egy táblázatot — vagy meghívott vendég." },
+  { q: "Hol vannak az adataim?", a: "A szimulációs adatok a saját eszközödön, a böngészőben / helyi tárhelyen futnak. A fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek. Mentés fájlba, mint régen egy táblázatot — vagy meghívott vendég." },
   { q: "Van telefonos support?", a: "Nincs. Kizárólag írásban, jeggyel." },
   { q: "Mennyi a válaszidő?", a: "Átlagosan 24 órán belül, írásban." },
   { q: "Hol a videó?", a: "YouTube-on. A saját szerver nem tárol videófájlt." },
@@ -265,7 +265,7 @@ export const FAQ_CHECKLIST: FaqItem[] = [
   {
     id: "check-save",
     q: "Hogyan mentem vagy állítom vissza az adatot?",
-    a: "A **Beállításokban** helyi fájlba menthetsz, és ugyanonnan tölthetsz vissza. Nincs felhős fiók: ami a gépeden van, az a tied. A fejlesztők nem látják és nem gyűjtik.",
+    a: "A **Beállításokban** helyi fájlba menthetsz, és ugyanonnan tölthetsz vissza. A szimulációnak nincs felhős fiókja: a modellezett számok a gépeden maradnak. A fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek.",
   },
   {
     id: "check-lock",
@@ -290,7 +290,7 @@ export const FAQ_GENERAL: FaqItem[] = [
   { q: "Működik offline?", a: "Az app igen. A support iframe hálózatot kér; offline a helyi súgó marad." },
   {
     q: "Látják a fejlesztők az adataimat?",
-    a: "Nem. A Szcenárió a saját eszközödön számol. A kivonat a Mesh Data Managerbe kerül helyben. A fejlesztők soha, semmilyen szinten nem látják és nem gyűjtik a modellezett adatot.",
+    a: "A szimuláció a saját eszközödön fut. A kivonat a Mesh Data Managerbe kerül helyben. A fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek — ezeket nem használjuk a modeled számolására.",
   },
   {
     q: "Miért hívják Szcenáriónak — ez több, mint egy jó és egy rossz év?",

@@ -43,6 +43,7 @@ export const ENTITLEMENT_GATES: Record<EntitlementId, EntitlementGate> = {
   seat_plus_1: { kind: "addon", addon: "seat_plus_1" },
   guest_plus_1: { kind: "addon", addon: "guest_plus_1" },
   edge_sensor: { kind: "addon", addon: "edge_sensor" },
+  advisor_desk: { kind: "addon", addon: "advisor_desk" },
 };
 
 export type EntitlementOffer = {

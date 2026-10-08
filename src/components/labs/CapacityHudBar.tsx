@@ -35,6 +35,13 @@ const HUD_LABEL_KEY = {
   guests: "labs.hudGuest",
 } as const satisfies Record<CapacityFraction["id"], MessageKey>;
 
+const HUD_HINT_KEY = {
+  cases: "labs.hudCaseHint",
+  slots: "labs.hudSlotHint",
+  seats: "labs.hudSeatHint",
+  guests: "labs.hudGuestHint",
+} as const satisfies Record<CapacityFraction["id"], MessageKey>;
+
 const HUD_ADDON: Record<CapacityFraction["id"], JitAddonId> = {
   cases: "case_plus_1",
   slots: "slot_plus_1",
@@ -60,6 +67,8 @@ export function CapacityHudBar({
 }) {
   const { t } = useI18n();
   const hud = readCapacityHud({ profileCount, workspaceIds });
+  const frame = (used: number, limit: number) =>
+    `${formatCapacityFraction(used, limit)} ${t("labs.hudFrame")}`;
   const nextPack = nextPackageCartHref();
   const sales = useSalesCart();
   const putAddon = (id: JitAddonId) => {
@@ -71,6 +80,7 @@ export function CapacityHudBar({
     { id: "slot_plus_1", label: t("labs.addSlot") },
     { id: "seat_plus_1", label: t("labs.addSeat") },
     { id: "guest_plus_1", label: t("labs.addGuest") },
+    { id: "advisor_desk", label: t("labs.addAdvisor") },
   ];
 
   const cart = (
@@ -123,7 +133,8 @@ export function CapacityHudBar({
           {capacityHudRows(hud).map((row) => {
             const Icon = HUD_ICON[row.id];
             const name = t(HUD_LABEL_KEY[row.id]);
-            const frac = formatCapacityFraction(row.used, row.limit);
+            const frac = frame(row.used, row.limit);
+            const spoken = `${name}: ${frac}`;
             return (
               <li key={row.id}>
                 <Tooltip>
@@ -131,18 +142,19 @@ export function CapacityHudBar({
                     <button
                       type="button"
                       className="flex w-full flex-col items-center gap-0.5 rounded-md px-0.5 py-0.5 text-center hover:bg-accent/60"
-                      aria-label={`${name} ${frac}`}
+                      aria-label={spoken}
+                      title={spoken}
                       onClick={() => putAddon(HUD_ADDON[row.id])}
                     >
-                      <span className="text-[10px] leading-none text-muted-foreground">{name}</span>
+                      <span className="text-[9px] leading-tight text-muted-foreground">{name}</span>
                       <span className="font-mono text-[11px] tabular-nums leading-none text-foreground">
                         {frac}
                       </span>
                       <Icon className="h-3.5 w-3.5 text-foreground/80" aria-hidden />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent className="z-[9999] text-[11px]">
-                    {addons.find((a) => a.id === HUD_ADDON[row.id])?.label}
+                  <TooltipContent className="z-[9999] max-w-[16rem] text-[11px] leading-snug">
+                    {t(HUD_HINT_KEY[row.id])}
                   </TooltipContent>
                 </Tooltip>
               </li>
@@ -166,7 +178,7 @@ export function CapacityHudBar({
                 </span>
               </TooltipTrigger>
               <TooltipContent className="z-[9999] text-[11px]">
-                {t(HUD_LABEL_KEY[row.id])} {formatCapacityFraction(row.used, row.limit)}
+                {t(HUD_LABEL_KEY[row.id])}: {frame(row.used, row.limit)}
               </TooltipContent>
             </Tooltip>
           );
@@ -196,9 +208,9 @@ export function CapacityHudBar({
       <ul className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-0.5">
         {capacityHudRows(hud).map((row) => (
           <li key={row.id} className="flex items-baseline gap-1 text-[11px]">
-            <span className="text-muted-foreground">{t(HUD_LABEL_KEY[row.id])}</span>
+            <span className="text-muted-foreground">{t(HUD_LABEL_KEY[row.id])}:</span>
             <span className="font-mono tabular-nums text-foreground">
-              {formatCapacityFraction(row.used, row.limit)}
+              {frame(row.used, row.limit)}
             </span>
           </li>
         ))}

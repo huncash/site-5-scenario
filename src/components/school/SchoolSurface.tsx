@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { SimLegalDisclaimer } from "@/components/legal/SimLegalDisclaimer";
 import { ScenarioDoor } from "@/components/ScenarioDoor";
 import { AnonForumPanel } from "@/components/school/AnonForumPanel";
 import { AnonPackLoader } from "@/components/school/AnonPackLoader";
@@ -64,6 +65,7 @@ export function SchoolSurface() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{t("school.kicker")}</p>
           <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground">{t("school.title")}</h1>
           <p className="text-pretty text-[15px] leading-relaxed text-muted-foreground">{t("school.lead")}</p>
+          <SimLegalDisclaimer />
           <ul className="space-y-1.5 text-sm text-foreground/90">
             <li>
               {SCHOOL_CASES} {t("school.casesLabel")} · {SCHOOL_SLOTS_PER_CASE} {t("school.slotsLabel")}

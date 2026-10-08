@@ -1,7 +1,7 @@
 import { translate, type MessageKey } from "@/i18n";
 import type { Locale } from "@/i18n/locale";
 
-/** Footer: EU AI Act (2024/1689) átláthatósági nyilatkozat — helyi, client-side modellezés. */
+/** Footer: AI-átláthatósági tájékoztató — helyi szabálymotor, nem megfelelőségi tanúsítvány. */
 export function EuAiActNotice({ locale }: { locale: Locale }) {
   const t = (key: MessageKey) => translate(locale, key);
   return (

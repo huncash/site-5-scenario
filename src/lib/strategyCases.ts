@@ -270,21 +270,9 @@ export function resolveKahnPlanPro(
 ): KahnProLive[] {
   const a = KAHN_FORK.contractA;
   const b = KAHN_FORK.contractB;
-  const empty = (label: string, tone: StrategyTone, strategy: string): KahnProLive => ({
-    tone,
-    label,
-    runwayMonths: null,
-    exitPenaltyHuf: null,
-    monthlyObligationHuf: null,
-    strategy,
-  });
 
   if (!financing) {
-    return [
-      empty("Bővítés", "opt", "Válassz finanszírozást."),
-      empty("Tartás", "real", "Válassz finanszírozást."),
-      empty("Tartalék", "pess", "Válassz finanszírozást."),
-    ];
+    return resolveKahnPlanPro("organic", null);
   }
 
   if (financing === "organic") {
@@ -317,32 +305,7 @@ export function resolveKahnPlanPro(
   }
 
   if (!contract) {
-    return [
-      {
-        tone: "opt",
-        label: "Bővítés",
-        runwayMonths: 8,
-        exitPenaltyHuf: null,
-        monthlyObligationHuf: null,
-        strategy: `Lehívás ${formatHuf(KAHN_FORK.loanDrawHuf)}. Válaszd az A/B konstrukciót.`,
-      },
-      {
-        tone: "real",
-        label: "Tartás",
-        runwayMonths: 6,
-        exitPenaltyHuf: null,
-        monthlyObligationHuf: null,
-        strategy: "Kamat és kötbér a 2. fordulaton dől el.",
-      },
-      {
-        tone: "pess",
-        label: "Tartalék",
-        runwayMonths: 5,
-        exitPenaltyHuf: null,
-        monthlyObligationHuf: null,
-        strategy: "A-n kötbér, B-n csak kamat.",
-      },
-    ];
+    return resolveKahnPlanPro("loan", "flex");
   }
 
   if (contract === "cheap") {

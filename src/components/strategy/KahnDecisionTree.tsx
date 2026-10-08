@@ -3,7 +3,10 @@ import { useMemo } from "react";
 import { DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { formatMoney } from "@/lib/finance";
+import { kpisNeverEmpty } from "@/lib/bisztroPreview";
 import { useKahnPlanPath } from "@/lib/kahnPlanPath";
+import { useLeanView } from "@/lib/leanView";
+import { penaltyLabel } from "@/lib/simpleLabels";
 import { MASTER_BASELINE_LABEL } from "@/lib/masterBaseline";
 import { cn } from "@/lib/utils";
 import {
@@ -23,9 +26,9 @@ const TONE_LABEL: Record<StrategyTone, string> = {
 };
 
 function metricOrDash(n: number | null, kind: "runway" | "money" | "monthly"): string {
-  if (n == null) return "—";
-  if (kind === "runway") return `${n} hó`;
-  const money = formatMoney(n, "HUF");
+  const v = kpisNeverEmpty(n);
+  if (kind === "runway") return `${v} hó`;
+  const money = formatMoney(v, "HUF");
   return kind === "monthly" ? `${money}/hó` : money;
 }
 
@@ -63,6 +66,7 @@ function ForkChoice({
 }
 
 function ProLiveCard({ card }: { card: KahnProLive }) {
+  const { lean } = useLeanView();
   return (
     <li className={cn("kahn-branch", `kahn-branch-${card.tone}`)}>
       <div className="flex items-center justify-between gap-2">
@@ -75,7 +79,7 @@ function ProLiveCard({ card }: { card: KahnProLive }) {
           <dd>{metricOrDash(card.runwayMonths, "runway")}</dd>
         </div>
         <div>
-          <dt>Kötbér</dt>
+          <dt>{penaltyLabel(lean)}</dt>
           <dd>{metricOrDash(card.exitPenaltyHuf, "money")}</dd>
         </div>
         <div>

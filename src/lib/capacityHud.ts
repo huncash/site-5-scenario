@@ -1,5 +1,6 @@
 import { finiteQuota, getPlan, type JitAddonId, type QuotaCount } from "@/config/plans";
 import { ACCESS_ROLE, readAccessRole } from "@/lib/accessRole";
+import { ADVISOR_CASE_FRAME, ADVISOR_GUEST_FRAME, hasAdvisorDesk } from "@/lib/advisorDesk";
 import { countActiveGuestCodes } from "@/lib/auth/guestSlots";
 import { resolveCurrentPlanId } from "@/lib/planPermissions";
 import { readLicense, readSlotLedger } from "@/lib/license";
@@ -26,7 +27,11 @@ function countOwnedAddon(id: JitAddonId, addons: readonly string[] | undefined):
 
 export function formatCapacityFraction(used: number, limit: QuotaCount | number): string {
   const cap = typeof limit === "number" ? Math.max(0, limit) : finiteQuota(limit);
-  return `${Math.max(0, used)}/${cap}`;
+  return `${Math.max(0, used)} / ${cap}`;
+}
+
+export function formatCapacityFrame(used: number, limit: QuotaCount | number): string {
+  return `${formatCapacityFraction(used, limit)} keret`;
 }
 
 /** Personal mindig számít; ha nincs a listában, +1 (alap kassza). */
@@ -47,6 +52,7 @@ export function readCapacityHud(input?: {
   const extraCases = countOwnedAddon("case_plus_1", addons);
   const extraSeats = countOwnedAddon("seat_plus_1", addons);
   const extraGuests = countOwnedAddon("guest_plus_1", addons);
+  const advisor = hasAdvisorDesk(addons);
   const usedSlots = usedSlotCount(input?.workspaceIds ?? []);
   const slotLimit = totalScenarioSlots(readSlotLedger());
   const seatsUsed =
@@ -64,7 +70,7 @@ export function readCapacityHud(input?: {
       id: "cases",
       label: "Case",
       used: Math.max(0, input?.profileCount ?? 1),
-      limit: finiteQuota(q.cases) + extraCases,
+      limit: Math.max(finiteQuota(q.cases) + extraCases, advisor ? ADVISOR_CASE_FRAME : 0),
     },
     slots: {
       id: "slots",
@@ -82,7 +88,7 @@ export function readCapacityHud(input?: {
       id: "guests",
       label: "Guest",
       used: guestsUsed,
-      limit: finiteQuota(q.guests) + extraGuests,
+      limit: Math.max(finiteQuota(q.guests) + extraGuests, advisor ? ADVISOR_GUEST_FRAME : 0),
     },
   };
 }

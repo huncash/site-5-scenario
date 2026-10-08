@@ -37,6 +37,9 @@ describe("bill catalog from plans.ts", () => {
     expect(q.dueNet).toBe(399_000 + 49_000);
     expect(q.lines[0]?.name).toContain("Pro Szcenárió");
     expect(q.lines.some((l) => l.name.includes("Aktív Case"))).toBe(true);
+    const doubled = quotePackage("pro", "yearly", { country: "HU", addon: "case_plus_1,case_plus_1" });
+    expect(doubled.dueNet).toBe(399_000 + 49_000 * 2);
+    expect(doubled.lines.find((l) => l.name.includes("Aktív Case"))?.quantity).toBe(2);
     expect(packageLines("starter", "yearly").at(0)?.netUnitPrice).toBe(199_000);
   });
 

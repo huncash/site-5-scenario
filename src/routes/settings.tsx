@@ -28,6 +28,7 @@ import { purgeDemoGeneratedDataForActiveProfile } from "@/lib/demoSeed";
 import { denyShowcaseWrite, SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolicy";
 import { localdb, type BankAccountRow, type BankAccountWorkspaceRow, type BankRawRow, type SnapshotRow } from "@/lib/localdb";
 import type { CategoryRuleRow } from "@/lib/localdb";
+import { stampBackupExport } from "@/lib/backupCue";
 import { useMeshRepository } from "@/lib/mesh/meshRepository";
 import { LabToggleRow } from "@/components/labs/LabToggleRow";
 import { DASHBOARD_LABS } from "@/lib/dashboardLabs";
@@ -667,10 +668,12 @@ function SettingsPage() {
     if (encrypted) {
       const enc = await encryptJSON(vaultKey!, dump);
       downloadText(`mesh_backup_${ymd()}_enc.json`, enc);
+      await stampBackupExport(meshRepo);
       toast.success(tx("Encrypted mentés letöltve."));
       return;
     }
     downloadText(`mesh_backup_${ymd()}.json`, JSON.stringify(dump, null, 2));
+    await stampBackupExport(meshRepo);
     toast.success(tx("Mentés letöltve."));
   };
 
@@ -695,6 +698,7 @@ function SettingsPage() {
       const label = scope === "ALL" ? "full" : String(workspaceName(scope)).replaceAll(" ", "_");
       const fn = scope === "ALL" ? `mesh_backup_full_${date}.json` : `mesh_backup_${label}_${date}.json`;
       downloadText(fn, txt);
+      await stampBackupExport(meshRepo);
       toast.success(tx("Titkosított mentés letöltve."));
     } catch (e: any) {
       toast.error(e?.message || tx("Titkosított mentés sikertelen."));
@@ -2721,15 +2725,15 @@ function SettingsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">{tx("(üres)")}</SelectItem>
-                        <SelectItem value="FIX_NEED">FIX_NEED</SelectItem>
-                        <SelectItem value="VARIABLE_NEED">VARIABLE_NEED</SelectItem>
-                        <SelectItem value="WANT">WANT</SelectItem>
-                        <SelectItem value="INVESTMENT">INVESTMENT</SelectItem>
+                        <SelectItem value="FIX_NEED">Fix kiadás</SelectItem>
+                        <SelectItem value="VARIABLE_NEED">Változó szükséglet</SelectItem>
+                        <SelectItem value="WANT">Rugalmas kiadás</SelectItem>
+                        <SelectItem value="INVESTMENT">Befektetés</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label>MUDA típus</Label>
+                    <Label>Pazarlás típus</Label>
                     <Select value={ruleMudaType} onValueChange={(v) => setRuleMudaType(v as any)}>
                       <SelectTrigger>
                         <SelectValue placeholder={tx("(üres)")} />

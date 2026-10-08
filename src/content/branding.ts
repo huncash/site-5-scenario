@@ -12,7 +12,7 @@ export const HERO_SUBHEADLINE =
 export const HERO_SLOGAN = "Káoszból tiszta pálya.";
 export const HERO_LOCAL_FIRST_LABEL = "A számok a gépeden maradnak:";
 export const HERO_LOCAL_FIRST_BODY =
-  "Lokális irányító-szimuláció a saját eszközödön: a fejlesztők soha nem látják és nem gyűjtik az adataidat. Megosztás meghívott vendéggel, vagy mentési fájllal — mint régen egy táblázatot. A kivonat (CSV, XML) a Mesh Data Managerbe kerül, helyben. Nincs külső felhős adatbázis.";
+  "Lokális irányító-szimuláció a saját eszközödön: a szimulációs adatok a böngészőben / helyi tárhelyen futnak. A fizetés, a számlázás és a support adatai a jogszabályok szerint kezeltek. Megosztás meghívott vendéggel, vagy mentési fájllal — mint régen egy táblázatot. A kivonat (CSV, XML) a Mesh Data Managerbe kerül, helyben.";
 export const HERO_DEMO_PREVIEW_TITLE = "További demó helyzetek";
 export const HERO_DEMO_PREVIEW_BODY =
   "Szabadon játszható, elképzelt minták a motor kipróbálásához. Nem baj, ha elsőre sok az infó vagy idegen a szakterület: nincs regisztráció, a számok a gépeden maradnak.";

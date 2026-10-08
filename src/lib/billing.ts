@@ -120,10 +120,10 @@ export function billCheckoutUrl(opts: {
     "";
   if (pendingReferral) url.searchParams.set("referral", pendingReferral.toUpperCase());
   if (opts.slotPack) url.searchParams.set("slotPack", opts.slotPack);
-  const addonList = [...(opts.addons ?? []), opts.addon].filter((x): x is string => Boolean(x));
-  const uniqueAddons = [...new Set(addonList)];
-  if (uniqueAddons.length === 1) url.searchParams.set("addon", uniqueAddons[0]!);
-  else if (uniqueAddons.length > 1) url.searchParams.set("addon", uniqueAddons.join(","));
+  const addonList = [...(opts.addons ?? []), ...(opts.addon ? opts.addon.split(",") : [])]
+    .map((x) => x.trim())
+    .filter(Boolean);
+  if (addonList.length) url.searchParams.set("addon", addonList.join(","));
   if (opts.partnerKind) url.searchParams.set("partnerKind", opts.partnerKind);
   const stored = typeof window !== "undefined" ? readCampaignAttribution() : null;
   applyAttributionSearchParams(

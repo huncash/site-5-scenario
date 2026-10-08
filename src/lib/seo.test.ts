@@ -9,8 +9,8 @@ describe("public SEO", () => {
     expect(SEO_HOME_TITLE).not.toMatch(/Szenárió —/);
     expect(SEO_HOME_TITLE).toMatch(/böngészőben/);
     expect(SEO_HOME_TITLE).not.toMatch(/Case\/Slot/);
-    expect(SEO_HOME_DESCRIPTION).toMatch(/felhős adatbázis/);
-    expect(SEO_HOME_DESCRIPTION).toMatch(/soha nem látják/);
+    expect(SEO_HOME_DESCRIPTION).toMatch(/helyben/);
+    expect(SEO_HOME_DESCRIPTION).toMatch(/jogszabályok szerint/);
     expect(SEO_HOME_DESCRIPTION).toMatch(/2027/);
     expect(SEO_HOME_DESCRIPTION).toMatch(/ingyen/);
     expect(SEO_OG_TITLE).toMatch(/böngésződben/);

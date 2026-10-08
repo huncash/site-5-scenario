@@ -353,11 +353,13 @@ export function LabsOverlay({
   onOpenChange,
   workspaceIds,
   profileCount,
+  variant = "popover",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workspaceIds: readonly string[];
   profileCount: number;
+  variant?: "popover" | "page";
 }) {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -444,15 +446,26 @@ export function LabsOverlay({
 
   return (
         <TooltipProvider delayDuration={120}>
-          <div className="relative flex flex-col gap-2 px-3 pb-3 pt-3">
+          <div
+            className={cn(
+              "relative flex flex-col gap-2 px-3 pb-3 pt-3",
+              variant === "page" &&
+                "rounded-2xl border border-cyan-400/35 bg-card/80 p-4 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.65)] sm:p-5",
+            )}
+          >
             <div className="flex items-center gap-2">
               <h2 className="flex shrink-0 items-center gap-1 text-sm font-semibold tracking-tight">
-                {t("labs.overlayTitle")}
+                {variant === "page" ? t("labs.doorTitle") : t("labs.overlayTitle")}
               </h2>
               <CapacityHudBar statusOnly workspaceIds={workspaceIds} profileCount={profileCount} />
             </div>
+            <p className="text-[11px] leading-snug text-muted-foreground">{t("labs.hudExplain")}</p>
+            {variant === "page" ? (
+              <p className="text-[12px] leading-snug text-muted-foreground">{t("labs.doorLead")}</p>
+            ) : (
+              <p className="sr-only">{t("labs.overlayLead")}</p>
+            )}
             <LabsSalesFunnel />
-            <p className="sr-only">{t("labs.overlayLead")}</p>
 
             <div
               ref={treeRef}

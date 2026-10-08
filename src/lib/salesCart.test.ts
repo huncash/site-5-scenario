@@ -32,6 +32,20 @@ describe("salesCart", () => {
     expect(JSON.stringify(q)).not.toMatch(/előfizetés|subscription|lifetime membership|élethosszig/i);
     expect(checkoutHrefFromCart(cart)).toContain("tier=starter");
     expect(checkoutHrefFromCart(cart)).toContain("addon=slot_plus_1");
+    expect(checkoutHrefFromCart(emptyCart())).toBe("");
+  });
+
+  it("repeats addon ids so quantity survives the billing origin", () => {
+    const cart = addSku(addSku(applyRecommendedPack(emptyCart(), "pro"), "case_plus_1"), "case_plus_1");
+    expect(decodeURIComponent(checkoutHrefFromCart(cart))).toContain("addon=case_plus_1,case_plus_1");
+  });
+
+  it("does not put coming-soon Edge into the cart", () => {
+    const cart = addSku(emptyCart(), "edge_sensor");
+    expect(cart.lines).toEqual([]);
+    expect(quoteCart(addSku(applyRecommendedPack(emptyCart(), "pro"), "edge_sensor")).addons).not.toContain(
+      "edge_sensor",
+    );
   });
 
   it("parses comma-separated checkout addons", () => {

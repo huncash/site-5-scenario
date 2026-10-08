@@ -4,6 +4,7 @@
  */
 
 import { PLANS_CONFIG, isPublicPlanId, type PublicPlanId } from "@/config/plans";
+import { ADVISOR_GUEST_FRAME, hasAdvisorDesk } from "@/lib/advisorDesk";
 import { readLicense } from "@/lib/license";
 import { normalizeTierId, type SlotTierId } from "@/lib/scenarioSlots";
 import { sha256Hex } from "@/lib/hash";
@@ -45,11 +46,11 @@ export const GUEST_CODE_SLOTS_PER_TIER: Record<TierId, number> = {
 };
 
 export function guestCodeSlotsForTier(tier: SlotTierId): number {
-  if (tier === "demo") return PLANS_CONFIG.demo.quotas.guests;
-  if (tier === "campus") return PLANS_CONFIG.campus.quotas.guests;
-  if (tier === "local") return PLANS_CONFIG.local.quotas.guests;
-  if (!isPublicPlanId(tier)) return PLANS_CONFIG.demo.quotas.guests;
-  return PLANS_CONFIG[tier].quotas.guests;
+  let base = PLANS_CONFIG.demo.quotas.guests;
+  if (tier === "campus") base = PLANS_CONFIG.campus.quotas.guests;
+  else if (tier === "local") base = PLANS_CONFIG.local.quotas.guests;
+  else if (isPublicPlanId(tier)) base = PLANS_CONFIG[tier].quotas.guests;
+  return hasAdvisorDesk() ? Math.max(base, ADVISOR_GUEST_FRAME) : base;
 }
 
 export function resolveGuestTier(): SlotTierId {

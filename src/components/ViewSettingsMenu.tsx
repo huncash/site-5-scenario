@@ -1,9 +1,10 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { Columns2, Glasses, Keyboard, Moon, Palette, Sun } from "lucide-react";
+import { Columns2, Glasses, GraduationCap, Keyboard, Moon, Palette, Sun } from "lucide-react";
 
 import { HelpIcon } from "@/components/HelpIcon";
 import { useTheme } from "@/components/ThemeProvider";
 import { localeLabel, paletteName, useI18n } from "@/i18n";
+import { useLeanView } from "@/lib/leanView";
 import { cn } from "@/lib/utils";
 
 const VIEW_MODE_KEY = "ui:viewMode";
@@ -50,6 +51,7 @@ export function ViewSettingsMenu({
 }) {
   const { theme, palette, a11y, cyclePalette, toggleTheme, toggleA11y } = useTheme();
   const { locale, toggleLocale, t } = useI18n();
+  const { lean, toggle: toggleLean } = useLeanView();
   const activePalette = paletteName(locale, palette);
   const [open, setOpen] = useState(false);
   const [localViewMode, setLocalViewMode] = useState<ViewMode>("split");
@@ -150,6 +152,18 @@ export function ViewSettingsMenu({
         </button>
         <HelpIcon kbId="language-persist" title={t("view.lang")} />
       </div>
+
+      <button
+        type="button"
+        className={cn("lang-header-btn inline-flex items-center gap-1", lean && "is-active")}
+        title={lean ? t("view.expertOn") : t("view.expertOff")}
+        aria-label={lean ? t("view.expertOn") : t("view.expertOff")}
+        aria-pressed={lean}
+        onClick={toggleLean}
+      >
+        <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+        <span className="hidden sm:inline">{lean ? t("view.expert") : t("view.simple")}</span>
+      </button>
 
       <div className={cn("view-settings-container", open && "active")}>
         <button

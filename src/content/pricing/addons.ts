@@ -19,6 +19,8 @@ export type JitAddon = {
   labelEn: string;
   /** Publikus JIT listában megjelenik. */
   public: boolean;
+  /** Előértékesítés / még nem létező — nincs kosár, csak helyi értesítés. */
+  comingSoon?: boolean;
 };
 
 export const JIT_ADDONS: JitAddon[] = [
@@ -56,25 +58,46 @@ export const JIT_ADDONS: JitAddon[] = [
     labelHu: "Szenzoros / Edge adatgyűjtő modul",
     labelEn: "Sensor / Edge data collector module",
     public: true,
+    comingSoon: true,
+  },
+  {
+    id: "advisor_desk",
+    priceHuf: JIT_ADDON_PRICES.advisor_desk,
+    labelHu: "Könyvelői / tanácsadói asztal — 18 ügyfélfiók",
+    labelEn: "Accountant / advisor desk — 18 client files",
+    public: true,
   },
 ];
 
 export const PUBLIC_JIT_ADDONS = JIT_ADDONS.filter((a) => a.public && a.priceHuf > 0);
 
+export const PURCHASABLE_JIT_ADDONS = PUBLIC_JIT_ADDONS.filter((a) => !a.comingSoon);
+
 export const JIT_ADDON_BY_ID: Record<JitAddonId, JitAddon> = Object.fromEntries(
   JIT_ADDONS.map((a) => [a.id, a]),
 ) as Record<JitAddonId, JitAddon>;
 
-export function parseCheckoutAddons(...raw: Array<string | null | undefined>): JitAddonId[] {
-  const out: JitAddonId[] = [];
+export function isComingSoonJitAddon(id: JitAddonId): boolean {
+  return Boolean(JIT_ADDON_BY_ID[id]?.comingSoon);
+}
+
+export function parseCheckoutAddonLines(
+  ...raw: Array<string | null | undefined>
+): Array<{ id: JitAddonId; qty: number }> {
+  const qty = new Map<JitAddonId, number>();
   for (const chunk of raw) {
     if (!chunk) continue;
     for (const part of chunk.split(",")) {
       const id = part.trim();
-      if (isJitAddonId(id) && !out.includes(id)) out.push(id);
+      if (!isJitAddonId(id)) continue;
+      qty.set(id, (qty.get(id) ?? 0) + 1);
     }
   }
-  return out;
+  return [...qty.entries()].map(([id, n]) => ({ id, qty: n }));
+}
+
+export function parseCheckoutAddons(...raw: Array<string | null | undefined>): JitAddonId[] {
+  return parseCheckoutAddonLines(...raw).map((l) => l.id);
 }
 
 export function isJitAddonId(v: unknown): v is JitAddonId {
@@ -83,7 +106,8 @@ export function isJitAddonId(v: unknown): v is JitAddonId {
     v === "slot_plus_1" ||
     v === "seat_plus_1" ||
     v === "guest_plus_1" ||
-    v === "edge_sensor"
+    v === "edge_sensor" ||
+    v === "advisor_desk"
   );
 }
 
