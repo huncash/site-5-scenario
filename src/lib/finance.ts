@@ -1,3 +1,4 @@
+import { bucketNameForLocale, categoryLabelForLocale, txnTitleForLocale } from "@/i18n/categories";
 import { formatCurrency } from "@/i18n/currency";
 import type {
   HumanResource,
@@ -36,20 +37,22 @@ export const CATEGORY_LABEL: Record<string, string> = {
 
 export function displayTxnTitle(title: string | null | undefined): string {
   const t = (title ?? "").trim();
-  if (t === "Továbbértékesített beszerzés (nyitott)") return "Beszerzés: Továbbértékesítésre (nyitott)";
-  if (t === "Továbbértékesített beszerzés") return "Beszerzés: Továbbértékesítésre";
-  if (t === "Resale purchase (open)") return "Beszerzés: Továbbértékesítésre (nyitott)";
-  if (t === "Resale purchase") return "Beszerzés: Továbbértékesítésre";
-  if (t === "Runway puffer félretétel") return "Céltartalék-puffer félretétel";
-  if (t === "CAPEX alap félretétel") return "Eszközalap félretétel";
-  return t;
+  let hu = t;
+  if (t === "Továbbértékesített beszerzés (nyitott)") hu = "Beszerzés: Továbbértékesítésre (nyitott)";
+  else if (t === "Továbbértékesített beszerzés") hu = "Beszerzés: Továbbértékesítésre";
+  else if (t === "Resale purchase (open)") hu = "Beszerzés: Továbbértékesítésre (nyitott)";
+  else if (t === "Resale purchase") hu = "Beszerzés: Továbbértékesítésre";
+  else if (t === "Runway puffer félretétel") hu = "Céltartalék-puffer félretétel";
+  else if (t === "CAPEX alap félretétel") hu = "Eszközalap félretétel";
+  return txnTitleForLocale(hu);
 }
 
 export function displayBucketName(name: string | null | undefined): string {
   const n = (name ?? "").trim();
-  if (n === "Runway puffer") return "Céltartalék-puffer";
-  if (n === "Eszköz / CAPEX alap") return "Eszközalap";
-  return n;
+  let hu = n;
+  if (n === "Runway puffer") hu = "Céltartalék-puffer";
+  else if (n === "Eszköz / CAPEX alap") hu = "Eszközalap";
+  return bucketNameForLocale(hu);
 }
 
 export function displayTxnLabel(t: {
@@ -529,7 +532,7 @@ export const EMPTY_SETTINGS: CustomSettings = {
   incomeCategories: [],
   expenseCategories: [],
   savingCategories: [],
-  showKpiQuickBar: true,
+  showKpiQuickBar: false,
   buckets: [],
   recurring: [],
   plannedOneOff: [],
@@ -602,7 +605,7 @@ export type Goal = {
 };
 
 export function categoryLabel(c: string) {
-  return CATEGORY_LABEL[c] ?? c;
+  return categoryLabelForLocale(c, CATEGORY_LABEL[c] ?? c);
 }
 
 export function formatMoney(n: number, _currency = "HUF") {

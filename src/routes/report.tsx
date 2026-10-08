@@ -13,11 +13,13 @@ import { useVault } from "@/lib/vault";
 import { decryptJSON } from "@/lib/crypto";
 import { categoryLabel, formatMoney, type Transaction } from "@/lib/finance";
 import { computeQuarterLockedVat } from "@/lib/financeCore";
+import { parseLangSearch } from "@/lib/langSearch";
 import { isSchoolHost, SCHOOL_WATERMARK } from "@/lib/school";
 
 export const Route = createFileRoute("/report")({
   component: ReportPage,
   validateSearch: (s: Record<string, unknown>) => ({
+    ...parseLangSearch(s),
     profile: String(s.profile ?? ""),
     workspace: String(s.workspace ?? "personal"),
   }),

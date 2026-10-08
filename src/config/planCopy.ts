@@ -35,21 +35,6 @@ function slotsLabel(slotsPerCase: number, locale: Locale): string {
     : `${slotsPerCase} Aktív Slot**/Case`;
 }
 
-function bankHighlight(mode: BankImportMode, locale: Locale): string {
-  if (locale === "en") {
-    if (mode === "api") return "Automated accounting / bank-statement import";
-    if (mode === "multi") {
-      return "Local statement (CSV, XML) + watched folder";
-    }
-    return "Manual statement import (CSV, XML) on your machine";
-  }
-  if (mode === "api") return "Automatizált könyvelési/bankkivonat import";
-  if (mode === "multi") {
-    return "Helyi kivonat (CSV, XML) + figyelt mappa";
-  }
-  return "Kézi kivonat-import (CSV, XML) a gépeden";
-}
-
 function bankCompare(mode: BankImportMode, locale: Locale): string {
   if (locale === "en") {
     if (mode === "api") return "✓ Accounting / bank-statement import";
@@ -101,7 +86,12 @@ export function planSlogan(plan: PlanConfig, locale: Locale = "hu"): string {
         : `${cases} Aktív Case*`;
   const slotPart =
     locale === "en" ? `${slotsPerCase} Active Slot**/Case` : `${slotsPerCase} Aktív Slot**/Case`;
-  return `${casePart} · ${slotPart} · ${seats} Seat + ${guests} Guest****`;
+  const seatPart = locale === "en" ? `${seats} editor${seats === 1 ? "" : "s"}` : `${seats} szerkesztő`;
+  const guestPart =
+    locale === "en"
+      ? `${guests} guest account${guests === 1 ? "" : "s"}`
+      : `${guests} vendégfiók`;
+  return `${casePart} · ${slotPart} · ${seatPart} · ${guestPart}`;
 }
 
 export function planAudience(plan: PlanConfig, locale: Locale = "hu"): string {
@@ -125,62 +115,25 @@ export function planHighlights(plan: PlanConfig, locale: Locale = "hu"): string[
   return planCardBullets(plan, locale);
 }
 
+function quotaLine(n: QuotaCount, huNoun: string, enOne: string, enMany: string, locale: Locale): string {
+  if (n === "unlimited") {
+    return locale === "en" ? `Unlimited ${enMany}` : `Korlátlan ${huNoun}`;
+  }
+  if (locale === "en") return `${n} ${n === 1 ? enOne : enMany}`;
+  return `${n} ${huNoun}`;
+}
+
 /**
- * Árazási kártya: max. 3–4 tiszta pont — nincs hűséglétra, nincs ismétlés.
- * A részletek a support /pricing oldalon élnek.
+ * Árazási kártya: csak a négy számozott keret. Nincs import-/hűségismétlés —
+ * a részletek a support /pricing gomb mögött élnek.
  */
 export function planCardBullets(plan: PlanConfig, locale: Locale = "hu"): string[] {
-  const L = locale === "en";
-  if (plan.id === "starter") {
-    return L
-      ? [
-          "1 active case",
-          "3 active slots",
-          "1 editor seat",
-          "Unlimited import & overwrite",
-        ]
-      : [
-          "1 aktív case",
-          "3 aktív slot",
-          "1 szerkesztői hely",
-          "Korlátlan import és felülírás",
-        ];
-  }
-  if (plan.id === "pro") {
-    return L
-      ? [
-          "2 parallel active cases",
-          "3 active slots each",
-          "1 editor + 5 guests",
-          "Local CSV/XML import, watched folder, own rules",
-        ]
-      : [
-          "2 párhuzamos aktív case",
-          "3 aktív slot case-enként",
-          "1 szerkesztő + 5 vendég",
-          "Helyi bankkivonat (CSV, XML), figyelt mappa, saját szabály",
-        ];
-  }
-  if (plan.id === "expert") {
-    return L
-      ? [
-          "5 Active Cases",
-          "4 Active Slots / Case",
-          "3 editors + 20 guests",
-          "Local accounting / bank-statement import",
-        ]
-      : [
-          "5 Aktív Case",
-          "4 Aktív Slot / Case",
-          "3 szerkesztő + 20 vendég",
-          "Helyi könyvelési/bankkivonat import",
-        ];
-  }
+  const q = plan.quotas;
   return [
-    casesLabel(plan.quotas.cases, locale),
-    slotsLabel(plan.quotas.slotsPerCase, locale),
-    `${plan.quotas.seats} Seat + ${plan.quotas.guests} Guest`,
-    bankHighlight(plan.features.bankImport, locale),
+    quotaLine(q.cases, "aktív case", "active case", "active cases", locale),
+    quotaLine(q.slotsPerCase, "aktív slot", "active slot", "active slots", locale),
+    quotaLine(q.seats, "szerkesztő", "editor", "editors", locale),
+    quotaLine(q.guests, "vendégfiók", "guest account", "guest accounts", locale),
   ];
 }
 
@@ -227,12 +180,21 @@ export function buildPricingCompareRows(locale: Locale = "hu"): PricingCompareRo
       },
     },
     {
-      id: "seat-guest",
-      feature: "Seat + Guest****",
+      id: "seats",
+      feature: L ? "Editors" : "Szerkesztő",
       cells: {
-        starter: `${byId.starter.quotas.seats} Seat + ${byId.starter.quotas.guests} Guest`,
-        pro: `${byId.pro.quotas.seats} Seat + ${byId.pro.quotas.guests} Guest`,
-        expert: `${byId.expert.quotas.seats} Seat + ${byId.expert.quotas.guests} Guest`,
+        starter: String(byId.starter.quotas.seats),
+        pro: String(byId.pro.quotas.seats),
+        expert: String(byId.expert.quotas.seats),
+      },
+    },
+    {
+      id: "guests",
+      feature: L ? "Guest accounts" : "Vendégfiók",
+      cells: {
+        starter: String(byId.starter.quotas.guests),
+        pro: String(byId.pro.quotas.guests),
+        expert: String(byId.expert.quotas.guests),
       },
     },
     {
@@ -315,12 +277,12 @@ export function capacityTipHu(): string {
   const s = PLANS_CONFIG.starter.quotas;
   const p = PLANS_CONFIG.pro.quotas;
   const e = PLANS_CONFIG.expert.quotas;
-  return `A keret az egyidejűleg aktív Case-ekre és Slotokra vonatkozik (nem a felhalmozott adatokra). Case-enként párhuzamosan futható Aktív Slot**: Basic ${s.slotsPerCase}, Pro ${p.slotsPerCase}, Enterprise ${e.slotsPerCase} — bővíthető JIT modullal. Inaktív munkaterület törölhető / felülírható díj nélkül.`;
+  return `A keret az egyidejűleg aktív Case-ekre és Slotokra vonatkozik (nem a felhalmozott adatokra). A Case / Slot / Seat / Guest a licenc kvótája; motorfelvétel (oktatás, BCP) külön kvótát nem ad. Case-enként párhuzamosan futtatható Aktív Slot: Basic ${s.slotsPerCase}, Pro ${p.slotsPerCase}, Enterprise ${e.slotsPerCase} — bővíthető JIT modullal. Inaktív munkaterület törölhető / felülírható díj nélkül.`;
 }
 
 export function seatGuestCapacityTipHu(): string {
   const s = PLANS_CONFIG.starter.quotas;
   const p = PLANS_CONFIG.pro.quotas;
   const e = PLANS_CONFIG.expert.quotas;
-  return `Basic: ${s.seats} Seat + ${s.guests} Guest · Pro: ${p.seats} Seat + ${p.guests} Guest · Enterprise: ${e.seats} Seat + ${e.guests} Guest.`;
+  return `Basic: ${s.seats} szerkesztő · ${s.guests} vendégfiók · Pro: ${p.seats} szerkesztő · ${p.guests} vendégfiók · Enterprise: ${e.seats} szerkesztő · ${e.guests} vendégfiók.`;
 }

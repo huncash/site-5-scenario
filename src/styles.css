@@ -238,6 +238,19 @@ body,
   overflow: visible;
 }
 
+/* Tételek: kategórianév — WCAG, chip a kártya hátterén, nem a bar/muted. */
+.txn-category {
+  color: var(--text-main) !important;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  display: inline-block;
+  padding: 0.05em 0.4em;
+  border-radius: 0.2rem;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.35;
+}
+
 /* Internal app: wrap instead of ellipsis so labels stay readable */
 .app-shell-main .kpi-value,
 .app-shell-main .kpi-label,
@@ -400,9 +413,9 @@ body,
   /* Default: Dark Forest — lombkorona (no-hype CTA, nem neon) */
   --app-bg: #071511;
   --card-bg: #0d221b;
-  --card-border: #16382c;
+  --card-border: #2d5346;
   --text-main: #ecfdf5;
-  --text-muted: #94a3b8;
+  --text-muted: #c5d4cc;
   --accent-emerald: #2d6a4f;
   --accent-hover: #2d6a4f;
   --accent-pressed: #081c15;
@@ -464,9 +477,9 @@ html.dark.palette-forest,
 [data-theme="dark-forest"] {
   --app-bg: #071511;
   --card-bg: #0d221b;
-  --card-border: #16382c;
+  --card-border: #2d5346;
   --text-main: #ecfdf5;
-  --text-muted: #94a3b8;
+  --text-muted: #c5d4cc;
   --dropdown-bg: #0d221b;
   --dropdown-hover: #16382c;
   --accent-emerald: #2d6a4f;
@@ -484,9 +497,9 @@ html.dark.palette-slate,
 [data-theme="dark-slate"] {
   --app-bg: #0b0f19;
   --card-bg: #111827;
-  --card-border: #1f2937;
+  --card-border: #3b4a63;
   --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
+  --text-muted: #d1d5db;
   --dropdown-bg: #111827;
   --dropdown-hover: #1f2937;
   --accent-emerald: #10b981;
@@ -501,9 +514,9 @@ html.dark.palette-bronze,
 [data-theme="dark-bronze"] {
   --app-bg: #120e0b;
   --card-bg: #1c1612;
-  --card-border: #32281f;
+  --card-border: #4a3c2e;
   --text-main: #f5efe6;
-  --text-muted: #b5a48c;
+  --text-muted: #d8cbb6;
   --dropdown-bg: #1c1612;
   --dropdown-hover: #32281f;
   --accent-emerald: #10b981;
@@ -1924,6 +1937,12 @@ html[data-accessibility="active"] body {
   --door-mute: var(--muted-foreground);
 }
 
+.door-page header > div {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 0.75rem;
+}
+
 .door-page .text-muted-foreground,
 .door-page .text-slate-300,
 .door-page .text-slate-400,
@@ -2203,8 +2222,16 @@ html.light-mode [class*="border-l-pink"] {
 
 .view-settings-bar {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  padding: 2px 0;
+  max-width: 100%;
+}
+
+.view-settings-bar .lang-header-btn {
+  position: relative;
+  z-index: 1;
 }
 
 .view-settings-bar.is-open,
@@ -2568,4 +2595,129 @@ html[data-accessibility="active"] .view-settings-icon-btn:focus-visible {
 .installment-arrears-tape-label {
   background: #fde047;
   box-shadow: 0 0 0 2px #111;
+}
+
+@keyframes lab-focus-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, #34d399 75%, transparent),
+      0 0 16px 3px color-mix(in srgb, #22d3ee 40%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px #34d399,
+      0 0 28px 8px color-mix(in srgb, #22d3ee 60%, transparent);
+  }
+}
+
+.lab-focus-ring {
+  outline: 2px solid #34d399;
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+  animation: lab-focus-pulse 0.7s ease-in-out 3;
+  position: relative;
+  z-index: 4;
+}
+
+@keyframes szumma-desk-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.szumma-desk-enter {
+  animation: szumma-desk-in 0.45s ease-out;
+}
+
+@keyframes szumma-canvas-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+}
+
+.szumma-canvas-leave {
+  animation: szumma-canvas-out 0.28s ease-in forwards;
+  pointer-events: none;
+}
+
+/* Dark: tábla / tétel / címke — WCAG AA+ a sötét kártyán */
+html.dark .app-shell-main table,
+html.dark .app-shell-main thead th,
+html.dark .app-shell-main tbody td {
+  color: var(--text-main);
+}
+html.dark .app-shell-main thead th {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background-color: color-mix(in srgb, var(--card-bg) 82%, #000);
+}
+html.dark .app-shell-main tbody tr {
+  border-color: var(--card-border);
+}
+html.dark .app-shell-main tbody tr:hover {
+  background-color: color-mix(in srgb, var(--dropdown-hover) 70%, transparent);
+}
+
+html.dark .card,
+html.dark [data-slot="card"],
+html.dark .card-module,
+html.dark .card-table,
+html.dark .app-shell-main .rounded-xl.border,
+html.dark .app-shell-main .rounded-lg.border,
+html.dark .app-shell-main .rounded-md.border {
+  border-color: var(--card-border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-main) 5%, transparent);
+}
+
+html.dark button.border:hover,
+html.dark a.border:hover,
+html.dark [data-slot="button"].border:hover {
+  border-color: color-mix(in srgb, var(--card-border) 45%, var(--text-main));
+  background-color: color-mix(in srgb, var(--dropdown-hover) 85%, var(--card-bg));
+}
+
+/* PDCA tárcsa + forgató: 124×55 a 22px sorra ül, középpont marad */
+.pdca-dial-slot {
+  position: relative;
+  width: 124px;
+  height: 22px;
+  flex-shrink: 0;
+  align-self: start;
+}
+.pdca-dial-slot > .pdca-dial {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 124px;
+  height: 55px;
+  transform: translateX(-50%);
+}
+.pdca-rotate-btn {
+  height: 32px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-main) 6%, transparent);
+}
+@media (max-width: 639px) {
+  .pdca-dial-slot {
+    height: 55px;
+    align-self: end;
+  }
+  .pdca-dial-slot > .pdca-dial {
+    position: static;
+    transform: none;
+  }
+}
+
+#labs-tree-panel {
+  transform-origin: top right;
 }

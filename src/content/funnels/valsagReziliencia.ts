@@ -36,6 +36,10 @@ export const VALSAG_REZILIENCIA_FUNNEL = {
       a: "Nem. Vállalatnál BCP és működési reziliencia, makróban stratégiai előrejelzés, közösségben helyi önfenntartás. A pesszimista sáv érettség: a piac azt keresi, aki reziliens, nem aki vakon optimista.",
     },
     {
+      q: "Új motort veszek, kapok extra Case-t?",
+      a: "Nem. A Case / Slot / Seat / Guest a licenc kvótája. A BCP motor ugyanerre a keretre ül — moduláris legó, külön kvótát nem ad.",
+    },
+    {
       q: "Miért fizikai mutató, nem csak forint?",
       a: "Ha a motor kiáll egy 72 órás hálózati kiesést vagy egy ellátási sokkot, látszik, hogy nem vékony Excel. Ugyanaz a számítás viszi a cash-flow-t és a fizikai korlátot.",
     },

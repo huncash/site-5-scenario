@@ -1,6 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 import { PrivateMonetizationSim } from "@/components/admin/PrivateMonetizationSim";
+import { langSearch } from "@/lib/langSearch";
 import { isLocalDevHost } from "@/lib/license";
 
 export const Route = createFileRoute("/admin/monetization-sim")({
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/admin/monetization-sim")({
 
 function MonetizationSimGate() {
   if (typeof window !== "undefined" && !isLocalDevHost()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" search={langSearch} replace />;
   }
 
   return (

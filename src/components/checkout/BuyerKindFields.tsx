@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import type { BuyerKind } from "@/lib/buyerKind";
 import { useI18n } from "@/i18n";
+import { keepLang } from "@/lib/langSearch";
 import { cn } from "@/lib/utils";
 
 type BuyerKindFieldsProps = {
@@ -76,11 +77,11 @@ export function BuyerKindFields(props: BuyerKindFieldsProps) {
         />
         <span>
           {t("pricing.acceptAszfPrefix")}{" "}
-          <Link to="/aszf" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
+          <Link to="/aszf" search={keepLang} className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
             {t("footer.terms")}
           </Link>{" "}
           {t("pricing.acceptAszfAnd")}{" "}
-          <Link to="/gdpr" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
+          <Link to="/gdpr" search={keepLang} className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
             {t("footer.gdpr")}
           </Link>
           .

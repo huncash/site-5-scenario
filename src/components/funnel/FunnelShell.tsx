@@ -5,6 +5,7 @@ import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
+import { keepLang, langSearch } from "@/lib/langSearch";
 import { DEMO_SELECTOR_HASH, preferDemoSelectorHome } from "@/lib/demoSelector";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,7 @@ export function FunnelShell(props: {
       <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
-            <Link to="/" className="block min-w-0 truncate text-sm font-semibold text-foreground">
+            <Link to="/" search={langSearch} className="block min-w-0 truncate text-sm font-semibold text-foreground">
               {t("brand.name")}
             </Link>
             <div
@@ -38,12 +39,12 @@ export function FunnelShell(props: {
             {rightSlot}
             <ViewSettingsMenu />
             <Button asChild size="sm" variant="outline" className="h-8 px-3">
-              <Link to="/" hash={DEMO_SELECTOR_HASH} onClick={() => preferDemoSelectorHome()}>
+              <Link to="/" search={langSearch} hash={DEMO_SELECTOR_HASH} onClick={() => preferDemoSelectorHome()}>
                 {t("door.startDemo")}
               </Link>
             </Button>
             <Button asChild size="sm" className="btn-cta h-8 px-3">
-              <Link to="/login">{t("chrome.login")}</Link>
+              <Link to="/login" search={keepLang}>{t("chrome.login")}</Link>
             </Button>
           </div>
         </div>

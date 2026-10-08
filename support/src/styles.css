@@ -69,6 +69,17 @@ p, li { color: var(--text-muted); line-height: 1.45; }
 .item { border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 12px; padding: 10px 12px; }
 .item b { display: block; color: var(--text-main); margin-bottom: 4px; }
 .item strong { color: var(--text-main); font-weight: 650; }
+.check {
+  border: 1px solid color-mix(in srgb, #2d6a4f 40%, var(--card-border));
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+}
+.check h2 { margin-top: 0; }
+.check ol { margin: 8px 0 0; padding-left: 1.25rem; }
+.check li { margin: 0 0 10px; color: var(--text-muted); }
+.check li b { display: block; color: var(--text-main); margin-bottom: 3px; }
 .faq-category { margin-top: 14px; }
 .faq-category h3 {
   margin: 0 0 8px;

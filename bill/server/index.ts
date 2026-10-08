@@ -407,6 +407,17 @@ async function handleApi(req: Request): Promise<Response> {
       addon,
       slotPack,
     });
+    if (quote.bundleLock.tripped) {
+      return Response.json(
+        {
+          ok: false,
+          error:
+            "A kiválasztott modulok a következő csomag listaárát elérik. A kedvezőbb csomagot kell választani — a kijátszás zárva van.",
+          bundleLock: quote.bundleLock,
+        },
+        { status: 409 },
+      );
+    }
     buyer.country = quote.vat.country;
     const wantInstallment = isPayPlan(body.payPlan) && body.payPlan === "installment2" && installmentAllowed(tier, interval);
     const installments = wantInstallment
@@ -582,6 +593,7 @@ async function handleApi(req: Request): Promise<Response> {
       vatCode: q.vat.vatCode,
       treatment: q.vat.treatment,
       labelHu: q.vat.labelHu,
+      bundleLock: q.bundleLock,
       net: q.due.net,
       vat: q.due.vat,
       gross: q.due.gross,

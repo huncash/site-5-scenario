@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { AppLicenseGate } from "@/components/AppLicenseGate";
 import { Button } from "@/components/ui/button";
+import { keepLang, langSearch } from "@/lib/langSearch";
 import { hasWorkspaceAccess } from "@/lib/license";
 import { useVault } from "@/lib/vault";
 
@@ -28,7 +29,7 @@ function AppWorkspacePage() {
     if (!licensed) return;
     if (state.status !== "unlocked") return;
     enterDashboard();
-    void navigate({ to: "/" });
+    void navigate({ to: "/", search: langSearch() });
   }, [licensed, navigate, state.status]);
 
   if (!licensed) {
@@ -58,7 +59,7 @@ function AppWorkspacePage() {
             A token rendben. Oldd fel a helyi profilt — a számítás a böngészőben marad.
           </p>
           <Button asChild>
-            <Link to="/login">Profil feloldása</Link>
+            <Link to="/login" search={keepLang}>Profil feloldása</Link>
           </Button>
         </div>
       </div>

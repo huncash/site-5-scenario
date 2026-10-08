@@ -39,8 +39,15 @@ export const JIT_ADDONS: JitAddon[] = [
   {
     id: "seat_plus_1",
     priceHuf: JIT_ADDON_PRICES.seat_plus_1,
-    labelHu: "+1 Extra Szerkesztő Seat",
-    labelEn: "+1 Extra Editor Seat",
+    labelHu: "+1 Extra szerkesztő",
+    labelEn: "+1 Extra editor",
+    public: true,
+  },
+  {
+    id: "guest_plus_1",
+    priceHuf: JIT_ADDON_PRICES.guest_plus_1,
+    labelHu: "+1 Extra vendégfiók",
+    labelEn: "+1 Extra guest account",
     public: true,
   },
   {
@@ -49,13 +56,6 @@ export const JIT_ADDONS: JitAddon[] = [
     labelHu: "Szenzoros / Edge adatgyűjtő modul",
     labelEn: "Sensor / Edge data collector module",
     public: true,
-  },
-  {
-    id: "guest_plus_1",
-    priceHuf: JIT_ADDON_PRICES.guest_plus_1,
-    labelHu: "+1 Extra Guest",
-    labelEn: "+1 Extra Guest",
-    public: false,
   },
 ];
 

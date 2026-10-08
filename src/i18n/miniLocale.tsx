@@ -8,6 +8,7 @@ import {
   readClientLocale,
   type Locale,
 } from "@/i18n/locale";
+import { persistViewPrefs } from "@/lib/viewPrefs";
 
 export type { Locale };
 
@@ -18,6 +19,7 @@ export function readSiteLocale(): Locale {
       const raw = q.get("lang") || q.get("locale");
       if (isLocale(raw)) {
         persistLocale(raw);
+        persistViewPrefs({ locale: raw });
         applyHtmlLang(raw);
         return raw;
       }
@@ -45,6 +47,7 @@ export function useSiteLocale() {
   const [locale, setLocaleState] = useState<Locale>(readSiteLocale);
   const setLocale = useCallback((next: Locale) => {
     persistLocale(next);
+    persistViewPrefs({ locale: next });
     applyHtmlLang(next);
     writeLocaleQuery(next);
     setLocaleState(next);

@@ -38,3 +38,5 @@ local_backups/
 bill/data/*.json
 bill/data/proformas
 bill/dist
+.aider*
+.env

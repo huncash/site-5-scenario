@@ -11,7 +11,7 @@ import {
   glossaryTooltip,
   type GlossaryTermId,
 } from "@/lib/glossary";
-import { kbById, type KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
+import { kbById, kbCopy, type KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
 import { oplByPath } from "@/lib/opl";
 import { supportPageUrl } from "@/lib/support";
 import { supportSlugForKb } from "@/lib/supportRoutes";
@@ -83,14 +83,23 @@ export function HelpIcon({
   className?: string;
   size?: "sm" | "md";
 }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const resolvedKb = termId ? (kbId ?? glossaryTerm(termId).kbId) : kbId;
   const article = useMemo(() => (resolvedKb ? kbById(resolvedKb) : null), [resolvedKb]);
-  const tooltipText = termId ? glossaryTooltip(termId, locale) : summary ?? article?.summary ?? "Súgó";
+  const articleCopy = article ? kbCopy(article, locale) : null;
   const kbLesson = resolvedKb ? supportSlugForKb(resolvedKb) : null;
   const localSlug = termId ? glossaryTerm(termId).supportSlug : kbLesson;
   const localOpl = localSlug ? oplByPath(localSlug) : null;
+  const oplWhy = localOpl ? (locale === "en" ? localOpl.whyEn : localOpl.whyHu) : undefined;
+  const oplTitle = localOpl ? (locale === "en" ? localOpl.titleEn : localOpl.titleHu) : undefined;
+  const heading = articleCopy?.title ?? oplTitle ?? title ?? (termId ? glossaryCopy(termId, locale).term : undefined);
+  const lead =
+    articleCopy?.summary ??
+    oplWhy ??
+    summary ??
+    (termId ? glossaryTooltip(termId, locale) : undefined) ??
+    t("chrome.help");
   const supportHref = termId ? glossarySupportHref(termId) : kbLesson ? supportPageUrl(kbLesson) : null;
   const embed = useSupportEmbedOptional();
 
@@ -110,7 +119,7 @@ export function HelpIcon({
           )}
           data-help-icon
           data-exact-ignore
-          aria-label={title ?? article?.title ?? "Súgó"}
+          aria-label={title ?? oplTitle ?? t("chrome.help")}
           aria-expanded={open}
           onClick={(e) => {
             e.stopPropagation();
@@ -120,7 +129,7 @@ export function HelpIcon({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-64 max-w-[min(16rem,calc(100vw-2rem))] border border-border bg-[var(--dropdown-bg)] p-2.5 text-[12px] leading-snug text-[var(--text-main)] shadow-xl"
+        className="z-[9999] w-80 max-w-[min(20rem,calc(100vw-2rem))] border border-border bg-[var(--dropdown-bg)] p-3 text-[12px] leading-snug text-[var(--text-main)] shadow-xl"
         align="start"
         side="bottom"
         sideOffset={14}
@@ -128,7 +137,10 @@ export function HelpIcon({
         data-exact-ignore
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="whitespace-pre-wrap break-words">{tooltipText}</div>
+        {heading ? <p className="font-semibold text-[var(--text-main)]">{heading}</p> : null}
+        <div className={heading ? "mt-1.5 whitespace-pre-wrap break-words text-[var(--text-main)]" : "whitespace-pre-wrap break-words"}>
+          {lead}
+        </div>
         {embed && localOpl ? (
           <button
             type="button"
@@ -138,7 +150,7 @@ export function HelpIcon({
               embed.openEmbed(localOpl.path, locale === "en" ? localOpl.titleEn : localOpl.titleHu);
             }}
           >
-            {locale === "en" ? "Open lesson in panel" : "Lecke a panelen"}
+            {t("chrome.openLessonPanel")}
           </button>
         ) : supportHref ? (
           <a
@@ -148,7 +160,7 @@ export function HelpIcon({
             className="mt-2 inline-block text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
             onClick={() => setOpen(false)}
           >
-            {locale === "en" ? "Open on Support" : "Részletek a Supporton"}
+            {t("chrome.openOnSupport")}
           </a>
         ) : embed ? (
           <button
@@ -156,10 +168,10 @@ export function HelpIcon({
             className="mt-2 text-[11px] text-[var(--accent-color)] underline-offset-2 hover:underline"
             onClick={() => {
               setOpen(false);
-              embed.openEmbed(resolvedKb ? `kb/${resolvedKb}` : "tippek", article?.title ?? title ?? "Súgó");
+              embed.openEmbed(resolvedKb ? `kb/${resolvedKb}` : "tippek", title ?? t("chrome.help"));
             }}
           >
-            Lecke megnyitása
+            {t("chrome.openLesson")}
           </button>
         ) : null}
       </PopoverContent>

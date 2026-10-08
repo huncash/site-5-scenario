@@ -19,6 +19,32 @@ export type DashboardBlock = {
   open: boolean;
 };
 
+export type LabsEnginePref = {
+  id: string;
+  on: boolean;
+};
+
+export type EngineInterestRow = {
+  id: string;
+  clicks: number;
+  starts: number;
+  switches: number;
+  updatedAt: number;
+};
+
+export type ForumNoteRow = {
+  id: string;
+  createdAt: number;
+  kind: number;
+  tags: string[][];
+  content: string;
+  pubkey: string;
+  alias: string;
+  cashHuf: number;
+  monthlyOpexHuf: number;
+  runwayMonths: number | null;
+};
+
 export type MeshSchema = {
   transactions: StoreDefinition<string, Transaction>;
   devices: StoreDefinition<string, MeshDevice>;
@@ -26,4 +52,7 @@ export type MeshSchema = {
   pairingSessions: StoreDefinition<string, PairingSession>;
   prefs: StoreDefinition<string, UiPrefs>;
   dashboardBlocks: StoreDefinition<string, DashboardBlock>;
+  labsEngines: StoreDefinition<string, LabsEnginePref>;
+  engineInterest: StoreDefinition<string, EngineInterestRow>;
+  forumNotes: StoreDefinition<string, ForumNoteRow>;
 };

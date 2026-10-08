@@ -37,6 +37,10 @@ export const OKTATAS_SZIMULACIO_FUNNEL = {
       q: "Ez ügyféladat?",
       a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő. A fejlesztők nem látják.",
     },
+    {
+      q: "Új motort veszek, kapok extra Case-t?",
+      a: "Nem. A Case / Slot / Seat / Guest a licenc kvótája. Az oktatási motor ugyanerre a keretre ül — moduláris legó, külön kvótát nem ad.",
+    },
     PRICING_VAT_FAQ,
     WHY_FAQ,
   ],

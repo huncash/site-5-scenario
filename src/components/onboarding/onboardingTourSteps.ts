@@ -1,5 +1,7 @@
 "use client";
 
+import type { MessageKey } from "@/i18n";
+
 export type TourAnchorId =
   | "header"
   | "situation"
@@ -25,89 +27,117 @@ export type OnboardingStep = {
   anchorLabels?: Partial<Record<TourAnchorId, string>>;
 };
 
-export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = [
+type StepDef = {
+  id: string;
+  title: MessageKey;
+  body?: MessageKey;
+  visuals?: Array<{ icon?: TourVisual["icon"]; caption: MessageKey }>;
+  anchors?: TourAnchorId[];
+  anchorLabels?: Partial<Record<TourAnchorId, MessageKey>>;
+};
+
+const STEP_DEFS: StepDef[] = [
   {
     id: "demo",
-    title: "Mintahelyzet",
-    body: "Előre betöltött példa. Nem banki kivonat, nem élő ügyféladat. A PRO-sáv nem jóslat: a múltból számolt mozgástér.",
+    title: "tour.demoTitle",
+    body: "tour.demoBody",
     visuals: [
-      { icon: "panels", caption: "A számok a böngészőben készülnek." },
-      { icon: "menu", caption: "Kilépés: Főmenü → Másik eset." },
+      { icon: "panels", caption: "tour.demoV1" },
+      { icon: "menu", caption: "tour.demoV2" },
     ],
     anchors: ["situation", "work-panels", "app-menu"],
     anchorLabels: {
-      situation: "Helyzet",
-      "work-panels": "Számok",
-      "app-menu": "Menü",
+      situation: "tour.demoASituation",
+      "work-panels": "tour.demoAPanels",
+      "app-menu": "tour.demoAMenu",
     },
   },
   {
     id: "anatomy",
-    title: "Három sáv",
-    body: "Felső vezérlés, középen a munka, alul a modulok.",
+    title: "tour.anatomyTitle",
+    body: "tour.anatomyBody",
     visuals: [
-      { icon: "layout", caption: "Fent: helyzet és PDCA-tárcsa." },
-      { icon: "workspace", caption: "A fülek a munkateret cserélik." },
-      { icon: "tabs", caption: "Lent: Cashflow, Tételek, Üzletek, Leltár." },
+      { icon: "layout", caption: "tour.anatomyV1" },
+      { icon: "workspace", caption: "tour.anatomyV2" },
+      { icon: "tabs", caption: "tour.anatomyV3" },
     ],
     anchors: ["situation", "pdca-dial", "workspaces", "bottom-tabs"],
     anchorLabels: {
-      situation: "Fent",
-      "pdca-dial": "Tárcsa",
-      workspaces: "Terek",
-      "bottom-tabs": "Modulok",
+      situation: "tour.anatomyATop",
+      "pdca-dial": "tour.anatomyADial",
+      workspaces: "tour.anatomyAWs",
+      "bottom-tabs": "tour.anatomyATabs",
     },
   },
   {
     id: "pdca",
-    title: "PDCA",
-    body: "PLAN → DO → CHECK → ACT. Egyszerre legfeljebb két fázis látszik.",
+    title: "tour.pdcaTitle",
+    body: "tour.pdcaBody",
     visuals: [
-      { icon: "dial", caption: "A tárcsa a következő fázispárra fordít." },
-      { icon: "split", caption: "Osztott / teljes nézet a fejléc kapcsolóján." },
+      { icon: "dial", caption: "tour.pdcaV1" },
+      { icon: "split", caption: "tour.pdcaV2" },
     ],
     anchors: ["pdca-dial", "view-toggle"],
     anchorLabels: {
-      "pdca-dial": "Tárcsa",
-      "view-toggle": "Nézet",
+      "pdca-dial": "tour.pdcaADial",
+      "view-toggle": "tour.pdcaAView",
     },
   },
   {
     id: "welcome-shortcuts",
-    title: "Gyorsbillentyűk",
-    body: "",
+    title: "tour.keysTitle",
     visuals: [
-      { caption: "Mentés: Ctrl/Cmd+S" },
-      { caption: "Lean kereső: Ctrl/Cmd+K" },
-      { caption: "Szumma: Alt+Shift+End" },
-      { caption: "Alsó fülek: Alt+Shift+←/→" },
-      { caption: "Munkaterek: PageUp/PageDown" },
-      { caption: "PDCA forgatás: ↓" },
+      { caption: "tour.keysV1" },
+      { caption: "tour.keysV2" },
+      { caption: "tour.keysV3" },
+      { caption: "tour.keysV4" },
+      { caption: "tour.keysV5" },
+      { caption: "tour.keysV6" },
     ],
     anchors: ["shortcuts"],
   },
   {
     id: "workspaces",
-    title: "Munkaterek",
-    body: "Fent a fülek: Magán, vállalkozás, projekt. Ami ki van választva, arra számol a középső rész.",
+    title: "tour.wsTitle",
+    body: "tour.wsBody",
     visuals: [
-      { caption: "Magán — saját kassza, nem a cégé." },
-      { caption: "Vállalkozás / projekt — a helyzet üzleti számai." },
-      { caption: "A + új teret nyit, a számokat nem keveri." },
+      { caption: "tour.wsV1" },
+      { caption: "tour.wsV2" },
+      { caption: "tour.wsV3" },
     ],
     anchors: ["workspaces"],
-    anchorLabels: { workspaces: "Fülek" },
+    anchorLabels: { workspaces: "tour.wsATabs" },
   },
   {
     id: "security-close",
-    title: "Menü",
-    body: "Jobb fent. Innen mentesz, segítséget kérsz, vagy kilépsz a helyzetből.",
+    title: "tour.menuTitle",
+    body: "tour.menuBody",
     visuals: [
-      { caption: "Gyors mentés — a fájl a gépeden marad." },
-      { caption: "Tudásbázis / GYIK — ha elakadtál." },
-      { caption: "Másik eset — vissza a kapuhoz, ez bezárul." },
+      { caption: "tour.menuV1" },
+      { caption: "tour.menuV2" },
+      { caption: "tour.menuV3" },
     ],
     anchors: ["app-menu"],
-    anchorLabels: { "app-menu": "Menü" },
+    anchorLabels: { "app-menu": "tour.menuAMenu" },
   },
 ];
+
+export const ONBOARDING_TOUR_STEP_IDS = STEP_DEFS.map((s) => s.id);
+
+export function onboardingTourSteps(t: (key: MessageKey) => string): OnboardingStep[] {
+  return STEP_DEFS.map((s) => ({
+    id: s.id,
+    title: t(s.title),
+    body: s.body ? t(s.body) : "",
+    visuals: s.visuals?.map((v) => ({ icon: v.icon, caption: t(v.caption) })),
+    anchors: s.anchors,
+    anchorLabels: s.anchorLabels
+      ? Object.fromEntries(
+          Object.entries(s.anchorLabels).map(([k, key]) => [k, t(key)]),
+        ) as Partial<Record<TourAnchorId, string>>
+      : undefined,
+  }));
+}
+
+/** HU fallback — length / ids only. Copy comes from onboardingTourSteps(t). */
+export const ONBOARDING_TOUR_STEPS: OnboardingStep[] = onboardingTourSteps((key) => key);

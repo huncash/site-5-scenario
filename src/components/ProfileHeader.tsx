@@ -7,6 +7,7 @@ import {
   Download,
   GraduationCap,
   Lock,
+  FlaskConical,
   Menu,
   Sparkles,
   QrCode,
@@ -48,6 +49,9 @@ import { SupportModal } from "@/components/support/SupportModal";
 import { SupportMainContent } from "@/components/SupportSurface";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { LabsOverlay } from "@/components/labs/LabsOverlay";
+import { useDashboardLab } from "@/hooks/useDashboardLabs";
+import { keepLang, langSearch, withInheritedLang } from "@/lib/langSearch";
 
 export function ProfileHeader({
   profileId,
@@ -86,6 +90,7 @@ export function ProfileHeader({
   const { openComingSoon } = useFeatureComingSoon();
   const { openTour, isOpen: tourOpen, stepId: tourStepId } = useOnboardingTour();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [labsOverlayOpen, setLabsOverlayOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [omni, setOmni] = useState("");
@@ -96,6 +101,7 @@ export function ProfileHeader({
   const highlightShortcuts = tourOpen && tourStepId === "welcome-shortcuts";
   const highlightViewToggle = tourOpen && tourStepId === "pdca";
   const highlightMenu = tourOpen && (tourStepId === "security-close" || tourStepId === "demo");
+  const szummaLab = useDashboardLab("labs-szumma");
 
   const settingsQ = useQuery({
     queryKey: ["settings"],
@@ -115,6 +121,12 @@ export function ProfileHeader({
 
   const workspaces = (settingsQ.data?.workspaces ?? []) as WorkspaceMeta[];
   const pdcaSum = useMemo(() => getPdcaCycleSum(workspaces), [workspaces]);
+  const profilesQ = useQuery({
+    queryKey: ["profiles"],
+    queryFn: () => localdb.listProfiles(),
+  });
+  const profileCount = Math.max(1, profilesQ.data?.length ?? 1);
+  const workspaceIds = workspaces.map((w) => w.id);
 
   const openOmniSearch = useCallback(() => {
     const q = omni.trim();
@@ -144,27 +156,32 @@ export function ProfileHeader({
   }
 
   const back = useCallback(() => {
-    void router.navigate({ to: "/" });
+    void router.navigate({ to: "/", search: langSearch() });
   }, [router]);
 
   const leaveVisitorCase = useCallback(async () => {
     setProfileOpen(false);
     if (visitorShell) preferDemoSelectorHome();
     await lock();
-    if (visitorShell) await router.navigate({ to: "/", hash: DEMO_SELECTOR_HASH });
+    if (visitorShell) await router.navigate({ to: "/", hash: DEMO_SELECTOR_HASH, search: langSearch() });
   }, [lock, router, visitorShell]);
 
   return (
+    <>
     <header
-      className="sticky top-0 z-50 shrink-0 border-b border-border text-foreground backdrop-blur-md"
+      className="sticky top-0 z-50 shrink-0 overflow-visible border-b border-border text-foreground backdrop-blur-md"
       style={{ background: "var(--ws-canvas-bg, var(--app-bg))" }}
     >
       <div className={`w-full px-2 sm:px-3 md:px-4 ${showBack ? "py-2" : "pt-1.5 pb-0.5"}`}>
-        <div className="grid w-full gap-2">
-          {/* TOP ROW: left brand/profile (fills) | right controls (pinned to right edge) */}
-          <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2 sm:gap-3">
-            <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-3 justify-self-start">
-              <div className="flex min-w-0 items-center gap-2">
+        <div className="grid w-full gap-1 overflow-visible">
+          {/* TOP ROW: cím + vezérlők wrap; infósáv külön sor, ne csússzon a HU/EN-re */}
+          <div
+            className={cn(
+              "w-full min-w-0 items-center gap-x-2 gap-y-2",
+              showBack ? "flex flex-wrap justify-between" : "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]",
+            )}
+          >
+            <div className="flex min-w-0 items-center gap-2">
                 {showBack ? (
                   <Button
                     type="button"
@@ -181,6 +198,7 @@ export function ProfileHeader({
                 ) : (
                 <Link
                   to="/"
+                  search={(prev) => withInheritedLang({}, prev)}
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary transition-all duration-200 hover:bg-primary/25"
                   aria-label={t("chrome.home")}
                   title={t("chrome.home")}
@@ -190,17 +208,16 @@ export function ProfileHeader({
                 )}
                 <div className="min-w-0 leading-tight">
                   <div className="truncate text-sm font-semibold tracking-tight text-foreground">{t("brand.name")}</div>
-                  <div className="flex min-w-0 items-center gap-2">
-                    <div className="truncate text-xs text-muted-foreground" title={profileHint ?? profileName}>
-                      {profileName}
-                    </div>
+                  <div className="truncate text-xs text-muted-foreground" title={profileHint ?? profileName}>
+                    {profileName}
                   </div>
                 </div>
-              </div>
             </div>
 
-            {/* RIGHT: pinned controls */}
-            <div className="flex min-w-0 items-center justify-end gap-2 justify-self-end">
+            {showBack ? null : <div className="w-[124px] shrink-0" aria-hidden />}
+
+            <div className="flex min-w-0 items-center gap-1.5 py-0.5">
+              <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5">
               {rightControls}
               {vaultKey ? (
                 <Popover
@@ -251,7 +268,7 @@ export function ProfileHeader({
                           variant="outline"
                           className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
-                          <Link to="/stats" search={{ profile: profileId }}>
+                          <Link to="/stats" search={(prev) => withInheritedLang({ profile: profileId }, prev)}>
                             {t("chrome.activityShort")}
                           </Link>
                         </Button>
@@ -261,7 +278,10 @@ export function ProfileHeader({
                           variant="outline"
                           className="h-8 border-border bg-card/30 text-foreground hover:bg-accent"
                         >
-                          <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
+                          <Link
+                            to="/settings"
+                            search={(prev) => withInheritedLang({ profile: profileId, tab: undefined, focus: undefined }, prev)}
+                          >
                             {t("chrome.settings")}
                           </Link>
                         </Button>
@@ -284,6 +304,42 @@ export function ProfileHeader({
                   </PopoverContent>
                 </Popover>
               ) : null}
+
+              <Popover open={labsOverlayOpen} onOpenChange={setLabsOverlayOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-card/40 text-foreground hover:bg-accent",
+                      labsOverlayOpen ? "border-cyan-300/70 text-cyan-100" : "border-border",
+                    )}
+                    aria-label={t("labs.overlayTitle")}
+                    title={t("labs.overlayTitle")}
+                    aria-expanded={labsOverlayOpen}
+                    aria-controls="labs-tree-panel"
+                  >
+                    <FlaskConical className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  id="labs-tree-panel"
+                  align="end"
+                  side="bottom"
+                  sideOffset={8}
+                  alignOffset={0}
+                  collisionPadding={8}
+                  className="z-[70] w-[min(calc(100vw-1.5rem),32rem)] max-h-[min(80vh,36rem)] overflow-visible border-border p-0 shadow-lg data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100"
+                >
+                  <div className="max-h-[min(80vh,36rem)] overflow-y-auto">
+                    <LabsOverlay
+                      open={labsOverlayOpen}
+                      onOpenChange={setLabsOverlayOpen}
+                      workspaceIds={workspaceIds}
+                      profileCount={profileCount}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <ViewSettingsMenu
                 showSplit
@@ -318,13 +374,13 @@ export function ProfileHeader({
                   {visitorShell ? null : (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to="/devices" search={{ profile: profileId }}>
+                        <Link to="/devices" search={(prev) => withInheritedLang({ profile: profileId }, prev)}>
                           <Users className="mr-2 h-4 w-4" />
                           {t("chrome.devices")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/logs" search={{ profile: profileId }}>
+                        <Link to="/logs" search={(prev) => withInheritedLang({ profile: profileId }, prev)}>
                           <CalendarClock className="mr-2 h-4 w-4" />
                           {t("chrome.log")}
                         </Link>
@@ -332,7 +388,7 @@ export function ProfileHeader({
                     </>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/stats" search={{ profile: profileId }}>
+                    <Link to="/stats" search={(prev) => withInheritedLang({ profile: profileId }, prev)}>
                       <CalendarClock className="mr-2 h-4 w-4" />
                       {t("chrome.activity")}
                     </Link>
@@ -352,20 +408,28 @@ export function ProfileHeader({
                   <DropdownMenuItem asChild>
                     <Link
                       to="/references"
-                      search={{
-                        profile: profileId,
-                        workspace: "personal",
-                        tab: "partners",
-                        highlight: undefined,
-                        isSzumma: false,
-                      }}
+                      search={(prev) =>
+                        withInheritedLang(
+                          {
+                            profile: profileId,
+                            workspace: "personal",
+                            tab: "partners",
+                            highlight: undefined,
+                            isSzumma: false,
+                          },
+                          prev,
+                        )
+                      }
                     >
                       <Settings className="mr-2 h-4 w-4" />
                       {t("chrome.master")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/settings" search={{ profile: profileId, tab: undefined, focus: undefined }}>
+                    <Link
+                      to="/settings"
+                      search={(prev) => withInheritedLang({ profile: profileId, tab: undefined, focus: undefined }, prev)}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       {t("chrome.settings")}
                     </Link>
@@ -406,7 +470,8 @@ export function ProfileHeader({
                         onSelect={() => {
                           void router.navigate({
                             to: "/settings",
-                            search: { profile: profileId, tab: undefined, focus: undefined },
+                            search: (prev) =>
+                              withInheritedLang({ profile: profileId, tab: undefined, focus: undefined }, prev),
                             hash: "backup-restore" as any,
                           });
                         }}
@@ -421,7 +486,7 @@ export function ProfileHeader({
                             onAddDevice();
                             return;
                           }
-                          void router.navigate({ to: "/connect" });
+                          void router.navigate({ to: "/connect", search: keepLang });
                         }}
                       >
                         <QrCode className="mr-2 h-4 w-4" />
@@ -444,9 +509,9 @@ export function ProfileHeader({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              </div>
             </div>
           </div>
-
           {/*
             RULE: the PDCA dial pivot (SVG centerline) sits on the viewport
             horizontal midpoint in every view. Equal 1fr | auto | 1fr on a
@@ -457,7 +522,7 @@ export function ProfileHeader({
           <div
             data-tour-anchor="header"
             data-pdca-dial-viewport-center
-            className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
+            className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-x-2"
           >
             {situationLead ? (
               <div
@@ -480,54 +545,59 @@ export function ProfileHeader({
               <div className="min-w-0" />
             )}
 
-            <div data-tour-anchor="pdca-dial" className="pointer-events-none select-none bg-transparent">
-              <PdcaSemiRotaryKnob mode={pdcaMode ?? "PD"} onModeChange={() => {}} />
+            <div
+              data-tour-anchor="pdca-dial"
+              className="pdca-dial-slot bg-transparent"
+            >
+              <div className="pdca-dial pointer-events-none select-none">
+                <PdcaSemiRotaryKnob mode={pdcaMode ?? "PD"} onModeChange={() => {}} />
+              </div>
             </div>
 
-            <div className="flex min-w-0 w-full flex-col items-stretch justify-end gap-1">
+            <div className="flex h-9 min-w-0 w-full items-center gap-2">
+            <button
+              type="button"
+              className="pdca-rotate-btn inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md text-xs transition-colors hover:bg-accent"
+              onClick={() => {
+                if (onRotatePdca) {
+                  onRotatePdca();
+                  return;
+                }
+                openComingSoon({
+                  title: "PDCA váltótárcsa forgatás",
+                  purpose:
+                    "Negyedfordulatos PDCA módváltás a tárcsával. Ezen az oldalon a tárcsa vezérlő nincs bekötve — nyisd meg a fő PDCA nézetet.",
+                  featureId: "header.pdca_rotate",
+                });
+              }}
+              aria-label={t("pdca.rotate")}
+              title={t("pdca.rotate")}
+            >
+              <span className="truncate">👈 {t("pdca.rotate")}</span>
+            </button>
+            <div className="flex h-9 min-w-0 flex-1 items-center overflow-hidden rounded-lg border border-border bg-card/40 px-3 focus-within:border-ring">
+              <Input
+                value={omni}
+                onChange={(e) => setOmni(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    openOmniSearch();
+                  }
+                }}
+                placeholder={t("chrome.search")}
+                className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
               <button
                 type="button"
-                className="inline-flex h-8 w-auto max-w-full shrink-0 self-start items-center justify-center whitespace-nowrap rounded-md border border-border bg-card/40 px-2 text-xs text-foreground transition-colors hover:bg-accent sm:px-3"
-                onClick={() => {
-                  if (onRotatePdca) {
-                    onRotatePdca();
-                    return;
-                  }
-                  openComingSoon({
-                    title: "PDCA váltótárcsa forgatás",
-                    purpose:
-                      "Negyedfordulatos PDCA módváltás a tárcsával. Ezen az oldalon a tárcsa vezérlő nincs bekötve — nyisd meg a fő PDCA nézetet.",
-                    featureId: "header.pdca_rotate",
-                  });
-                }}
-                aria-label={t("pdca.rotate")}
-                title={t("pdca.rotate")}
+                className="cursor-pointer border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
+                title={t("chrome.searchBtn")}
+                aria-label={t("chrome.searchBtn")}
+                onClick={openOmniSearch}
               >
-                <span className="truncate">👈 {t("pdca.rotate")}</span>
+                <Search className="h-4 w-4" />
               </button>
-              <div className="flex h-9 min-w-0 w-full items-center overflow-hidden rounded-lg border border-border bg-card/40 px-3 focus-within:border-ring">
-                <Input
-                  value={omni}
-                  onChange={(e) => setOmni(e.currentTarget.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      openOmniSearch();
-                    }
-                  }}
-                  placeholder={t("chrome.search")}
-                  className="h-8 min-w-0 flex-1 border-none bg-transparent px-0 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
-                <button
-                  type="button"
-                  className="cursor-pointer border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
-                  title={t("chrome.searchBtn")}
-                  aria-label={t("chrome.searchBtn")}
-                  onClick={openOmniSearch}
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </div>
+            </div>
             </div>
           </div>
           )}
@@ -562,10 +632,12 @@ export function ProfileHeader({
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lean kereső</div>
                   <div className="mt-1 font-mono">Ctrl/Cmd + K</div>
                 </div>
+                {szummaLab.isOpen ? (
                 <div className="rounded-xl border border-border bg-card/40 p-3">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Szumma</div>
                   <div className="mt-1 font-mono">Alt + Shift + End</div>
                 </div>
+                ) : null}
                 <div className="rounded-xl border border-border bg-card/40 p-3">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Alsó fülek</div>
                   <div className="mt-1 font-mono">Alt + Shift + ← / →</div>
@@ -596,7 +668,9 @@ export function ProfileHeader({
         <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)}>
           <SupportMainContent localNav compactHero />
         </SupportModal>
+
       </div>
     </header>
+    </>
   );
 }

@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 
 import { ScenarioDoor } from "@/components/ScenarioDoor";
+import { AnonForumPanel } from "@/components/school/AnonForumPanel";
+import { AnonPackLoader } from "@/components/school/AnonPackLoader";
+import { AnonStudyPlay } from "@/components/school/AnonStudyPlay";
 import { StudentProofForm } from "@/components/school/StudentProofForm";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
+import type { AnonCasePack } from "@/lib/anonCasePack";
 import {
   SCHOOL_CASES,
   SCHOOL_PROOF_EVENT,
@@ -16,6 +21,8 @@ import {
 export function SchoolSurface() {
   const { t } = useI18n();
   const [verified, setVerified] = useState(() => isSchoolVerified());
+  const [deskOpen, setDeskOpen] = useState(false);
+  const [pack, setPack] = useState<AnonCasePack | null>(null);
 
   useEffect(() => {
     const sync = () => setVerified(isSchoolVerified());
@@ -28,7 +35,18 @@ export function SchoolSurface() {
     };
   }, []);
 
-  if (verified) return <ScenarioDoor />;
+  if (deskOpen && verified) {
+    return (
+      <div className="relative">
+        <div className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-2">
+          <Button type="button" size="sm" variant="ghost" onClick={() => setDeskOpen(false)}>
+            {t("school.campusBack")}
+          </Button>
+        </div>
+        <ScenarioDoor />
+      </div>
+    );
+  }
 
   return (
     <div className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background">
@@ -56,7 +74,19 @@ export function SchoolSurface() {
             <li>{SCHOOL_WATERMARK}</li>
           </ul>
         </div>
-        <StudentProofForm onVerified={() => setVerified(true)} />
+        {pack ? (
+          <AnonStudyPlay pack={pack} onClose={() => setPack(null)} />
+        ) : (
+          <AnonPackLoader onLoaded={setPack} />
+        )}
+        <AnonForumPanel />
+        {verified ? (
+          <Button type="button" className="w-full" onClick={() => setDeskOpen(true)}>
+            {t("school.campusDesk")}
+          </Button>
+        ) : (
+          <StudentProofForm onVerified={() => setVerified(true)} />
+        )}
       </div>
       <SiteFooter inline />
     </div>

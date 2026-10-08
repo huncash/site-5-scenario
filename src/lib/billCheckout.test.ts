@@ -39,6 +39,19 @@ describe("bill catalog from plans.ts", () => {
     expect(q.lines.some((l) => l.name.includes("Aktív Case"))).toBe(true);
     expect(packageLines("starter", "yearly").at(0)?.netUnitPrice).toBe(199_000);
   });
+
+  it("trips the bundle lock when Basic + 5 extra Slots reach the Pro list price", () => {
+    const q = quotePackage("starter", "yearly", { country: "HU", slotPack: "slot_plus_5" });
+    expect(q.dueNet).toBe(199_000 + 245_000);
+    expect(q.bundleLock.tripped).toBe(true);
+    expect(q.bundleLock.nextTier).toBe("pro");
+    expect(q.bundleLock.saveHuf).toBe(45_000);
+  });
+
+  it("does not trip the bundle lock on Pro + one extra Case", () => {
+    const q = quotePackage("pro", "yearly", { country: "HU", addon: "case_plus_1" });
+    expect(q.bundleLock.tripped).toBe(false);
+  });
 });
 
 describe("szamlazz dijbekero xml", () => {

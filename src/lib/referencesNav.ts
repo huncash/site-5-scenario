@@ -1,11 +1,11 @@
 export type ReferencesTabId = "partners" | "bank" | "resources" | "buckets" | "debts";
 
-export const REFERENCES_TABS: Array<{ id: ReferencesTabId; label: string }> = [
-  { id: "partners", label: "Partnerek" },
-  { id: "bank", label: "Bankszámlák & Szinkron" },
-  { id: "resources", label: "Munkavállalók & Erőforrások" },
-  { id: "buckets", label: "Perselyek & Ügyeletek" },
-  { id: "debts", label: "Tartozások & Önrészek" },
+export const REFERENCES_TABS: Array<{ id: ReferencesTabId; key: "ref.tabPartners" | "ref.tabBank" | "ref.tabResources" | "ref.tabBuckets" | "ref.tabDebts" }> = [
+  { id: "partners", key: "ref.tabPartners" },
+  { id: "bank", key: "ref.tabBank" },
+  { id: "resources", key: "ref.tabResources" },
+  { id: "buckets", key: "ref.tabBuckets" },
+  { id: "debts", key: "ref.tabDebts" },
 ];
 
 export type ReferencesReturnState = {

@@ -8,6 +8,7 @@ import { DISPLAY_HUF_PER_EUR, formatCurrency, currencyUnit } from "@/i18n/curren
 import { currencyForLocale, DEFAULT_LOCALE, isLocale, otherLocale } from "@/i18n/locale";
 import { parseMnbEur } from "@/lib/mnbRate";
 import { TERMS } from "@/i18n/terms";
+import { surfaceTx } from "@/i18n/surfaceTx";
 
 function keysOf(obj: unknown, prefix = ""): string[] {
   if (!obj || typeof obj !== "object") return prefix ? [prefix] : [];
@@ -26,6 +27,18 @@ describe("i18n", () => {
 
   it("keeps HU and EN key trees aligned", () => {
     expect(keysOf(en).sort()).toEqual(keysOf(hu).sort());
+  });
+
+  it("covers references, settings, tour and stats chrome", () => {
+    expect(translate("en", "ref.tabPartners")).toBe("Partners");
+    expect(translate("en", "set.tabDanger")).toBe("Danger zone");
+    expect(translate("en", "tour.skip")).toBe("Skip");
+    expect(translate("en", "tour.next")).toBe("Next");
+    expect(translate("en", "stats.title")).toBe("Activity & cycle statistics");
+    expect(translate("en", "labs.preview")).toBe("Preview / Try");
+    expect(translate("hu", "ref.saveConfirmDetail", { name: "Core", id: "ws1" })).toContain("Core");
+    expect(surfaceTx("en", "Mentés")).toBe("Save");
+    expect(surfaceTx("hu", "Mentés")).toBe("Mentés");
   });
 
   it("keeps dashboard money labels bilingual; user names stay out of the dictionary", () => {
@@ -55,6 +68,16 @@ describe("i18n", () => {
     expect(translate("en", "loan.typeCredit")).toBe("Working capital loan");
     expect(translate("hu", "dash.itemsQuick")).toBe("Tételek (gyors szerkesztés)");
     expect(translate("en", "dash.itemsQuick")).toBe("Items (quick edit)");
+    expect(translate("en", "dash.planned")).toBe("Planned spend");
+    expect(translate("en", "dash.txnExpense")).toBe("Expense");
+    expect(translate("en", "dash.txnDate")).toBe("Date");
+    expect(translate("en", "dash.invoicePaid")).toBe("Paid");
+    expect(translate("en", "dash.bankNote")).toMatch(/Bank/);
+    expect(translate("en", "login.activateTitle")).toMatch(/password/i);
+    expect(translate("en", "chrome.cmdEmpty")).toBe("No matches.");
+    expect(translate("en", "chrome.help")).toBe("Help");
+    expect(translate("en", "chrome.openLesson")).toBe("Open lesson");
+    expect(surfaceTx("en", "Új tétel")).toBe("New item");
     expect(translate("hu", "pdca.actWord")).toBe("Beavatkozás");
     expect(translate("en", "pdca.actWord")).toBe("Intervention");
     expect(translate("hu", "loan.slotNote", { name: "Core üzem vállalkozás" })).toContain("Core üzem vállalkozás");

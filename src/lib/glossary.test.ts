@@ -34,6 +34,8 @@ describe("glossary", () => {
     expect(glossarySupportHref("vat")).toContain("lecke-motor-afa-kor");
     expect(glossarySupportHref("pdca")).toContain("lecke-3-pdca");
     expect(glossarySupportHref("kpi")).toContain("lecke-dash-kpi-sav");
+    expect(glossarySupportHref("devTree")).toContain("lecke-dash-dev-tree");
+    expect(glossarySupportHref("pokaYoke")).toContain("lecke-motor-poka-yoke");
     expect(glossarySupportHref("want")).toContain("lecke-2-szukseglet-vagy-befektetes");
     expect(glossarySupportHref("cashflow")).toContain("lecke-cashflow-logika");
   });

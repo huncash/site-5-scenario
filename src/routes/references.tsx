@@ -16,9 +16,12 @@ import {
   type WorkspaceMeta,
 } from "@/lib/finance";
 import { localdb } from "@/lib/localdb";
+import { useI18n } from "@/i18n";
+import { langSearch, parseLangSearch } from "@/lib/langSearch";
 import {
   consumeReferencesHighlightIds,
   isReferencesTab,
+  REFERENCES_TABS,
   type ReferencesTabId,
 } from "@/lib/referencesNav";
 import { useVault } from "@/lib/vault";
@@ -44,6 +47,7 @@ export const Route = createFileRoute("/references")({
     const workspace =
       wsRaw === "__all" || wsRaw === "all" || wsRaw === "szumma" ? "__all" : wsRaw || "personal";
     return {
+      ...parseLangSearch(s),
       profile: String(s.profile ?? ""),
       workspace,
       tab,
@@ -54,6 +58,7 @@ export const Route = createFileRoute("/references")({
 });
 
 function ReferencesPage() {
+  const { t } = useI18n();
   const { state } = useVault();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -62,7 +67,7 @@ function ReferencesPage() {
 
   const unlocked = state.status === "unlocked" ? state : null;
   const profileId = unlocked?.profile.id ?? search.profile;
-  const profileName = unlocked?.profile.name ?? "Profil";
+  const profileName = unlocked?.profile.name ?? t("common.profile");
   const vaultKey = unlocked?.key ?? null;
 
   const isSzumma = Boolean(search.isSzumma);
@@ -157,13 +162,13 @@ function ReferencesPage() {
 
   const workspaceOptions = useMemo(() => {
     const map = new Map<string, string>();
-    map.set("personal", "Magán");
+    map.set("personal", t("chrome.personal"));
     for (const w of visitorWorkspaces) {
       if (!w?.id || w.id === "personal") continue;
       map.set(w.id, w.alias?.trim() || w.id);
     }
     return Array.from(map.entries()).map(([id, label]) => ({ id, label }));
-  }, [visitorWorkspaces]);
+  }, [t, visitorWorkspaces]);
 
   const stackedIds = useMemo(() => {
     if (!isSzumma) return [] as string[];
@@ -183,22 +188,22 @@ function ReferencesPage() {
       return {
         id: workspaceId,
         type: workspaceId === "personal" ? "personal" : "business",
-        alias: workspaceId === "personal" ? "Magán" : null,
+        alias: workspaceId === "personal" ? t("chrome.personal") : null,
       };
     },
-    [visitorWorkspaces],
+    [t, visitorWorkspaces],
   );
 
   const labelOf = useCallback(
-    (id: string) => workspaceOptions.find((w) => w.id === id)?.label ?? (id === "personal" ? "Magán" : id),
-    [workspaceOptions],
+    (id: string) => workspaceOptions.find((w) => w.id === id)?.label ?? (id === "personal" ? t("chrome.personal") : id),
+    [t, workspaceOptions],
   );
 
   const persistMetaFor = useCallback(
     async (workspaceId: string, patch: Partial<WorkspaceMeta>, label: string) => {
       if (denyShowcaseWrite(Boolean(visitorSegmentId) || isDemoProfileName(profileName))) return;
       if (!vaultKey) {
-        toast.error("A profil zárva van.");
+        toast.error(t("ref.profileLocked"));
         return;
       }
       setBusy(true);
@@ -241,7 +246,7 @@ function ReferencesPage() {
         await qc.invalidateQueries({ queryKey: ["settings"] });
         toast.success(`${label} · ${labelOf(workspaceId)}`);
       } catch (e: any) {
-        toast.error(e?.message || "Mentés sikertelen.");
+        toast.error(e?.message || t("ref.saveFail"));
       } finally {
         setBusy(false);
       }
@@ -262,11 +267,11 @@ function ReferencesPage() {
         });
         await localdb.putLoan({ id, profile_id: profileId, data_enc });
         await qc.invalidateQueries({ queryKey: ["loans"] });
-        toast.success(input.id ? "Tartozás frissítve" : "Tartozás létrehozva");
+        toast.success(input.id ? t("ref.loanUpdated") : t("ref.loanCreated"));
         setLoanOpen(false);
         setLoanEditing(null);
       } catch (e: any) {
-        toast.error(e?.message || "Tartozás mentése sikertelen.");
+        toast.error(e?.message || t("ref.loanSaveFail"));
       } finally {
         setBusy(false);
       }
@@ -281,9 +286,9 @@ function ReferencesPage() {
       try {
         await localdb.deleteLoan(loanId);
         await qc.invalidateQueries({ queryKey: ["loans"] });
-        toast.success("Tartozás törölve");
+        toast.success(t("ref.loanDeleted"));
       } catch (e: any) {
-        toast.error(e?.message || "Törlés sikertelen.");
+        toast.error(e?.message || t("ref.deleteFail"));
       } finally {
         setBusy(false);
       }
@@ -308,12 +313,12 @@ function ReferencesPage() {
   if (state.status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        Betöltés…
+        {t("common.loading")}
       </div>
     );
   }
   if (!unlocked || !vaultKey) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" search={langSearch} />;
   }
 
   const activeTab = parseReferencesTab(search.tab);
@@ -329,37 +334,29 @@ function ReferencesPage() {
             <>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h1 className="text-lg font-semibold tracking-tight">Szumma — Törzsadatok</h1>
+                  <h1 className="text-lg font-semibold tracking-tight">{t("ref.szummaTitle")}</h1>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Összes aktív munkatér törzsadata egymás alatt (stacked).
+                    {t("ref.szummaLead")}
                   </p>
                 </div>
                 <Button type="button" variant="outline" className="gap-2" onClick={backToPreviousView}>
-                  ◄ Vissza a PDCA nézethez
+                  {t("ref.backPdca")}
                 </Button>
               </div>
 
               <div className="flex flex-wrap gap-2 border-b border-border/60 pb-2">
-                {(
-                  [
-                    ["partners", "Partnerek"],
-                    ["bank", "Bank"],
-                    ["resources", "Erőforrások"],
-                    ["buckets", "Perselyek"],
-                    ["debts", "Tartozások"],
-                  ] as const
-                ).map(([id, label]) => (
+                {REFERENCES_TABS.map((tab) => (
                   <button
-                    key={id}
+                    key={tab.id}
                     type="button"
-                    onClick={() => setTab(id)}
+                    onClick={() => setTab(tab.id)}
                     className={
-                      activeTab === id
+                      activeTab === tab.id
                         ? "rounded-md bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary"
                         : "rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/40"
                     }
                   >
-                    {label}
+                    {t(tab.key)}
                   </button>
                 ))}
               </div>

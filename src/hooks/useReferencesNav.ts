@@ -9,6 +9,7 @@ import {
   type ReferencesReturnState,
   type ReferencesTabId,
 } from "@/lib/referencesNav";
+import { inheritedLang, langSearch } from "@/lib/langSearch";
 
 export function useReferencesNav() {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export function useReferencesNav() {
       void navigate({
         to: "/references",
         search: {
+          lang: inheritedLang(),
           profile: input.profile,
           workspace,
           tab: input.tab ?? "partners",
@@ -67,10 +69,10 @@ export function useReferencesNav() {
     const st = consumeReferencesReturn();
     if (st) {
       stageReferencesRestore(st);
-      void navigate({ to: (st.previousView || "/") as "/" });
+      void navigate({ to: (st.previousView || "/") as "/", search: langSearch() });
       return;
     }
-    void navigate({ to: "/" });
+    void navigate({ to: "/", search: langSearch() });
   }, [navigate]);
 
   return { openReferences, backToPreviousView };

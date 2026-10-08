@@ -14,10 +14,21 @@ import type { MessageKey } from "@/i18n";
 export type { DemoCatalogIndustry, DemoCatalogKind, DemoCatalogKindGroup };
 export { scenarioKindOf };
 
-/** Csak ez a motor indulhat a választóból / vezérlőpultról. */
+/** Alapértelmezett első választás / mindig-on mag. */
 export const CORE_SCENARIO_KIND: DemoCatalogKind = "economic";
 
+/** Case / Slot keretben azonnal indítható motorok. */
+export const STARTABLE_SCENARIO_KINDS: readonly DemoCatalogKind[] = [
+  "economic",
+  "resilience",
+  "education",
+];
+
 export function isStartableScenarioKind(kind: string): boolean {
+  return (STARTABLE_SCENARIO_KINDS as readonly string[]).includes(kind);
+}
+
+export function isCoreDefaultKind(kind: string): boolean {
   return kind === CORE_SCENARIO_KIND;
 }
 

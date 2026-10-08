@@ -36,9 +36,10 @@ function readHomeMode(): HomeMode {
 }
 
 function Loading() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-      Betöltés…
+      {t("chrome.loading")}
     </div>
   );
 }

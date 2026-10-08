@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Folder } from "lucide-react";
 
-import { LeanTerm } from "@/components/HelpIcon";
+import { HelpIcon, LeanTerm } from "@/components/HelpIcon";
 import { CollapsibleSection } from "@/components/lean-viz/CollapsibleCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -146,7 +146,7 @@ export function WorkspaceTabs({
         </div>
       </div>
       {onOpenCreate ? (
-        <div className="btn-new-item-wrap">
+        <div className="btn-new-item-wrap inline-flex items-end gap-0.5">
           <button
             type="button"
             className="btn-new-item"
@@ -157,6 +157,7 @@ export function WorkspaceTabs({
             <span aria-hidden="true">+</span>
             <span className="btn-new-item-label">Új</span>
           </button>
+          <HelpIcon kbId="new-workspace" title="Új Slot" />
         </div>
       ) : null}
     </div>

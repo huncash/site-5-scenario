@@ -1,3 +1,4 @@
+import { LabActiveDot } from "@/components/labs/LabActiveDot";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n";
 
@@ -12,8 +13,8 @@ export function BottomNav({
   activeSubTab: "cashflow" | "ledger" | "deals" | "inventory";
   onChangeSubTab: (t: "cashflow" | "ledger" | "deals" | "inventory") => void;
   labels?: { cashflow?: string; items?: string; deals?: string; inventory?: string };
-  isSzummaActive: boolean;
-  onToggleSzumma: () => void;
+  isSzummaActive?: boolean;
+  onToggleSzumma?: () => void;
   onOpenCreate: () => void;
 }) {
   const { t } = useI18n();
@@ -76,6 +77,7 @@ export function BottomNav({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
+        {onToggleSzumma ? (
         <button
           type="button"
           onClick={onToggleSzumma}
@@ -95,8 +97,10 @@ export function BottomNav({
           }
           title={t("dash.szummaTitle")}
         >
+          {isSzummaActive ? <LabActiveDot className="mr-1.5" /> : null}
           {t("dash.szumma")}
         </button>
+        ) : null}
 
         <div className="btn-new-item-wrap">
           <button

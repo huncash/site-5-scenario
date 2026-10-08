@@ -28,7 +28,9 @@ import { type DemoSegmentId } from "@/lib/demoCatalog";
 import { KAHN_SEGMENT_ID } from "@/lib/coreCases";
 import { writeScenarioDoorStep } from "@/lib/doorStep";
 import { DEMO_SELECTOR_HASH, preferDemoSelectorHome } from "@/lib/demoSelector";
+import { keepLang, langSearch } from "@/lib/langSearch";
 import { AddonModuleDialog } from "@/components/cases/AddonModuleDialog";
+import { recordEngineStart } from "@/lib/engineInterest";
 import {
   isStartableScenarioKind,
   LATER_KIND_BLURB_KEY,
@@ -105,6 +107,7 @@ export function ScenarioDoor() {
       return;
     }
     if (inFlight.current) return;
+    recordEngineStart(scenarioKindOf(segmentId));
     inFlight.current = true;
     setBusyId(segmentId);
     setError(null);
@@ -116,7 +119,7 @@ export function ScenarioDoor() {
       const { enterDemoSegment } = await import("@/lib/demoSession");
       await enterDemoSegment(segmentId, { unlockById, createProfile });
       preferDashboardHome();
-      await navigate({ to: "/" });
+      await navigate({ to: "/", search: langSearch() });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("door.openFail"));
     } finally {
@@ -133,17 +136,17 @@ export function ScenarioDoor() {
       className="door-page h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-background outline-none"
     >
       <header className="sticky top-0 z-30 overflow-visible border-b border-border bg-background">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3">
+          <div className="min-w-0 flex-1 basis-[min(100%,12.5rem)] pr-1">
             <div className="truncate text-sm font-semibold text-foreground">{t("brand.name")}</div>
             <div
-              className="block truncate text-[10px] font-normal tracking-wide text-slate-300"
+              className="block text-pretty text-[10px] font-normal leading-snug tracking-wide text-slate-300 sm:truncate"
               title={t("brand.heroPositioning")}
             >
               {t("brand.heroPositioning")}
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <ViewSettingsMenu />
             <Button
               type="button"
@@ -157,7 +160,7 @@ export function ScenarioDoor() {
               {t("door.startDemo")}
             </Button>
             <Button asChild className="btn-cta h-8 px-3">
-              <Link to="/login">{t("chrome.login")}</Link>
+              <Link to="/login" search={keepLang}>{t("chrome.login")}</Link>
             </Button>
           </div>
         </div>

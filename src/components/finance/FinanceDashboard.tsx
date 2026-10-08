@@ -137,6 +137,7 @@ import { useVault } from "@/lib/vault";
 import { localdb, type BankRawRow, type EncGoalRow, type EncTxnRow, type Profile } from "@/lib/localdb";
 import { currencyUnit } from "@/i18n/currency";
 import { useI18n } from "@/i18n";
+import { useSurfaceTx } from "@/i18n/surfaceTx";
 import { cn } from "@/lib/utils";
 import { getWorkspaceTransactionsGuard } from "@/lib/workspaceGuard";
 import { sha256Hex } from "@/lib/hash";
@@ -152,7 +153,11 @@ import { HelpIcon, LeanTerm } from "@/components/HelpIcon";
 import { ProChartCallout } from "@/components/home/ProChartExplain";
 import { LedgerTxnRow } from "@/components/LedgerTxnRow";
 import { InstallmentArrearsBar } from "@/components/InstallmentArrearsBar";
-import { KpiQuickBar } from "@/components/KpiQuickBar";
+import { EngineFocusSurface } from "@/components/engine/EngineFocusSurface";
+import { ModuleSubsetSection } from "@/components/ModuleSubsetNav";
+import { moduleSubsetById, subsetDomId, subsetIdForLab, type ModuleSubsetId } from "@/lib/moduleSubsets";
+import { buildEconomicReadSnapshot } from "@/lib/bcpEconomicOverlay";
+import { anonRowsFromTxns } from "@/lib/educationAnonymize";
 import { WorkspacePanels, WorkspaceTabs, type PdcaMode } from "@/components/WorkspaceTabs";
 import { ConsistencyLampCard, DataLineage } from "@/components/DataLineage";
 import { SectionSettingsGear } from "@/components/SectionSettingsGear";
@@ -160,6 +165,22 @@ import { MudaHeatmap } from "@/components/MudaHeatmap";
 import { CollapsibleCard, RevealToggle } from "@/components/lean-viz/CollapsibleCard";
 import { RevealPanel } from "@/components/lean-viz/RevealPanel";
 import { useDashboardBlockOpen } from "@/hooks/useDashboardBlockOpen";
+import { LabActiveMark } from "@/components/labs/LabActiveDot";
+import { LabSection } from "@/components/labs/LabSection";
+import { MultiCaseDesk } from "@/components/labs/MultiCaseDesk";
+import { useDashboardLabs } from "@/hooks/useDashboardLabs";
+import {
+  assertDashboardSurface,
+  formatDashboardSurfaceReport,
+} from "@/lib/dashboardSurfaceGuard";
+import {
+  canPromotePlanToDo,
+  copyTxnStatusForMotor,
+  plannedDocumentsAllowed,
+  resolveTxnStatusForMotor,
+  resolveWhatIfForMotor,
+  type TxnLifecycleStatus,
+} from "@/lib/labMotor";
 import {
   BulletGraph,
   ChartChrome,
@@ -198,6 +219,14 @@ import {
 } from "@/lib/referencesNav";
 import { computeWorkspaceTint } from "@/lib/workspaceTint";
 import { applyWorkspaceSwitch, publishWorkspaceCatalog, WORKSPACE_SWITCH_EVENT } from "@/lib/workspaceSwitch";
+import { snapshotActiveCase, szummaSnapshotLabel } from "@/lib/caseSnapshot";
+import {
+  LAB_FOCUS_EVENT,
+  SZUMMA_ENTER_EVENT,
+  consumeSzummaEnter,
+  requestLabFocus,
+  useLabFocusListener,
+} from "@/lib/labFocus";
 import {
   CASE_ENTRY_DEFAULT_WS,
   CASE_ENTRY_TAB_KEY,
@@ -218,11 +247,12 @@ import { GuestSessionGuard } from "@/components/access/GuestSessionGuard";
 import { GuestWatermark } from "@/components/access/GuestWatermark";
 import { SlotCapacityChooser } from "@/components/access/SlotCapacityChooser";
 import { denyMutateIfViewer } from "@/lib/accessRole";
-import { readSlotLedger } from "@/lib/license";
+import { isLocalDevHost, readSlotLedger } from "@/lib/license";
 import { checkScenarioSlotCapacity } from "@/lib/scenarioSlots";
-import { denyShowcaseWrite } from "@/lib/versionPolicy";
+import { denyEconomicWriteBack, denyShowcaseWrite } from "@/lib/versionPolicy";
 import { EducationCasePanel } from "@/components/education/EducationCasePanel";
 import { IndustryCasePanel } from "@/components/industry/IndustryCasePanel";
+import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import { ResilienceCasePanel } from "@/components/resilience/ResilienceCasePanel";
 import { StrategyCasePanel } from "@/components/strategy/StrategyCasePanel";
 import { MasterBaselineCard } from "@/components/pdca/MasterBaselineCard";
@@ -306,11 +336,6 @@ type GoalPayload = { name: string; target_amount: number; workspace?: string; pr
 
 const CURRENCY = "HUF";
 
-const TYPE_LABEL: Record<TxnType, string> = {
-  income: "Bevétel",
-  expense: "Kiadás",
-  saving: "Megtakarítás",
-};
 
 function newId() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -602,6 +627,16 @@ export function FinanceDashboard({
   const meshRepo = useMeshRepository();
   const { openReferences } = useReferencesNav();
   const { t, locale } = useI18n();
+  const tx = useSurfaceTx();
+  const typeLabel = useMemo(
+    () =>
+      ({
+        income: t("dash.txnIncome"),
+        expense: t("dash.txnExpense"),
+        saving: t("dash.txnSaving"),
+      }) satisfies Record<TxnType, string>,
+    [t],
+  );
   const { openComingSoon } = useFeatureComingSoon();
   const { can } = usePlanPermissions();
 
@@ -680,6 +715,12 @@ export function FinanceDashboard({
   const uzletekBlock = useDashboardBlockOpen("uzletek", false);
   const ugyletlistaBlock = useDashboardBlockOpen("ugyletlista", false);
   const leltarKezelesBlock = useDashboardBlockOpen("leltar-kezeles", false);
+  const labs = useDashboardLabs();
+  const goSubsetRef = useRef<(id: ModuleSubsetId) => void>(() => {});
+  useLabFocusListener();
+  const [szummaLeaving, setSzummaLeaving] = useState(false);
+  const szummaBusyRef = useRef(false);
+  const edgeSeenRef = useRef<boolean | null>(null);
   const ledgerCollapsed = !tetelekBlock.isOpen;
   type CashflowChannelFilter = "all" | "card" | "transfer" | "bank" | "other";
   const [cashflowChannelFilter, setCashflowChannelFilter] = useState<CashflowChannelFilter>("all");
@@ -785,24 +826,117 @@ export function FinanceDashboard({
     }
   }, [activeWs, middleWs]);
 
+  const enterSzumma = useCallback(async () => {
+    if (activeWs === "szumma") {
+      requestLabFocus("labs-szumma");
+      return;
+    }
+    if (szummaBusyRef.current) return;
+    szummaBusyRef.current = true;
+    setSzummaLeaving(true);
+    try {
+      await snapshotActiveCase(vaultKey, szummaSnapshotLabel(profileName));
+      toast.success(tx("Pillanatmentés kész."));
+    } catch {
+      toast.error(tx("A pillanatmentés nem sikerült — a kezelő ettől még megnyílik."));
+    }
+    window.setTimeout(() => {
+      setSzummaLeaving(false);
+      setActiveWs("szumma");
+      szummaBusyRef.current = false;
+      requestLabFocus("labs-szumma");
+    }, 280);
+  }, [activeWs, profileName, vaultKey]);
+
+  const enterSzummaRef = useRef(enterSzumma);
+  enterSzummaRef.current = enterSzumma;
+
   const toggleSzumma = useCallback(() => {
+    if (!labs.szumma) return;
     if (activeWs === "szumma") {
       setMiddleWs(lastNonSzummaRef.current.middleWs);
       setActiveWs(lastNonSzummaRef.current.activeWs);
-    } else {
-      setActiveWs("szumma");
+      return;
     }
-  }, [activeWs]);
+    void enterSzumma();
+  }, [activeWs, enterSzumma, labs.szumma]);
+
+  useEffect(() => {
+    const onEnter = () => {
+      void enterSzummaRef.current();
+    };
+    window.addEventListener(SZUMMA_ENTER_EVENT, onEnter);
+    if (consumeSzummaEnter()) onEnter();
+    return () => window.removeEventListener(SZUMMA_ENTER_EVENT, onEnter);
+  }, []);
+
+  useEffect(() => {
+    if (edgeSeenRef.current === null) {
+      edgeSeenRef.current = labs.edge;
+      return;
+    }
+    if (labs.edge && !edgeSeenRef.current) requestLabFocus("labs-edge");
+    edgeSeenRef.current = labs.edge;
+  }, [labs.edge]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      const root = document.querySelector("[data-site-surface='dashboard']");
+      const report = assertDashboardSurface(root);
+      if (report.ok) return;
+      const msg = formatDashboardSurfaceReport(report);
+      console.warn("[poka-yoke] dashboard surface", msg);
+      if (isLocalDevHost()) toast.error(`Poka-Yoke: ${report.violations.length} felületi eltérés`);
+    };
+    const id = window.requestAnimationFrame(run);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(id);
+    };
+  }, [labs.advise, labs.baseline, labs.shock, labs.sim, pdcaMode]);
+
+  const whatIfSetOpenRef = useRef(whatIfBlock.setOpen);
+  whatIfSetOpenRef.current = whatIfBlock.setOpen;
+  const whatIfOpenRef = useRef(whatIfBlock.isOpen);
+  whatIfOpenRef.current = whatIfBlock.isOpen;
+  useEffect(() => {
+    const onFocus = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string; mode?: "highlight" | "jump" }>).detail;
+      const id = detail?.id;
+      if (id === "labs-halmozott") {
+        if (!whatIfOpenRef.current) whatIfSetOpenRef.current(true);
+        setPdcaMode((m) => (m === "DC" || m === "CA" ? m : "CA"));
+      }
+      if (detail?.mode === "highlight") return;
+      const subset = typeof id === "string" ? subsetIdForLab(id) : null;
+      if (subset) goSubsetRef.current(subset);
+    };
+    window.addEventListener(LAB_FOCUS_EVENT, onFocus as EventListener);
+    return () => window.removeEventListener(LAB_FOCUS_EVENT, onFocus as EventListener);
+  }, []);
+
+  useEffect(() => {
+    if (labs.szumma || activeWs !== "szumma") return;
+    setMiddleWs(lastNonSzummaRef.current.middleWs);
+    setActiveWs(lastNonSzummaRef.current.activeWs);
+  }, [activeWs, labs.szumma]);
 
   useEffect(() => {
     const onSwitch = (e: Event) => {
       const id = (e as CustomEvent<{ id?: string }>).detail?.id;
       if (!id) return;
+      if (id === "__all") {
+        if (!labs.szumma) return;
+        void enterSzummaRef.current();
+        return;
+      }
       applyWorkspaceSwitch(id, { setActiveWs, setMiddleWs });
     };
     window.addEventListener(WORKSPACE_SWITCH_EVENT, onSwitch as EventListener);
     return () => window.removeEventListener(WORKSPACE_SWITCH_EVENT, onSwitch as EventListener);
-  }, []);
+  }, [labs.szumma]);
 
   const stepBottomTab = useCallback(
     (delta: -1 | 1) => {
@@ -854,7 +988,7 @@ export function FinanceDashboard({
             : `mesh_quicksave_${scopeName}_${ymd}.json`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
-        toast.success("Gyorsmentés letöltve.");
+        toast.success(tx("Gyorsmentés letöltve."));
       } catch (e: any) {
         toast.error(e?.message || "Gyorsmentés sikertelen.");
       }
@@ -868,7 +1002,7 @@ export function FinanceDashboard({
     onPrevTopTab: () => stepWorkspaceTab(-1),
     onNextTopTab: () => stepWorkspaceTab(1),
     onSave: quickSave,
-    onToggleSzumma: toggleSzumma,
+    onToggleSzumma: labs.szumma ? toggleSzumma : undefined,
     onRotatePdca: rotatePdcaQuarter,
   });
 
@@ -1089,7 +1223,7 @@ export function FinanceDashboard({
           incomeCategories: s.incomeCategories ?? [],
           expenseCategories: s.expenseCategories ?? [],
           savingCategories: (s as any).savingCategories ?? [],
-          showKpiQuickBar: (s as any).showKpiQuickBar ?? true,
+          showKpiQuickBar: (s as any).showKpiQuickBar ?? false,
           buckets: s.buckets ?? [],
           recurring: s.recurring ?? [],
           plannedOneOff: s.plannedOneOff ?? [],
@@ -1263,7 +1397,7 @@ export function FinanceDashboard({
 
   const denyWorkspaceCreate = () => {
     if (denyMutateIfViewer()) {
-      toast.warning("Guest módban nem hozható létre Slot.");
+      toast.warning(tx("Guest módban nem hozható létre Slot."));
       return false;
     }
     const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -1544,7 +1678,7 @@ export function FinanceDashboard({
   const bankDirHandleRef = useRef<any>(null);
   const onBankCsvFile = useCallback(
     (file: File | null) => {
-      if (denyShowcaseWrite(isVisitorDemo)) return;
+      if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) return;
       if (!file) return;
       if (!file.name.toLowerCase().endsWith(".csv")) {
         setBankImportStatus("Támogatott formátum: Banki XML / SpreadsheetML (.xml)");
@@ -1608,13 +1742,13 @@ export function FinanceDashboard({
             null;
           if (!detected) {
             setBankImportStatus("Nincs bankszámla azonosítás ehhez a CSV-hez. Beállítások → Bankszámlák & Profilok.");
-            toast.error("Nincs bankszámla azonosítás (Beállítások → Bankszámlák).");
+            toast.error(tx("Nincs bankszámla azonosítás (Beállítások → Bankszámlák)."));
             return;
           }
           const mapped = maps.some((m) => m.bank_account_id === detected.id && m.workspace_id === activeWorkspace);
           if (!mapped) {
             setBankImportStatus("A bankszámla nincs ehhez a munkatérhez rendelve. Állítsd be a Beállításokban.");
-            toast.error("Bankszámla nincs ehhez a munkatérhez rendelve.");
+            toast.error(tx("Bankszámla nincs ehhez a munkatérhez rendelve."));
             return;
           }
 
@@ -1732,7 +1866,7 @@ export function FinanceDashboard({
 
           await qc.invalidateQueries({ queryKey: ["transactions"] });
           setBankImportStatus(
-            `Import kész: ${saved} tétel. ÁFA: HU tételeknél bruttóból nettó (alap ${defaultVat}%), gyanús tételek jelölve (${needsReview}).${skippedNonHuf ? ` Kihagyva (nem HUF): ${skippedNonHuf}.` : ""}`,
+            `${t("set.importReady", { saved, needsReview })}${skippedNonHuf ? ` ${t("set.skippedNonHuf")} ${skippedNonHuf}.` : ""}`,
           );
           appendAudit({
             op: "save",
@@ -1752,7 +1886,7 @@ export function FinanceDashboard({
 
   const onBankPersonalXmlText = useCallback(
     async (input: { fileName: string; text: string; fileSize?: number | null; bypassWantsLock?: boolean; quiet?: boolean; workspaceId?: string }) => {
-      if (denyShowcaseWrite(isVisitorDemo)) return;
+      if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) return;
       try {
         const activeWorkspaceId =
           (input.workspaceId && input.workspaceId !== "__all" ? input.workspaceId : null) ||
@@ -1806,7 +1940,7 @@ export function FinanceDashboard({
         }
         if (rows.length === 0) {
           setBankImportStatus("Nem ismert XML formátum. (HISTORY_… SpreadsheetML kivonatot várok.)");
-          if (!input.quiet) toast.error("HIBA: Az XML struktúrából nem sikerült tranzakciókat kinyerni. Ellenőrizd a fájl formátumát!");
+          if (!input.quiet) toast.error(tx("HIBA: Az XML struktúrából nem sikerült tranzakciókat kinyerni. Ellenőrizd a fájl formátumát!"));
           return;
         }
 
@@ -1820,13 +1954,13 @@ export function FinanceDashboard({
           accounts.find((a) => normalize(a.iban) === ref) ?? accounts.find((a) => ref && normalize(a.iban).includes(ref)) ?? null;
         if (!detected) {
           setBankImportStatus("Nincs bankszámla azonosítás ehhez az XML-hez. Beállítások → Bankszámlák & Profilok.");
-          toast.error("Nincs bankszámla azonosítás (Beállítások → Bankszámlák).");
+          toast.error(tx("Nincs bankszámla azonosítás (Beállítások → Bankszámlák)."));
           return;
         }
         const mapped = maps.some((m) => m.bank_account_id === detected.id && m.workspace_id === activeWorkspaceId);
         if (!mapped) {
           setBankImportStatus("A bankszámla nincs ehhez a munkatérhez rendelve. Állítsd be a Beállításokban.");
-          toast.error("Bankszámla nincs ehhez a munkatérhez rendelve.");
+          toast.error(tx("Bankszámla nincs ehhez a munkatérhez rendelve."));
           return;
         }
 
@@ -2129,7 +2263,7 @@ export function FinanceDashboard({
   );
 
   const syncPersonalBankFromLatestFileInFolder = useCallback(async (opts?: { autoscan?: boolean; workspaceId?: string }) => {
-    if (denyShowcaseWrite(isVisitorDemo)) return;
+    if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) return;
     const targetWs = opts?.workspaceId ?? activeWorkspace;
     const quiet = Boolean(opts?.autoscan);
     if (targetWs === "__all") {
@@ -2987,6 +3121,24 @@ export function FinanceDashboard({
     return { bankGross, piggies, free, fixedMonthly, runwayMonths };
   }, [activeWorkspace, activeLoans, settings.recurring, txns, txnNetHuf]);
 
+  const economicReadSnapshot = useMemo(
+    () =>
+      buildEconomicReadSnapshot({
+        baseline: inheritedBaseline,
+        live: personalCashflowKpis
+          ? {
+              cashHuf: personalCashflowKpis.bankGross,
+              lockedHuf: personalCashflowKpis.piggies,
+              opexHuf: personalCashflowKpis.fixedMonthly,
+              runwayMonths: personalCashflowKpis.runwayMonths,
+            }
+          : undefined,
+      }),
+    [inheritedBaseline, personalCashflowKpis],
+  );
+
+  const anonRows = useMemo(() => anonRowsFromTxns(allTxns), [allTxns]);
+
   const multiYear = useMemo(() => {
     if (activeWorkspace !== "personal") return null;
     const liq = personalCashflowKpis?.free ?? null;
@@ -3588,7 +3740,8 @@ export function FinanceDashboard({
     const realistic = build("realistic");
     const pessimistic = build("pessimistic");
 
-    const pick = whatIfScenario === "optimistic" ? optimistic : whatIfScenario === "pessimistic" ? pessimistic : realistic;
+    const motorScenario = resolveWhatIfForMotor(labs.sim, whatIfScenario);
+    const pick = motorScenario === "optimistic" ? optimistic : motorScenario === "pessimistic" ? pessimistic : realistic;
     const breakEvenLabel = pick.breakEvenIdx == null ? null : pick.rows[pick.breakEvenIdx]?.month ?? null;
 
     const fixedRatio = avgExpense > 0 ? fixedMonthlyGross / avgExpense : null;
@@ -3613,7 +3766,7 @@ export function FinanceDashboard({
         ? buildIndustryWhatIf({ caseId: demoSegmentId, horizonMonths })
         : null;
 
-    const chart =
+    const rawChart =
       strategyWhatIf?.chart ??
       educationWhatIf?.chart ??
       industryWhatIf?.chart ??
@@ -3623,6 +3776,13 @@ export function FinanceDashboard({
         realistic: realistic.rows[i]?.cum ?? 0,
         pessimistic: pessimistic.rows[i]?.cum ?? 0,
       }));
+    const chart = labs.sim
+      ? rawChart
+      : rawChart.map((c) => ({
+          ...c,
+          optimistic: c.realistic,
+          pessimistic: c.realistic,
+        }));
 
     const pickMonth = pick.rows[0] ?? { inc: baseIncome, exp: baseExpense, net: 0 };
     const inRecent = (iso: string) => {
@@ -3652,16 +3812,20 @@ export function FinanceDashboard({
       roi: pick.roi,
       chart,
       waterfall,
-      multiples: [
-        { id: "opt", label: t("dash.optimistic"), points: chart.map((c) => ({ x: c.month, y: c.optimistic })), active: whatIfScenario === "optimistic" },
-        { id: "real", label: t("dash.realistic"), points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: whatIfScenario === "realistic" },
-        { id: "pess", label: t("dash.pessimistic"), points: chart.map((c) => ({ x: c.month, y: c.pessimistic })), active: whatIfScenario === "pessimistic" },
-      ],
+      multiples: labs.sim
+        ? [
+            { id: "opt", label: t("dash.optimistic"), points: chart.map((c) => ({ x: c.month, y: c.optimistic })), active: motorScenario === "optimistic" },
+            { id: "real", label: t("dash.realistic"), points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: motorScenario === "realistic" },
+            { id: "pess", label: t("dash.pessimistic"), points: chart.map((c) => ({ x: c.month, y: c.pessimistic })), active: motorScenario === "pessimistic" },
+          ]
+        : [
+            { id: "real", label: t("dash.realistic"), points: chart.map((c) => ({ x: c.month, y: c.realistic })), active: true },
+          ],
       strategySignals: strategyWhatIf?.signals ?? [],
       strategyInheritedFrom: strategyWhatIf?.inheritedFrom ?? "",
       kahnMetrics: strategyWhatIf?.kahnMetrics,
     };
-  }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, settings.recurring, t, txns, txnGrossHuf, vizSpan, whatIfScenario]);
+  }, [activeLoans, activeWorkspace, businessMode, defaultVat, demoSegmentId, labs.sim, settings.recurring, t, txns, txnGrossHuf, vizSpan, whatIfScenario]);
 
   const leanInsights = useMemo(() => {
     if (!businessMode || activeWorkspace === "__all") return null;
@@ -4031,7 +4195,7 @@ export function FinanceDashboard({
       return;
     }
     if (createWsType === "project" && !createProjectMode) {
-      toast.error("Válassz projekt módot.");
+      toast.error(tx("Válassz projekt módot."));
       return;
     }
     if (!denyWorkspaceCreate()) return;
@@ -4064,7 +4228,7 @@ export function FinanceDashboard({
     setCreateWsName("");
     setCreateProjectMode(null);
     setCreatePilotBusinessId("");
-    toast.success("Slot létrehozva a gépeden.");
+    toast.success(tx("Slot létrehozva a gépeden."));
   }, [
     createWsType,
     createWsName,
@@ -4206,10 +4370,10 @@ export function FinanceDashboard({
           await localdb.deleteTxn(res.outId);
           await localdb.deleteTxn(res.inId);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Átcsoportosítás visszavonva");
+          toast.success(tx("Átcsoportosítás visszavonva"));
         },
       });
-      toast.success("Átcsoportosítás mentve.");
+      toast.success(tx("Átcsoportosítás mentve."));
       setReallocateOpen(false);
       setReallocateAmount("");
     },
@@ -4239,7 +4403,7 @@ export function FinanceDashboard({
       payload: TxnPayload;
       bypassWantsLock?: boolean;
     }) => {
-      if (denyShowcaseWrite(isVisitorDemo)) throw new Error("denied");
+      if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) throw new Error("denied");
       const ws =
         input.payload.workspace ??
         (activeWorkspace === "__all" ? "personal" : activeWorkspace);
@@ -4402,7 +4566,7 @@ export function FinanceDashboard({
         run: async () => {
           for (const id of res.ids) await localdb.deleteTxn(id);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Új tétel visszavonva");
+          toast.success(tx("Új tétel visszavonva"));
         },
       });
     },
@@ -4411,6 +4575,7 @@ export function FinanceDashboard({
 
   const delTxn = useMutation({
     mutationFn: async (id: string) => {
+      if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) throw new Error("denied");
       const rows = await localdb.listTxns();
       const row = rows.find((r) => r.id === id);
       if (!row) {
@@ -4469,7 +4634,7 @@ export function FinanceDashboard({
             }
             await qc.invalidateQueries({ queryKey: ["transactions"] });
             if (res.loanEffects?.length) await qc.invalidateQueries({ queryKey: ["loans"] });
-            toast.success("Törlés visszavonva");
+            toast.success(tx("Törlés visszavonva"));
           },
         });
       }
@@ -4532,7 +4697,7 @@ export function FinanceDashboard({
           for (const e of res.loanEffects) await applyLoanPrincipalDelta(e.loanId, -e.delta);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
           if (res.loanEffects.length) await qc.invalidateQueries({ queryKey: ["loans"] });
-          toast.success("Tömeges törlés visszavonva");
+          toast.success(tx("Tömeges törlés visszavonva"));
         },
       });
     },
@@ -4591,7 +4756,7 @@ export function FinanceDashboard({
         run: async () => {
           for (const r of res.prevRows) await localdb.putTxn(r);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Tömeges persely visszavonva");
+          toast.success(tx("Tömeges persely visszavonva"));
         },
       });
     },
@@ -4611,12 +4776,11 @@ export function FinanceDashboard({
         const row = byId.get(id);
         if (!row) continue;
         const p = await decryptJSON<TxnPayload>(vaultKey, row.data_enc);
-        const copiedStatus =
-          (p.status as any) && (p.status as any) !== "actual"
-            ? (p.status as any)
-            : mode === "simulation"
-              ? "planned"
-              : "committed";
+        const copiedStatus = copyTxnStatusForMotor(
+          labs.sim,
+          (p.status as TxnLifecycleStatus | null | undefined) ?? null,
+          mode,
+        );
         const next: TxnPayload = {
           ...p,
           workspace: input.projectWs,
@@ -4655,7 +4819,7 @@ export function FinanceDashboard({
         run: async () => {
           for (const id of res.createdIds) await localdb.deleteTxn(id);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Másolás visszavonva");
+          toast.success(tx("Másolás visszavonva"));
         },
       });
     },
@@ -4696,7 +4860,7 @@ export function FinanceDashboard({
           if (!row) return;
           await localdb.putTxn({ ...row, type: from });
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Áthelyezés visszavonva");
+          toast.success(tx("Áthelyezés visszavonva"));
         },
       });
     },
@@ -4730,7 +4894,7 @@ export function FinanceDashboard({
       payload: TxnPayload;
       bypassWantsLock?: boolean;
     }) => {
-      if (denyShowcaseWrite(isVisitorDemo)) throw new Error("denied");
+      if (denyShowcaseWrite(isVisitorDemo) || denyEconomicWriteBack()) throw new Error("denied");
       const rows = await localdb.listTxns();
       const row = rows.find((r) => r.id === input.id);
       if (!row) throw new Error("Nem található tétel.");
@@ -4917,7 +5081,7 @@ export function FinanceDashboard({
           await localdb.putTxn(prevRow);
           if (prevPeerRow) await localdb.putTxn(prevPeerRow);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Módosítás visszavonva");
+          toast.success(tx("Módosítás visszavonva"));
         },
       });
 
@@ -5041,7 +5205,7 @@ export function FinanceDashboard({
           if (createdId) await localdb.deleteTxn(createdId);
           await localdb.putTxn(prevRow);
           await qc.invalidateQueries({ queryKey: ["transactions"] });
-          toast.success("Átvezetés visszavonva");
+          toast.success(tx("Átvezetés visszavonva"));
         },
       });
     },
@@ -5074,7 +5238,7 @@ export function FinanceDashboard({
         run: async () => {
           await localdb.deleteGoal(id);
           await qc.invalidateQueries({ queryKey: ["goals"] });
-          toast.success("Új cél visszavonva");
+          toast.success(tx("Új cél visszavonva"));
         },
       });
     },
@@ -5098,7 +5262,7 @@ export function FinanceDashboard({
           run: async () => {
             await localdb.putGoal(row);
             await qc.invalidateQueries({ queryKey: ["goals"] });
-            toast.success("Cél visszaállítva");
+            toast.success(tx("Cél visszaállítva"));
           },
         });
       }
@@ -5139,7 +5303,7 @@ export function FinanceDashboard({
             if (row) await localdb.putGoal({ ...row, is_active: p.is_active });
           }
           await qc.invalidateQueries({ queryKey: ["goals"] });
-          toast.success("Aktív cél visszaállítva");
+          toast.success(tx("Aktív cél visszaállítva"));
         },
       });
     },
@@ -5289,7 +5453,7 @@ export function FinanceDashboard({
       if (cur && target) {
         moveTxn.mutate({ id: cur.id, to: target });
         toast.success(
-          `Áthelyezve: ${TYPE_LABEL[cur.type]} → ${TYPE_LABEL[target]}`,
+          t("dash.movedType", { from: typeLabel[cur.type], to: typeLabel[target] }),
         );
       }
       setDragging(null);
@@ -5642,8 +5806,8 @@ export function FinanceDashboard({
                           variant="ghost"
                           className="h-6 w-6"
                           onClick={() => removeBucket(it.id!)}
-                          aria-label="Alhalmaz törlése"
-                          title="Alhalmaz törlése (üres)"
+                          aria-label={tx("Alhalmaz törlése")}
+                          title={tx("Alhalmaz törlése (üres)")}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -5658,7 +5822,7 @@ export function FinanceDashboard({
           <Dialog open={reallocateOpen} onOpenChange={setReallocateOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Persely átcsoportosítás</DialogTitle>
+                <DialogTitle>{tx("Persely átcsoportosítás")}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-3">
                 <div className="space-y-1">
@@ -5702,9 +5866,9 @@ export function FinanceDashboard({
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setReallocateOpen(false)}>
-                  Mégse
-                </Button>
+                <Button type="button" variant="ghost" onClick={() => setReallocateOpen(false)}>{
+                  tx("Mégse")
+                }</Button>
                 <Button
                   type="button"
                   onClick={() => {
@@ -5734,9 +5898,9 @@ export function FinanceDashboard({
           <RevealToggle open={tervezettBlock.isOpen} onClick={tervezettBlock.toggle} />
           <CardTitle
             className="text-sm font-medium text-[var(--text-main)]"
-            data-exact="Tervezett kiadások — ismétlődő, egyszeri és használati tételek a következő 60 napban."
+            data-exact={t("dash.plannedExact")}
           >
-            Tervezett kiadások / Projekt szimuláció
+            {t("dash.plannedTitle")}
           </CardTitle>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -5745,11 +5909,11 @@ export function FinanceDashboard({
           </Badge>
           {tervezettBlock.isOpen ? (
           <div className="text-right leading-tight">
-            <div className="text-[10px] text-slate-400">Ismétlődő 60 nap</div>
+            <div className="text-[10px] text-slate-400">{t("dash.plannedRecurring60")}</div>
             <div className="font-mono text-[12px] text-slate-200">
               {formatMoney(Math.round(planned60Sums.recurring), CURRENCY)}
             </div>
-            <div className="mt-1 text-[10px] text-slate-400">Összesen 60 nap</div>
+            <div className="mt-1 text-[10px] text-slate-400">{t("dash.plannedTotal60")}</div>
             <div className="font-mono text-[12px] text-slate-200">
               {formatMoney(Math.round(planned60Sums.total), CURRENCY)}
             </div>
@@ -5891,7 +6055,7 @@ export function FinanceDashboard({
               variant={whatIfScenario === "optimistic" ? "secondary" : "outline"}
               className="h-7 whitespace-nowrap px-2 text-[11px]"
               onClick={() => setWhatIfScenario("optimistic")}
-              title="Ha a forgalom jobb, a költség szorosabb."
+              title={tx("Ha a forgalom jobb, a költség szorosabb.")}
             >
               {t("dash.optimistic")}
             </Button>
@@ -5901,7 +6065,7 @@ export function FinanceDashboard({
               variant={whatIfScenario === "realistic" ? "secondary" : "outline"}
               className="h-7 whitespace-nowrap px-2 text-[11px]"
               onClick={() => setWhatIfScenario("realistic")}
-              title="A jelenlegi ritmus folytatása."
+              title={tx("A jelenlegi ritmus folytatása.")}
             >
               {t("dash.realistic")}
             </Button>
@@ -5911,7 +6075,7 @@ export function FinanceDashboard({
               variant={whatIfScenario === "pessimistic" ? "secondary" : "outline"}
               className="h-7 whitespace-nowrap px-2 text-[11px]"
               onClick={() => setWhatIfScenario("pessimistic")}
-              title="Ha a bevétel csúszik vagy esik, a költség nő."
+              title={tx("Ha a bevétel csúszik vagy esik, a költség nő.")}
             >
               {t("dash.pessimistic")}
             </Button>
@@ -5944,7 +6108,7 @@ export function FinanceDashboard({
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-[var(--text-muted)]"
-                  title="Megtérülés (ROI)"
+                  title={tx("Megtérülés (ROI)")}
                   exact="Megtérülés — (bevétel − költség) / költség a 12 hónapon. Százalék, nem kamat."
                   summary="(A horizont teljes bevétele mínusz a teljes költség) osztva a költséggel. Százalék. Nem diszkontált, nem kamat."
                 >
@@ -5957,12 +6121,12 @@ export function FinanceDashboard({
               <div className="tile-lift rounded-lg p-2.5">
                 <LeanTerm
                   className="kpi-label text-[10px] uppercase tracking-wide text-[var(--text-muted)]"
-                  title="Fix arány"
+                  title={tx("Fix arány")}
                   exact="Fix arány — a havi kiadásból mennyi a kötött tétel (bérlet, előfizetés). Magas arány: kevesebb mozgástér."
                   summary="A havi kiadásból mennyi a kötött tétel (bérleti díj, előfizetés). A maradék a forgalommal mozog. Magas arány: kevesebb mozgástér, ha esik a bevétel."
-                >
-                  Fix arány
-                </LeanTerm>
+                >{
+                  tx("Fix arány")
+                }</LeanTerm>
                 <div className="kpi-value mt-1 font-mono text-sm text-[var(--text-main)]">
                   {whatIf.fixedRatio == null ? "—" : `${Math.round(whatIf.fixedRatio * 100)}%`}
                 </div>
@@ -5994,15 +6158,15 @@ export function FinanceDashboard({
           </>
         )}
 
-        {isKahnForkSegment(demoSegmentId) || strategyForkKind ? null : (
-        <>
-        <div className="viz-split">
+        {labs.halmozott ? (
+        <LabSection id="labs-halmozott" className="viz-split">
           <ChartChrome
             blockId="halmozott"
             title={
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-2">
                 Halmozott eredmény
-                <HelpIcon kbId="pro-chart" title="Hogyan értelmezzük a PRO-grafikont?" />
+                <LabActiveMark />
+                <HelpIcon kbId="pro-chart" title={tx("Hogyan értelmezzük a PRO-grafikont?")} />
               </span>
             }
             span={vizSpan}
@@ -6021,12 +6185,15 @@ export function FinanceDashboard({
           >
             <SmallMultiples series={whatIf.multiples} xLabel={t("dash.month")} yLabel={currencyUnit()} />
           </ChartChrome>
-        </div>
+        </LabSection>
+        ) : null}
 
+        {isKahnForkSegment(demoSegmentId) || strategyForkKind ? null : (
+        <>
         <div className="viz-split">
           <ChartChrome
             blockId="eredmeny"
-            title="Eredménylevezetés"
+            title={tx("Eredménylevezetés")}
             span={vizSpan}
             onSpan={onVizSpan}
             onPrev={onVizPrev}
@@ -6062,18 +6229,40 @@ export function FinanceDashboard({
 
   const resiliencePanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
     isResilienceSegment(demoSegmentId) ? (
-      <ResilienceCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
+      <ResilienceCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} snapshot={economicReadSnapshot} />
     ) : null;
 
   const educationPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
     isEducationSegment(demoSegmentId) ? (
-      <EducationCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
+      <EducationCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} snapshot={economicReadSnapshot} />
     ) : null;
 
   const industryPanel = (phase: "PLAN" | "DO" | "CHECK" | "ACT") =>
     isIndustrySegment(demoSegmentId) ? (
       <IndustryCasePanel segmentId={demoSegmentId} phase={phase} baseline={inheritedBaseline} />
     ) : null;
+
+  const edgeSection = (phase: "PLAN" | "DO" | "CHECK" | "ACT") => {
+    const inner = industryPanel(phase);
+    if (labs.edge && isIndustrySegment(demoSegmentId)) return inner;
+    if (labs.edge) {
+      return (
+        <LabSection id="labs-edge" className="rounded-xl border border-emerald-500/25 bg-card/80 p-3">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Szenzoros / Edge
+            </span>
+            <LabActiveMark />
+          </div>
+          <p className="text-[12px] leading-snug text-muted-foreground">
+            A szenzoros panel a BCP és ipari case-eken élő mérőkkel töltődik. A modul itt aktív.
+          </p>
+          <PhysicalOpsPanel segmentId={demoSegmentId} baseline={inheritedBaseline} phase={phase} />
+        </LabSection>
+      );
+    }
+    return inner;
+  };
   const kahnDemo = isKahnForkSegment(demoSegmentId);
   const goKahnWorkspace = useCallback((ws: KahnGuideWorkspace) => {
     if (ws === "personal") {
@@ -6107,16 +6296,6 @@ export function FinanceDashboard({
           />
           <GuidedTourRestoreChip />
         </>
-      ) : null}
-      {surface.inheritMasterBaseline ? (
-        <MasterBaselineCard
-          context={inheritedBaseline}
-          specificHint={
-            kahnDemo
-              ? "A törzs adott. Itt a bővítési döntést mozgatod."
-              : undefined
-          }
-        />
       ) : null}
       {kahnDemo && activeWorkspace !== "personal" && activeWorkspace !== "Projekt1" ? (
         <KahnCoreLinkStrip
@@ -6155,36 +6334,64 @@ export function FinanceDashboard({
       ) : null}
       {resiliencePanel("PLAN")}
       {educationPanel("PLAN")}
-      {industryPanel("PLAN")}
+      {edgeSection("PLAN")}
       {/* Stratégia PLAN: mátrix a strategyPanel-en; KPI/grafikon CHECK-en. */}
-      {isStrategySegment(demoSegmentId) ? null : whatIfPanel}
-      <>
-      <GoalCard
-        goal={activeGoal}
-        goals={goals}
-        savings={goalSavings}
-        leanMonthlySupport={
-          activeWorkspace === "personal" ? Math.max(0, Math.round(((multiYear?.annualizedLeak ?? 0) / 12) * 1)) : 0
-        }
-        currency={CURRENCY}
-        properties={personalProperties as any}
-        onSelect={(id) => setActive.mutate(id)}
-        onRemove={(id) => delGoal.mutate(id)}
-        onAdd={(g) => addGoal.mutate(g)}
-        workspaceId={activeWorkspace}
-        workspaceLabel={workspaceDisplayName(activeWorkspace)}
-      />
-      {savingsBucketsPanel}
-      {plannedSimPanel}
-      </>
+      {labs.baseline ? (
+      <LabSection id="labs-baseline">
+      <ModuleSubsetSection id="baseline">
+        {surface.inheritMasterBaseline ? (
+          <MasterBaselineCard
+            context={inheritedBaseline}
+            specificHint={
+              kahnDemo
+                ? "A törzs adott. Itt a bővítési döntést mozgatod."
+                : undefined
+            }
+          />
+        ) : null}
+        <GoalCard
+          goal={activeGoal}
+          goals={goals}
+          savings={goalSavings}
+          leanMonthlySupport={
+            activeWorkspace === "personal" ? Math.max(0, Math.round(((multiYear?.annualizedLeak ?? 0) / 12) * 1)) : 0
+          }
+          currency={CURRENCY}
+          properties={personalProperties as any}
+          onSelect={(id) => setActive.mutate(id)}
+          onRemove={(id) => delGoal.mutate(id)}
+          onAdd={(g) => addGoal.mutate(g)}
+          workspaceId={activeWorkspace}
+          workspaceLabel={workspaceDisplayName(activeWorkspace)}
+        />
+        {savingsBucketsPanel}
+      </ModuleSubsetSection>
+      </LabSection>
+      ) : null}
+      {labs.sim ? (
+      <LabSection id="labs-sim">
+      <ModuleSubsetSection id="sim">
+        {plannedSimPanel}
+        {isStrategySegment(demoSegmentId) ? null : whatIfPanel}
+      </ModuleSubsetSection>
+      </LabSection>
+      ) : null}
     </div>
   );
 
   const lockPdcaView = true;
 
   const promotePlanToDo = () => {
-    if (!activeWorkspaceMeta || activeWorkspace === "__all") return toast.error("Válassz egy projektet.");
-    if (activeWorkspaceMeta.type !== "project") return toast.error("Csak projekt élesíthető PLAN → DO.");
+    const gate = canPromotePlanToDo({
+      hasWorkspace: Boolean(activeWorkspaceMeta) && activeWorkspace !== "__all",
+      workspaceType: activeWorkspaceMeta?.type,
+      baselineOn: labs.baseline,
+    });
+    if (!gate.ok) {
+      if (gate.code === "no-workspace") return toast.error(tx("Válassz egy projektet."));
+      if (gate.code === "not-project") return toast.error(tx("Csak projekt élesíthető PLAN → DO."));
+      return toast.error(tx("A törzs ki van kapcsolva a fán. Kapcsold be, majd élesíts."));
+    }
     const ms = applyPdcaMilestone(activeWorkspaceMeta as any, "do") ?? {};
     updateWorkspaceMeta(
       activeWorkspace,
@@ -6216,7 +6423,7 @@ export function FinanceDashboard({
 
   const newImprovementGoal = () => {
     setActiveSubTab("ledger");
-    toast.success("Célok: a Tételek nézet jobb oldalán.");
+    toast.success(tx("Célok: a Tételek nézet jobb oldalán."));
   };
 
   const leanRecommendations = useLeanRecommendations({
@@ -6226,6 +6433,16 @@ export function FinanceDashboard({
     currency: CURRENCY,
     limit: 6,
   });
+
+  const goSubset = useCallback((id: ModuleSubsetId) => {
+    const spec = moduleSubsetById(id);
+    setPdcaMode(spec.pdca);
+    if (spec.subTab) setActiveSubTab(spec.subTab);
+    window.setTimeout(() => {
+      document.getElementById(subsetDomId(id))?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }, []);
+  goSubsetRef.current = goSubset;
 
   const executeLeanRecommendation = useCallback(
     (rec: { navigateTo?: "ledger" | "deals" | "cashflow" | "inventory"; title: string }) => {
@@ -6392,7 +6609,7 @@ export function FinanceDashboard({
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-emerald-500/60 bg-muted/25 p-2.5"
                 data-exact="Likviditás — azonnal elérhető pénz az összesített munkatereken."
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Összesített likviditás">Likviditás</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={tx("Összesített likviditás")}>Likviditás</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(sumMetrics.liquidity), CURRENCY)}
@@ -6404,7 +6621,7 @@ export function FinanceDashboard({
                 className="card-kpi min-w-[130px] flex-1 rounded-md border border-l-4 border-l-[color:var(--color-chart-1)] bg-muted/25 p-2.5"
                 data-exact="Tiszta eredmény — céges bevétel mínusz kiadás (nettó)."
               >
-                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title="Céges tiszta eredmény">Tiszta eredmény</div>
+                <div className="kpi-label text-[10px] uppercase tracking-wide text-slate-300" title={tx("Céges tiszta eredmény")}>Tiszta eredmény</div>
                 <div
                   className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-white sm:text-sm"
                   title={formatMoney(Math.round(sumMetrics.businessResultNet), CURRENCY)}
@@ -6557,6 +6774,7 @@ export function FinanceDashboard({
                 <FlowSankey sources={leanBuilt.sources} sinks={leanBuilt.sinks} links={leanBuilt.links} />
               </ChartChrome>
             ) : null}
+            {labs.shock ? (
             <div className="viz-split">
               <ChartChrome
                 blockId="hoterkep"
@@ -6581,6 +6799,7 @@ export function FinanceDashboard({
                 />
               </ChartChrome>
             </div>
+            ) : null}
           </div>
         </CardContent>
         ) : null}
@@ -6594,7 +6813,7 @@ export function FinanceDashboard({
                 <RevealToggle open={idovonalBlock.isOpen} onClick={idovonalBlock.toggle} />
                 <CardTitle className="text-sm font-medium text-muted-foreground">6 hónapos idővonal</CardTitle>
               </div>
-              <Badge variant="secondary" className="text-[10px]" title="Kattints egy hónapra a részletekhez">
+              <Badge variant="secondary" className="text-[10px]" title={tx("Kattints egy hónapra a részletekhez")}>
                 {timeline6Rows.length} hónap
               </Badge>
             </div>
@@ -6618,7 +6837,7 @@ export function FinanceDashboard({
                       setTimelineSelectedTxnId(null);
                       setTimelineOpen(true);
                     }}
-                    title="Részletek megnyitása"
+                    title={tx("Részletek megnyitása")}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-[11px] font-semibold text-slate-200">{label}</div>
@@ -6641,7 +6860,7 @@ export function FinanceDashboard({
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span>Mentés</span>
+                        <span>{tx("Mentés")}</span>
                         <span className="font-mono tabular-nums text-sky-300">
                           {formatMoney(Math.round(r.saving), CURRENCY)}
                         </span>
@@ -6659,7 +6878,7 @@ export function FinanceDashboard({
         </Card>
       ) : null}
 
-      {doDebtsCard}
+      {labs.shock ? doDebtsCard : null}
 
       <Card className="card-table pdca-tile--wide w-full">
         <CardHeader className="pb-1.5">
@@ -6680,13 +6899,13 @@ export function FinanceDashboard({
                   variant="ghost"
                   className="h-7 px-2 text-[11px]"
                   onClick={() => setAuditDayIso(null)}
-                  title="Napi szűrő törlése"
+                  title={tx("Napi szűrő törlése")}
                 >
                   Szűrő törlése
                 </Button>
               </>
             ) : null}
-            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Kategória</span>
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{tx("Kategória")}</span>
             <Button
               type="button"
               size="sm"
@@ -6720,20 +6939,20 @@ export function FinanceDashboard({
               className="h-7 px-2 text-[11px]"
               variant={cashflowChannelFilter === "bank" ? "secondary" : "outline"}
               onClick={() => setCashflowChannelFilter("bank")}
-            >
-              Bank
-            </Button>
+            >{
+              tx("Bank")
+            }</Button>
             <Button
               type="button"
               size="sm"
               className="h-7 px-2 text-[11px]"
               variant={cashflowChannelFilter === "other" ? "secondary" : "outline"}
               onClick={() => setCashflowChannelFilter("other")}
-              title="Kézi tételek + KP jellegű banki mozgások"
+              title={tx("Kézi tételek + KP jellegű banki mozgások")}
             >
               Egyéb
             </Button>
-            <Badge variant="secondary" className="ml-auto text-[10px]" title="Szűrés utáni lista (max 80 sor)">
+            <Badge variant="secondary" className="ml-auto text-[10px]" title={tx("Szűrés utáni lista (max 80 sor)")}>
               {cashflowQuickTxns.length} tétel
             </Badge>
           </div>
@@ -6763,7 +6982,7 @@ export function FinanceDashboard({
                         <div className="truncate font-medium" title={displayTxnLabel(t)}>
                           {displayTxnLabel(t)}
                         </div>
-                        <div className="truncate text-[11px] text-muted-foreground">{categoryLabel(t.category)}</div>
+                        <div className="txn-category truncate text-[11px]">{categoryLabel(t.category)}</div>
                       </td>
                       <td className="px-2 py-1.5">
                         <div className="truncate text-muted-foreground" title={t.party?.trim() || undefined}>{t.party?.trim() || "—"}</div>
@@ -6778,7 +6997,7 @@ export function FinanceDashboard({
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
                               if (denyShowcaseWrite(isVisitorDemo)) return;
                               beginEditTxn(t);
-                            }} aria-label="Szerkesztés">
+                            }} aria-label={tx("Szerkesztés")}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
                       </td>
@@ -6799,7 +7018,7 @@ export function FinanceDashboard({
                     className="h-7 px-2 text-[11px]"
                     disabled={cashflowQuickPage <= 1}
                     onClick={() => setCashflowQuickPage(1)}
-                    title="Első oldal"
+                    title={tx("Első oldal")}
                   >
                     ⏮ Első
                   </Button>
@@ -6810,7 +7029,7 @@ export function FinanceDashboard({
                     className="h-7 px-2 text-[11px]"
                     disabled={cashflowQuickPage <= 1}
                     onClick={() => setCashflowQuickPage((p) => Math.max(1, p - 1))}
-                    title="Előző oldal"
+                    title={tx("Előző oldal")}
                   >
                     ◀ Előző
                   </Button>
@@ -6824,7 +7043,7 @@ export function FinanceDashboard({
                     className="h-7 px-2 text-[11px]"
                     disabled={cashflowQuickPage >= cashflowQuickPageCount}
                     onClick={() => setCashflowQuickPage((p) => Math.min(cashflowQuickPageCount, p + 1))}
-                    title="Következő oldal"
+                    title={tx("Következő oldal")}
                   >
                     Következő ▶
                   </Button>
@@ -6835,7 +7054,7 @@ export function FinanceDashboard({
                     className="h-7 px-2 text-[11px]"
                     disabled={cashflowQuickPage >= cashflowQuickPageCount}
                     onClick={() => setCashflowQuickPage(cashflowQuickPageCount)}
-                    title="Utolsó oldal"
+                    title={tx("Utolsó oldal")}
                   >
                     Végére ⏭
                   </Button>
@@ -6849,8 +7068,8 @@ export function FinanceDashboard({
                         setCashflowQuickPageSize(v === 15 || v === 25 || v === 50 ? (v as any) : 25);
                       }}
                       className="h-7 rounded-md border border-border/60 bg-background/40 px-2 text-[11px] text-slate-200"
-                      aria-label="Oldalméret"
-                      title="Oldalméret"
+                      aria-label={tx("Oldalméret")}
+                      title={tx("Oldalméret")}
                     >
                       <option value={15}>15</option>
                       <option value={25}>25</option>
@@ -6951,10 +7170,10 @@ export function FinanceDashboard({
                           size="sm"
                           className="mt-2"
                           onClick={() => beginEditTxn(selected)}
-                          title="Megnyitás szerkesztésre"
-                        >
-                          Szerkesztés
-                        </Button>
+                          title={tx("Megnyitás szerkesztésre")}
+                        >{
+                          tx("Szerkesztés")
+                        }</Button>
                       </div>
                     </div>
                   </div>
@@ -6966,7 +7185,7 @@ export function FinanceDashboard({
                       <tr className="border-b border-border/60 text-[11px] text-slate-300">
                         <th className="px-2 py-1.5 text-left font-medium">Dátum</th>
                         <th className="px-2 py-1.5 text-left font-medium">Megnevezés</th>
-                        <th className="px-2 py-1.5 text-left font-medium">Kategória</th>
+                        <th className="px-2 py-1.5 text-left font-medium">{tx("Kategória")}</th>
                         <th className="px-2 py-1.5 text-right font-medium">Összeg</th>
                         <th className="px-2 py-1.5 text-right font-medium" />
                       </tr>
@@ -6987,7 +7206,7 @@ export function FinanceDashboard({
                               timelineSelectedTxnId === t.id ? "bg-muted/15" : "",
                             )}
                             onClick={() => setTimelineSelectedTxnId(t.id)}
-                            title="Kattints a részletekhez"
+                            title={tx("Kattints a részletekhez")}
                           >
                             <td className="px-2 py-1.5 font-mono text-muted-foreground">
                               {String(t.occurred_at).slice(0, 10)}
@@ -7002,7 +7221,7 @@ export function FinanceDashboard({
                                 </div>
                               ) : null}
                             </td>
-                            <td className="px-2 py-1.5 whitespace-normal break-words text-muted-foreground">
+                            <td className="txn-category px-2 py-1.5 whitespace-normal break-words">
                               {categoryLabel(t.category)}
                             </td>
                             <td className="px-2 py-1.5 text-right font-mono tabular-nums whitespace-nowrap">
@@ -7028,7 +7247,7 @@ export function FinanceDashboard({
                                   e.stopPropagation();
                                   beginEditTxn(t);
                                 }}
-                                aria-label="Szerkesztés"
+                                aria-label={tx("Szerkesztés")}
                               >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </Button>
@@ -7083,7 +7302,7 @@ export function FinanceDashboard({
                       if (!f) return;
                       void (async () => {
                         if (!f.name.toLowerCase().endsWith(".xml")) {
-                          toast.error("HIBA: Nem megfelelő formátum (Magán). Csak XML (SpreadsheetML).");
+                          toast.error(tx("HIBA: Nem megfelelő formátum (Magán). Csak XML (SpreadsheetML)."));
                           return;
                         }
                         const text = await f.text();
@@ -7097,11 +7316,11 @@ export function FinanceDashboard({
                     size="sm"
                     className="h-8 gap-2 px-2 sm:px-3"
                     onClick={() => void requestWatchedFolderSync()}
-                    title="Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából"
-                    aria-label="Magán szinkron XML"
+                    title={tx("Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából")}
+                    aria-label={tx("Magán szinkron XML")}
                   >
                     <Folder className="h-4 w-4" />
-                    <span className="hidden sm:inline">Magán szinkron</span>
+                    <span className="hidden sm:inline">{tx("Magán szinkron")}</span>
                   </Button>
                   <Button
                     type="button"
@@ -7109,8 +7328,8 @@ export function FinanceDashboard({
                     size="sm"
                     className="h-8 gap-2 px-2 sm:px-3"
                     onClick={() => bankXmlFileRef.current?.click()}
-                    title="Magán: XML kivonat kiválasztása"
-                    aria-label="XML kivonat kiválasztása"
+                    title={tx("Magán: XML kivonat kiválasztása")}
+                    aria-label={tx("XML kivonat kiválasztása")}
                   >
                     <Upload className="h-4 w-4" />
                     <span className="hidden sm:inline">XML</span>
@@ -7153,11 +7372,11 @@ export function FinanceDashboard({
                   if (denyShowcaseWrite(isVisitorDemo)) return;
                   setQuickAddType("expense");
                 }}
-                title="+ Új tétel"
+                title={tx("+ Új tétel")}
               >
-                <Plus className="h-4 w-4" />
-                Új tétel
-              </Button>
+                <Plus className="h-4 w-4" />{
+                tx("Új tétel")
+              }</Button>
             </div>
           </div>
           {preferBankImport && !isVisitorDemo ? (
@@ -7197,7 +7416,7 @@ export function FinanceDashboard({
               </div>
             </div>
             <div className="card-kpi min-w-[130px] flex-1 rounded-md border border-sky-500/25 bg-sky-950/20 p-2.5">
-              <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Megtakarítás</div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{tx("Megtakarítás")}</div>
               <div
                 className="kpi-value mt-0.5 w-full text-xs font-bold tabular-nums text-sky-400 sm:text-sm"
                 title={formatMoney(Math.round(ledgerSummary.savingNet), CURRENCY)}
@@ -7243,9 +7462,9 @@ export function FinanceDashboard({
             <Button type="button" size="sm" variant={ledgerFilter === "expense" ? "secondary" : "outline"} className="h-8" onClick={() => setLedgerFilter("expense")}>
               Kiadás
             </Button>
-            <Button type="button" size="sm" variant={ledgerFilter === "saving_transfer" ? "secondary" : "outline"} className="h-8" onClick={() => setLedgerFilter("saving_transfer")}>
-              Megtakarítás
-            </Button>
+            <Button type="button" size="sm" variant={ledgerFilter === "saving_transfer" ? "secondary" : "outline"} className="h-8" onClick={() => setLedgerFilter("saving_transfer")}>{
+              tx("Megtakarítás")
+            }</Button>
             <Button type="button" size="sm" variant={ledgerFilter === "liability_planned" ? "secondary" : "outline"} className="h-8" onClick={() => setLedgerFilter("liability_planned")}>
               Tartozás / Tervezett
             </Button>
@@ -7363,11 +7582,11 @@ export function FinanceDashboard({
         <CardContent>
           <div className="grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
-              label="Beszerzés (nettó)"
+              label={tx("Beszerzés (nettó)")}
               value={formatMoney(Math.round(resaleDeals.kpi.purchaseNetSum), CURRENCY)}
             />
             <StatCard
-              label="Bevétel (nettó)"
+              label={tx("Bevétel (nettó)")}
               value={formatMoney(Math.round(resaleDeals.kpi.revenueSum), CURRENCY)}
             />
             <StatCard
@@ -7375,7 +7594,7 @@ export function FinanceDashboard({
               value={`${formatMoney(Math.round(resaleDeals.kpi.marginSum), CURRENCY)} · ${resaleDeals.kpi.avgPct.toFixed(1)}%`}
             />
             <StatCard
-              label="Lezárt ügyletek"
+              label={tx("Lezárt ügyletek")}
               value={`${resaleDeals.kpi.closedCount} / ${resaleDeals.kpi.totalCount}`}
             />
           </div>
@@ -7470,17 +7689,17 @@ export function FinanceDashboard({
       <CardHeader className="relative z-10 shrink-0 pb-1.5">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           <LeanTerm
-            title="CHECK — összegzés"
+            title={tx("CHECK — összegzés")}
             exact={pdcaPhaseExact("CHECK", surface, demoSegmentId)}
-          >
-            CHECK — összegzés
-          </LeanTerm>
+          >{
+            tx("CHECK — összegzés")
+          }</LeanTerm>
         </CardTitle>
       </CardHeader>
       <CardContent className="card-scroll-body relative z-10 grid gap-2.5 text-sm text-slate-300">
         {resiliencePanel("CHECK")}
         {educationPanel("CHECK")}
-        {industryPanel("CHECK")}
+        {edgeSection("CHECK")}
         {isStrategySegment(demoSegmentId) ? whatIfPanel : null}
         {strategyPanel("CHECK")}
         {surface.showFinanceModules ? (
@@ -7523,11 +7742,11 @@ export function FinanceDashboard({
                     <div className="mt-2 rounded-md border border-slate-700/60 bg-slate-900/30 p-2">
                       <LeanTerm
                         className="text-[11px] text-slate-300"
-                        title="MUDA-ráta"
+                        title={tx("MUDA-ráta")}
                         exact="veszteség-arány — mennyivel kevesebb vagy több a pazarlás ebben a hónapban, mint az előző három hónap átlaga."
-                      >
-                        MUDA-ráta
-                      </LeanTerm>
+                      >{
+                        tx("MUDA-ráta")
+                      }</LeanTerm>
                       <div className="mt-0.5 font-mono text-slate-100">
                         {rate.reductionHuf >= 0 ? (
                           <span className="text-emerald-200">+{formatMoney(Math.round(rate.reductionHuf), CURRENCY)}</span>
@@ -7607,6 +7826,9 @@ export function FinanceDashboard({
           </div>
         ) : null}
 
+        {labs.shock ? (
+        <LabSection id="labs-shock">
+        <ModuleSubsetSection id="shock">
         <CollapsibleCard
           id="valosag-sokk"
           defaultOpen
@@ -7614,11 +7836,11 @@ export function FinanceDashboard({
           title={
             <LeanTerm
               className="text-xs uppercase tracking-wide text-emerald-200/90"
-              title="Pénzügyi Valóság-Sokk"
+              title={tx("Pénzügyi Valóság-Sokk")}
               exact="A kiadások szükséglet / vágy / befektetés aránya."
-            >
-              Pénzügyi Valóság-Sokk
-            </LeanTerm>
+            >{
+              tx("Pénzügyi Valóság-Sokk")
+            }</LeanTerm>
           }
           headerRight={
             <span
@@ -7636,11 +7858,11 @@ export function FinanceDashboard({
             >
               <LeanTerm
                 className="text-[11px] text-slate-300"
-                title="Szükséglet"
+                title={tx("Szükséglet")}
                 exact="Kötelező, el nem hagyható kiadás."
-              >
-                Szükséglet
-              </LeanTerm>
+              >{
+                tx("Szükséglet")
+              }</LeanTerm>
               <div className="mt-0.5 font-mono text-slate-100">
                 {formatMoney(Math.round(mirrorSummary.needs), CURRENCY)} · {mirrorSummary.needsPct.toFixed(0)}%
               </div>
@@ -7666,11 +7888,11 @@ export function FinanceDashboard({
             >
               <LeanTerm
                 className="text-[11px] text-slate-300"
-                title="Befektetés"
+                title={tx("Befektetés")}
                 exact="Megtakarítás, tőke, jövőbe tett pénz."
-              >
-                Befektetés
-              </LeanTerm>
+              >{
+                tx("Befektetés")
+              }</LeanTerm>
               <div className="mt-0.5 font-mono text-slate-100">
                 {formatMoney(Math.round(mirrorSummary.invest), CURRENCY)} · {mirrorSummary.investPct.toFixed(0)}%
               </div>
@@ -7698,11 +7920,11 @@ export function FinanceDashboard({
               aria-expanded={mudaOpen}
             >
               <LeanTerm
-                title="Észlelt MUDA"
+                title={tx("Észlelt MUDA")}
                 exact="veszteség — pazarlás a tételeken (impulzus, díj, selejt, dupla előfizetés)."
-              >
-                Észlelt MUDA
-              </LeanTerm>
+              >{
+                tx("Észlelt MUDA")
+              }</LeanTerm>
               <span className="font-mono text-rose-200">{formatMoney(Math.round(mirrorSummary.muda), CURRENCY)}</span>
             </button>
             {mudaOpen ? (
@@ -7787,12 +8009,12 @@ export function FinanceDashboard({
             title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-emerald-200/90"
-                title="Adósság-helyreállítás"
+                title={tx("Adósság-helyreállítás")}
                 exact="melyik tartozást érdemes először csökkenteni, ha van extra pénz."
                 summary="Két sorrend ugyanazokra a tartozásokra. lavina: a legmagasabb kamat előre. hólabda: a legkisebb tőke előre."
-              >
-                Adósság-helyreállítás
-              </LeanTerm>
+              >{
+                tx("Adósság-helyreállítás")
+              }</LeanTerm>
             }
             headerRight={
               <span className="font-mono text-xs text-slate-300">
@@ -7850,19 +8072,22 @@ export function FinanceDashboard({
             </div>
           </CollapsibleCard>
         ) : null}
+        </ModuleSubsetSection>
+        </LabSection>
+        ) : null}
 
-        {bridge ? (
+        {labs.advise && bridge ? (
           <CollapsibleCard
             id="magan-uzleti-hid"
             className="rounded-lg border border-slate-700/60 bg-slate-900/30 p-3"
             title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-slate-200"
-                title="Magán ↔ üzleti híd"
+                title={tx("Magán ↔ üzleti híd")}
                 exact="pénzáramlás-híd — a magán kassza és a cég között: mennyi vihető át, mire kell, mennyi a javasolt áthidalás."
-              >
-                Magán ↔ üzleti híd
-              </LeanTerm>
+              >{
+                tx("Magán ↔ üzleti híd")
+              }</LeanTerm>
             }
             headerRight={
               <span className="font-mono text-xs text-slate-300">
@@ -7874,11 +8099,11 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Üzleti mozgósítható"
+                  title={tx("Üzleti mozgósítható")}
                   exact="Üzleti mozgósítható — a céges kasszából amennyi a kötelezettségek után még átvihető."
-                >
-                  Üzleti mozgósítható
-                </LeanTerm>
+                >{
+                  tx("Üzleti mozgósítható")
+                }</LeanTerm>
                 <div className="mt-0.5 font-mono text-slate-100">
                   {formatMoney(Math.round(bridge.totalBusinessSurplus), CURRENCY)}
                 </div>
@@ -7886,7 +8111,7 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Magán igény"
+                  title={tx("Magán igény")}
                   exact="Magán igény — amennyi a magán oldalon hiányzik (deficit vagy tartozás)."
                 >
                   Magán igény (deficit / adósság)
@@ -7898,11 +8123,11 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Javasolt áthidalás"
+                  title={tx("Javasolt áthidalás")}
                   exact="Javasolt áthidalás — ennyit érdemes a cég és a magán között vinni. Javaslat, nem utalás."
-                >
-                  Javasolt áthidalás
-                </LeanTerm>
+                >{
+                  tx("Javasolt áthidalás")
+                }</LeanTerm>
                 <div className="mt-0.5 font-mono text-emerald-200">
                   {formatMoney(Math.round(bridge.suggestedTransfer), CURRENCY)}
                 </div>
@@ -7937,7 +8162,7 @@ export function FinanceDashboard({
             title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-slate-200"
-                title="Többéves tükör"
+                title={tx("Többéves tükör")}
                 exact="Többéves tükör — három évnyi minta: mennyi a pazarlás évesítve, és meddig tart a kassza, ha ezt elhagyod."
               >
                 Többéves tükör (3 év)
@@ -7953,11 +8178,11 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Évesített MUDA"
+                  title={tx("Évesített MUDA")}
                   exact="veszteség — ha a mostani pazarlás így marad, ennyi forint megy el egy év alatt."
-                >
-                  Évesített MUDA
-                </LeanTerm>
+                >{
+                  tx("Évesített MUDA")
+                }</LeanTerm>
                 <div className="mt-0.5 font-mono text-rose-200">
                   {formatMoney(Math.round(multiYear.annualizedMuda), CURRENCY)}/év
                 </div>
@@ -7965,11 +8190,11 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Évesített WANT"
+                  title={tx("Évesített WANT")}
                   exact="vágy — ha a mostani extra (nem kötelező) költés így marad, ennyi egy év alatt."
-                >
-                  Évesített WANT
-                </LeanTerm>
+                >{
+                  tx("Évesített WANT")
+                }</LeanTerm>
                 <div className="mt-0.5 font-mono text-amber-200">
                   {formatMoney(Math.round(multiYear.annualizedWants), CURRENCY)}/év
                 </div>
@@ -7977,11 +8202,11 @@ export function FinanceDashboard({
               <div className="rounded-md border border-slate-800/60 bg-slate-950/20 p-2">
                 <LeanTerm
                   className="text-[11px] text-slate-300"
-                  title="Céltartalék (most → lean)"
+                  title={tx("Céltartalék (most → lean)")}
                   exact="hány hónapig tart a kassza a mostani ütemmel, és mennyivel tovább, ha a pazarlást elhagyod."
-                >
-                  Céltartalék (most → lean)
-                </LeanTerm>
+                >{
+                  tx("Céltartalék (most → lean)")
+                }</LeanTerm>
                 <div className="mt-0.5 font-mono text-slate-100">
                   {multiYear.runwayMonthsCurrent == null ? "—" : `${multiYear.runwayMonthsCurrent.toFixed(1)} hó`} →{" "}
                   {multiYear.runwayMonthsLean == null ? "—" : `${multiYear.runwayMonthsLean.toFixed(1)} hó`}
@@ -8016,12 +8241,12 @@ export function FinanceDashboard({
         {resourceEfficiency ? (
           <div className="flex items-center justify-between">
             <LeanTerm
-              title="EV+EFO arány"
+              title={tx("EV+EFO arány")}
               exact="alvállalkozói és alkalmi díjak az összes kiadáshoz képest."
               summary="EV: alvállalkozó / egyéni vállalkozó díja. EFO: alkalmi foglalkoztatás napidíja. Az arány ezeknek a költsége az összes kiadáshoz képest."
-            >
-              EV+EFO arány
-            </LeanTerm>
+            >{
+              tx("EV+EFO arány")
+            }</LeanTerm>
             <span className="font-mono text-slate-200">
               {resourceEfficiency.totalExpenseGross > 0
                 ? `${Math.round(
@@ -8036,15 +8261,16 @@ export function FinanceDashboard({
         <div className="viz-split grid items-start gap-3">
           <Card className="w-full">
             <CardContent className="grid items-start gap-3 pt-2.5">
+              {labs.shock ? (
               <ChartChrome
                 blockId="eredmeny"
                 title={
                   <LeanTerm
-                    title="Eredménylevezetés"
+                    title={tx("Eredménylevezetés")}
                     exact="Bevétel, levonások és a maradó eredmény."
-                  >
-                    Eredménylevezetés
-                  </LeanTerm>
+                  >{
+                    tx("Eredménylevezetés")
+                  }</LeanTerm>
                 }
                 span={vizSpan}
                 onSpan={onVizSpan}
@@ -8060,10 +8286,12 @@ export function FinanceDashboard({
               >
                 <WaterfallChart steps={leanBuilt.waterfall} />
               </ChartChrome>
+              ) : null}
+              {labs.baseline ? (
               <div className="viz-split">
                 <ChartChrome
                   blockId="havi-sorozat"
-                  title="Havi bevétel, kiadás és megtakarítás"
+                  title={tx("Havi bevétel, kiadás és megtakarítás")}
                   span={vizSpan}
                   onSpan={onVizSpan}
                   onPrev={onVizPrev}
@@ -8073,7 +8301,7 @@ export function FinanceDashboard({
                     <>
                       <ChartLegendSwatch color={SERIES_COLORS.income} label="Bevétel" line />
                       <ChartLegendSwatch color={SERIES_COLORS.expense} label="Kiadás" line />
-                      <ChartLegendSwatch color={SERIES_COLORS.saving} label="Megtakarítás" line />
+                      <ChartLegendSwatch color={SERIES_COLORS.saving} label={tx("Megtakarítás")} line />
                     </>
                   }
                 >
@@ -8088,6 +8316,7 @@ export function FinanceDashboard({
                   />
                 </ChartChrome>
               </div>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -8121,6 +8350,7 @@ export function FinanceDashboard({
                   <FlowSankey sources={leanBuilt.sources} sinks={leanBuilt.sinks} links={leanBuilt.links} />
                 </ChartChrome>
               )}
+              {labs.shock ? (
               <div className="viz-split">
                 <ChartChrome
                   blockId="hoterkep"
@@ -8145,6 +8375,7 @@ export function FinanceDashboard({
                   />
                 </ChartChrome>
               </div>
+              ) : null}
             </CardContent>
           </Card>
         </div>
@@ -8169,7 +8400,7 @@ export function FinanceDashboard({
       <CardContent className="card-scroll-body relative z-10 grid gap-3">
         {resiliencePanel("ACT")}
         {educationPanel("ACT")}
-        {industryPanel("ACT")}
+        {edgeSection("ACT")}
         {strategyPanel("ACT")}
         {surface.showFinanceModules ? (
         <>
@@ -8180,7 +8411,7 @@ export function FinanceDashboard({
             title={
               <LeanTerm
                 className="text-xs uppercase tracking-wide text-rose-200/90"
-                title="Törlesztési fókusz"
+                title={tx("Törlesztési fókusz")}
                 exact="ugyanaz a két sorrend: kamat előre vagy kis tőke előre."
               >
                 Javasolt havi törlesztési fókusz
@@ -8239,17 +8470,20 @@ export function FinanceDashboard({
           </CollapsibleCard>
         ) : null}
 
+        {labs.advise ? (
+        <LabSection id="labs-advise">
+        <ModuleSubsetSection id="advise">
         <CollapsibleCard
           id="act-elagazasok"
           defaultOpen
           title={
             <LeanTerm
               className="text-xs font-medium text-slate-200"
-              title="Döntési elágazások"
+              title={tx("Döntési elágazások")}
               exact="Döntési elágazások — három beavatkozás: árazás, extra-költés keret, projekt átütemezés."
-            >
-              Döntési elágazások
-            </LeanTerm>
+            >{
+              tx("Döntési elágazások")
+            }</LeanTerm>
           }
         >
           <div className="grid gap-2 sm:grid-cols-3">
@@ -8269,7 +8503,7 @@ export function FinanceDashboard({
                     )} hiány). Emeld az árrést / óradíjat vagy csökkentsd a fix burn-t.`,
                   );
                 } else {
-                  toast.success("ACT: Árazás / margin döntések az Üzletek nézetben.");
+                  toast.success(tx("ACT: Árazás / margin döntések az Üzletek nézetben."));
                 }
               }}
             >
@@ -8282,7 +8516,7 @@ export function FinanceDashboard({
               data-exact="Havi vágy-limit rögzítése, hogy az extra költés ne nőjön tovább."
               onClick={() => {
                 setActiveSubTab("ledger");
-                if (activeWorkspace === "__all") return toast.error("Válassz egy workspace-t a zároláshoz.");
+                if (activeWorkspace === "__all") return toast.error(tx("Válassz egy workspace-t a zároláshoz."));
                 const suggested = Math.max(0, Math.round(wantsMonthlyAvg90 * 0.7));
                 const limit = suggested > 0 ? suggested : Math.max(0, Math.round(wantsMonthlyAvg90));
                 updateWorkspaceMeta(activeWorkspace, { wants_budget_monthly_huf: limit } as any, "WANT budget zárolás");
@@ -8305,7 +8539,7 @@ export function FinanceDashboard({
                   return days < 90;
                 });
                 if (risky) {
-                  toast.success("ACT: Projekt átütemezés javasolt — a Cash‑Flow híd szerint az üzleti puffer 90 nap alá esne.");
+                  toast.success(tx("ACT: Projekt átütemezés javasolt — a Cash‑Flow híd szerint az üzleti puffer 90 nap alá esne."));
                 }
                 startNewPlanningCycle();
               }}
@@ -8314,16 +8548,20 @@ export function FinanceDashboard({
             </Button>
           </div>
         </CollapsibleCard>
+        </ModuleSubsetSection>
+        </LabSection>
+        ) : null}
         </>
         ) : null}
 
-        {surface.showLean || surface.showFinanceModules ? (
+        {labs.advise && (surface.showLean || surface.showFinanceModules) ? (
         <ActRecommendations
           recommendations={leanRecommendations}
           onExecute={executeLeanRecommendation}
         />
         ) : null}
 
+        {labs.advise ? (
         <LeanConsultantPanel
           transactions={allTxns}
           workspaces={workspaceMetas as any}
@@ -8332,9 +8570,9 @@ export function FinanceDashboard({
           onApplyAdvice={(advice, plan) => {
             markWsPdca("act");
             if (plan?.id === "tag_manual_auto") {
-              toast.success("Lean: Jelöltem a kézi vs banki forrást a listákban (finom, nem tolakodó).");
+              toast.success(tx("Lean: Jelöltem a kézi vs banki forrást a listákban (finom, nem tolakodó)."));
             } else if (plan?.id === "prefer_import") {
-              toast.success("Lean: Import-first mód — a kézi rögzítést innentől inkább finomhangolásra használd.");
+              toast.success(tx("Lean: Import-first mód — a kézi rögzítést innentől inkább finomhangolásra használd."));
             } else if (plan?.id === "other") {
               toast.success(`Lean: Elfogadva — ${advice.title}`);
             } else {
@@ -8345,15 +8583,16 @@ export function FinanceDashboard({
             else if (advice.target === "buckets" || advice.target === "plan") setActiveSubTab("inventory");
           }}
         />
+        ) : null}
 
         <div className="grid gap-2 sm:grid-cols-3">
-          <Button type="button" variant="outline" onClick={promotePlanToDo} title="Projekt élesítése (PLAN→DO)">
+          <Button type="button" variant="outline" onClick={promotePlanToDo} title={tx("Projekt élesítése (PLAN→DO)")}>
             🚀 {t("dash.goLive")}
           </Button>
-          <Button type="button" variant="outline" onClick={newImprovementGoal} title="Új fejlesztési cél">
+          <Button type="button" variant="outline" onClick={newImprovementGoal} title={tx("Új fejlesztési cél")}>
             🎯 {t("dash.newGoal")}
           </Button>
-          <Button type="button" variant="outline" onClick={quickSave} title="Gyors mentés (encrypted JSON)">
+          <Button type="button" variant="outline" onClick={quickSave} title={tx("Gyors mentés (encrypted JSON)")}>
             💾 {t("chrome.quickSave")}
           </Button>
         </div>
@@ -8409,7 +8648,7 @@ export function FinanceDashboard({
               colorFor={workspaceColorCls}
               onOpenCreate={() => {
                 if (denyMutateIfViewer()) {
-                  toast.warning("Guest módban nem hozható létre Slot.");
+                  toast.warning(tx("Guest módban nem hozható létre Slot."));
                   return;
                 }
                 const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -8431,7 +8670,6 @@ export function FinanceDashboard({
       <AccessModeBanner />
 
       <InstallmentArrearsBar />
-      {settings.showKpiQuickBar ? <KpiQuickBar /> : null}
 
       <ExportQrDialog open={exportOpen} onOpenChange={setExportOpen} />
 
@@ -8529,7 +8767,7 @@ export function FinanceDashboard({
               <Label>Cél kategória</Label>
               <Select value={autoRuleCategory} onValueChange={setAutoRuleCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Válassz kategóriát" />
+                  <SelectValue placeholder={tx("Válassz kategóriát")} />
                 </SelectTrigger>
                 <SelectContent>
                   {[
@@ -8557,9 +8795,9 @@ export function FinanceDashboard({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setAutoRuleOpen(false)}>
-              Mégse
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => setAutoRuleOpen(false)}>{
+              tx("Mégse")
+            }</Button>
             <Button
               type="button"
               disabled={autoRuleBusy || !autoRuleKeyword.trim() || !autoRuleCategory.trim()}
@@ -8577,7 +8815,7 @@ export function FinanceDashboard({
                     is_active: true,
                   } as any);
                   await qc.invalidateQueries({ queryKey: ["category_rules"] });
-                  toast.success("Szabály létrehozva.");
+                  toast.success(tx("Szabály létrehozva."));
                   setAutoRuleOpen(false);
                 } catch (e: any) {
                   toast.error(e?.message || "Szabály mentése sikertelen.");
@@ -8585,9 +8823,9 @@ export function FinanceDashboard({
                   setAutoRuleBusy(false);
                 }
               }}
-            >
-              Mentés
-            </Button>
+            >{
+              tx("Mentés")
+            }</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -8602,9 +8840,9 @@ export function FinanceDashboard({
             Biztosan törölni szeretnéd a kijelölt <span className="font-mono">{selectedCount}</span> db tételt?
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setBulkDeleteOpen(false)}>
-              Mégse
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => setBulkDeleteOpen(false)}>{
+              tx("Mégse")
+            }</Button>
             <Button
               type="button"
               variant="destructive"
@@ -8639,7 +8877,7 @@ export function FinanceDashboard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none">Általános megtakarítás</SelectItem>
+                  <SelectItem value="__none">{tx("Általános megtakarítás")}</SelectItem>
                   {(settings.buckets ?? []).map((b) => (
                     <SelectItem key={b.id} value={b.id}>
                       {b.name}
@@ -8662,9 +8900,9 @@ export function FinanceDashboard({
             })()}
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setBulkPiggyOpen(false)}>
-              Mégse
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => setBulkPiggyOpen(false)}>{
+              tx("Mégse")
+            }</Button>
             <Button
               type="button"
               onClick={() => {
@@ -8712,9 +8950,9 @@ export function FinanceDashboard({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setBulkCopyOpen(false)}>
-              Mégse
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => setBulkCopyOpen(false)}>{
+              tx("Mégse")
+            }</Button>
             <Button
               type="button"
               disabled={!bulkProjectId.trim()}
@@ -8749,9 +8987,9 @@ export function FinanceDashboard({
           ) : (
             <>
               <div className="mb-3 grid gap-3 sm:grid-cols-4">
-                <StatCard label="Összes ráfordítás" value={formatMoney(Math.round(locationTotals.totalGross), CURRENCY)} />
+                <StatCard label={tx("Összes ráfordítás")} value={formatMoney(Math.round(locationTotals.totalGross), CURRENCY)} />
                 <StatCard label="CAPEX" value={formatMoney(Math.round(locationTotals.capexGross), CURRENCY)} />
-                <StatCard label="Karbantartás" value={formatMoney(Math.round(locationTotals.maintGross), CURRENCY)} />
+                <StatCard label={tx("Karbantartás")} value={formatMoney(Math.round(locationTotals.maintGross), CURRENCY)} />
                 <StatCard label="OPEX" value={formatMoney(Math.round(locationTotals.opexGross), CURRENCY)} />
               </div>
               <div className="overflow-x-auto whitespace-nowrap rounded-md border">
@@ -8773,7 +9011,7 @@ export function FinanceDashboard({
                           <div className="font-medium">
                             {displayTxnLabel(t)}
                           </div>
-                          <div className="text-muted-foreground">{categoryLabel(t.category)}</div>
+                          <div className="txn-category">{categoryLabel(t.category)}</div>
                         </td>
                         <td className="py-2">
                           <Badge variant="secondary" className="text-[10px]">
@@ -8795,8 +9033,8 @@ export function FinanceDashboard({
                               if (denyShowcaseWrite(isVisitorDemo)) return;
                               beginEditTxn(t);
                             }}
-                            aria-label="Szerkesztés"
-                            title="Tétel szerkesztése"
+                            aria-label={tx("Szerkesztés")}
+                            title={tx("Tétel szerkesztése")}
                           >
                             <Edit3 className="h-3.5 w-3.5" />
                           </Button>
@@ -8847,9 +9085,9 @@ export function FinanceDashboard({
                 {" · "}Projekt: <span className="text-foreground">{projectName(selectedAsset.project_id) ?? "—"}</span>
               </div>
               <div className="mb-3 grid gap-3 sm:grid-cols-4">
-                <StatCard label="Összes ráfordítás" value={formatMoney(Math.round(assetTotals.totalGross), CURRENCY)} />
+                <StatCard label={tx("Összes ráfordítás")} value={formatMoney(Math.round(assetTotals.totalGross), CURRENCY)} />
                 <StatCard label="CAPEX" value={formatMoney(Math.round(assetTotals.capexGross), CURRENCY)} />
-                <StatCard label="Karbantartás" value={formatMoney(Math.round(assetTotals.maintGross), CURRENCY)} />
+                <StatCard label={tx("Karbantartás")} value={formatMoney(Math.round(assetTotals.maintGross), CURRENCY)} />
                 <StatCard label="OPEX" value={formatMoney(Math.round(assetTotals.opexGross), CURRENCY)} />
               </div>
               <div className="overflow-x-auto whitespace-nowrap rounded-md border">
@@ -8871,7 +9109,7 @@ export function FinanceDashboard({
                           <div className="font-medium">
                             {displayTxnLabel(t)}
                           </div>
-                          <div className="text-muted-foreground">{categoryLabel(t.category)}</div>
+                          <div className="txn-category">{categoryLabel(t.category)}</div>
                         </td>
                         <td className="py-2">
                           <Badge variant="secondary" className="text-[10px]">
@@ -8893,8 +9131,8 @@ export function FinanceDashboard({
                               if (denyShowcaseWrite(isVisitorDemo)) return;
                               beginEditTxn(t);
                             }}
-                            aria-label="Szerkesztés"
-                            title="Tétel szerkesztése"
+                            aria-label={tx("Szerkesztés")}
+                            title={tx("Tétel szerkesztése")}
                           >
                             <Edit3 className="h-3.5 w-3.5" />
                           </Button>
@@ -8933,7 +9171,7 @@ export function FinanceDashboard({
               <Label>Új projekt</Label>
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 <Input
-                  placeholder="pl. Ügyfél A / Telephely 2 fejlesztés"
+                  placeholder={tx("pl. Ügyfél A / Telephely 2 fejlesztés")}
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   maxLength={60}
@@ -8952,7 +9190,7 @@ export function FinanceDashboard({
                   }}
                   disabled={!newProjectName.trim()}
                 >
-                  Hozzáad
+                  {tx("Hozzáad")}
                 </Button>
               </div>
             </div>
@@ -9011,9 +9249,9 @@ export function FinanceDashboard({
                                     setProjEditingName("");
                                   }}
                                   disabled={!projEditingName.trim()}
-                                >
-                                  Mentés
-                                </Button>
+                                >{
+                                  tx("Mentés")
+                                }</Button>
                                 <Button
                                   type="button"
                                   size="sm"
@@ -9023,9 +9261,9 @@ export function FinanceDashboard({
                                     setProjEditingId(null);
                                     setProjEditingName("");
                                   }}
-                                >
-                                  Mégse
-                                </Button>
+                                >{
+                                  tx("Mégse")
+                                }</Button>
                               </>
                             ) : (
                               <>
@@ -9089,7 +9327,7 @@ export function FinanceDashboard({
               <Label>Új eszköz</Label>
               <div className="grid grid-cols-[1fr_10rem_10rem_auto] gap-2">
                 <Input
-                  placeholder="pl. Nyomtató, Laptop, Raktári polc"
+                  placeholder={tx("pl. Nyomtató, Laptop, Raktári polc")}
                   value={newAssetName}
                   onChange={(e) => setNewAssetName(e.target.value)}
                   maxLength={60}
@@ -9115,7 +9353,7 @@ export function FinanceDashboard({
                   onValueChange={(v) => setNewAssetProjectId(v === "__none" ? "" : v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Projekt" />
+                    <SelectValue placeholder={tx("Projekt")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none">Projekt: —</SelectItem>
@@ -9148,7 +9386,7 @@ export function FinanceDashboard({
                   }}
                   disabled={!newAssetName.trim()}
                 >
-                  Hozzáad
+                  {tx("Hozzáad")}
                 </Button>
               </div>
             </div>
@@ -9223,9 +9461,9 @@ export function FinanceDashboard({
                                       setAssetEditingProjectId("");
                                     }}
                                     disabled={!assetEditingName.trim()}
-                                  >
-                                    Mentés
-                                  </Button>
+                                  >{
+                                    tx("Mentés")
+                                  }</Button>
                                   <Button
                                     type="button"
                                     size="sm"
@@ -9237,9 +9475,9 @@ export function FinanceDashboard({
                                       setAssetEditingLocationId("");
                                       setAssetEditingProjectId("");
                                     }}
-                                  >
-                                    Mégse
-                                  </Button>
+                                  >{
+                                    tx("Mégse")
+                                  }</Button>
                                 </>
                               ) : (
                                 <>
@@ -9306,7 +9544,7 @@ export function FinanceDashboard({
                                 }
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Projekt" />
+                                  <SelectValue placeholder={tx("Projekt")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="__none">Projekt: —</SelectItem>
@@ -9347,7 +9585,7 @@ export function FinanceDashboard({
               <Label>Új hely hozzáadása</Label>
               <div className="grid grid-cols-[1fr_10rem_auto] gap-2">
                 <Input
-                  placeholder="pl. Székhely, Telephely 1, Raktár"
+                  placeholder={tx("pl. Székhely, Telephely 1, Raktár")}
                   value={newLocName}
                   onChange={(e) => setNewLocName(e.target.value)}
                   maxLength={60}
@@ -9381,7 +9619,7 @@ export function FinanceDashboard({
                   }}
                   disabled={!newLocName.trim()}
                 >
-                  Hozzáad
+                  {tx("Hozzáad")}
                 </Button>
               </div>
             </div>
@@ -9451,9 +9689,9 @@ export function FinanceDashboard({
                                     setLocEditingName("");
                                   }}
                                   disabled={!locEditingName.trim()}
-                                >
-                                  Mentés
-                                </Button>
+                                >{
+                                  tx("Mentés")
+                                }</Button>
                                 <Button
                                   type="button"
                                   size="sm"
@@ -9463,9 +9701,9 @@ export function FinanceDashboard({
                                     setLocEditingId(null);
                                     setLocEditingName("");
                                   }}
-                                >
-                                  Mégse
-                                </Button>
+                                >{
+                                  tx("Mégse")
+                                }</Button>
                               </>
                             ) : (
                               <>
@@ -9698,7 +9936,19 @@ export function FinanceDashboard({
 
 
       <main className="app-shell-main">
-        <div className="workspace-canvas">
+        {labs.szumma && activeWs === "szumma" ? (
+          <MultiCaseDesk
+            profileId={profileId}
+            profileName={profileName}
+            workspaces={workspaceMetas}
+            onOpenSlot={(id) => applyWorkspaceSwitch(id, { setActiveWs, setMiddleWs })}
+            onLeave={() => {
+              setMiddleWs(lastNonSzummaRef.current.middleWs);
+              setActiveWs(lastNonSzummaRef.current.activeWs);
+            }}
+          />
+        ) : (
+        <div className={cn("workspace-canvas", szummaLeaving && "szumma-canvas-leave")}>
           <div
             className={cn(
               "w-full space-y-2 px-2 py-1.5 sm:px-3 md:px-4",
@@ -9821,7 +10071,7 @@ export function FinanceDashboard({
                           updateWorkspaceMeta(activeWorkspace, { scenario: v }, "P-R-O forgatókönyv")
                         }
                       >
-                        <SelectTrigger className="h-9 w-[160px]" title="P-R-O forgatókönyv">
+                        <SelectTrigger className="h-9 w-[160px]" title={tx("P-R-O forgatókönyv")}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -9838,11 +10088,11 @@ export function FinanceDashboard({
                           if (denyShowcaseWrite(isVisitorDemo)) return;
                           setQuickAddType("expense");
                         }}
-                        title="+ Új tétel"
+                        title={tx("+ Új tétel")}
                       >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Új tétel
-                      </Button>
+                        <Plus className="mr-2 h-4 w-4" />{
+                        tx("Új tétel")
+                      }</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -9901,7 +10151,7 @@ export function FinanceDashboard({
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Szumma — összesítő
                   </CardTitle>
-                  <Badge variant="secondary" className="text-[10px]" title="Belső átvezetések kiejtve a grafikonokból">
+                  <Badge variant="secondary" className="text-[10px]" title={t("dash.eliminationTitle")}>
                     elimination
                   </Badge>
                 </CardHeader>
@@ -9910,13 +10160,13 @@ export function FinanceDashboard({
                     <Card className="border-l-4 border-l-[color:var(--color-chart-2)]">
                       <CardContent className="p-4">
                         <p className="text-xs uppercase tracking-wide text-foreground/80">
-                          Összesített likviditás (bruttó készpénzpozíció)
+                          {t("dash.liquidityGross")}
                         </p>
                         <p className="mt-1 text-xl font-bold tabular-nums text-white">
                           {formatMoney(Math.round(sumMetrics.liquidity), CURRENCY)}
                         </p>
                         <p className="mt-1 text-[11px] text-muted-foreground">
-                          Magán + Céges (bruttó) − Zárolt ÁFA − Perselyek
+                          {t("dash.liquidityHint")}
                         </p>
                       </CardContent>
                     </Card>
@@ -9924,13 +10174,13 @@ export function FinanceDashboard({
                     <Card className="border-l-4 border-l-[color:var(--color-chart-1)]">
                       <CardContent className="p-4">
                         <p className="text-xs uppercase tracking-wide text-foreground/80">
-                          Céges tiszta eredmény (nettó)
+                          {t("dash.businessNetResult")}
                         </p>
                         <p className="mt-1 text-xl font-bold tabular-nums text-white">
                           {formatMoney(Math.round(sumMetrics.businessResultNet), CURRENCY)}
                         </p>
                         <p className="mt-1 text-[11px] text-muted-foreground">
-                          Üzleti bevétel nettó − üzleti kiadás nettó (tagi tételek kizárva)
+                          {t("dash.businessNetHint")}
                         </p>
                       </CardContent>
                     </Card>
@@ -9938,13 +10188,13 @@ export function FinanceDashboard({
                     <Card className="border-l-4 border-l-[color:var(--color-chart-6)]">
                       <CardContent className="p-4">
                         <p className="text-xs uppercase tracking-wide text-foreground/80">
-                          Magán kassza (bruttó)
+                          {t("dash.personalTillGross")}
                         </p>
                         <p className="mt-1 text-xl font-semibold tabular-nums text-[color:var(--color-chart-6)]">
                           {formatMoney(Math.round(sumMetrics.personalBankGross), CURRENCY)}
                         </p>
                         <p className="mt-1 text-[11px] text-muted-foreground">
-                          ÁFA bontás nélkül (csak bruttó)
+                          {t("dash.personalTillHint")}
                         </p>
                       </CardContent>
                     </Card>
@@ -9990,11 +10240,11 @@ export function FinanceDashboard({
                         size="sm"
                         className="h-9"
                         onClick={() => setLeanView((v) => !v)}
-                        title="☯️ Lean nézet be/ki"
+                        title={tx("☯️ Lean nézet be/ki")}
                       >
                         ☯️ Lean Nézet: {leanView ? "BE" : "KI"}
                       </Button>
-                      <Button type="button" variant="outline" size="sm" className="h-9" title="Nézet: táblázat" disabled>
+                      <Button type="button" variant="outline" size="sm" className="h-9" title={tx("Nézet: táblázat")} disabled>
                         táblázat
                       </Button>
                       <Button
@@ -10008,7 +10258,7 @@ export function FinanceDashboard({
                             search: { profile: profileId, workspace: activeWorkspace },
                           })
                         }
-                        title="Vezetői riport (nyomtatás/PDF)"
+                        title={tx("Vezetői riport (nyomtatás/PDF)")}
                       >
                         📊 Riport
                       </Button>
@@ -10039,7 +10289,7 @@ export function FinanceDashboard({
                             variant="secondary"
                             className="h-9 gap-2"
                             onClick={() => void requestWatchedFolderSync()}
-                            title="Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából"
+                            title={tx("Magán: szinkron a kiválasztott mappa legfrissebb XML kivonatából")}
                           >
                             <Folder className="h-4 w-4" />
                             Magán szinkron (legfrissebb)
@@ -10049,7 +10299,7 @@ export function FinanceDashboard({
                             variant="outline"
                             className="h-9 gap-2"
                             onClick={() => bankXmlFileRef.current?.click()}
-                            title="Magán: XML kivonat kiválasztása"
+                            title={tx("Magán: XML kivonat kiválasztása")}
                           >
                             <Upload className="h-4 w-4" />
                             XML (SpreadsheetML)
@@ -10141,8 +10391,8 @@ export function FinanceDashboard({
                             <div className="mb-4 grid gap-4 grid-cols-1 lg:grid-cols-2">
                               <StatCard
                                 label={
-                                  <span className="inline-flex items-center gap-2">
-                                    Banki bruttó egyenleg <HelpIcon kbId="cashflow-savings" />
+                                  <span className="inline-flex items-center gap-2">{
+                                    tx("Banki bruttó egyenleg") }<HelpIcon kbId="cashflow-savings" />
                                   </span>
                                 }
                                 value={formatMoney(Math.round(vatReserve.balance), CURRENCY)}
@@ -10298,7 +10548,7 @@ export function FinanceDashboard({
                                       ? "bg-amber-950/40 text-amber-200 border border-amber-500/20"
                                       : "bg-rose-950/40 text-rose-200 border border-rose-500/20",
                                 )}
-                                title="Nettó hatékonyság"
+                                title={tx("Nettó hatékonyság")}
                               >
                                 {Math.round(leanInsights.eff * 100)}%
                               </Badge>
@@ -10306,9 +10556,9 @@ export function FinanceDashboard({
 
                             <div className="mt-3 grid gap-2">
                               <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-300" data-exact="hány fillér marad 1 Ft beáramlásból.">
-                                  Nettó hatékonyság
-                                </span>
+                                <span className="text-slate-300" data-exact="hány fillér marad 1 Ft beáramlásból.">{
+                                  tx("Nettó hatékonyság")
+                                }</span>
                                 <span className="font-mono text-slate-200">
                                   1 Ft → {Math.round(leanInsights.eff * 100)} fillér
                                 </span>
@@ -10515,7 +10765,7 @@ export function FinanceDashboard({
                           <>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="Hány hónapig bírja a készpénz a rosszabb pályán."
+                              title={tx("Hány hónapig bírja a készpénz a rosszabb pályán.")}
                             >
                               <div className="text-[11px] text-muted-foreground">Tartalékidő (rossz ág)</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
@@ -10524,7 +10774,7 @@ export function FinanceDashboard({
                             </div>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="Olcsóbb hitel kilépési ára — nem megtérülés."
+                              title={tx("Olcsóbb hitel kilépési ára — nem megtérülés.")}
                             >
                               <div className="text-[11px] text-muted-foreground">Kilépési ár</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
@@ -10533,7 +10783,7 @@ export function FinanceDashboard({
                             </div>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="Ennyi időd van dönteni."
+                              title={tx("Ennyi időd van dönteni.")}
                             >
                               <div className="text-[11px] text-muted-foreground">Döntési ablak</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
@@ -10545,7 +10795,7 @@ export function FinanceDashboard({
                           <>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát."
+                              title={tx("Az első hónap, amikor a választott pálya halmozott eredménye eléri a nullát.")}
                             >
                               <div className="text-[11px] text-muted-foreground">Fedezeti pont</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
@@ -10554,16 +10804,16 @@ export function FinanceDashboard({
                             </div>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="ROI: (bevétel − költség) / költség a 12 hónapon. Nem diszkontált."
+                              title={tx("ROI: (bevétel − költség) / költség a 12 hónapon. Nem diszkontált.")}
                             >
-                              <div className="text-[11px] text-muted-foreground">Megtérülés (ROI)</div>
+                              <div className="text-[11px] text-muted-foreground">{tx("Megtérülés (ROI)")}</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
                                 {whatIf.roi == null ? "—" : `${whatIf.roi.toFixed(0)}%`}
                               </div>
                             </div>
                             <div
                               className="cursor-help rounded-md border border-slate-700/60 bg-slate-950/30 p-4"
-                              title="Kötött havi kiadás osztva az átlagos havi kiadással."
+                              title={tx("Kötött havi kiadás osztva az átlagos havi kiadással.")}
                             >
                               <div className="text-[11px] text-muted-foreground">Fix költség arány</div>
                               <div className="mt-1 font-mono text-sm text-slate-100">
@@ -10668,9 +10918,9 @@ export function FinanceDashboard({
                         <DialogTitle>ÁFA felülvizsgálat (jelölt tételek)</DialogTitle>
                       </DialogHeader>
 
-                      <div className="rounded-md border bg-background/40 p-3 text-xs text-muted-foreground">
-                        Lean cél: csak a “gyanús” tételeket kelljen átnézni. A HU tételeket az import már bruttóból nettóra bontotta.
-                      </div>
+                      <div className="rounded-md border bg-background/40 p-3 text-xs text-muted-foreground">{
+                        tx("Lean cél: csak a “gyanús” tételeket kelljen átnézni. A HU tételeket az import már bruttóból nettóra bontotta.")
+                      }</div>
 
                       <div className="overflow-x-auto whitespace-nowrap">
                         <table className="w-full text-xs">
@@ -10682,7 +10932,7 @@ export function FinanceDashboard({
                               <th className="py-2 text-right font-medium">Nettó</th>
                               <th className="py-2 text-right font-medium">Bruttó</th>
                               <th className="py-2 text-left font-medium">Javaslat</th>
-                              <th className="py-2 text-left font-medium">Művelet</th>
+                              <th className="py-2 text-left font-medium">{tx("Művelet")}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -10799,9 +11049,9 @@ export function FinanceDashboard({
                               if (denyShowcaseWrite(isVisitorDemo)) return;
                               beginEditTxn(t);
                             }}
-                                      >
-                                        Szerkesztés
-                                      </Button>
+                                      >{
+                                        tx("Szerkesztés")
+                                      }</Button>
                                     </div>
                                   </td>
                                 </tr>
@@ -10832,7 +11082,7 @@ export function FinanceDashboard({
                           <th className="px-2 py-1.5 text-left font-medium">Hónap</th>
                           <th className="px-2 py-1.5 text-right font-medium">Bevétel</th>
                           <th className="px-2 py-1.5 text-right font-medium">Kiadás</th>
-                          <th className="px-2 py-1.5 text-right font-medium">Megtakarítás</th>
+                          <th className="px-2 py-1.5 text-right font-medium">{tx("Megtakarítás")}</th>
                           <th className="px-2 py-1.5 text-right font-medium">Változás</th>
                         </tr>
                       </thead>
@@ -10871,9 +11121,9 @@ export function FinanceDashboard({
                   <div className="mt-6 rounded-lg border bg-muted/20 p-4">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-medium">Tervezett kiadások</div>
+                        <div className="text-sm font-medium">{t("dash.planned")}</div>
                         <div className="text-xs text-muted-foreground">
-                          Következő 60 nap — banki pénzmozgások (bruttó), egy devizanemre (HUF) átszámolva.
+                          {t("dash.plannedHint")}
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -10886,7 +11136,7 @@ export function FinanceDashboard({
                             onClick={() => setRecOpen(true)}
                           >
                             <Plus className="mr-2 h-4 w-4" />
-                            Új FIX
+                            {t("dash.newFix")}
                           </Button>
                         )}
                         {plannedTab === "oneoff" && (
@@ -10898,7 +11148,7 @@ export function FinanceDashboard({
                             onClick={() => setOneOffOpen(true)}
                           >
                             <Plus className="mr-2 h-4 w-4" />
-                            Új eseti
+                            {t("dash.newOneOff")}
                           </Button>
                         )}
                         {plannedTab === "usage" && (
@@ -10910,7 +11160,7 @@ export function FinanceDashboard({
                             onClick={() => setUsageTplOpen(true)}
                           >
                             <Plus className="mr-2 h-4 w-4" />
-                            Új sablon
+                            {t("dash.newTemplate")}
                           </Button>
                         )}
                       </div>
@@ -10918,9 +11168,9 @@ export function FinanceDashboard({
 
                     <Tabs value={plannedTab} onValueChange={(v) => setPlannedTab(v as typeof plannedTab)}>
                       <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="fixed">FIX költségek</TabsTrigger>
-                        <TabsTrigger value="oneoff">Eseti / tervezett</TabsTrigger>
-                        <TabsTrigger value="usage">Használat-alapú</TabsTrigger>
+                        <TabsTrigger value="fixed">{t("dash.fixedCosts")}</TabsTrigger>
+                        <TabsTrigger value="oneoff">{t("dash.oneOffPlanned")}</TabsTrigger>
+                        <TabsTrigger value="usage">{t("dash.usageBased")}</TabsTrigger>
                       </TabsList>
                     </Tabs>
 
@@ -10957,7 +11207,7 @@ export function FinanceDashboard({
                                 <div className="font-semibold tabular-nums">
                                   {formatMoney(Math.round(x.gross), CURRENCY)}
                                 </div>
-                                <div className="text-muted-foreground">bruttó</div>
+                                <div className="text-muted-foreground">{t("pricing.gross")}</div>
                               </div>
                               <Button
                                 type="button"
@@ -11020,7 +11270,7 @@ export function FinanceDashboard({
                                   <div className="font-semibold tabular-nums">
                                     {formatMoney(Math.round(split.gross), CURRENCY)}
                                   </div>
-                                  <div className="text-muted-foreground">bruttó</div>
+                                  <div className="text-muted-foreground">{t("pricing.gross")}</div>
                                 </div>
                                 <Button
                                   type="button"
@@ -11084,9 +11334,9 @@ export function FinanceDashboard({
                                       setUsageLogTemplateId(tpl.id);
                                       setUsageLogOpen(true);
                                     }}
-                                  >
-                                    Használat rögzítése
-                                  </Button>
+                                  >{
+                                    tx("Használat rögzítése")
+                                  }</Button>
                                   <Button
                                     type="button"
                                     size="sm"
@@ -11149,7 +11399,7 @@ export function FinanceDashboard({
                                     <div className="font-semibold tabular-nums">
                                       {formatMoney(Math.round(split.gross), CURRENCY)}
                                     </div>
-                                    <div className="text-muted-foreground">bruttó</div>
+                                    <div className="text-muted-foreground">{t("pricing.gross")}</div>
                                   </div>
                                   <Button
                                     type="button"
@@ -11194,7 +11444,7 @@ export function FinanceDashboard({
                               id="rec-name"
                               value={recName}
                               onChange={(e) => setRecName(e.target.value)}
-                              placeholder="pl. Internet + tárhely"
+                              placeholder={tx("pl. Internet + tárhely")}
                               autoFocus
                               maxLength={120}
                             />
@@ -11245,7 +11495,7 @@ export function FinanceDashboard({
                               />
                             </div>
                             <div className="grid gap-2">
-                              <Label>Kategória</Label>
+                              <Label>{tx("Kategória")}</Label>
                               <Select value={recCategory} onValueChange={setRecCategory}>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -11327,15 +11577,15 @@ export function FinanceDashboard({
                         </div>
 
                         <DialogFooter>
-                          <Button variant="ghost" onClick={() => setRecOpen(false)}>
-                            Mégse
-                          </Button>
+                          <Button variant="ghost" onClick={() => setRecOpen(false)}>{
+                            tx("Mégse")
+                          }</Button>
                           <Button
                             onClick={() => {
                               const nm = recName.trim();
-                              if (!nm) return toast.error("Adj meg megnevezést.");
+                              if (!nm) return toast.error(tx("Adj meg megnevezést."));
                               if (!/^\d{4}-\d{2}-\d{2}$/.test(recNextDate))
-                                return toast.error("Hibás dátum.");
+                                return toast.error(tx("Hibás dátum."));
                               const huf = Number(recAmountHuf.replace(",", "."));
                               const eur = Number(recAmountEur.replace(",", "."));
                               const rate = Number(recEurRate.replace(",", "."));
@@ -11344,9 +11594,9 @@ export function FinanceDashboard({
                               const eurNum = recAmountEur.trim() && Number.isFinite(eur) ? Math.max(0, eur) : 0;
                               const rateNum = recEurRate.trim() && Number.isFinite(rate) ? Math.max(0, rate) : 0;
                               if (eurNum > 0 && rateNum <= 0)
-                                return toast.error("EUR összeghez kötelező árfolyamot megadni.");
+                                return toast.error(tx("EUR összeghez kötelező árfolyamot megadni."));
                               if (hufNum <= 0 && eurNum <= 0)
-                                return toast.error("Adj meg HUF vagy EUR nettó összeget.");
+                                return toast.error(tx("Adj meg HUF vagy EUR nettó összeget."));
                               const item: RecurringItem = {
                                 id: newId(),
                                 name: nm,
@@ -11366,9 +11616,9 @@ export function FinanceDashboard({
                               );
                               setRecOpen(false);
                             }}
-                          >
-                            Mentés
-                          </Button>
+                          >{
+                            tx("Mentés")
+                          }</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -11386,7 +11636,7 @@ export function FinanceDashboard({
                               id="oneoff-name"
                               value={oneOffName}
                               onChange={(e) => setOneOffName(e.target.value)}
-                              placeholder="pl. tervezett fejlesztés / beszerzés megelőlegezés"
+                              placeholder={tx("pl. tervezett fejlesztés / beszerzés megelőlegezés")}
                               autoFocus
                               maxLength={120}
                             />
@@ -11420,7 +11670,7 @@ export function FinanceDashboard({
                           </div>
 
                           <div className="grid gap-2">
-                            <Label>Kategória</Label>
+                            <Label>{tx("Kategória")}</Label>
                             <Select value={oneOffCategory} onValueChange={setOneOffCategory}>
                               <SelectTrigger>
                                 <SelectValue />
@@ -11486,15 +11736,15 @@ export function FinanceDashboard({
                         </div>
 
                         <DialogFooter>
-                          <Button variant="ghost" onClick={() => setOneOffOpen(false)}>
-                            Mégse
-                          </Button>
+                          <Button variant="ghost" onClick={() => setOneOffOpen(false)}>{
+                            tx("Mégse")
+                          }</Button>
                           <Button
                             onClick={() => {
                               const nm = oneOffName.trim();
-                              if (!nm) return toast.error("Adj meg megnevezést.");
+                              if (!nm) return toast.error(tx("Adj meg megnevezést."));
                               if (!/^\d{4}-\d{2}-\d{2}$/.test(oneOffAt))
-                                return toast.error("Hibás dátum.");
+                                return toast.error(tx("Hibás dátum."));
                               const huf = Number(oneOffAmountHuf.replace(",", "."));
                               const eur = Number(oneOffAmountEur.replace(",", "."));
                               const rate = Number(oneOffEurRate.replace(",", "."));
@@ -11506,9 +11756,9 @@ export function FinanceDashboard({
                               const rateNum =
                                 oneOffEurRate.trim() && Number.isFinite(rate) ? Math.max(0, rate) : 0;
                               if (eurNum > 0 && rateNum <= 0)
-                                return toast.error("EUR összeghez kötelező árfolyamot megadni.");
+                                return toast.error(tx("EUR összeghez kötelező árfolyamot megadni."));
                               if (hufNum <= 0 && eurNum <= 0)
-                                return toast.error("Adj meg HUF vagy EUR nettó összeget.");
+                                return toast.error(tx("Adj meg HUF vagy EUR nettó összeget."));
                               const item: PlannedOneOff = {
                                 id: newId(),
                                 name: nm,
@@ -11527,9 +11777,9 @@ export function FinanceDashboard({
                               );
                               setOneOffOpen(false);
                             }}
-                          >
-                            Mentés
-                          </Button>
+                          >{
+                            tx("Mentés")
+                          }</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -11547,14 +11797,14 @@ export function FinanceDashboard({
                               id="usage-name"
                               value={usageTplName}
                               onChange={(e) => setUsageTplName(e.target.value)}
-                              placeholder="pl. Futárszolgálat"
+                              placeholder={tx("pl. Futárszolgálat")}
                               autoFocus
                               maxLength={120}
                             />
                           </div>
 
                           <div className="grid gap-2">
-                            <Label>Kategória</Label>
+                            <Label>{tx("Kategória")}</Label>
                             <Select value={usageTplCategory} onValueChange={setUsageTplCategory}>
                               <SelectTrigger>
                                 <SelectValue />
@@ -11617,13 +11867,13 @@ export function FinanceDashboard({
                         </div>
 
                         <DialogFooter>
-                          <Button variant="ghost" onClick={() => setUsageTplOpen(false)}>
-                            Mégse
-                          </Button>
+                          <Button variant="ghost" onClick={() => setUsageTplOpen(false)}>{
+                            tx("Mégse")
+                          }</Button>
                           <Button
                             onClick={() => {
                               const nm = usageTplName.trim();
-                              if (!nm) return toast.error("Adj meg megnevezést.");
+                              if (!nm) return toast.error(tx("Adj meg megnevezést."));
                               const huf = Number(usageTplAmountHuf.replace(",", "."));
                               const eur = Number(usageTplAmountEur.replace(",", "."));
                               const rate = Number(usageTplEurRate.replace(",", "."));
@@ -11635,9 +11885,9 @@ export function FinanceDashboard({
                               const rateNum =
                                 usageTplEurRate.trim() && Number.isFinite(rate) ? Math.max(0, rate) : 0;
                               if (eurNum > 0 && rateNum <= 0)
-                                return toast.error("EUR összeghez kötelező árfolyamot megadni.");
+                                return toast.error(tx("EUR összeghez kötelező árfolyamot megadni."));
                               if (hufNum <= 0 && eurNum <= 0)
-                                return toast.error("Adj meg HUF vagy EUR egységárat.");
+                                return toast.error(tx("Adj meg HUF vagy EUR egységárat."));
                               const tpl: UsageTemplate = {
                                 id: newId(),
                                 name: nm,
@@ -11655,9 +11905,9 @@ export function FinanceDashboard({
                               );
                               setUsageTplOpen(false);
                             }}
-                          >
-                            Mentés
-                          </Button>
+                          >{
+                            tx("Mentés")
+                          }</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -11665,7 +11915,7 @@ export function FinanceDashboard({
                     <Dialog open={usageLogOpen} onOpenChange={setUsageLogOpen}>
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                          <DialogTitle>Használat rögzítése</DialogTitle>
+                          <DialogTitle>{tx("Használat rögzítése")}</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4">
                           <div className="grid gap-2">
@@ -11688,14 +11938,14 @@ export function FinanceDashboard({
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button variant="ghost" onClick={() => setUsageLogOpen(false)}>
-                            Mégse
-                          </Button>
+                          <Button variant="ghost" onClick={() => setUsageLogOpen(false)}>{
+                            tx("Mégse")
+                          }</Button>
                           <Button
                             onClick={() => {
-                              if (!usageLogTemplateId) return toast.error("Nincs sablon kiválasztva.");
+                              if (!usageLogTemplateId) return toast.error(tx("Nincs sablon kiválasztva."));
                               if (!/^\d{4}-\d{2}-\d{2}$/.test(usageLogAt))
-                                return toast.error("Hibás dátum.");
+                                return toast.error(tx("Hibás dátum."));
                               const c = Number(usageLogCount.replace(",", "."));
                               const count = Number.isFinite(c) ? Math.max(1, Math.round(c)) : 1;
                               const ev: UsageEvent = {
@@ -11711,9 +11961,9 @@ export function FinanceDashboard({
                               );
                               setUsageLogOpen(false);
                             }}
-                          >
-                            Mentés
-                          </Button>
+                          >{
+                            tx("Mentés")
+                          }</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -11730,7 +11980,7 @@ export function FinanceDashboard({
                 className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-primary/60 bg-popover px-3 py-2 text-xs font-medium text-popover-foreground shadow-xl"
                 style={{ left: dragging.x, top: dragging.y }}
               >
-                {TYPE_LABEL[dragging.type]} · {dragging.label}
+                {typeLabel[dragging.type]} · {dragging.label}
               </div>
             )}
 
@@ -11761,7 +12011,7 @@ export function FinanceDashboard({
                                 if (!f) return;
                                 void (async () => {
                                   if (!f.name.toLowerCase().endsWith(".xml")) {
-                                    toast.error("HIBA: Nem megfelelő formátum (Magán). Csak XML (SpreadsheetML).");
+                                    toast.error(tx("HIBA: Nem megfelelő formátum (Magán). Csak XML (SpreadsheetML)."));
                                     return;
                                   }
                                   const text = await f.text();
@@ -11779,18 +12029,18 @@ export function FinanceDashboard({
                                   ? `Magán szinkron (mappa: ${activeWorkspaceMeta.bank_sync_folder})`
                                   : "Magán szinkron (legfrissebb XML a mappából)"
                               }
-                              aria-label="Magán szinkron"
+                              aria-label={tx("Magán szinkron")}
                             >
                               <Folder className="h-4 w-4" />
-                              <span className="hidden sm:inline">Magán szinkron</span>
+                              <span className="hidden sm:inline">{tx("Magán szinkron")}</span>
                             </Button>
                             <Button
                               type="button"
                               variant="outline"
                               className="h-9 gap-2 px-2 sm:px-3"
                               onClick={() => bankXmlFileRef.current?.click()}
-                              title="Magán: XML kivonat kiválasztása"
-                              aria-label="XML kivonat kiválasztása"
+                              title={tx("Magán: XML kivonat kiválasztása")}
+                              aria-label={tx("XML kivonat kiválasztása")}
                             >
                               <Upload className="h-4 w-4" />
                               <span className="hidden sm:inline">XML</span>
@@ -12076,9 +12326,9 @@ export function FinanceDashboard({
                           </div>
                           <div className="mt-3 grid gap-2">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-slate-300" data-exact="hány fillér marad 1 Ft beáramlásból.">
-                                Nettó hatékonyság
-                              </span>
+                              <span className="text-slate-300" data-exact="hány fillér marad 1 Ft beáramlásból.">{
+                                tx("Nettó hatékonyság")
+                              }</span>
                               <span className="font-mono text-slate-200">
                                 1 Ft → {Math.round(leanInsights.eff * 100)} fillér
                               </span>
@@ -12267,7 +12517,7 @@ export function FinanceDashboard({
                                     <div className="font-medium">
                                       {displayTxnLabel(t)}
                                     </div>
-                                    <div className="text-muted-foreground">{categoryLabel(t.category)}</div>
+                                    <div className="txn-category">{categoryLabel(t.category)}</div>
                                   </td>
                                   <td className="px-2 py-1.5">{locationName(t.location_id) ?? "—"}</td>
                                   <td className="px-2 py-1.5">
@@ -12279,7 +12529,7 @@ export function FinanceDashboard({
                                           setSelectedAssetId(t.asset_id!);
                                           setAssetTcoOpen(true);
                                         }}
-                                        title="Eszköz összesítő"
+                                        title={tx("Eszköz összesítő")}
                                       >
                                         {assetName(t.asset_id) ?? "Eszköz"}
                                       </button>
@@ -12299,8 +12549,8 @@ export function FinanceDashboard({
                               if (denyShowcaseWrite(isVisitorDemo)) return;
                               beginEditTxn(t);
                             }}
-                                      aria-label="Szerkesztés"
-                                      title="Szerkesztés"
+                                      aria-label={tx("Szerkesztés")}
+                                      title={tx("Szerkesztés")}
                                     >
                                       <Edit3 className="h-3.5 w-3.5" />
                                     </Button>
@@ -12342,7 +12592,7 @@ export function FinanceDashboard({
                         variant="outline"
                         className="h-8"
                         onClick={() => setActiveSubTab("cashflow")}
-                        title="Ugrás a Cashflow aloldalra"
+                        title={tx("Ugrás a Cashflow aloldalra")}
                       >
                         Megnyitás Cashflow-ban
                       </Button>
@@ -12400,9 +12650,9 @@ export function FinanceDashboard({
                               )}%`
                             : "—"}
                         </div>
-                        <div className="mt-1 text-[11px] text-muted-foreground">
-                          EV+EFO arány az összes költségen belül (bruttó).
-                        </div>
+                        <div className="mt-1 text-[11px] text-muted-foreground">{
+                          tx("EV+EFO arány az összes költségen belül (bruttó).")
+                        }</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -12447,7 +12697,7 @@ export function FinanceDashboard({
                             setAutoRulePartner(s.partner);
                             setAutoRuleOpen(true);
                           }}
-                          title="Automatikus szabály létrehozása"
+                          title={tx("Automatikus szabály létrehozása")}
                         >
                           ⚡ Szabály létrehozása
                         </Button>
@@ -12493,10 +12743,10 @@ export function FinanceDashboard({
                           if (denyShowcaseWrite(isVisitorDemo)) return;
                           setQuickAddType("expense");
                         }}
-                          title="+ Új tétel"
+                          title={t("dash.newItemTitle")}
                         >
                           <Plus className="h-4 w-4" />
-                          Új tétel
+                          {t("dash.newItem")}
                         </Button>
                       </div>
                     </CardHeader>
@@ -12504,62 +12754,62 @@ export function FinanceDashboard({
                       <div className="grid grid-cols-1 gap-2 min-w-0 sm:grid-cols-2 lg:grid-cols-3">
                         <div className="rounded-md border border-sky-500/25 bg-sky-950/20 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Tételek</span>
+                            <span>{t("dash.items")}</span>
                             <HelpIcon kbId="ledger-count" />
                           </div>
-                          <div className="mt-1 text-base font-bold tabular-nums text-white">{ledgerSummary.count} db</div>
+                          <div className="mt-1 text-base font-bold tabular-nums text-white">{t("dash.countPcs", { n: ledgerSummary.count })}</div>
                         </div>
                         <div className="rounded-md border border-emerald-500/25 bg-emerald-950/30 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Összes bevétel</span>
+                            <span>{t("dash.totalIncome")}</span>
                             <HelpIcon kbId="ledger-income" />
                           </div>
                           <div className="mt-1 text-base font-bold tabular-nums text-emerald-400">
                             {formatMoney(Math.round(ledgerSummary.incomeNet), CURRENCY)}
                           </div>
                           <div className="mt-0.5 text-[11px] text-slate-300 tabular-nums">
-                            bruttó: {formatMoney(Math.round(ledgerSummary.incomeGross), CURRENCY)}
+                            {t("dash.grossPrefix")} {formatMoney(Math.round(ledgerSummary.incomeGross), CURRENCY)}
                           </div>
                         </div>
                         <div className="rounded-md border border-rose-500/25 bg-rose-950/30 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Összes kiadás</span>
+                            <span>{t("dash.totalExpense")}</span>
                             <HelpIcon kbId="ledger-expense" />
                           </div>
                           <div className="mt-1 text-base font-bold tabular-nums text-rose-400">
                             {formatMoney(Math.round(ledgerSummary.expenseNet), CURRENCY)}
                           </div>
                           <div className="mt-0.5 text-[11px] text-slate-300 tabular-nums">
-                            bruttó: {formatMoney(Math.round(ledgerSummary.expenseGross), CURRENCY)}
+                            {t("dash.grossPrefix")} {formatMoney(Math.round(ledgerSummary.expenseGross), CURRENCY)}
                           </div>
                         </div>
                         <div className="rounded-md border border-sky-500/25 bg-sky-950/20 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Megtakarítás</span>
+                            <span>{t("dash.txnSaving")}</span>
                             <HelpIcon kbId="ledger-saving" />
                           </div>
                           <div className="mt-1 text-base font-bold tabular-nums text-sky-400">
                             {formatMoney(Math.round(ledgerSummary.savingNet), CURRENCY)}
                           </div>
                           <div className="mt-0.5 text-[11px] text-slate-300 tabular-nums">
-                            bruttó: {formatMoney(Math.round(ledgerSummary.savingGross), CURRENCY)}
+                            {t("dash.grossPrefix")} {formatMoney(Math.round(ledgerSummary.savingGross), CURRENCY)}
                           </div>
                         </div>
                         <div className="rounded-md border border-amber-500/25 bg-amber-950/30 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Tőketörlesztés</span>
+                            <span>{t("dash.principal")}</span>
                             <HelpIcon kbId="ledger-loan-principal" />
                           </div>
                           <div className="mt-1 text-base font-bold tabular-nums text-amber-400">
                             {formatMoney(Math.round(ledgerSummary.loanPrincipalNet), CURRENCY)}
                           </div>
                           <div className="mt-0.5 text-[11px] text-slate-300 tabular-nums">
-                            tervezett: {ledgerSummary.plannedCount} db
+                            {t("dash.plannedCount", { n: ledgerSummary.plannedCount })}
                           </div>
                         </div>
                         <div className="rounded-md border border-sky-500/25 bg-sky-950/20 p-4">
                           <div className="inline-flex items-center text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                            <span>Egyenleg</span>
+                            <span>{t("dash.balance")}</span>
                             <HelpIcon kbId="ledger-balance" />
                           </div>
                           <div
@@ -12572,7 +12822,7 @@ export function FinanceDashboard({
                             {formatMoney(Math.round(ledgerSummary.balanceNet), CURRENCY)}
                           </div>
                           <div className="mt-0.5 text-[11px] text-slate-300 tabular-nums">
-                            bruttó: {ledgerSummary.balanceGross >= 0 ? "+" : ""}
+                            {t("dash.grossPrefix")} {ledgerSummary.balanceGross >= 0 ? "+" : ""}
                             {formatMoney(Math.round(ledgerSummary.balanceGross), CURRENCY)}
                           </div>
                         </div>
@@ -12584,7 +12834,7 @@ export function FinanceDashboard({
                     <CardContent className="pt-6">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <div className="mr-1 inline-flex items-center text-xs text-slate-300">
-                      Szűrők
+                      {t("dash.filters")}
                       <HelpIcon kbId="ledger-filters" />
                     </div>
                     <Button
@@ -12593,7 +12843,7 @@ export function FinanceDashboard({
                       variant={ledgerFilter === "all" ? "secondary" : "outline"}
                       className={cn("h-8", ledgerFilter === "all" && "bg-slate-800/80")}
                       onClick={() => setLedgerFilter("all")}
-                      title="Összes tétel"
+                      title={tx("Összes tétel")}
                     >
                       Összes
                     </Button>
@@ -12606,7 +12856,7 @@ export function FinanceDashboard({
                         ledgerFilter === "income" && "bg-emerald-950/40 border-emerald-500/30 text-emerald-200",
                       )}
                       onClick={() => setLedgerFilter("income")}
-                      title="Bevételek"
+                      title={tx("Bevételek")}
                     >
                       Bevétel
                     </Button>
@@ -12619,7 +12869,7 @@ export function FinanceDashboard({
                         ledgerFilter === "expense" && "bg-rose-950/40 border-rose-500/30 text-rose-200",
                       )}
                       onClick={() => setLedgerFilter("expense")}
-                      title="Kiadások"
+                      title={tx("Kiadások")}
                     >
                       Kiadás
                     </Button>
@@ -12632,7 +12882,7 @@ export function FinanceDashboard({
                         ledgerFilter === "saving_transfer" && "bg-sky-950/40 border-sky-500/30 text-sky-200",
                       )}
                       onClick={() => setLedgerFilter("saving_transfer")}
-                      title="Megtakarítások / átvezetések"
+                      title={tx("Megtakarítások / átvezetések")}
                     >
                       Megtakarítás / Átvezetés
                     </Button>
@@ -12645,7 +12895,7 @@ export function FinanceDashboard({
                         ledgerFilter === "liability_planned" && "bg-amber-950/40 border-amber-500/30 text-amber-200",
                       )}
                       onClick={() => setLedgerFilter("liability_planned")}
-                      title="Tartozás / törlesztés / tervezett"
+                      title={tx("Tartozás / törlesztés / tervezett")}
                     >
                       Tartozás / Tervezett
                     </Button>
@@ -12674,7 +12924,7 @@ export function FinanceDashboard({
                       <Checkbox
                         checked={allShownSelected}
                         onCheckedChange={() => toggleSelectAllShown()}
-                        aria-label="Összes kijelölése"
+                        aria-label={tx("Összes kijelölése")}
                       />
                       <div className="min-w-0 pr-2">Megnevezés</div>
                       <div className="w-[11rem] text-right font-mono tabular-nums whitespace-nowrap">Összeg</div>
@@ -12749,7 +12999,7 @@ export function FinanceDashboard({
                         size="sm"
                         className="h-8"
                         onClick={() => setBulkDeleteOpen(true)}
-                        title="Tömeges törlés"
+                        title={tx("Tömeges törlés")}
                       >
                         🗑️ Tömeges törlés
                       </Button>
@@ -12759,7 +13009,7 @@ export function FinanceDashboard({
                         size="sm"
                         className="h-8"
                         onClick={() => setBulkPiggyOpen(true)}
-                        title="Tömeges persely"
+                        title={tx("Tömeges persely")}
                       >
                         🐷 Perselybe helyezés
                       </Button>
@@ -12769,7 +13019,7 @@ export function FinanceDashboard({
                         size="sm"
                         className="h-8"
                         onClick={() => setBulkCopyOpen(true)}
-                        title="Másolás projektbe"
+                        title={tx("Másolás projektbe")}
                       >
                         📋 Másolás projektbe
                       </Button>
@@ -12779,10 +13029,10 @@ export function FinanceDashboard({
                         size="sm"
                         className="h-8 text-slate-300"
                         onClick={() => setSelectedTxnIds(new Set())}
-                        title="Kijelölés törlése"
-                      >
-                        Kijelölés törlése
-                      </Button>
+                        title={tx("Kijelölés törlése")}
+                      >{
+                        tx("Kijelölés törlése")
+                      }</Button>
                     </div>
                   </div>
                 </div>
@@ -12808,7 +13058,7 @@ export function FinanceDashboard({
                     Üzletek & Árrés
                     <HelpIcon kbId="deals-overview" />
                   </CardTitle>
-                  <Badge variant="secondary" className="text-[10px]" title="Lezárt / összes továbbértékesítési beszerzés">
+                  <Badge variant="secondary" className="text-[10px]" title={tx("Lezárt / összes továbbértékesítési beszerzés")}>
                     {resaleDeals.kpi.closedCount}/{resaleDeals.kpi.totalCount} lezárt
                   </Badge>
                 </CardHeader>
@@ -12825,9 +13075,9 @@ export function FinanceDashboard({
                     />
                     <StatCard
                       label={
-                        <span className="inline-flex items-center">
-                          Összes továbbértékesített beszerzés (bruttó)
-                          <HelpIcon kbId="deals-margin" />
+                        <span className="inline-flex items-center">{
+                          tx("Összes továbbértékesített beszerzés (bruttó)")
+                          }<HelpIcon kbId="deals-margin" />
                         </span>
                       }
                       value={formatMoney(Math.round(resaleDeals.kpi.purchaseGrossSum), CURRENCY)}
@@ -12900,7 +13150,7 @@ export function FinanceDashboard({
                           <tr className="border-b border-border/60 text-xs text-muted-foreground">
                             <th className="px-3 py-2 text-left">Tétel</th>
                             <th className="px-3 py-2 text-left">Partner</th>
-                            <th className="px-3 py-2 text-right">Beszerzés (nettó/bruttó)</th>
+                            <th className="px-3 py-2 text-right">{tx("Beszerzés (nettó/bruttó)")}</th>
                             <th className="px-3 py-2 text-left">Kapcsolódó bevétel</th>
                             <th className="px-3 py-2 text-right">Árrés (Ft / %)</th>
                             <th className="px-3 py-2 text-left">Státusz</th>
@@ -12999,8 +13249,17 @@ export function FinanceDashboard({
 
           </>
         )}
+          {!loading ? (
+            <EngineFocusSurface
+              segmentId={demoSegmentId}
+              snapshot={economicReadSnapshot}
+              showAnonOnDashboard={labs.anon}
+              anonRows={anonRows}
+            />
+          ) : null}
         </div>
         </div>
+        )}
       </main>
 
       {/* Always mounted — lockPdcaView hides the legacy else-branch UI */}
@@ -13053,6 +13312,7 @@ export function FinanceDashboard({
               wsOptions={wsOptions}
               workspaceKind={workspaceKind}
               projectMode={(activeWorkspaceMeta?.project_mode as any) ?? null}
+              simOn={labs.sim}
             />
 
             <TxnDialog
@@ -13141,6 +13401,7 @@ export function FinanceDashboard({
               wsOptions={wsOptions}
               workspaceKind={workspaceKind}
               projectMode={(activeWorkspaceMeta?.project_mode as any) ?? null}
+              simOn={labs.sim}
             />
 
             <LoanDialog
@@ -13191,9 +13452,9 @@ export function FinanceDashboard({
                       setWantsLockOpen(false);
                       setWantsLockPending(null);
                     }}
-                  >
-                    Mégse
-                  </AlertDialogCancel>
+                  >{
+                    tx("Mégse")
+                  }</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
                       const p = wantsLockPending;
@@ -13228,7 +13489,7 @@ export function FinanceDashboard({
                   bucket_id,
                 });
                 setTransferSource(null);
-                toast.success("Átvezetve megtakarításba.");
+                toast.success(tx("Átvezetve megtakarításba."));
               }}
             />
 
@@ -13245,11 +13506,9 @@ export function FinanceDashboard({
               ? t("dash.assets")
               : lens.tabs.inventory,
         }}
-        isSzummaActive={activeWs === "szumma"}
-        onToggleSzumma={toggleSzumma}
         onOpenCreate={() => {
           if (denyMutateIfViewer()) {
-            toast.warning("Guest módban nem hozható létre Slot.");
+            toast.warning(tx("Guest módban nem hozható létre Slot."));
             return;
           }
           const used = workspaceMetas.length + (workspaceMetas.some((w) => w.id === "personal") ? 0 : 1);
@@ -13498,6 +13757,13 @@ function StatCard({
   business?: boolean;
   children?: React.ReactNode;
 }) {
+  const tx = useSurfaceTx();
+  const { t } = useI18n();
+  const typeLabel = {
+    income: t("dash.txnIncome"),
+    expense: t("dash.txnExpense"),
+    saving: t("dash.txnSaving"),
+  } as const;
   const statusBarColor =
     statusColor &&
     {
@@ -13523,8 +13789,8 @@ function StatCard({
             size="icon"
             variant="ghost"
             onClick={onTransferToSaving}
-            aria-label="Átvezetés megtakarításba"
-            title="Átvezetés megtakarításba"
+            aria-label={tx("Átvezetés megtakarításba")}
+            title={tx("Átvezetés megtakarításba")}
             className="h-7 w-7 text-[color:var(--color-chart-2)]"
           >
             <PiggyBank className="h-4 w-4" />
@@ -13535,8 +13801,8 @@ function StatCard({
             size="icon"
             variant="secondary"
             onClick={onQuickAdd}
-            aria-label={`Új ${TYPE_LABEL[type].toLowerCase()} tétel`}
-            title={`Új ${TYPE_LABEL[type].toLowerCase()}`}
+            aria-label={t("dash.newTypeItem", { type: typeLabel[type].toLowerCase() })}
+            title={t("dash.newTypeTitle", { type: typeLabel[type].toLowerCase() })}
             className="h-7 w-7"
           >
             <Plus className="h-4 w-4" />
@@ -13611,6 +13877,7 @@ function InlineTxnList({
   defaultVat?: number;
   vatMode?: VatMode;
 }) {
+  const tx = useSurfaceTx();
   const bucketName = (id?: string | null) =>
     id ? displayBucketName(buckets.find((b) => b.id === id)?.name) || null : null;
   const netHuf = (t: Transaction) => {
@@ -13672,8 +13939,8 @@ function InlineTxnList({
                     type="button"
                     onPointerDown={(e) => onStartDrag(t, e)}
                     className="flex h-8 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
-                    aria-label="Áthelyezés fogantyú"
-                    title="Húzd egy másik szekcióra"
+                    aria-label={tx("Áthelyezés fogantyú")}
+                    title={tx("Húzd egy másik szekcióra")}
                   >
                     <GripVertical className="h-4 w-4" />
                   </button>
@@ -13682,7 +13949,7 @@ function InlineTxnList({
                       {displayTxnLabel(t)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {categoryLabel(t.category)}
+                      <span className="txn-category">{categoryLabel(t.category)}</span>
                       {" · "}
                       {new Date(t.occurred_at).toLocaleDateString("hu-HU")}
                       {t.type === "saving" && bucketName(t.bucket_id) && (
@@ -13696,7 +13963,7 @@ function InlineTxnList({
                           title={t.history
                             .map(
                               (h) =>
-                                `${new Date(h.at).toLocaleString("hu-HU")}: ${TYPE_LABEL[h.from]} → ${TYPE_LABEL[h.to]}`,
+                                `${new Date(h.at).toLocaleString(locale === "en" ? "en-GB" : "hu-HU")}: ${typeLabel[h.from]} → ${typeLabel[h.to]}`,
                             )
                             .join("\n")}
                         >
@@ -13728,7 +13995,7 @@ function InlineTxnList({
                       size="icon"
                       variant="ghost"
                       onClick={() => onTransferToSaving(t)}
-                      aria-label="Átvezetés megtakarításba"
+                      aria-label={tx("Átvezetés megtakarításba")}
                       title={
                         t.type === "saving"
                           ? "Átvezetés másik alhalmazba"
@@ -13743,8 +14010,8 @@ function InlineTxnList({
                     size="icon"
                     variant="ghost"
                     onClick={() => onEdit(t)}
-                    aria-label="Szerkesztés"
-                    title="Szerkesztés"
+                    aria-label={tx("Szerkesztés")}
+                    title={tx("Szerkesztés")}
                   >
                     <Edit3 className="h-3.5 w-3.5" />
                   </Button>
@@ -13801,6 +14068,7 @@ function GoalCard({
   onRemove: (id: string) => void;
   onAdd: (g: { deadline: string; payload: GoalPayload }) => void;
 }) {
+  const tx = useSurfaceTx();
   const celokBlock = useDashboardBlockOpen("celok", true);
   if (!goal) {
     return (
@@ -13918,7 +14186,7 @@ function GoalCard({
           )}
           <p
             className="kpi-label mt-1 text-[10px] text-slate-400"
-            title="Csak az általános megtakarítás és a cél nevével egyező alhalmaz számít bele."
+            title={tx("Csak az általános megtakarítás és a cél nevével egyező alhalmaz számít bele.")}
           >
             Általános megtakarítás + egyező alhalmaz számít.
           </p>
@@ -13933,7 +14201,7 @@ function GoalCard({
           }}
         />
         <div className="viz-split">
-          <RevealPanel id="plan.goal" title="Részletes progresszió" kind="bullet">
+          <RevealPanel id="plan.goal" title={tx("Részletes progresszió")} kind="bullet">
             <Progress value={progress} className="h-2" />
             <p className="kpi-label mt-1 text-right text-xs text-slate-300">{progress.toFixed(1)}%</p>
           </RevealPanel>
@@ -13969,8 +14237,8 @@ function GoalCard({
           className="h-7 w-full text-xs text-slate-300 hover:text-destructive"
           onClick={() => onRemove(goal.id)}
         >
-          <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Cél törlése
-        </Button>
+          <Trash2 className="mr-1.5 h-3.5 w-3.5" />{ tx("Cél törlése")
+        }</Button>
       </CardContent>
       ) : null}
     </Card>
@@ -14012,6 +14280,7 @@ function TransferPickerDialog({
   incomeTxns: Transaction[];
   onPick: (t: Transaction) => void;
 }) {
+  const tx = useSurfaceTx();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -14034,7 +14303,7 @@ function TransferPickerDialog({
                       {displayTxnLabel(t)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {categoryLabel(t.category)} ·{" "}
+                      <span className="txn-category">{categoryLabel(t.category)}</span> ·{" "}
                       {new Date(t.occurred_at).toLocaleDateString("hu-HU")}
                     </p>
                   </div>
@@ -14047,9 +14316,9 @@ function TransferPickerDialog({
           </ul>
         )}
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Mégse
-          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>{
+            tx("Mégse")
+          }</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -14071,6 +14340,7 @@ function SavingsTransferDialog({
   onAddBucket: (name: string) => SavingBucket | null;
   goals: Goal[];
 }) {
+  const tx = useSurfaceTx();
   const max = source ? Number(source.amount) : 0;
   const [value, setValue] = useState<number>(0);
   const [note, setNote] = useState("");
@@ -14104,15 +14374,15 @@ function SavingsTransferDialog({
       <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 custom-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <PiggyBank className="h-4 w-4 text-[color:var(--color-chart-2)]" />
-            Átvezetés megtakarításba
-          </DialogTitle>
+            <PiggyBank className="h-4 w-4 text-[color:var(--color-chart-2)]" />{
+            tx("Átvezetés megtakarításba")
+          }</DialogTitle>
         </DialogHeader>
         {source && (
           <div className="space-y-5 pt-1">
             <div className="rounded-lg border border-border/60 bg-muted/40 p-3">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Forrás {TYPE_LABEL[source.type].toLowerCase()}
+                {t("dash.sourceType", { type: typeLabel[source.type].toLowerCase() })}
               </p>
               <p className="mt-0.5 truncate text-sm font-medium">
                 {source.note?.trim() || categoryLabel(source.category)}
@@ -14135,9 +14405,9 @@ function SavingsTransferDialog({
                   className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
                   onClick={() => setNewBucketOpen((o) => !o)}
                 >
-                  <Plus className="h-3 w-3" />
-                  Új alhalmaz
-                </Button>
+                  <Plus className="h-3 w-3" />{
+                  tx("Új alhalmaz")
+                }</Button>
               </div>
               <Select
                 value={bucketId || "__none"}
@@ -14147,7 +14417,7 @@ function SavingsTransferDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none">Általános megtakarítás</SelectItem>
+                  <SelectItem value="__none">{tx("Általános megtakarítás")}</SelectItem>
                   {buckets.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
                       {b.name}
@@ -14160,7 +14430,7 @@ function SavingsTransferDialog({
                   <div className="flex items-center gap-2">
                     <Input
                       autoFocus
-                      placeholder="pl. Nyaralás, Vésztartalék"
+                      placeholder={tx("pl. Nyaralás, Vésztartalék")}
                       value={newBucketName}
                       onChange={(e) => setNewBucketName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && commitNewBucket()}
@@ -14172,7 +14442,7 @@ function SavingsTransferDialog({
                       onClick={commitNewBucket}
                       disabled={!newBucketName.trim()}
                     >
-                      Hozzáad
+                      {tx("Hozzáad")}
                     </Button>
                   </div>
                   {goals.length > 0 && (
@@ -14265,7 +14535,7 @@ function SavingsTransferDialog({
               </Label>
               <Input
                 id="transfer-note"
-                placeholder="pl. vésztartalék"
+                placeholder={tx("pl. vésztartalék")}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 maxLength={200}
@@ -14274,9 +14544,9 @@ function SavingsTransferDialog({
           </div>
         )}
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Mégse
-          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>{
+            tx("Mégse")
+          }</Button>
           <Button
             onClick={() => onConfirm(value, note, bucketId || null)}
             disabled={value <= 0}
@@ -14320,6 +14590,7 @@ function TxnDialog({
   wsOptions,
   workspaceKind,
   projectMode,
+  simOn = true,
 }: {
   onSave: (t: { type: TxnType; occurred_at: string; payload: TxnPayload }) => void;
   onUpdate?: (
@@ -14346,7 +14617,10 @@ function TxnDialog({
   wsOptions: string[];
   workspaceKind: "personal" | "business" | "project" | "sum";
   projectMode?: "simulation" | "pilot" | "prep" | null;
+  simOn?: boolean;
 }) {
+  const tx = useSurfaceTx();
+  const { t } = useI18n();
   const isBankImmutable = Boolean(editing?.bank_raw_id);
   const [openState, setOpenState] = useState(false);
   const isControlled = openProp !== undefined;
@@ -14406,8 +14680,11 @@ function TxnDialog({
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [newBucketName, setNewBucketName] = useState("");
   const [txnStatus, setTxnStatus] = useState<"planned" | "committed" | "actual">(
-    (editing?.status as any) ??
-      (workspaceKind === "project" && projectMode === "simulation" ? "planned" : "actual"),
+    resolveTxnStatusForMotor(
+      simOn,
+      (editing?.status as TxnLifecycleStatus | undefined) ??
+        (workspaceKind === "project" && projectMode === "simulation" ? "planned" : "actual"),
+    ),
   );
   const [invoiceStatus, setInvoiceStatus] = useState<"unpaid" | "pending" | "paid" | "">(
     (editing?.invoice_status as any) ?? "",
@@ -14487,7 +14764,7 @@ function TxnDialog({
       setIsResale(Boolean(editing.is_resale));
       setCustomerName(editing.customer_name ?? "");
       setLinkedRevenueId(editing.linked_revenue_id ?? "");
-      setTxnStatus((editing.status as any) ?? "actual");
+      setTxnStatus(resolveTxnStatusForMotor(simOn, (editing.status as TxnLifecycleStatus | undefined) ?? "actual"));
       setInvoiceStatus((editing.invoice_status as any) ?? "");
       setInternalOn(
         editing.internal_transfer_kind === "member_loan_out" ||
@@ -14496,7 +14773,12 @@ function TxnDialog({
       setInternalTo(editing.internal_transfer_to ?? "");
     } else if (defaultType) {
       setType(defaultType);
-      setTxnStatus(workspaceKind === "project" && projectMode === "simulation" ? "planned" : "actual");
+      setTxnStatus(
+        resolveTxnStatusForMotor(
+          simOn,
+          workspaceKind === "project" && projectMode === "simulation" ? "planned" : "actual",
+        ),
+      );
       setInvoiceStatus("");
     }
     setNewCatOpen(false);
@@ -14570,7 +14852,7 @@ function TxnDialog({
     const eurRateNum =
       eurRate.trim() && Number.isFinite(eurR) ? Math.max(0, eurR) : null;
     if (eurInput && !eurRateNum) {
-      toast.error("EUR összeghez kötelező árfolyamot megadni.");
+      toast.error(tx("EUR összeghez kötelező árfolyamot megadni."));
       return;
     }
     const vatNum = Number(vatRate.replace(",", "."));
@@ -14642,7 +14924,7 @@ function TxnDialog({
         : null,
       eur_amount: eurNet,
       eur_rate: eurRateNum,
-      status: workspaceKind === "project" ? txnStatus : "actual",
+      status: workspaceKind === "project" ? resolveTxnStatusForMotor(simOn, txnStatus) : "actual",
       invoice_status: invoiceStatus || null,
       workspace: editing?.workspace ?? (activeWorkspace === "__all" ? "personal" : activeWorkspace),
       loan_id:
@@ -14701,8 +14983,8 @@ function TxnDialog({
         <DialogTrigger asChild>
           {trigger ?? (
             <Button>
-              <Plus className="mr-2 h-4 w-4" /> Új tétel
-            </Button>
+              <Plus className="mr-2 h-4 w-4" />{ tx("Új tétel")
+            }</Button>
           )}
         </DialogTrigger>
       )}
@@ -14717,7 +14999,7 @@ function TxnDialog({
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="expense">Kiadás</TabsTrigger>
               <TabsTrigger value="income">Bevétel</TabsTrigger>
-              <TabsTrigger value="saving">Megtakarítás</TabsTrigger>
+              <TabsTrigger value="saving">{tx("Megtakarítás")}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -14728,7 +15010,7 @@ function TxnDialog({
             <div className="rounded-lg border bg-[color:var(--color-chart-6)]/5 p-3 md:col-span-2 border-l-4 border-l-[color:var(--color-chart-6)]">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium">Belső átvezetés (tagi)</div>
+                  <div className="text-sm font-medium">{tx("Belső átvezetés (tagi)")}</div>
                   <div className="text-[11px] text-muted-foreground">{internalLabel}</div>
                 </div>
                 <Button
@@ -14747,7 +15029,7 @@ function TxnDialog({
                       return next;
                     });
                   }}
-                  title="Belső átvezetés bekapcsolása"
+                  title={tx("Belső átvezetés bekapcsolása")}
                 >
                   {internalOn ? "Bekapcsolva" : "Kikapcsolva"}
                 </Button>
@@ -14782,7 +15064,7 @@ function TxnDialog({
 
               {internalOn && internalKind === "member_loan_repay" && (
                 <div className="mt-3 rounded-md border bg-background/40 p-3 text-xs text-muted-foreground">
-                  Cél: <span className="font-mono text-foreground">Magán</span>. Automatikus: 0% ÁFA, és a Szumma/P&L
+                  Cél: <span className="font-mono text-foreground">{tx("Magán")}</span>. Automatikus: 0% ÁFA, és a Szumma/P&L
                   nézetből kiejtve.
                 </div>
               )}
@@ -14959,7 +15241,7 @@ function TxnDialog({
                   return (
                     <div className="grid gap-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">HUF nettó / bruttó</span>
+                        <span className="text-muted-foreground">{tx("HUF nettó / bruttó")}</span>
                         <span className="font-medium">
                           {formatMoney(Math.round(hufNet), CURRENCY)} · {formatMoney(Math.round(hufGross), CURRENCY)}
                         </span>
@@ -14971,7 +15253,7 @@ function TxnDialog({
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">EUR→HUF bruttó (ha bruttót adtál meg)</span>
+                        <span className="text-muted-foreground">{tx("EUR→HUF bruttó (ha bruttót adtál meg)")}</span>
                         <span className="font-medium">
                           {formatMoney(Math.round(eurHufGross), CURRENCY)}
                         </span>
@@ -14988,9 +15270,9 @@ function TxnDialog({
                         <span className="text-muted-foreground">Bruttó összesen (banki pénzmozgás)</span>
                         <span className="font-semibold">{formatMoney(split.gross, CURRENCY)}</span>
                       </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        Mentéskor nettót tárolunk; a bruttó/napi FX csak megjelenítés és tervezés.
-                      </p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">{
+                        tx("Mentéskor nettót tárolunk; a bruttó/napi FX csak megjelenítés és tervezés.")
+                      }</p>
                     </div>
                   );
                 })()}
@@ -15001,7 +15283,7 @@ function TxnDialog({
           {type !== "saving" && (
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label>Kategória</Label>
+                <Label>{tx("Kategória")}</Label>
                 <HelpIcon kbId="loan-repayment-linking" />
                 <Button
                   type="button"
@@ -15010,9 +15292,9 @@ function TxnDialog({
                   className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
                   onClick={() => setNewCatOpen((o) => !o)}
                 >
-                  <Plus className="h-3 w-3" />
-                  Új kategória
-                </Button>
+                  <Plus className="h-3 w-3" />{
+                  tx("Új kategória")
+                }</Button>
               </div>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
@@ -15030,7 +15312,7 @@ function TxnDialog({
                 <div className="flex items-center gap-2">
                   <Input
                     autoFocus
-                    placeholder="pl. Sport, Előfizetések"
+                    placeholder={tx("pl. Sport, Előfizetések")}
                     value={newCatLabel}
                     onChange={(e) => setNewCatLabel(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && commitNewCategory()}
@@ -15042,7 +15324,7 @@ function TxnDialog({
                     onClick={commitNewCategory}
                     disabled={!newCatLabel.trim()}
                   >
-                    Hozzáad
+                    {tx("Hozzáad")}
                   </Button>
                 </div>
               )}
@@ -15054,7 +15336,7 @@ function TxnDialog({
               <div className="grid gap-3 rounded-md border border-border/60 bg-muted/20 p-3">
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label>Kapcsolódó hitel / tartozás</Label>
+                    <Label>{t("dash.loanLink")}</Label>
                     <HelpIcon kbId="loan-repayment-linking" />
                   </div>
                   <Select value={loanId || "__none"} onValueChange={(v) => setLoanId(v === "__none" ? "" : v)}>
@@ -15074,22 +15356,22 @@ function TxnDialog({
                     </SelectContent>
                   </Select>
                   <div className="text-[11px] text-muted-foreground">
-                    Ha kiválasztod, a mentés automatikusan csökkenti a fennálló tőketartozást.
+                    {t("dash.loanLinkHint")}
                   </div>
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label>Tőkerész (Ft) — opcionális</Label>
+                    <Label>{t("dash.loanPrincipal")}</Label>
                     <HelpIcon kbId="loan-repayment-linking" />
                   </div>
                   <Input
                     inputMode="decimal"
                     value={loanPrincipalPaid}
                     onChange={(e) => setLoanPrincipalPaid(e.currentTarget.value)}
-                    placeholder="Alapértelmezés: teljes összeg"
+                    placeholder={tx("Alapértelmezés: teljes összeg")}
                   />
                   <div className="text-[11px] text-muted-foreground">
-                    Ha üresen hagyod, a teljes tételösszeget tőketörlesztésnek vesszük (konzervatív).
+                    {t("dash.loanPrincipalHint")}
                   </div>
                 </div>
               </div>
@@ -15101,7 +15383,7 @@ function TxnDialog({
                 <Label htmlFor="txn-description">Tétel pontos megnevezése / Leírás</Label>
                 <Input
                   id="txn-description"
-                  placeholder="pl. Lidl bevásárlás, Irodaszer, Kávézó…"
+                  placeholder={tx("pl. Lidl bevásárlás, Irodaszer, Kávézó…")}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={120}
@@ -15112,7 +15394,7 @@ function TxnDialog({
                   <Label htmlFor="party">Partner / Ellenoldal (opcionális)</Label>
                   <Input
                     id="party"
-                    placeholder="pl. ügyfél / beszállító / partner"
+                    placeholder={tx("pl. ügyfél / beszállító / partner")}
                     value={party}
                     onChange={(e) => setParty(e.target.value)}
                     maxLength={160}
@@ -15126,7 +15408,7 @@ function TxnDialog({
               <Label htmlFor="txn-description">Tétel pontos megnevezése / Leírás</Label>
               <Input
                 id="txn-description"
-                placeholder="pl. megtakarítás célja"
+                placeholder={tx("pl. megtakarítás célja")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={120}
@@ -15159,7 +15441,7 @@ function TxnDialog({
                 <Label htmlFor="tags">Címkék (opcionális)</Label>
                 <Input
                   id="tags"
-                  placeholder="pl. telephely, beszerzés, fejlesztés"
+                  placeholder={tx("pl. telephely, beszerzés, fejlesztés")}
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   maxLength={160}
@@ -15277,7 +15559,7 @@ function TxnDialog({
                   <SelectContent>
                     <SelectItem value="opex">Üzemeltetési költség (OPEX)</SelectItem>
                     <SelectItem value="capex">Tárgyi eszköz / Beruházás (CAPEX)</SelectItem>
-                    <SelectItem value="maintenance">Karbantartás</SelectItem>
+                    <SelectItem value="maintenance">{tx("Karbantartás")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -15321,7 +15603,7 @@ function TxnDialog({
                       id="resale-customer"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="pl. Ügyfél Kft."
+                      placeholder={tx("pl. Ügyfél Kft.")}
                       maxLength={160}
                     />
                   </div>
@@ -15466,9 +15748,9 @@ function TxnDialog({
                   className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground"
                   onClick={() => setNewBucketOpen((o) => !o)}
                 >
-                  <Plus className="h-3 w-3" />
-                  Új alhalmaz
-                </Button>
+                  <Plus className="h-3 w-3" />{
+                  tx("Új alhalmaz")
+                }</Button>
               </div>
               <Select
                 value={bucketId || "__none"}
@@ -15478,7 +15760,7 @@ function TxnDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none">Általános megtakarítás</SelectItem>
+                  <SelectItem value="__none">{tx("Általános megtakarítás")}</SelectItem>
                   {settings.buckets.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
                       {b.name}
@@ -15490,7 +15772,7 @@ function TxnDialog({
                 <div className="flex items-center gap-2">
                   <Input
                     autoFocus
-                    placeholder="pl. Nyaralás, Vésztartalék"
+                    placeholder={tx("pl. Nyaralás, Vésztartalék")}
                     value={newBucketName}
                     onChange={(e) => setNewBucketName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && commitNewBucket()}
@@ -15502,7 +15784,7 @@ function TxnDialog({
                     onClick={commitNewBucket}
                     disabled={!newBucketName.trim()}
                   >
-                    Hozzáad
+                    {tx("Hozzáad")}
                   </Button>
                 </div>
               )}
@@ -15510,7 +15792,7 @@ function TxnDialog({
           )}
 
           <div className="grid gap-2 md:col-span-2">
-            <Label htmlFor="date">Dátum</Label>
+            <Label htmlFor="date">{t("dash.txnDate")}</Label>
             <Input
               id="date"
               type="date"
@@ -15520,32 +15802,34 @@ function TxnDialog({
             />
             {isBankImmutable && (
               <p className="text-[11px] text-muted-foreground">
-                Banki import dátuma módosíthatatlan (immutable).
+                {t("dash.bankDateImmutable")}
               </p>
             )}
           </div>
 
           {workspaceKind === "project" && (
             <div className="grid gap-2 md:col-span-2">
-              <Label>Státusz (projekt)</Label>
+              <Label>{t("dash.txnStatus")}</Label>
               <Select value={txnStatus} onValueChange={(v) => setTxnStatus(v as any)} disabled={isBankImmutable}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="planned">Tervezett</SelectItem>
-                  <SelectItem value="committed">Lekötött</SelectItem>
-                  <SelectItem value="actual">Tényleges</SelectItem>
+                  {plannedDocumentsAllowed(simOn) ? (
+                    <SelectItem value="planned">{t("dash.txnPlanned")}</SelectItem>
+                  ) : null}
+                  <SelectItem value="committed">{t("dash.txnCommitted")}</SelectItem>
+                  <SelectItem value="actual">{t("dash.txnActual")}</SelectItem>
                 </SelectContent>
               </Select>
               <div className="text-[11px] text-muted-foreground">
-                Szimuláció módban az alapértelmezett a “Tervezett”.
+                {plannedDocumentsAllowed(simOn) ? t("dash.txnPlannedHint") : t("dash.txnPlannedOff")}
               </div>
             </div>
           )}
 
           <div className="grid gap-2 md:col-span-2">
-            <Label>Számla státusz</Label>
+            <Label>{t("dash.invoiceStatus")}</Label>
             <Select
               value={invoiceStatus || "__none"}
               onValueChange={(v) => setInvoiceStatus(v === "__none" ? "" : (v as any))}
@@ -15555,16 +15839,16 @@ function TxnDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none">—</SelectItem>
-                <SelectItem value="unpaid">Fizetetlen</SelectItem>
-                <SelectItem value="pending">Folyamatban</SelectItem>
-                <SelectItem value="paid">Kifizetve</SelectItem>
+                <SelectItem value="unpaid">{t("dash.invoiceUnpaid")}</SelectItem>
+                <SelectItem value="pending">{t("dash.invoicePending")}</SelectItem>
+                <SelectItem value="paid">{t("dash.invoicePaid")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {isBankImmutable && note.trim() ? (
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="bank-note">Nyers banki közlemény (Bank Note)</Label>
+              <Label htmlFor="bank-note">{t("dash.bankNote")}</Label>
               <Textarea
                 id="bank-note"
                 rows={2}
@@ -15573,19 +15857,19 @@ function TxnDialog({
                 className="bg-muted/30"
               />
               <div className="text-[11px] text-muted-foreground">
-                Ez a banki közlemény mező (nyers import) — nem szerkeszthető. A pontos megnevezést fent add meg.
+                {t("dash.bankNoteHint")}
               </div>
             </div>
           ) : null}
 
           {!isBankImmutable ? (
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="note">Megjegyzés (opcionális)</Label>
+              <Label htmlFor="note">{t("dash.noteOptional")}</Label>
               <Textarea
                 id="note"
                 rows={2}
                 maxLength={500}
-                placeholder="pl. extra részletek, belső megjegyzés…"
+                placeholder={tx("pl. extra részletek, belső megjegyzés…")}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
@@ -15610,12 +15894,12 @@ function TxnDialog({
               <span />
             )}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" className="h-9" onClick={() => setOpen(false)}>
-                Mégse
-              </Button>
-              <Button className="h-9" onClick={submit}>
-                Mentés
-              </Button>
+              <Button variant="ghost" className="h-9" onClick={() => setOpen(false)}>{
+                tx("Mégse")
+              }</Button>
+              <Button className="h-9" onClick={submit}>{
+                tx("Mentés")
+              }</Button>
             </div>
           </div>
         </div>
@@ -15639,6 +15923,7 @@ function GoalDialog({
   trigger?: React.ReactNode | null;
   properties?: Array<{ id: string; name: string }>;
 }) {
+  const tx = useSurfaceTx();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
@@ -15687,7 +15972,7 @@ function GoalDialog({
             <Label htmlFor="gname">Név</Label>
             <Input
               id="gname"
-              placeholder="pl. Nyaralás Görögországba"
+              placeholder={tx("pl. Nyaralás Görögországba")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={120}
@@ -15733,9 +16018,9 @@ function GoalDialog({
           ) : null}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Mégse
-          </Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>{
+            tx("Mégse")
+          }</Button>
           <Button onClick={submit}>Létrehozás</Button>
         </DialogFooter>
       </DialogContent>
@@ -15783,6 +16068,7 @@ function HomeLoginScreen({
   profiles: Profile[];
   preselectId?: string;
 }) {
+  const tx = useSurfaceTx();
   const { unlockById, beginCreate, deleteProfile, backToPicker } = useVault();
   const hasProfiles = profiles.length > 0;
 
@@ -15838,7 +16124,7 @@ function HomeLoginScreen({
         <div className="mt-6 space-y-4">
           {profiles.length > 1 && (
             <div className="grid gap-2">
-              <Label htmlFor="profile-pick">Profil</Label>
+              <Label htmlFor="profile-pick">{tx("Profil")}</Label>
               <Select value={selectedId} onValueChange={setSelectedId}>
                 <SelectTrigger id="profile-pick">
                   <SelectValue />
@@ -15898,9 +16184,9 @@ function HomeLoginScreen({
           className="w-full"
           onClick={() => void beginCreate()}
         >
-          <UserPlus className="mr-2 h-4 w-4" />
-          Profil létrehozása
-        </Button>
+          <UserPlus className="mr-2 h-4 w-4" />{
+          tx("Profil létrehozása")
+        }</Button>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">
           A következő lépésben nevet és mesterjelszót adhatsz meg — Bitwarden-ajánlással
           erős jelszó generálásához.
@@ -15946,16 +16232,16 @@ function HomeLoginScreen({
             Nincs visszaállítás.
           </p>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setConfirmDel(null)}>
-              Mégse
-            </Button>
+            <Button variant="ghost" onClick={() => setConfirmDel(null)}>{
+              tx("Mégse")
+            }</Button>
             <Button
               variant="destructive"
               onClick={async () => {
                 if (!confirmDel) return;
                 await deleteProfile(confirmDel);
                 setConfirmDel(null);
-                toast.success("Profil törölve.");
+                toast.success(tx("Profil törölve."));
               }}
             >
               Törlés
@@ -15968,6 +16254,7 @@ function HomeLoginScreen({
 }
 
 function VaultSetupScreen({ first = false }: { first?: boolean }) {
+  const tx = useSurfaceTx();
   const { createProfile, cancelCreate } = useVault();
   const [name, setName] = useState("");
   const [pw, setPw] = useState("");
@@ -15982,17 +16269,17 @@ function VaultSetupScreen({ first = false }: { first?: boolean }) {
       return;
     }
     if (pw.length < 12) {
-      toast.error("Legalább 12 karakter kell.");
+      toast.error(tx("Legalább 12 karakter kell."));
       return;
     }
     if (pw !== confirm) {
-      toast.error("A két jelszó nem egyezik.");
+      toast.error(tx("A két jelszó nem egyezik."));
       return;
     }
     setBusy(true);
     try {
       await createProfile(name, pw);
-      toast.success("Profil létrehozva.");
+      toast.success(tx("Profil létrehozva."));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Hiba");
     } finally {
@@ -16037,7 +16324,7 @@ function VaultSetupScreen({ first = false }: { first?: boolean }) {
             id="profile-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="pl. Személyes, Vállalkozás"
+            placeholder={tx("pl. Személyes, Vállalkozás")}
             autoFocus
           />
         </div>
@@ -16088,9 +16375,9 @@ function VaultSetupScreen({ first = false }: { first?: boolean }) {
               className="flex-1"
               onClick={() => void cancelCreate()}
               disabled={busy}
-            >
-              Mégse
-            </Button>
+            >{
+              tx("Mégse")
+            }</Button>
           )}
           <Button className="flex-1" onClick={submit} disabled={busy}>
             {busy ? "Létrehozás…" : "Profil létrehozása"}
@@ -16239,6 +16526,7 @@ function WorkspaceTabsLegacy({
   onCustom: () => void;
   labelFor: (wsId: string) => string;
 }) {
+  const tx = useSurfaceTx();
   const tabBase =
     "relative -mb-px inline-flex items-center gap-1.5 rounded-t-lg border border-b-0 px-3 py-1.5 text-xs font-medium transition-colors";
   const active =
@@ -16256,9 +16544,9 @@ function WorkspaceTabsLegacy({
         }`}
         aria-pressed={activeWs === "magan"}
       >
-        <Folder className="h-3.5 w-3.5" />
-        Magán
-      </button>
+        <Folder className="h-3.5 w-3.5" />{
+        tx("Magán")
+      }</button>
 
       <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto">
         {wsOptions.map((o) => {
@@ -16299,8 +16587,8 @@ function WorkspaceTabsLegacy({
             type="button"
             onClick={onCustom}
             className="btn-new-item"
-            title="Új Slot hozzáadása"
-            aria-label="Új Slot hozzáadása"
+            title={tx("Új Slot hozzáadása")}
+            aria-label={tx("Új Slot hozzáadása")}
           >
             <Plus className="h-3.5 w-3.5" />
             <span className="btn-new-item-label">Új</span>
@@ -16316,7 +16604,7 @@ function WorkspaceTabsLegacy({
           activeWs === "szumma" ? "border-t-slate-400/80" : "border-t-transparent"
         }`}
         aria-pressed={activeWs === "szumma"}
-        title="Szumma nézet (összes munkatér)"
+        title={tx("Szumma nézet (összes munkatér)")}
       >
         <Sigma className="h-3.5 w-3.5" />
         Szumma

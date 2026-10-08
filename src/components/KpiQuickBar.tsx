@@ -33,7 +33,10 @@ export function KpiQuickBar({ tiles }: { tiles?: KpiQuickBarTile[] }) {
     "flex h-10 max-h-[120px] items-center justify-center rounded-lg border border-border bg-[var(--dropdown-hover)] px-1 text-[11px] text-[var(--text-muted)] transition-all duration-200";
 
   return (
-    <div className="mx-auto mb-1 w-full max-w-[98%] shrink-0 px-2 sm:px-3 md:px-4">
+    <div
+      data-kpi-quick-bar=""
+      className="kpi-quick-bar mx-auto mb-1 w-full max-w-[98%] shrink-0 px-2 sm:px-3 md:px-4"
+    >
       <div className="flex items-start gap-2">
         <RevealToggle open={isOpen} onClick={toggle} />
         <div className="min-w-0 flex-1">

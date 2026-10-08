@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useVault } from "@/lib/vault";
 import { enterCampaignChooser } from "@/lib/campaignSession";
+import { langSearch } from "@/lib/langSearch";
 
 export const Route = createFileRoute("/f/oktatas-szimulacio/demo")({
   component: OktatasSzimulacioDemoLoaderPage,
@@ -24,7 +25,7 @@ function OktatasSzimulacioDemoLoaderPage() {
     setError(null);
     try {
       enterCampaignChooser("oktatas");
-      void navigate({ to: "/", hash: "tipusok" });
+      void navigate({ to: "/", hash: "tipusok", search: langSearch() });
     } catch (e: unknown) {
       inFlight.current = false;
       setError(e instanceof Error ? e.message : "Nem sikerült megnyitni a tréning-eseteket.");

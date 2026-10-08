@@ -1,4 +1,5 @@
 import type { GlossaryTermId } from "@/lib/glossary";
+import type { KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
 import type { OplLesson, OplStep } from "@/lib/opl";
 
 function step(
@@ -32,6 +33,7 @@ function motor(p: {
   deepDiveEn: string;
   jargon: GlossaryTermId[];
   keywords: string[];
+  kbId?: KnowledgeBaseArticleId;
   steps: OplStep[];
 }): OplLesson {
   const { slug, ...rest } = p;
@@ -309,16 +311,17 @@ export const MOTOR_OPL_LESSONS: OplLesson[] = [
     titleEn: "Poka-Yoke",
     whyHu: "Ne lehessen elrontani. A motor megkérdez, nem ír titokban.",
     whyEn: "Make the error hard. The engine asks; it does not write in silence.",
-    jargon: ["pokaYoke", "want", "vat"],
-    keywords: ["poka-yoke", "hibaellenes", "megelőzés", "selejt"],
+    jargon: ["pokaYoke", "want", "devTree"],
+    keywords: ["poka-yoke", "hibaellenes", "megelőzés", "selejt", "nyelv", "zár"],
+    kbId: "poka-yoke-guard",
     deepDiveHu:
-      "Poka-Yoke: folyamatba épített hibamegelőzés. A motorban: WANT keret túllépés megerősítése, Szummában tiltott import, gyanús ÁFA-kulcs jelölése, konzisztencia lámpa. Nem büntetés — a hiba drágább, mint a kérdés. A fizikai oldalon a hibaindex a sérült lépést számolja. Egy zárat fogadj el, ne mindet kapcsold ki.",
+      "Poka-Yoke: folyamatba épített hibamegelőzés. A motorban: WANT keret túllépés, Szummában tiltott import, gyanús ÁFA-kulcs, konzisztencia lámpa. A felületen: a nyelv a címsorban marad, a modulok a fán kapcsolhatók, a gyors mutató nem mászik a főasztalra. Nem büntetés — a hiba drágább, mint a kérdés. Egy zárat fogadj el, ne mindet kapcsold ki.",
     deepDiveEn:
-      "Poka-Yoke: mistake-proofing built into the process. In the engine: WANT-cap confirm, import blocked in Szumma, flagged VAT rate, consistency lamp. Not punishment — the error is costlier than the question. On the physical side the fault index counts a broken step. Accept one lock; do not switch them all off.",
+      "Poka-Yoke: mistake-proofing built into the process. In the engine: WANT-cap confirm, import blocked in Szumma, flagged VAT rate, consistency lamp. On the surface: language stays in the address bar, modules switch on the tree, the quick indicator does not crawl onto the main desk. Not punishment — the error is costlier than the question. Accept one lock; do not switch them all off.",
     steps: [
       step("s1", "Zár", "Lock", "A WANT / import / ÁFA kérdés Poka-yoke.", "WANT / import / VAT prompts are poka-yoke.", "Poka-yoke megerősítés", "Poka-yoke confirm"),
-      step("s2", "Lámpa", "Lamp", "A piros konzisztencia a forrást kéri, nem a KPI-t.", "A red lamp asks for the source, not the KPI.", "Poka-yoke lámpa", "Poka-yoke lamp"),
-      step("s3", "Ne kapcsold ki", "Do not disable", "Ha mindig felülírod, a hiba olcsónak tűnik.", "If you always override, the error looks cheap.", "Poka-yoke felülírás", "Poka-yoke override"),
+      step("s2", "Nyelv", "Language", "A ?lang= hiányát a zár visszaírja. Nézd a címsort.", "If ?lang= is missing, the lock writes it back. Read the bar.", "Nyelv Poka-yoke a címsorban", "Language poka-yoke in the address bar"),
+      step("s3", "Fa", "Tree", "Ami nincs a fán bekapcsolva, az nem zsúfolja az asztalt.", "What is off on the tree does not clutter the desk.", "Fa zár / modul", "Tree lock / module"),
     ],
   }),
   motor({
@@ -399,6 +402,26 @@ export const MOTOR_OPL_LESSONS: OplLesson[] = [
       step("s1", "CHECK", "CHECK", "Olvasd a súrlódás forintját a CHECK-en.", "Read friction forints on CHECK.", "Súrlódás a CHECK-en", "Friction on CHECK"),
       step("s2", "Forrás", "Source", "Díj, késés vagy dupla sor. Válassz egyet.", "Fee, delay or a double line. Pick one.", "Súrlódás forrása", "Friction source"),
       step("s3", "Egy", "One", "Egy beavatkozás. A holtpénz más kérdés.", "One intervention. Idle cash is a different question.", "Súrlódás Kaizen", "Friction Kaizen"),
+    ],
+  }),
+  motor({
+    slug: "licenckeret",
+    categoryHu: "Licenc",
+    categoryEn: "Licence",
+    titleHu: "Licenckeret — Case / Slot / Seat / Guest",
+    titleEn: "Licence frame — Case / Slot / Seat / Guest",
+    whyHu: "A Case / Slot / Seat / Guest a licenc. Új motor nem ad asztalt.",
+    whyEn: "Case / Slot / Seat / Guest are the licence. A new engine does not add a desk.",
+    jargon: ["case", "slot", "pokaYoke"],
+    keywords: ["licenc", "kvóta", "motor", "case", "slot", "legó", "licence", "quota"],
+    deepDiveHu:
+      "A licenckeret a párhuzamos asztalokat, füleket, szerkesztőket és vendégeket köti: Case, Slot, Seat, Guest. Ez a kvóta a vásárolt csomaghoz tartozik, nem a motorhoz. A gazdasági, oktatási és BCP motor ugyanarra a keretre ül — moduláris legó. Extra Case vagy extra Slot kapacitást ad; motorfelvétel nem. A számolás helyben marad, Poka-Yoke zárral: idegen token nem olvad bele, és a kvóta nem nő magától. Ha több asztal kell, bővítőt veszel, nem új motort.",
+    deepDiveEn:
+      "The licence frame caps parallel desks, tabs, editors and guests: Case, Slot, Seat, Guest. That quota belongs to the purchased plan, not to the engine. Economic, education and BCP sit on the same frame — modular Lego. Extra Case or Extra Slot add capacity; adding an engine does not. Calculation stays local, behind a Poka-Yoke lock: a foreign token cannot merge in, and quota does not grow by itself. If you need another desk, you buy an add-on, not a new engine.",
+    steps: [
+      step("s1", "Keret", "Frame", "Nézd a Case / Slot / Seat / Guest számot a licencen.", "Read Case / Slot / Seat / Guest on the licence.", "Licenckeret HUD", "Licence-frame HUD"),
+      step("s2", "Motor", "Engine", "Válts oktatásra vagy BCP-re: a kvóta nem nő.", "Switch to education or BCP: quota does not grow.", "Motor a kereten", "Engine on the frame"),
+      step("s3", "Bővítő", "Add-on", "Extra asztalhoz Extra Case kell, nem motor.", "Extra desk needs Extra Case, not an engine.", "Kapacitás bővítő", "Capacity add-on"),
     ],
   }),
 ];

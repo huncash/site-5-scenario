@@ -39,9 +39,9 @@ const SUPPORT_CORE_LESSON_INDEX: SupportLessonIndex[] = [
     group: "guide",
     titleHu: "Dashboard kezelés",
     titleEn: "Dashboard handling",
-    summaryHu: "Felső vezérlés, középen a munka, alul a modulok. Gyors állapot, döntés és a fülek.",
-    summaryEn: "Controls on top, work in the middle, modules below. Quick read, decision and the tabs.",
-    keywords: ["dashboard", "kpi", "what-if", "pro", "fedezeti", "három sáv", "anatomy"],
+    summaryHu: "Előbb a fül, aztán a lombik. A modulok a fán vannak — a főasztal a döntésé.",
+    summaryEn: "Tab first, then the flask. Modules live on the tree — the desk is for the decision.",
+    keywords: ["dashboard", "kpi", "what-if", "pro", "lombik", "dev tree", "laboratórium"],
   },
   {
     id: "lecke-want",
@@ -183,6 +183,20 @@ const SUPPORT_CORE_LESSON_INDEX: SupportLessonIndex[] = [
   },
 ];
 
+function slugEn(titleEn: string): string {
+  return titleEn
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function withEnglishAliases(lesson: SupportLessonIndex): SupportLessonIndex {
+  const slug = slugEn(lesson.titleEn);
+  const shortId = lesson.id.replace(/^lecke-/, "");
+  const extra = [`lesson-${shortId}`, slug, `lesson-${slug}`].filter(Boolean);
+  return { ...lesson, aliases: [...new Set([...lesson.aliases, ...extra])] };
+}
+
 function oplIndexExtras(): SupportLessonIndex[] {
   return OPL_LESSONS.filter(
     (o) => !SUPPORT_CORE_LESSON_INDEX.some((c) => c.path === o.path || c.id === o.id),
@@ -200,13 +214,14 @@ function oplIndexExtras(): SupportLessonIndex[] {
     summaryHu: o.whyHu,
     summaryEn: o.whyEn,
     keywords: o.keywords,
+    kbId: o.kbId,
   }));
 }
 
 export const SUPPORT_LESSON_INDEX: SupportLessonIndex[] = [
   ...SUPPORT_CORE_LESSON_INDEX,
   ...oplIndexExtras(),
-];
+].map(withEnglishAliases);
 
 const STATIC = new Set<string>(SUPPORT_STATIC_SLUGS);
 
@@ -282,7 +297,14 @@ export function searchSupportLessons(
       body?.deepDiveHu ?? "",
       body?.deepDiveEn ?? "",
       ...(body?.jargon ?? []),
-      ...(body?.steps.flatMap((s) => [s.titleHu, s.actionHu, s.image?.captionHu ?? ""]) ?? []),
+      ...(body?.steps.flatMap((s) => [
+        s.titleHu,
+        s.actionHu,
+        s.image?.captionHu ?? "",
+        s.titleEn,
+        s.actionEn,
+        s.image?.captionEn ?? "",
+      ]) ?? []),
     ]
       .join(" ")
       .toLowerCase();

@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { LabActiveMark } from "@/components/labs/LabActiveDot";
+import { LabSection } from "@/components/labs/LabSection";
 import { CrisisBranchTimeline } from "@/components/physical/CrisisBranchTimeline";
 import { MeshNodeMap } from "@/components/physical/MeshNodeMap";
 import { SurvivalGauges } from "@/components/physical/SurvivalGauges";
@@ -12,6 +14,7 @@ import {
   type SurvivalGauge,
 } from "@/lib/physicalMetrics";
 import { usePhysicalPlanPath } from "@/lib/physicalPlanPath";
+import { useLabOnDashboard } from "@/hooks/useDashboardLabs";
 
 function planGauges(gauges: SurvivalGauge[], prefix: string): SurvivalGauge[] {
   return gauges.map((g) => ({
@@ -29,6 +32,7 @@ export function PhysicalOpsPanel(props: {
   phase?: "PLAN" | "DO" | "CHECK" | "ACT";
 }) {
   const { t } = useI18n();
+  const edgeOn = useLabOnDashboard("labs-edge");
   const seed = useMemo(
     () => buildPhysicalDashboard(props.segmentId, props.baseline),
     [props.baseline, props.segmentId],
@@ -36,6 +40,7 @@ export function PhysicalOpsPanel(props: {
   const { selected, setChoice } = usePhysicalPlanPath(props.segmentId ?? "");
   const dash = useMemo(() => (seed ? applyCrisisSelections(seed, selected) : seed), [seed, selected]);
 
+  if (!edgeOn) return null;
   if (!seed || !dash || !dash.gauges.length) return null;
 
   const onChoose = (forkId: string, choice: CrisisChoice) => {
@@ -54,7 +59,11 @@ export function PhysicalOpsPanel(props: {
       : t("panel.pokaHold");
 
   return (
-    <div className="grid gap-3">
+    <LabSection id="labs-edge" className="grid gap-3">
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Szenzoros / Edge</span>
+        <LabActiveMark />
+      </div>
       {phase === "PLAN" ? (
         <>
           <p className="text-[12px] leading-snug text-muted-foreground">{t("pdca.planFocus")}</p>
@@ -149,6 +158,6 @@ export function PhysicalOpsPanel(props: {
           </div>
         </>
       ) : null}
-    </div>
+    </LabSection>
   );
 }

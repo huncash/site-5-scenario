@@ -3,9 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FunnelCheckout } from "@/components/funnel/FunnelCheckout";
 import { getTierCore, isTierId, type TierId } from "@/content/pricing/tiers";
 import { OKTATAS_SZIMULACIO_FUNNEL } from "@/content/funnels/oktatasSzimulacio";
+import { parseLangSearch } from "@/lib/langSearch";
 
 export const Route = createFileRoute("/f/oktatas-szimulacio/checkout")({
-  validateSearch: (s: Record<string, unknown>) => ({ tier: isTierId(s.tier) ? s.tier : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    ...parseLangSearch(s),
+    tier: isTierId(s.tier) ? s.tier : undefined,
+  }),
   component: OktatasSzimulacioCheckoutPage,
 });
 

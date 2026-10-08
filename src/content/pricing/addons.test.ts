@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   JIT_ADDON_BY_ID,
   JIT_ADDON_MIN_COMMITMENT_DAYS,
+  PUBLIC_JIT_ADDONS,
   jitExampleBundleHuf,
   slotPackPriceFromUnit,
 } from "@/content/pricing/addons";
@@ -15,6 +16,16 @@ describe("JIT perpetual add-on pricing", () => {
     expect(JIT_ADDON_BY_ID.case_plus_1.public).toBe(true);
     expect(JIT_ADDON_BY_ID.slot_plus_1.priceHuf).toBe(49_000);
     expect(JIT_ADDON_BY_ID.seat_plus_1.priceHuf).toBe(79_000);
+    expect(JIT_ADDON_BY_ID.guest_plus_1.priceHuf).toBe(19_000);
+    expect(JIT_ADDON_BY_ID.guest_plus_1.public).toBe(true);
+    expect(JIT_ADDON_BY_ID.guest_plus_1.labelHu).toBe("+1 Extra vendégfiók");
+    expect(PUBLIC_JIT_ADDONS.map((a) => a.id)).toEqual([
+      "case_plus_1",
+      "slot_plus_1",
+      "seat_plus_1",
+      "guest_plus_1",
+      "edge_sensor",
+    ]);
     expect(JIT_ADDON_BY_ID.edge_sensor.priceHuf).toBe(99_000);
     expect(JIT_ADDON_MIN_COMMITMENT_DAYS).toBe(0);
   });

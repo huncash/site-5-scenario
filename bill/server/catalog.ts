@@ -64,8 +64,8 @@ export const JIT_ADDON_HUF: Record<JitAddonId, number> = { ...JIT_ADDON_PRICES }
 export const JIT_ADDON_LABELS: Record<JitAddonId, string> = {
   case_plus_1: "+1 Extra Aktív Case",
   slot_plus_1: "+1 Extra Aktív Slot",
-  seat_plus_1: "+1 Extra Szerkesztő Seat",
-  guest_plus_1: "+1 Extra Guest",
+  seat_plus_1: "+1 Extra szerkesztő",
+  guest_plus_1: "+1 Extra vendégfiók",
   edge_sensor: "Szenzoros / Edge adatgyűjtő modul",
 };
 

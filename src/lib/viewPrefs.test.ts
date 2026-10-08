@@ -65,4 +65,18 @@ describe("viewPrefs", () => {
     expect(VIEW_PREFS_BOOT_SCRIPT).toContain("szcenario_theme");
     expect(VIEW_PREFS_BOOT_SCRIPT.startsWith("(function")).toBe(true);
   });
+
+  it("applies cookie before localStorage so a stored EN locale wins over a stale HU cookie", () => {
+    const cookieRead = VIEW_PREFS_BOOT_SCRIPT.indexOf("fromToken");
+    const storageLocale = VIEW_PREFS_BOOT_SCRIPT.indexOf('localStorage.getItem("szcenario_locale")');
+    const queryLang = VIEW_PREFS_BOOT_SCRIPT.indexOf('q.get("lang")');
+    expect(cookieRead).toBeGreaterThan(-1);
+    expect(storageLocale).toBeGreaterThan(cookieRead);
+    expect(queryLang).toBeGreaterThan(storageLocale);
+  });
+
+  it("Poka-Yoke: missing ?lang= is restored from persistence before hydrate", () => {
+    expect(VIEW_PREFS_BOOT_SCRIPT).toContain('q.set("lang"');
+    expect(VIEW_PREFS_BOOT_SCRIPT).toContain("history.replaceState");
+  });
 });

@@ -30,7 +30,8 @@ import {
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { SiteFooter } from "@/components/SiteFooter";
-import { billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
+import { billCheckoutUrl, billSearchFromLocation, readBillCheckoutSearch } from "@/lib/billing";
+import { bundleLockUpgradeCart, evaluateBundleLockFromCart } from "@/lib/bundleLock";
 import { formatRenewalDate, nextRenewalDate } from "@/lib/billingRenewal";
 import { enterpriseInquiryHref, ENTERPRISE_SELF_SERVE_CHECKOUT, isEnterprisePlanId } from "@/lib/enterpriseSchedule";
 import type { BillingInterval } from "@/lib/funnelOrder";
@@ -352,6 +353,12 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
   if (slotPack && isSlotPackId(slotPack) && slotPackAllowedForTier(planTier)) {
     dueNet += slotPackNetForInterval(slotPack, interval);
   }
+  const bundleLock = evaluateBundleLockFromCart({
+    planId: planTier,
+    addon,
+    slotPack: slotPackAllowedForTier(planTier) ? slotPack : undefined,
+  });
+  const bundleNextLabel = bundleLock.nextTier ? tierLabel(locale, bundleLock.nextTier) : "";
   const due = splitVat(dueNet, vat.rate);
   const canInstallment = installmentAllowed(planTier, interval);
   const useInstallment = canInstallment && payPlan === "installment2";
@@ -391,8 +398,29 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
   const canSubmit =
     !busy &&
     !gapHint &&
+    !bundleLock.tripped &&
     !(payMethod === "barion" && !cfg.barion) &&
     cfg.missingKeys.length === 0;
+
+  const goBundleUpgrade = () => {
+    if (!bundleLock.nextTier) return;
+    if (bundleLock.nextTier === "expert" && !ENTERPRISE_SELF_SERVE_CHECKOUT) {
+      window.location.assign(enterpriseInquiryHref({ locale }));
+      return;
+    }
+    const kept = bundleLockUpgradeCart({ addon, slotPack });
+    window.location.assign(
+      billCheckoutUrl({
+        tier: bundleLock.nextTier,
+        interval,
+        addon: kept.addon,
+        country,
+        partnerKind: buyerKind,
+        hostname: window.location.hostname,
+        pathname: window.location.pathname,
+      }),
+    );
+  };
   const mainOrigin = mainPublicOrigin();
   const aszfHref = `${mainOrigin}/aszf`;
   const gdprHref = `${mainOrigin}/gdpr`;
@@ -1048,8 +1076,28 @@ export function BillingCheckout({ search }: { search?: string } = {}) {
           </div>
         </div>
 
+        {bundleLock.tripped ? (
+          <div className="card" style={{ marginTop: 16, borderColor: "var(--border)" }}>
+            <div style={{ fontSize: 14, fontWeight: 650 }}>{t.bundleLockTitle}</div>
+            <p className="hint" style={{ marginTop: 8 }}>
+              {t.bundleLockBody
+                .replaceAll("{next}", bundleNextLabel)
+                .replace("{upgrade}", money(bundleLock.upgradeNet))
+                .replace("{stay}", money(bundleLock.stayNet))
+                .replace("{save}", money(bundleLock.saveHuf))}
+            </p>
+            <p className="err" style={{ marginTop: 8 }}>
+              {t.bundleLockBlocked}
+            </p>
+            <button type="button" className="btn primary" style={{ marginTop: 12, width: "100%" }} onClick={goBundleUpgrade}>
+              {bundleLock.nextTier === "expert" && !ENTERPRISE_SELF_SERVE_CHECKOUT
+                ? t.bundleLockInquiry
+                : t.bundleLockCta.replace("{next}", bundleNextLabel)}
+            </button>
+          </div>
+        ) : null}
         {error ? <p className="err">{error}</p> : null}
-        {gapHint ? <p className="hint poka-hint">{t.needCheckout}</p> : null}
+        {gapHint && !bundleLock.tripped ? <p className="hint poka-hint">{t.needCheckout}</p> : null}
         <button
           className="btn primary"
           style={{ marginTop: 16, width: "100%" }}

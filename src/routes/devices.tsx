@@ -14,9 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/devices")({
-  validateSearch: z.object({
-    profile: z.string().min(1),
-  }),
+  validateSearch: z
+    .object({
+      profile: z.string().min(1),
+      lang: z.enum(["hu", "en"]).optional(),
+    })
+    .passthrough(),
   component: DevicesPage,
 });
 

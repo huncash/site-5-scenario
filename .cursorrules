@@ -18,7 +18,7 @@
 
 ## Support SSOT (árazás / licenc / helyi import)
 - A részletes működési, árazási, licencelési és technikai specifikáció hivatalos forrása a Support `/pricing` oldal (`support/src/copy.ts` + `supportPricingHref`).
-- Horgonyok: `#basic` `#pro` `#enterprise` `#tiered-loyalty` `#addons` `#active-workspaces` `#workflow` `#local-import` `#desktop-engines` `#desktop` `#economic-engine` `#bcp` `#education-engine`.
+- Horgonyok: `#basic` `#pro` `#enterprise` `#tiered-loyalty` `#addons` `#active-workspaces` `#license-frame` `#workflow` `#local-import` `#desktop-engines` `#desktop` `#own-line` `#economic-engine` `#bcp` `#education-engine`.
 - A főoldal és az app felületei csak tömör szöveget mutatnak; részletezéshez a fenti horgonyokra kell linkelni (`src/lib/support.ts` → `supportPricingHref`).
 
 ## Nyilvános szövegezés (Public Copy Policy)

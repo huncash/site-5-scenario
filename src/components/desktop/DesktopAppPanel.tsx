@@ -172,7 +172,17 @@ export function DesktopAppPanel({ compact = false }: { compact?: boolean }) {
             <li key={phase} className="text-[13px] leading-snug">
               <span className="font-medium text-foreground">{t(PHASE_COPY[phase].title)}</span>
               {compact ? null : (
-                <span className="mt-0.5 block text-[12px] text-muted-foreground">{t(PHASE_COPY[phase].body)}</span>
+                <span className="mt-0.5 block text-[12px] text-muted-foreground">
+                  {t(PHASE_COPY[phase].body)}
+                  {phase === "sovereign" ? (
+                    <>
+                      {" "}
+                      <a className="underline underline-offset-2" href={supportPricingHref("own-line")}>
+                        {t("pricing.moreInfo")}
+                      </a>
+                    </>
+                  ) : null}
+                </span>
               )}
             </li>
           ))}

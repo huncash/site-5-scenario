@@ -153,10 +153,18 @@ export const YEARLY_DISCOUNT_PCT = 0;
 export const JIT_ADDON_MIN_COMMITMENT_DAYS = 0;
 export const MAX_REFERRAL_GIFT_SLOTS = 25;
 
-/** Soft cap unlimited Case mellett a slot-ledger alsó határhoz (Case × Slot/Case). */
-const UNLIMITED_CASES_SOFT = 24;
+/** Soft cap unlimited Case mellett a slot-ledger alsó határhoz (Case × Slot/Case). HUD soha nem mutat ∞. */
+export const UNLIMITED_CASES_SOFT = 24;
 
-/** JIT egységárak (nettó Ft / örökös modul) — Pro Case upsell listaár. */
+/** Licenckeret szám: nyitott / unlimited kvóta → rögzített soft cap. */
+export function finiteQuota(n: QuotaCount, unlimitedFrame = UNLIMITED_CASES_SOFT): number {
+  return n === "unlimited" ? unlimitedFrame : n;
+}
+
+/**
+ * JIT egységárak (nettó Ft / örökös modul) — Pro Case upsell listaár.
+ * Bundle-zár (Case+Slot+Seat+Edge): a halmaz Basicen nem lehet olcsóbb a Pro-lépcsőnél.
+ */
 export const JIT_ADDON_PRICES: Record<JitAddonId, number> = {
   case_plus_1: 49_000,
   slot_plus_1: 49_000,
@@ -422,13 +430,18 @@ export function loyaltyFeeForYear(plan: PlanConfig, year: number): MoneyPair | n
   return { huf: 0, eur: 0 };
 }
 
-/** Havi egyenletes frissítési bevétel a 36 hónapos szimulációhoz (Y2 / Y3; Y4+ = 0). */
-export function loyaltyMonthlyRenewalHuf(plan: PlanConfig, month: number): number {
+/** Opcionális éves frissítés a 36 hónapos szimulációhoz: Y2 a 13. hónapban, Y3 a 25.-ben; Y4+ = 0. Nem havi előfizetés. */
+export function loyaltyAnniversaryFeeHuf(plan: PlanConfig, month: number): number {
   const L = plan.loyaltyLadder;
-  if (!L || month <= 12) return 0;
-  if (month <= 24) return L.year2.huf / 12;
-  if (month <= 36) return L.year3.huf / 12;
+  if (!L) return 0;
+  if (month === 13) return L.year2.huf;
+  if (month === 25) return L.year3.huf;
   return 0;
+}
+
+/** @deprecated Az éves csomag nem havi előfizetés — használd: loyaltyAnniversaryFeeHuf. */
+export function loyaltyMonthlyRenewalHuf(plan: PlanConfig, month: number): number {
+  return loyaltyAnniversaryFeeHuf(plan, month);
 }
 
 export function hasLoyaltyLadder(plan: PlanConfig): boolean {

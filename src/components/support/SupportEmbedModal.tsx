@@ -20,13 +20,13 @@ export function SupportEmbedFrame({
 }) {
   const { locale, t } = useI18n();
   const route = resolveSupportSlug(slug);
-  const opl = oplByPath(route.canonical);
+  const opl = oplByPath(route.canonical) ?? (route.lesson ? oplByPath(route.lesson.id) : null);
   const [failed, setFailed] = useState(false);
   const timer = useRef<number | null>(null);
   const src = `${supportEmbedUrl(slug)}#${locale}`;
 
   useEffect(() => {
-    if (opl) return;
+    if (opl || route.lesson) return;
     setFailed(false);
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setFailed(true);
@@ -36,12 +36,23 @@ export function SupportEmbedFrame({
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [src, opl]);
+  }, [src, opl, route.lesson]);
 
   if (opl) {
     return (
       <div data-support-embed="local" className="min-h-0 overflow-y-auto pr-1">
         <OnePointLesson lesson={opl} />
+      </div>
+    );
+  }
+
+  if (route.lesson) {
+    const titleText = locale === "en" ? route.lesson.titleEn : route.lesson.titleHu;
+    const summary = locale === "en" ? route.lesson.summaryEn : route.lesson.summaryHu;
+    return (
+      <div data-support-embed="local" className="min-h-0 space-y-3 overflow-y-auto pr-1">
+        <h2 className="text-base font-semibold text-foreground">{titleText}</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">{summary}</p>
       </div>
     );
   }

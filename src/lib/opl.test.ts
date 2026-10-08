@@ -30,9 +30,14 @@ describe("opl", () => {
       expect(lesson.deepDiveEn.length).toBeGreaterThan(160);
       expect(lesson.steps.length).toBeGreaterThanOrEqual(3);
       expect(lesson.jargon.length).toBeGreaterThan(0);
+      expect(lesson.titleEn.trim().length).toBeGreaterThan(2);
+      expect(lesson.whyEn.trim().length).toBeGreaterThan(8);
       for (const step of lesson.steps) {
+        expect(step.titleEn.trim().length).toBeGreaterThan(0);
+        expect(step.actionEn.trim().length).toBeGreaterThan(3);
         expect(step.actionHu.split(" ").length).toBeLessThan(22);
         expect(step.image?.captionHu.length).toBeGreaterThan(3);
+        expect(step.image?.captionEn.length).toBeGreaterThan(3);
       }
     }
   });
@@ -45,7 +50,7 @@ describe("opl", () => {
     expect(MOTOR_OPL_LESSONS.length).toBeGreaterThanOrEqual(15);
     const paths = MOTOR_OPL_LESSONS.map((l) => l.path);
     expect(new Set(paths).size).toBe(paths.length);
-    for (const slug of ["jit", "dokk", "afa-kor", "holtpenz", "kuszob", "opcio"]) {
+    for (const slug of ["jit", "dokk", "afa-kor", "holtpenz", "kuszob", "opcio", "licenckeret"]) {
       expect(paths).toContain(`lecke-motor-${slug}`);
     }
     for (const lesson of MOTOR_OPL_LESSONS) {
@@ -60,6 +65,11 @@ describe("opl", () => {
     expect(oplByPath("lecke-dash-horizont")?.titleHu).toMatch(/6 \/ 12 \/ 24/);
     expect(oplByPath("lecke-dash-horizont")?.steps.every((s) => Boolean(s.image?.src))).toBe(true);
     expect(oplByPath("lecke-motor-jit")?.titleHu).toMatch(/JIT/i);
+    expect(oplByPath("lecke-dash-dev-tree")?.kbId).toBe("labs-dev-tree");
+    expect(oplByPath("lecke-dash-nyelv")?.kbId).toBe("language-persist");
+    expect(oplByPath("lecke-dash-nyelv")?.whyHu).toMatch(/HU \/ EN/);
+    expect(oplByPath("lecke-dash-nyelv")?.whyEn).toMatch(/HU \/ EN/);
+    expect(oplByPath("lecke-motor-poka-yoke")?.kbId).toBe("poka-yoke-guard");
     expect(oplByPath("nincs")).toBeNull();
   });
 });

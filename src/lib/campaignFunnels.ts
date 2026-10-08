@@ -1,4 +1,5 @@
 import type { ScenarioDoorStep } from "@/lib/doorStep";
+import { parseLangSearch, type LangSearch } from "@/lib/langSearch";
 
 export const CAMPAIGN_IDS = ["bcp", "strategia", "kozosseg", "oktatas", "makro"] as const;
 export type CampaignId = (typeof CAMPAIGN_IDS)[number];
@@ -11,7 +12,7 @@ export type CampaignUtm = {
   term?: string;
 };
 
-export type CampaignSearch = {
+export type CampaignSearch = LangSearch & {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -101,6 +102,7 @@ export function optSearchStr(value: unknown): string | undefined {
 
 export function campaignSearchFromUnknown(s: Record<string, unknown>): CampaignSearch {
   return {
+    ...parseLangSearch(s),
     utm_source: optSearchStr(s.utm_source),
     utm_medium: optSearchStr(s.utm_medium),
     utm_campaign: optSearchStr(s.utm_campaign),

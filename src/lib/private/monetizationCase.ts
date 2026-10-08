@@ -1,16 +1,16 @@
 /**
  * Privát monetizációs szimuláció — NEM része a publikus demó/katalógus listáknak.
  * Elérés: csak localhost `/admin/monetization-sim`.
+ *
+ * Két pillér: Opció A (örök használat + 1 év frissítés, egyszeri vagy 2×60 nap),
+ * Opció B (opcionális Y2+ éves frissítés a meglévő örök licenc mellé).
  */
 
+import { INSTALLMENT2_DUE_DAYS } from "@/lib/installmentPlan";
 import {
-  OURS_ENTERPRISE_MAINTENANCE_HUF,
-  OURS_ENTERPRISE_PERPETUAL_HUF,
-  OURS_ENTERPRISE_Y3_HUF,
   OURS_PRO_MAINTENANCE_HUF,
   OURS_PRO_PERPETUAL_HUF,
   OURS_PRO_Y3_HUF,
-  SAAS_CONTROL_SEAT_MONTHLY_HUF,
 } from "@/lib/private/marketControls";
 
 export const PRIVATE_MONETIZATION_CASE = {
@@ -18,96 +18,61 @@ export const PRIVATE_MONETIZATION_CASE = {
   title: "PRIVÁT: Szcenárió Monetizációs & Árazási Szimuláció (3 Év)",
   isPrivate: true as const,
   timeHorizonMonths: 36,
+  installmentDueDays: INSTALLMENT2_DUE_DAYS,
 
-  slot1: {
-    id: "slot-subscription",
-    name: "1. Slot: Klasszikus SaaS (havi előfizetés) — piaci kontroll",
-    baseValues: {
-      seatPriceMonthly: SAAS_CONTROL_SEAT_MONTHLY_HUF,
-      initialSeats: 15,
-      monthlyGrowthRate: 0.08,
-      churnRate: 0.02,
-      cacPerSeat: 45_000,
-      annualDiscount: 0.2,
-    },
-  },
-
-  slot2: {
-    id: "slot-perpetual",
-    name: "2. Slot: Örökös Licenc + 1 Év Frissítés (a mi Pro árazásunk)",
+  optionA: {
+    id: "option-a-perpetual-y1",
+    name: "Opció A: Örök használat + 1 év frissítés",
+    description:
+      "Egyszeri listaár, vagy 2 egyenlő részlet 60 napon belül. A szoftver hátraléknál nem zár.",
     baseValues: {
       perpetualPrice: OURS_PRO_PERPETUAL_HUF,
-      /** 2. évi hűségdíj. */
-      maintenanceFeeY2: OURS_PRO_MAINTENANCE_HUF,
-      /** 3. évi hűségdíj; 4. évtől 0. */
-      maintenanceFeeY3: OURS_PRO_Y3_HUF,
       initialSales: 8,
       salesGrowthRate: 0.05,
-      renewalRateYear2And3: 0.75,
       cacPerLicense: 65_000,
+      /** 0 = mindenki egyszerre fizet; 1 = mindenki 2 részletben. */
+      installmentShare: 0.5,
     },
   },
 
-  slot3: {
-    id: "slot-enterprise-dynamic",
-    name: "3. Slot: Enterprise / Multi-Seat (Transzparens & Csúszkás)",
+  optionB: {
+    id: "option-b-y2-update",
+    name: "Opció B: Éves frissítés Y2+-tól (opcionális)",
     description:
-      "Fix egyedi tárgyalások helyett önkiszolgáló, transzparens csúszkás árazás a nagyobb cégeknek és csapatoknak.",
+      "Nem kötelező kiegészítés a meglévő örök licenc mellé. Y2 75% · Y3 60% · Y4+ 0. Nincs havi előfizetés.",
     baseValues: {
-      basePackagePrice: OURS_ENTERPRISE_PERPETUAL_HUF,
-      extraCasePrice: 39_000,
-      extraSeatPrice: 79_000,
-      extraSlotPrice: 49_000,
-      monthlySalesVolume: 2,
-      annualRenewalRate: 0.85,
-      maintenanceFeeY2: OURS_ENTERPRISE_MAINTENANCE_HUF,
-      maintenanceFeeY3: OURS_ENTERPRISE_Y3_HUF,
-      cacPerLicense: 120_000,
+      attachRate: 0.65,
+      feeY2: OURS_PRO_MAINTENANCE_HUF,
+      feeY3: OURS_PRO_Y3_HUF,
     },
   },
 } as const;
 
 export type PrivateMonetizationCase = typeof PRIVATE_MONETIZATION_CASE;
 
-export type SubscriptionSliderState = {
-  seatPriceMonthly: number;
-  monthlyGrowthRatePct: number;
-  churnRatePct: number;
-};
-
-export type PerpetualSliderState = {
+export type OptionASliderState = {
   perpetualPrice: number;
-  renewalRatePct: number;
+  installmentSharePct: number;
+  initialSales: number;
+  salesGrowthPct: number;
 };
 
-export type EnterpriseSliderState = {
-  basePackagePrice: number;
-  monthlySalesVolume: number;
-  renewalRatePct: number;
+export type OptionBSliderState = {
+  attachRatePct: number;
 };
 
-export function subscriptionBaselineSliders(): SubscriptionSliderState {
-  const b = PRIVATE_MONETIZATION_CASE.slot1.baseValues;
-  return {
-    seatPriceMonthly: b.seatPriceMonthly,
-    monthlyGrowthRatePct: b.monthlyGrowthRate * 100,
-    churnRatePct: b.churnRate * 100,
-  };
-}
-
-export function perpetualBaselineSliders(): PerpetualSliderState {
-  const b = PRIVATE_MONETIZATION_CASE.slot2.baseValues;
+export function optionABaselineSliders(): OptionASliderState {
+  const b = PRIVATE_MONETIZATION_CASE.optionA.baseValues;
   return {
     perpetualPrice: b.perpetualPrice,
-    renewalRatePct: b.renewalRateYear2And3 * 100,
+    installmentSharePct: b.installmentShare * 100,
+    initialSales: b.initialSales,
+    salesGrowthPct: b.salesGrowthRate * 100,
   };
 }
 
-export function enterpriseBaselineSliders(): EnterpriseSliderState {
-  const b = PRIVATE_MONETIZATION_CASE.slot3.baseValues;
+export function optionBBaselineSliders(): OptionBSliderState {
   return {
-    basePackagePrice: b.basePackagePrice,
-    monthlySalesVolume: b.monthlySalesVolume,
-    renewalRatePct: b.annualRenewalRate * 100,
+    attachRatePct: PRIVATE_MONETIZATION_CASE.optionB.baseValues.attachRate * 100,
   };
 }

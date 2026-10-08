@@ -149,8 +149,8 @@ export function persistViewPrefs(partial: Partial<ViewPrefs>): ViewPrefs {
 export function resolveViewPrefs(input?: { search?: string }): ViewPrefs {
   return {
     ...DEFAULTS,
-    ...readStoredViewPrefs(),
     ...readViewPrefsCookie(),
+    ...readStoredViewPrefs(),
     ...readViewPrefsFromSearch(input?.search ?? (typeof window !== "undefined" ? window.location.search : "")),
   };
 }
@@ -169,5 +169,5 @@ export function withViewPrefs(href: string, prefs?: Partial<ViewPrefs>): string 
   return url.toString();
 }
 
-/** Head boot: query > cookie > localStorage > default. Mirrors to cookie + localStorage. */
+/** Head boot: query > localStorage > cookie > default. Storage EN wins over a stale HU cookie. */
 export const VIEW_PREFS_BOOT_SCRIPT = VIEW_PREFS_BOOT_RAW.trim();

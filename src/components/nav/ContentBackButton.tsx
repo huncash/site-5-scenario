@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { useI18n } from "@/i18n";
+import { keepLang } from "@/lib/langSearch";
 import { cn } from "@/lib/utils";
 
 /** Tartalom feletti egységes „Vissza” — nem header/footer. */
@@ -26,7 +27,7 @@ export function ContentBackButton({
           window.history.back();
           return;
         }
-        void navigate({ to: fallbackTo });
+        void navigate({ to: fallbackTo, search: keepLang });
       }}
       className={cn(
         "mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",

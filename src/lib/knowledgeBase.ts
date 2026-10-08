@@ -17,7 +17,8 @@ export type KnowledgeBaseCategoryId =
   | "bank-sync"
   | "settings"
   | "scenario"
-  | "lessons";
+  | "lessons"
+  | "nav";
 
 export type KnowledgeBaseArticleId =
   | "concept-case-slot"
@@ -59,7 +60,10 @@ export type KnowledgeBaseArticleId =
   | "lesson-bcp"
   | "lesson-demography"
   | "lesson-campus"
-  | "lesson-kahn";
+  | "lesson-kahn"
+  | "labs-dev-tree"
+  | "poka-yoke-guard"
+  | "language-persist";
 
 export type KnowledgeBaseArticle = {
   id: KnowledgeBaseArticleId;
@@ -67,6 +71,9 @@ export type KnowledgeBaseArticle = {
   title: string;
   summary: string; // 1-2 mondat tooltiphez
   body: string; // részletes leírás (plain text / markdown-like)
+  titleEn?: string;
+  summaryEn?: string;
+  bodyEn?: string;
   tags?: string[];
 };
 
@@ -80,6 +87,7 @@ export const KB_CATEGORIES: Array<{ id: KnowledgeBaseCategoryId; title: string }
   { id: "settings", title: "6. Beállítások & Danger Zone" },
   { id: "scenario", title: "7. P-R-O forgatókönyv & grafikon" },
   { id: "lessons", title: "8. Szcenárió-leckék" },
+  { id: "nav", title: "9. Laboratórium, nyelv, hibabiztos zár" },
 ];
 
 export const KB_ARTICLES: KnowledgeBaseArticle[] = [
@@ -89,15 +97,27 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
     title: "Case vs Slot – mi a különbség?",
     summary:
       "A Case az asztal. A Slot a fül rajta: Magán, Vállalkozás, Projekt — külön kassza.",
+    titleEn: "Case vs Slot — what is the difference?",
+    summaryEn: "The Case is the desk. A Slot is a tab on it: Personal, Business, Project — separate till.",
     body: `🎯 Fogalom
 - **Case:** az asztal, amin dolgozol.
 - **Slot:** a fül az asztalon (Magán, Vállalkozás, Projekt). A tétel oda esik, amelyik nyitva van. Nem KPI-csempe.
 
 ⚙️ Kapacitás
 - ${capacityTipHu()}
+- A Case / Slot a licenchez tartozik. Oktatási vagy BCP motor külön kvótát nem ad — ugyanaz a keret, moduláris legó.
 
 💡 Tip
-- A Slot a fiók. A P-R-O a három világ abban a fiókban: rossz / közepes / jó. A KPI sáv: KPI mutató #1–#4, egyedi beállítás — az nem Slot.`,
+- A Slot a fiók. A három pálya abban a fiókban: rossz / közepes / jó. A gyors mutatók a lombik fáján vannak — az nem Slot.`,
+    bodyEn: `🎯 Concept
+- **Case:** the desk you work on.
+- **Slot:** a tab on the desk (Personal, Business, Project). A posting lands on the open tab. Not a KPI tile.
+
+⚙️ Capacity
+- Case / Slot belong to the licence. An education or emergency engine does not add quota — same frame, modular add-on.
+
+💡 Tip
+- The Slot is the drawer. The three paths run inside that drawer. Quick indicators live on the flask tree — that is not a Slot.`,
     tags: ["case", "slot", "fogalom", "kapacitás"],
   },
   {
@@ -129,6 +149,7 @@ export const KB_ARTICLES: KnowledgeBaseArticle[] = [
 
 ⚙️ Kapacitás
 - ${seatGuestCapacityTipHu()}
+- Seat és Guest a licenckeret. Motorfelvétel nem nyit szerkesztőt és vendéget.
 
 💡 Tip
 - A Guest nem írhatja át a modelljeidet; a kulcs bármikor visszavonható.`,
@@ -320,17 +341,34 @@ Mentéskor:
     category: "workspaces",
     title: "„+ Új…” – hogyan válasszak Slot típust?",
     summary:
-      "Magán, Vállalkozás vagy Projekt — egy Case-en belüli új Slot. A KPI sáv ettől külön van.",
+      "Magán, Vállalkozás vagy Projekt — új fül ugyanazon az asztalon. Extra hely a lombik fáján a kapacitás, nem új motor.",
+    titleEn: "“+ New…” — which Slot type?",
+    summaryEn:
+      "Personal, Business or Project — a new tab on the same desk. Extra room on the flask tree is capacity, not a new engine.",
     body: `🎯 Mire jó?
-- Hogy a megfelelő szemüveget kapd: Magán, Vállalkozás vagy Projekt — egy Case-en belüli új Slotként. A KPI sáv ettől külön van: KPI mutató #1–#4, egyedi beállítás.
+- Hogy a megfelelő szemüveget kapd: Magán, Vállalkozás vagy Projekt — egy Case-en belüli új Slotként.
+- A gyors mutatók a lombik fáján vannak, nem a fülek között.
 
 ⚙️ Hogyan működik?
 - Magán: személyes költések + megtakarítások (elkölthető keret).
 - Vállalkozás: céges cashflow + ÁFA + jogcímek (vezetői nézet).
-- Projekt: szimuláció/pilot/prep → státuszokkal és P-R-O forgatókönyvvel tervezel.
+- Projekt: szimuláció / próbaüzem / előkészítés — külön fiók, ugyanaz az asztal.
+- Ha a hely betelt, a bővítés a licenc (Extra Case / Extra Slot), nem egy új motor.
 
 💡 Tipp
-- Ha nem biztos a konstrukció, indulj Projekttel (🧪 szimulációs szabadság), és csak akkor élesíts, amikor a számok és a folyamat összeállt.`,
+- Ha még formálódik az ötlet, indulj Projekttel. Akkor élesíts, amikor a számok és a folyamat összeállt.`,
+    bodyEn: `🎯 What it is for
+- The right lens: Personal, Business or Project — a new Slot inside one Case.
+- Quick indicators live on the flask tree, not among the tabs.
+
+⚙️ How it works
+- Personal: household spend and savings (spendable cap).
+- Business: company cashflow, VAT and legal titles.
+- Project: simulation / trial / prep — another drawer, same desk.
+- If the place is full, expansion is the licence (Extra Case / Extra Slot), not a new engine.
+
+💡 Tip
+- If the idea is still forming, start as a Project. Promote only when the numbers and the process hold.`,
     tags: ["új", "slot", "munkatér", "típus"],
   },
   {
@@ -722,12 +760,12 @@ Blackout, csapvíz-tilalom, mobilnet-kiesés. A demo13 ugyanezt a 72 órás abla
     category: "lessons",
     title: "Vállalati BCP — SaaS, ellátás, kulcsmunkatárs",
     summary:
-      "Local-first élesítés, lean kvóta, keresztképzési mátrix. A TTR órában van, nem „amint lehet”.",
+      "Local-first élesítés, lean kvóta, keresztképzési mátrix. A TTR órában van, nem „amint lehet”. A BCP motor a meglévő Case / Slot kereten fut.",
     body: `🎯 Mire jó?
 - Hogy a kiesés, a blokád és a hiányzó műszak ugyanazon a PDCA-héjon fusson.
 
 ⚙️ Hogyan működik?
-demo11 / demo26 a vendor-függés, demo21–24 a lánc és a dokk. A mátrix a szerephez ketőst rendel. A mentés az, amit üres gépre vissza tudsz állítani.
+A BCP motor a meglévő Case / Slot kereten fut. Külön licenckvótát nem ad. demo11 / demo26 a vendor-függés, demo21–24 a lánc és a dokk. A mátrix a szerephez ketőst rendel. A mentés az, amit üres gépre vissza tudsz állítani.
 
 💡 Tipp
 - Amit a felhőből olvasol, a kiesésben nincs. Amit a saját gépeden írsz, az a tartalék.`,
@@ -754,20 +792,122 @@ A demo14 a 2023-as helyi TFR-pillanatképet viszi. A lecke a közelmúltbeli sá
     category: "lessons",
     title: "Oktatási válság — kiber, hősziget, helyi kör",
     summary:
-      "Analóg vizsga, kWh-kvóta, műanyagmentes menza. Hallgatói BCP: óra, kilowattóra, kilogramm.",
+      "Analóg vizsga, kWh-kvóta, műanyagmentes menza. Az oktatási motor a meglévő Case / Slot kereten fut.",
     body: `🎯 Mire jó?
 - Hogy a campus a portál kiesése, a hőhullám és a szakadó lánc alatt is vizsgáztasson és etessen.
 
 ⚙️ Hogyan működik?
-demo18 izolációs idő, demo17 kvóta, demo16 folyamat-audit (veszteségmentesítés) a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
+Az oktatási motor a meglévő Case / Slot kereten fut. Külön licenckvótát nem ad. demo18 izolációs idő, demo17 kvóta, demo16 folyamat-audit (veszteségmentesítés) a konyhán és a laborban. A törzs a létszám és az épület; a sokk a változó.
 
 💡 Tipp
 - Az izolációt órában méred a riasztástól a leválasztásig. A dobott étel selejt: elhatárolod.`,
     tags: ["oktatás", "campus", "kiber", "hősziget", "demo17", "demo18"],
   },
+  {
+    id: "labs-dev-tree",
+    category: "nav",
+    title: "Laboratórium — hol a modul?",
+    summary: "A fejléc lombikja nyitja a fejlesztési fát. A bogyóra kattintasz: a modul az asztalon jelenik meg.",
+    titleEn: "Laboratory — where is the module?",
+    summaryEn: "The flask in the header opens the development tree. Tap a berry: the module lands on the desk.",
+    body: `🎯 Fogalom
+- A **Laboratórium** a fejléc lombikja. Nem menü a láblécben.
+- A **fejlesztési fa** a magból ágazik: motor, aztán modul. Legalább egy motor maradjon aktív.
+
+⚙️ Használat
+- Nyisd a lombikot. Kapcsold a bogyót. Ami kell, a saját asztalodon jelenik meg; ami kikapcsolva, az nem zsúfol.
+- A gyors mutatók (KPI) is ezen a fán élnek. A főasztalon még előkészítés — ne keresd a fülek alatt.
+- Extra Case / Slot a fa alján kapacitás, nem új motor.
+
+💡 Tip
+- Előbb a fül (Magán / Vállalkozás / Projekt), aztán a fa. Ugyanaz a szám más fiókban más döntés.`,
+    bodyEn: `🎯 Concept
+- The **Laboratory** is the flask in the header. Not a footer menu.
+- The **development tree** branches from the core: engine, then module. Keep at least one engine on.
+
+⚙️ Use
+- Open the flask. Switch a berry. What you need lands on your desk; what is off does not clutter.
+- The quick indicators (KPI) also live on this tree. The main desk still keeps them in preparation — do not hunt under the tabs.
+- Extra Case / Slot at the foot of the tree is capacity, not a new engine.
+
+💡 Tip
+- Tab first (Personal / Business / Project), then the tree. The same number is a different decision in another drawer.`,
+    tags: ["lombik", "laboratórium", "modul", "dev tree", "kpi"],
+  },
+  {
+    id: "poka-yoke-guard",
+    category: "nav",
+    title: "Hibabiztos zár — miért kérdez?",
+    summary: "A program megkérdez, mielőtt átír. Keret, ÁFA, import, nyelv: a hiba drágább, mint a kérdés.",
+    titleEn: "Mistake-proof lock — why does it ask?",
+    summaryEn: "The program asks before it overwrites. Cap, VAT, import, language: the error costs more than the question.",
+    body: `🎯 Fogalom
+- **Hibabiztos zár:** úgy van összerakva, hogy nehéz elrontani. Nem büntetés.
+
+⚙️ Hol áll meg?
+- WANT keret túllépés, gyanús ÁFA-kulcs, Szummában tiltott import.
+- A nyelv a címsorban marad; ha hiányzik, a zár visszaírja.
+- A fa is zár: ami nincs bekapcsolva, az nem mászik a főasztalra.
+
+💡 Tip
+- Egy kérdést fogadj el. Ha mindig felülírod, a hiba olcsónak tűnik — pedig a kasszán látszik.`,
+    bodyEn: `🎯 Concept
+- **Mistake-proof lock:** built so it is hard to mess up. Not punishment.
+
+⚙️ Where it stops you
+- WANT cap overrun, a flagged VAT rate, import blocked in Szumma.
+- Language stays in the address bar; if it is missing, the lock writes it back.
+- The tree is a lock too: what is off does not crawl onto the main desk.
+
+💡 Tip
+- Accept one question. If you always override, the error looks cheap — until it shows on the till.`,
+    tags: ["poka-yoke", "zár", "hiba", "nyelv", "import"],
+  },
+  {
+    id: "language-persist",
+    category: "nav",
+    title: "Nyelv — hogyan marad meg?",
+    summary: "A fejléc HU / EN gombja. A címsor és a gép őrzi; oldalváltáskor a zár visszaírja.",
+    titleEn: "Language — how does it stay?",
+    summaryEn: "The HU / EN button in the header. The address bar and this machine keep it; on navigation the lock writes it back.",
+    body: `🎯 Hol váltasz?
+- A fejléc **HU / EN** gombja: magyar vagy angol.
+- A modell, a forint és az ÁFA nem változik — csak a felirat.
+
+⚙️ Mi őrzi?
+- A címsor: \`lang=hu\` vagy \`lang=en\`.
+- A helyi tároló és a süti ugyanazon a gépen.
+- Ha egy linkből kiesik a nyelv, a program visszaírja, mielőtt a felület ugrana. Ez a hibabiztos zár.
+
+💡 Tip
+- Ha angolra ugrott, először a címsort nézd. Frissítés után is ez a zár tartja a választást.`,
+    bodyEn: `🎯 Where do you switch?
+- The header **HU / EN** button: Hungarian or English.
+- The model, forint and VAT do not change — only the labels.
+
+⚙️ What keeps it?
+- The address bar: \`lang=hu\` or \`lang=en\`.
+- Local storage and the cookie on this machine.
+- If a link drops the language, the program writes it back before the UI jumps. That is the mistake-proof lock.
+
+💡 Tip
+- If it flipped to English, read the address bar first. The same lock holds after a refresh.`,
+    tags: ["nyelv", "lang", "i18n", "perzisztencia"],
+  },
 ];
 
 export function kbById(id: KnowledgeBaseArticleId) {
   return KB_ARTICLES.find((a) => a.id === id) ?? null;
+}
+
+export function kbCopy(article: KnowledgeBaseArticle, locale: "hu" | "en" = "hu") {
+  if (locale === "en") {
+    return {
+      title: article.titleEn ?? article.title,
+      summary: article.summaryEn ?? article.summary,
+      body: article.bodyEn ?? article.body,
+    };
+  }
+  return { title: article.title, summary: article.summary, body: article.body };
 }
 

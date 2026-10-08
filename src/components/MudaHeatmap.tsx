@@ -313,7 +313,7 @@ export function MudaHeatmap({
                   <li key={t.id} className="flex items-start justify-between gap-2 font-mono text-[10px]">
                     <span className="min-w-0 whitespace-normal break-words text-slate-200">
                       {t.title?.trim() || t.note?.trim() || categoryLabel(t.category)}
-                      <span className="block text-slate-400">{categoryLabel(t.category)}</span>
+                      <span className="txn-category mt-0.5 block">{categoryLabel(t.category)}</span>
                     </span>
                     <span className={cn("shrink-0 tabular-nums", muda ? "text-rose-300" : "text-slate-200")}>
                       {formatMoney(Math.round(a))}

@@ -5,7 +5,7 @@ export const MeshLogEntrySchema = z.object({
   profileId: z.string().min(1),
   deviceId: z.string().min(1),
   at: z.string().min(1),
-  op: z.enum(["save", "delete", "sync:full", "hello"]),
+  op: z.enum(["save", "delete", "sync:full", "hello", "license:fusion"]),
   store: z.string().min(1),
   key: z.string().optional(),
   message: z.string().optional(),

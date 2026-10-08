@@ -1,4 +1,5 @@
 import type { GlossaryTermId } from "@/lib/glossary";
+import type { KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
 import type { OplLesson, OplStep } from "@/lib/opl";
 
 function step(
@@ -39,6 +40,7 @@ function dash(p: {
   deepDiveEn: string;
   jargon: GlossaryTermId[];
   keywords: string[];
+  kbId?: KnowledgeBaseArticleId;
   steps: OplStep[];
 }): OplLesson {
   const { slug, ...rest } = p;
@@ -99,13 +101,55 @@ export const DASH_OPL_LESSONS: OplLesson[] = [
     jargon: ["fiveS"],
     keywords: ["nézet", "téma", "paletta", "theme", "a11y", "split"],
     deepDiveHu:
-      "A nézetmenü (paletta) témát, kontrasztot, nyelvet és osztott/teljes nézetet állít. Ez 5S a képernyőn: ami zavar, azt vedd le, ami kell, az legyen olvasható. A számok nem változnak. A split nézet a PLAN/DO oszlopokat tartja egymás mellett — asztali munka. Mobilnál a full nézet kevesebb zaj. A nyelv csak a feliratot cseréli; a HUF és az ÁFA szabálya helyben marad.",
+      "A nézetmenü (szemüveg) témát, kontrasztot és osztott/teljes nézetet állít. Ez 5S a képernyőn: ami zavar, azt vedd le, ami kell, az legyen olvasható. A számok nem változnak. A split nézet a PLAN/DO oszlopokat tartja egymás mellett — asztali munka. Mobilnál a full nézet kevesebb zaj. A nyelv külön gomb: HU / EN. Csak a feliratot cseréli; a HUF és az ÁFA szabálya helyben marad.",
     deepDiveEn:
-      "The view menu (palette) sets theme, contrast, language and split/full layout. That is 5S on screen: remove what distracts, keep what you must read. The numbers do not change. Split keeps PLAN/DO columns side by side — desktop work. On mobile, full is less noise. Language only swaps labels; HUF and VAT rules stay local.",
+      "The view menu (glasses) sets theme, contrast and split/full layout. That is 5S on screen: remove what distracts, keep what you must read. The numbers do not change. Split keeps PLAN/DO columns side by side — desktop work. On mobile, full is less noise. Language is a separate button: HU / EN. It only swaps labels; HUF and VAT rules stay local.",
     steps: [
-      step("s1", "Paletta", "Palette", "A paletta ikon a nézetmenüt nyitja.", "The palette icon opens the view menu.", "Paletta ikon jobbra fent", "Palette icon, top right"),
-      step("s2", "Téma", "Theme", "Válassz kontrasztot és nyelvet. A modell nem változik.", "Pick contrast and language. The model does not change.", "Téma / nyelv / a11y", "Theme / language / a11y"),
+      step("s1", "Szemüveg", "Glasses", "A szemüveg ikon a nézetmenüt nyitja.", "The glasses icon opens the view menu.", "Szemüveg ikon jobbra fent", "Glasses icon, top right"),
+      step("s2", "Téma", "Theme", "Válassz kontrasztot. A modell nem változik.", "Pick contrast. The model does not change.", "Téma / a11y", "Theme / a11y"),
       step("s3", "Split", "Split", "Asztalon oszd a PLAN/DO oszlopokat. Mobilnál full.", "On desktop split PLAN/DO. On mobile use full.", "Split / full váltó", "Split / full toggle"),
+    ],
+  }),
+  dash({
+    slug: "nyelv",
+    categoryHu: "Fejléc",
+    categoryEn: "Header",
+    titleHu: "Nyelv és megőrzés",
+    titleEn: "Language and persistence",
+    whyHu: "A HU / EN gomb a fejlécben. A nyelv a címsorban és a gépeden marad — a zár visszaírja, ha hiányzik.",
+    whyEn: "The HU / EN button is in the header. Language stays in the address bar and on this machine — the lock writes it back if it is missing.",
+    jargon: ["pokaYoke", "fiveS"],
+    keywords: ["nyelv", "language", "lang", "perzisztencia", "i18n", "hu", "en"],
+    kbId: "language-persist",
+    deepDiveHu:
+      "A fejléc HU / EN gombja csak a feliratot cseréli: a modell, a forint és az ÁFA helyben marad. A választás három helyen él: a címsor (?lang=hu vagy ?lang=en), a helyi tároló és a süti. Ez Poka-Yoke: ha egy linkből kiesik a nyelv, a program visszaírja, mielőtt a felület „ugrana”. Oldalváltáskor, mentéskor és a support-ablakban is ugyanaz a zár. Ha angolra ugrott, nézd a címsort — ne a gyorsítótárat hibáztasd először.",
+    deepDiveEn:
+      "The header HU / EN button only swaps labels: the model, forint and VAT stay local. The choice lives in three places: the address bar (?lang=hu or ?lang=en), local storage and the cookie. That is poka-yoke: if a link drops the language, the program writes it back before the UI “jumps”. The same lock holds on navigation, save and the support pane. If it flipped to English, read the address bar first — do not blame the cache.",
+    steps: [
+      step("s1", "Gomb", "Button", "A fejléc HU / EN gombjával válts nyelvet.", "Switch language with the header HU / EN button.", "HU / EN gomb a fejlécben", "HU / EN button in the header"),
+      step("s2", "Címsor", "Address", "Ellenőrizd: lang=hu vagy lang=en.", "Check: lang=hu or lang=en.", "Címsor lang zárolás", "Address-bar lang lock"),
+      step("s3", "Marad", "Stays", "Oldalváltás után is ez a nyelv. A modell nem változik.", "Same language after a page change. The model does not change.", "Nyelv megőrzése oldalváltáskor", "Language kept after navigation"),
+    ],
+  }),
+  dash({
+    slug: "dev-tree",
+    categoryHu: "Laboratórium",
+    categoryEn: "Laboratory",
+    titleHu: "Fejlesztési fa / modulok",
+    titleEn: "Development tree / modules",
+    whyHu: "A modulok a lombik fáján vannak. Előbb a bogyót kapcsold, aztán keresd az asztalon.",
+    whyEn: "Modules live on the flask tree. Switch the berry first, then look on the desk.",
+    jargon: ["devTree", "kpi", "pokaYoke"],
+    keywords: ["lombik", "laboratórium", "dev tree", "modul", "fa", "bogyó", "kpi", "flask", "modules"],
+    kbId: "labs-dev-tree",
+    deepDiveHu:
+      "A fejléc lombikja nyitja a Laboratóriumot. A magból ágaznak a motorok (gazdasági, oktatási, vészhelyzet), onnan a modulok. Legalább egy motornak aktívnak kell maradnia — ez a mag zárja. A bogyóra kattintasz: ami kell, az asztalon jelenik meg; ami kikapcsolva, az nem zsúfol. A gyors mutatók (KPI) is ezen a fán élnek, a főasztalon még előkészítés. Extra Case / Slot a fa alján a kapacitás, nem új motor. Poka-Yoke: ne keresd a főasztal közepén, ami a fán van.",
+    deepDiveEn:
+      "The flask in the header opens the Laboratory. Engines branch from the core (economic, education, emergency), modules from the engines. At least one engine must stay on — the core locks that. Tap a berry: what you need lands on the desk; what is off does not clutter. The quick indicators (KPI) also live on this tree; the main desk still keeps them in preparation. Extra Case / Slot at the foot of the tree is capacity, not a new engine. Poka-yoke: do not hunt in the middle of the desk for what lives on the tree.",
+    steps: [
+      step("s1", "Lombik", "Flask", "A fejléc lombikja nyitja a fát.", "The header flask opens the tree.", "Lombik gomb a fejlécben", "Flask button in the header"),
+      step("s2", "Bogyó", "Berry", "Kapcsold a motort vagy a modult. Egy kép, kevesebb zaj.", "Switch the engine or module. One picture, less noise.", "Fejlesztési fa bogyói", "Development-tree berries"),
+      step("s3", "Asztal", "Desk", "Ami aktív, az a dashboardon. A KPI a fán marad.", "What is on lands on the dashboard. KPI stays on the tree.", "Aktív modul a műszerfalon", "Active module on the dashboard"),
     ],
   }),
   dash({
@@ -291,17 +335,18 @@ export const DASH_OPL_LESSONS: OplLesson[] = [
     categoryEn: "Status",
     titleHu: "KPI sáv",
     titleEn: "KPI bar",
-    whyHu: "KPI mutató #1–#4. Nem mérleg — első pillantás, hogy merre nézz.",
-    whyEn: "KPI indicator #1–#4. Not a balance sheet — a first glance at where to look.",
-    jargon: ["kpi", "cashflow", "runway"],
-    keywords: ["kpi", "sáv", "mutató", "összecsuk", "egyedi beállítás"],
+    whyHu: "KPI mutató #1–#4 a lombik fáján. Nem mérleg — merre nézz tovább.",
+    whyEn: "KPI indicator #1–#4 on the flask tree. Not a balance sheet — where to look next.",
+    jargon: ["kpi", "devTree", "runway"],
+    keywords: ["kpi", "sáv", "mutató", "lombik", "fa", "egyedi beállítás"],
+    kbId: "labs-dev-tree",
     deepDiveHu:
-      "A KPI sáv a fülek alatt négy gyorscsempét mutat: KPI mutató #1–#4, mindegyik egyedi beállítás. Célja a figyelem: melyik kártyára menj tovább. Nem Slot — a Slot a munkatér. Nem könyvelési minősítés, és nem helyettesíti a cashflow-kártyát. A jobb felső +/− összecsukja, hogy a PLAN/DO oszlopnak legyen hely. Üres csempe = a mutató még nincs bekötve. Ha a négy szám ellentmond, ne a sávot „javítsd” — nyisd a mögötte lévő kártyát.",
+      "A KPI sáv a lombik fáján négy gyorscsempét mutat: KPI mutató #1–#4, mindegyik egyedi beállítás. A főasztalon még előkészítés — ne keresd a fülek alatt. Célja a figyelem: melyik kártyára menj tovább. Nem Slot — a Slot a munkatér. Nem könyvelési minősítés, és nem helyettesíti a cashflow-kártyát. Üres csempe = a mutató még nincs bekötve. Ha a négy szám ellentmond, ne a sávot „javítsd” — nyisd a mögötte lévő kártyát.",
     deepDiveEn:
-      "The KPI bar under the tabs shows four quick tiles: KPI indicator #1–#4, each a custom setting. Its job is attention: which card to open next. Not a Slot — a Slot is a workspace. It is not an accounting grade and it does not replace the cashflow card. The top-right +/− collapses it so PLAN/DO has room. An empty tile means that metric is not wired yet. If the four figures disagree, do not “fix” the bar — open the card behind them.",
+      "The KPI bar on the flask tree shows four quick tiles: KPI indicator #1–#4, each a custom setting. The main desk still keeps it in preparation — do not hunt under the tabs. Its job is attention: which card to open next. Not a Slot — a Slot is a workspace. It is not an accounting grade and it does not replace the cashflow card. An empty tile means that metric is not wired yet. If the four figures disagree, do not “fix” the bar — open the card behind them.",
     steps: [
-      step("s1", "Négy csempe", "Four tiles", "Olvasd a KPI mutató #1–#4 feliratot.", "Read KPI indicator #1–#4.", "KPI mutató #1–#4", "KPI indicator #1–#4"),
-      step("s2", "Összecsuk", "Collapse", "A +/− helyet ad a munkának.", "The +/− gives the work room.", "KPI sáv összecsukó", "KPI bar collapse"),
+      step("s1", "Fa", "Tree", "Nyisd a lombikot. A KPI bogyó ott van.", "Open the flask. The KPI berry is there.", "KPI bogyó a fejlesztési fán", "KPI berry on the development tree"),
+      step("s2", "Négy", "Four", "Olvasd a KPI mutató #1–#4 feliratot.", "Read KPI indicator #1–#4.", "KPI mutató #1–#4", "KPI indicator #1–#4"),
       step("s3", "Tovább", "Next", "Ellentmondásnál nyisd a mögöttes kártyát.", "If they disagree, open the card behind.", "KPI → kártya ugrás", "KPI → card jump"),
     ],
   }),

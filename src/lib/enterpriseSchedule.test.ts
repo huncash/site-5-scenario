@@ -37,13 +37,11 @@ describe("enterprise schedule", () => {
     expect(new URL(href, "https://support.local").searchParams.get("subject")).toBe(enterpriseInquirySubject("hu"));
   });
 
-  it("uses Aktív Case / Aktív Slot on the Enterprise card", () => {
+  it("uses numbered capacity lines on the Enterprise card", () => {
     const hu = planCardBullets(PLANS_CONFIG.expert, "hu");
-    expect(hu[0]).toBe("5 Aktív Case");
-    expect(hu[1]).toBe("4 Aktív Slot / Case");
+    expect(hu).toEqual(["5 aktív case", "4 aktív slot", "3 szerkesztő", "20 vendégfiók"]);
     expect(hu.join(" ")).not.toMatch(/szcenárió/i);
     const en = planCardBullets(PLANS_CONFIG.expert, "en");
-    expect(en[0]).toBe("5 Active Cases");
-    expect(en[1]).toBe("4 Active Slots / Case");
+    expect(en).toEqual(["5 active cases", "4 active slots", "3 editors", "20 guest accounts"]);
   });
 });

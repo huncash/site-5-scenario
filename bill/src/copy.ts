@@ -128,6 +128,12 @@ const hu = {
   enterpriseCta: "Kapcsolatfelvétel / Ajánlatkérés",
   enterpriseInquiryLead:
     "Az Enterprise csomag előjegyzésre érhető el. Az ár és a kapacitás (Aktív Case / Aktív Slot) tájékoztató értékhorgony. Nincs önkiszolgáló checkout.",
+  bundleLockTitle: "Kedvezőbb csomag — modulzár",
+  bundleLockBody:
+    "A kiegészítők a {next} listaárát elérik. A {next} {upgrade}, a mostani keret + modulok {stay}. Megtakarítás {save}. A kijátszás zárva van.",
+  bundleLockCta: "Váltás: {next}",
+  bundleLockInquiry: "Ajánlatkérés a kedvezőbb csomagra",
+  bundleLockBlocked: "A megrendelés a modulzár miatt nem indítható ezen a keveréken.",
 };
 
 const en: typeof hu = {
@@ -258,6 +264,12 @@ const en: typeof hu = {
   enterpriseCta: "Contact / request a quote",
   enterpriseInquiryLead:
     "The Enterprise plan is available on waitlist. Price and capacity (Active Case / Active Slot) stay visible as a value anchor. There is no self-serve checkout.",
+  bundleLockTitle: "Better package — module lock",
+  bundleLockBody:
+    "The add-ons reach the {next} list price. {next} is {upgrade}; current frame + modules are {stay}. You save {save}. The under-config loophole is closed.",
+  bundleLockCta: "Switch to {next}",
+  bundleLockInquiry: "Request a quote for the better package",
+  bundleLockBlocked: "This mix cannot be ordered — the module lock is on.",
 };
 
 export function billCopy(locale: Locale) {

@@ -18,12 +18,13 @@ import {
   currencyForLocale,
   DEFAULT_LOCALE,
   otherLocale,
-  persistLocale,
   readClientLocale,
   type DisplayCurrency,
   type Locale,
 } from "@/i18n/locale";
-import { consumeViewPrefsFromLocation, persistViewPrefs } from "@/lib/viewPrefs";
+import { lockLocaleUrl, persistLocaleTrio } from "@/lib/langSearch";
+import { consumeViewPrefsFromLocation } from "@/lib/viewPrefs";
+import { useRouter, useRouterState } from "@tanstack/react-router";
 import { getHufPerEur, MNB_RATE_EVENT, refreshMnbEurRate } from "@/lib/mnbRate";
 
 export type { Locale, DisplayCurrency } from "@/i18n/locale";
@@ -74,16 +75,28 @@ type I18nValue = {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
+function replaceLangHref(href: string, router: { history?: { replace?: (h: string) => void } }) {
+  try {
+    router.history?.replace?.(href);
+  } catch {
+    window.history.replaceState(window.history.state, "", href);
+  }
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(readClientLocale);
   const [fxRate, setFxRate] = useState(getHufPerEur);
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useLayoutEffect(() => {
     const prefs = consumeViewPrefsFromLocation();
     setLocaleState(prefs.locale);
     applyHtmlLang(prefs.locale);
-    persistLocale(prefs.locale);
-  }, []);
+    persistLocaleTrio(prefs.locale);
+    lockLocaleUrl(prefs.locale, (href) => replaceLangHref(href, router));
+  }, [searchStr, pathname, router]);
 
   useEffect(() => {
     const sync = () => setFxRate(getHufPerEur());
@@ -96,9 +109,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     applyHtmlLang(next);
-    persistLocale(next);
+    persistLocaleTrio(next);
+    lockLocaleUrl(next, (href) => replaceLangHref(href, router));
     if (currencyForLocale(next) === "EUR") void refreshMnbEurRate();
-  }, []);
+  }, [router]);
 
   const toggleLocale = useCallback(() => {
     setLocale(otherLocale(locale));

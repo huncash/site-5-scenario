@@ -40,7 +40,7 @@ function withRoute(lesson: Lesson, id: string): Lesson {
   };
 }
 
-function yt(key: string, fallback = "M7lc1UVf-VE") {
+function yt(key: string, fallback = "") {
   const env = (import.meta as { env?: Record<string, string> }).env ?? {};
   return env[key] || fallback;
 }
@@ -60,7 +60,7 @@ export const LESSONS: Lesson[] = [
       slug: "lecke-02",
       title: "Dashboard kezelés",
       body:
-        "Felső vezérlés, középen a munka, alul a modulok. A fülek a Magán, Vállalkozás és Projekt területeket cserélik. A felső sáv a gyors állapot, a középső a döntés. 0 hónap = elfogyott a levegő: először a kasszát kell megfogni.",
+        "Előbb a fül (Magán, Vállalkozás, Projekt), aztán a lombik: a modulok a fejlesztési fán kapcsolhatók. Középen a döntés. 0 hónap = elfogyott a levegő: először a kasszát kell megfogni.",
       youtubeId: yt("VITE_YT_LECKE_02"),
     },
     "lecke-02",
@@ -226,6 +226,57 @@ export const TIPS = [
     q: "A három pálya grafikonja a jövőt mutatja?",
     a: "Nem. Nem valóság és nem jóslat: a múlt adataidból a lehetséges kimenetelek szórását és a mozgásteret számolja.",
   },
+  {
+    q: "Hol a Laboratórium?",
+    a: "A fejléc lombikja. Ott a fejlesztési fa: motor, modul, gyors mutató. A bogyóra kattintasz, a kép az asztalon jelenik meg.",
+  },
+  {
+    q: "A nyelv megmarad oldalváltáskor?",
+    a: "Igen. A fejléc HU / EN gombja a címsorban (lang=hu vagy lang=en) és a gépen is őrzi. Ha egy linkből kiesik, a zár visszaírja.",
+  },
+];
+
+export const FAQ_CHECKLIST: FaqItem[] = [
+  {
+    id: "check-modules",
+    q: "Hol találom a modulokat?",
+    a: "A fejlécben a **lombik** nyitja a Laboratóriumot. Ott, a fejlesztési fán kapcsolhatók a motorok és a modulok: ami kell, a saját asztalodon jelenik meg. A gyors mutatók is ezen a fán vannak — ne a főasztal közepén keresd őket.",
+  },
+  {
+    id: "check-slots",
+    q: "Hol a Magán, a Vállalkozás és a Projekt?",
+    a: "A fejléc alatt a **fülek**. Egy Eset egy asztal; a fül a Slot — külön kassza. Előbb a fület válaszd, aztán írj tételt. Új fül a **+** gombbal; ha a hely betelt, a bővítés a licenc, nem egy új motor.",
+  },
+  {
+    id: "check-lang",
+    q: "Hogyan váltok nyelvet?",
+    a: "A fejléc **HU / EN** gombja. A választás a címsorban (`lang=hu` vagy `lang=en`) és ezen a gépen marad — oldalváltás után sem ugrik vissza.",
+  },
+  {
+    id: "check-lang-lost",
+    q: "Eltűnt a nyelv, vagy angolra ugrott a felület?",
+    a: "Nézd a címsort: legyen benne `lang=hu` vagy `lang=en`. Ha hiányzik, a program visszaírja a mentett választást. Frissítés után is ez a zár tartja a nyelvet.",
+  },
+  {
+    id: "check-lock-ws",
+    q: "Hogyan zárom vagy nyitom a munkateret?",
+    a: "A profilpanel **lakatja** zárja a helyi tárolót. Előbb ments (Ctrl/Cmd+S), aztán zárd. Nincs felhős kijelentkezés: a modell a gépeden marad. Másik Esethez zárd az aktuálisat.",
+  },
+  {
+    id: "check-save",
+    q: "Hogyan mentem vagy állítom vissza az adatot?",
+    a: "A **Beállításokban** helyi fájlba menthetsz, és ugyanonnan tölthetsz vissza. Nincs felhős fiók: ami a gépeden van, az a tied. A fejlesztők nem látják és nem gyűjtik.",
+  },
+  {
+    id: "check-lock",
+    q: "Miért kér megerősítést, vagy miért tilt egy lépést?",
+    a: "Ez a hibabiztos zár: a program megkérdez, mielőtt átírna egy keretet, adókulcsot vagy importot. A nyelv sem vész el csendben. Egy kérdést fogadj el — ne kapcsold ki a zárakat.",
+  },
+  {
+    id: "check-offline",
+    q: "Működik hálózat nélkül?",
+    a: "Az asztal igen: a számolás a saját eszközödön marad. A support oldal hálózatot kér; offline a helyi súgó és a leckék elérhetők.",
+  },
 ];
 
 export type FaqItem = { q: string; a: string; id?: string };
@@ -248,6 +299,14 @@ export const FAQ_GENERAL: FaqItem[] = [
   {
     q: "Hogyan értelmezzük a pesszimista, realista és optimista grafikont?",
     a: "Nem a valóságot és nem jóslatot látsz. A modell a múltbeli adataidból, szezonális mintákból és a beállított paraméterekből rajzol mozgásteret: szórási hibát csökkent, és megmutatja a pesszimista tartalékot vs. az optimista kapacitásigényt.",
+  },
+  {
+    q: "Mi az opcionális saját vonal?",
+    a: "Egyedi asztali és app-kiadásokban kapcsolható, közvetlen, titkosított vonal — a Te kezdeményezéseddel. Nem kötelező, nem része a nyilvános belépőígéretnek, és nem nyit üzemeltetői betekintést. A részletes leírás a Support árazási oldal Opcionális saját vonal szakaszában van.",
+  },
+  {
+    q: "Új motort veszek, kapok extra Case-t?",
+    a: "Nem. A Case / Slot / Seat / Guest a licenc kvótája. Az oktatási vagy BCP motor ugyanerre a keretre ül — moduláris legó, külön kvótát nem ad. Extra asztalhoz Extra Case vagy Extra Slot kell. A számolás a saját eszközödön marad; külső felhős adatbázist nem használunk.",
   },
 ];
 

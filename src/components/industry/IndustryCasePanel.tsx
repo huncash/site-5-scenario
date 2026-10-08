@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 
+import { useLabOnDashboard } from "@/hooks/useDashboardLabs";
+
 import { caseTitle, useI18n } from "@/i18n";
 import { HelpIcon } from "@/components/HelpIcon";
+import { LabActiveMark } from "@/components/labs/LabActiveDot";
+import { LabSection } from "@/components/labs/LabSection";
 import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
 import { HospitalTriageSim } from "@/components/industry/HospitalTriageSim";
@@ -129,6 +133,8 @@ export function IndustryCasePanel(props: {
   baseline?: MasterBaselineContext | null;
 }) {
   const { locale, t } = useI18n();
+  const edgeOn = useLabOnDashboard("labs-edge");
+  if (!edgeOn) return null;
   if (!isIndustrySegment(props.segmentId)) return null;
   const cse = industryCaseById(props.segmentId as IndustryCaseId);
   const whatIf = buildIndustryWhatIf({ caseId: cse.id, horizonMonths: 12 });
@@ -142,12 +148,13 @@ export function IndustryCasePanel(props: {
           : t("panel.industryCheck");
 
   return (
+    <LabSection id="labs-edge">
     <CollapsibleCard
       id={`industry-${props.phase ?? "check"}`}
       className="rounded-xl border border-border/60 bg-card/80 p-3"
       title={
         <span>
-          <span className="inline-flex items-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {cse.door === "healthcare"
               ? t("panel.doorHealthcare")
               : cse.door === "manufacturing"
@@ -155,6 +162,7 @@ export function IndustryCasePanel(props: {
                 : cse.door === "logistics"
                   ? t("panel.doorLogistics")
                   : t("panel.doorServices")}
+            <LabActiveMark />
             {cse.kind === "saas" || cse.kind === "supply" || cse.kind === "wms" || cse.kind === "fuel" ? (
               <HelpIcon kbId="lesson-bcp" title={t("panel.lesson")} />
             ) : null}
@@ -172,5 +180,6 @@ export function IndustryCasePanel(props: {
         {whatIf && (props.phase === "CHECK" || props.phase === "ACT") ? <SignalCards signals={whatIf.signals} /> : null}
       </div>
     </CollapsibleCard>
+    </LabSection>
   );
 }

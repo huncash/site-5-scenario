@@ -8,11 +8,11 @@ import {
 } from "@/lib/scenarioCatalog";
 
 describe("scenario module startability", () => {
-  it("starts only the economic engine", () => {
+  it("starts the three engines and keeps economic as the default core", () => {
     expect(CORE_SCENARIO_KIND).toBe("economic");
     expect(isStartableScenarioKind("economic")).toBe(true);
-    expect(isStartableScenarioKind("resilience")).toBe(false);
-    expect(isStartableScenarioKind("education")).toBe(false);
+    expect(isStartableScenarioKind("resilience")).toBe(true);
+    expect(isStartableScenarioKind("education")).toBe(true);
     expect(isStartableScenarioKind("inner")).toBe(false);
     expect(isStartableScenarioKind("climate")).toBe(false);
   });
@@ -23,14 +23,14 @@ describe("scenario module startability", () => {
     expect(isStartableScenarioKind(scenarioKindOf("demo11_strategy_kahn_fork"))).toBe(true);
   });
 
-  it("marks BCP, education and inner as add-on kinds", () => {
+  it("starts BCP and education cases, and keeps inner as add-on", () => {
     expect(scenarioKindOf("demo12_resilience_saas_outage")).toBe("resilience");
     expect(scenarioKindOf("demo16_edu_startup_cashflow")).toBe("education");
     expect(scenarioKindOf("demo18_personal_pocket_seasonal_pilot")).toBe("inner");
     for (const id of CORE_CASE_IDS) {
       const kind = scenarioKindOf(id);
-      if (kind === "economic") expect(isStartableScenarioKind(kind)).toBe(true);
-      else expect(isStartableScenarioKind(kind)).toBe(false);
+      if (kind === "inner") expect(isStartableScenarioKind(kind)).toBe(false);
+      else expect(isStartableScenarioKind(kind)).toBe(true);
     }
   });
 });

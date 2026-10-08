@@ -22,11 +22,9 @@ export function InstallmentArrearsBar() {
       data-installment-arrears=""
       className="mx-auto mb-1 w-full max-w-[98%] shrink-0 px-2 sm:px-3 md:px-4"
     >
-      <div className="installment-arrears-tape px-2 py-2">
-        <p className="installment-arrears-tape-label mx-auto max-w-[52rem] px-3 py-1.5 text-center text-[12px] font-bold leading-snug tracking-wide text-zinc-950 sm:text-[13px]">
-          {t("dash.installmentArrears")}
-        </p>
-      </div>
+      <p className="relative z-0 rounded-md border border-border/60 bg-card/80 px-3 py-1.5 text-center text-[11px] leading-snug text-muted-foreground">
+        {t("dash.installmentArrears")}
+      </p>
     </div>
   );
 }

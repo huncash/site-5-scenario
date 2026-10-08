@@ -92,8 +92,9 @@ export function TransactionListItem({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{title}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {categoryLabel(t.category)} · {dateStr}
+        <p className="truncate text-xs">
+          <span className="txn-category">{categoryLabel(t.category)}</span>
+          <span className="text-muted-foreground"> · {dateStr}</span>
           {showWorkspaceBadge && (
             <span
               className={cn(

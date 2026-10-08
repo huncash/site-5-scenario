@@ -33,6 +33,7 @@ import { Route as StrategiaRouteImport } from './routes/strategia'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TicketRouteImport } from './routes/ticket'
 import { Route as AdminMonetizationSimRouteImport } from './routes/admin/monetization-sim'
+import { Route as LabsDeskRouteImport } from './routes/labs.desk'
 import { Route as LoginActivateRouteImport } from './routes/login_.activate'
 import { Route as SupportSplatRouteImport } from './routes/support.$'
 import { Route as FOktatasSzimulacioIndexRouteImport } from './routes/f/oktatas-szimulacio/index'
@@ -168,6 +169,11 @@ const AdminMonetizationSimRoute = AdminMonetizationSimRouteImport.update({
   path: '/admin/monetization-sim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabsDeskRoute = LabsDeskRouteImport.update({
+  id: '/labs/desk',
+  path: '/labs/desk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginActivateRoute = LoginActivateRouteImport.update({
   id: '/login_/activate',
   path: '/login/activate',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
+  '/labs/desk': typeof LabsDeskRoute
   '/login/activate': typeof LoginActivateRoute
   '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
+  '/labs/desk': typeof LabsDeskRoute
   '/login/activate': typeof LoginActivateRoute
   '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
@@ -350,6 +358,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRouteWithChildren
   '/ticket': typeof TicketRoute
   '/admin/monetization-sim': typeof AdminMonetizationSimRoute
+  '/labs/desk': typeof LabsDeskRoute
   '/login_/activate': typeof LoginActivateRoute
   '/support/$': typeof SupportSplatRoute
   '/f/oktatas-szimulacio/checkout': typeof FOktatasSzimulacioCheckoutRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
+    | '/labs/desk'
     | '/login/activate'
     | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
+    | '/labs/desk'
     | '/login/activate'
     | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/ticket'
     | '/admin/monetization-sim'
+    | '/labs/desk'
     | '/login_/activate'
     | '/support/$'
     | '/f/oktatas-szimulacio/checkout'
@@ -513,6 +525,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRouteWithChildren
   TicketRoute: typeof TicketRoute
   AdminMonetizationSimRoute: typeof AdminMonetizationSimRoute
+  LabsDeskRoute: typeof LabsDeskRoute
   LoginActivateRoute: typeof LoginActivateRoute
   FOktatasSzimulacioCheckoutRoute: typeof FOktatasSzimulacioCheckoutRoute
   FOktatasSzimulacioDemoRoute: typeof FOktatasSzimulacioDemoRoute
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMonetizationSimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/labs/desk': {
+      id: '/labs/desk'
+      path: '/labs/desk'
+      fullPath: '/labs/desk'
+      preLoaderRoute: typeof LabsDeskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login_/activate': {
       id: '/login_/activate'
       path: '/login/activate'
@@ -835,6 +855,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRouteWithChildren,
   TicketRoute: TicketRoute,
   AdminMonetizationSimRoute: AdminMonetizationSimRoute,
+  LabsDeskRoute: LabsDeskRoute,
   LoginActivateRoute: LoginActivateRoute,
   FOktatasSzimulacioCheckoutRoute: FOktatasSzimulacioCheckoutRoute,
   FOktatasSzimulacioDemoRoute: FOktatasSzimulacioDemoRoute,

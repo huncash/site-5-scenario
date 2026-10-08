@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { DATA_CONTROLLER } from "@/content/legal";
 import { useI18n } from "@/i18n";
+import { langSearch } from "@/lib/langSearch";
 import { publicSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/gdpr")({
@@ -61,7 +62,7 @@ function GdprPage() {
         </section>
 
         <p>
-          <Link to="/" className="text-[var(--accent)] underline-offset-4 hover:underline">
+          <Link to="/" search={langSearch} className="text-[var(--accent)] underline-offset-4 hover:underline">
             {t("brand.aboutBack")}
           </Link>
         </p>

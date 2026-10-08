@@ -46,6 +46,8 @@ describe("school channel", () => {
     expect(hu.school.casesLabel).toBe("Aktív Case");
     expect(hu.school.slotsLabel).toBe("Aktív Slot");
     expect(hu.school.watermark).toBe(SCHOOL_WATERMARK);
+    expect(hu.school.packTitle).toBeTruthy();
+    expect(hu.school.forumNoRelay).not.toMatch(/ping/i);
     expect(SCHOOL_WATERMARK).toBe("Oktatási Licenc – Üzleti célra nem használható");
   });
 

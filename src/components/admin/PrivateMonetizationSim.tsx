@@ -10,32 +10,33 @@ import {
   YAxis,
 } from "recharts";
 
+import { EngineInterestPanel } from "@/components/admin/EngineInterestPanel";
+import { PricingLegoPanel } from "@/components/admin/PricingLegoPanel";
 import { Button } from "@/components/ui/button";
 import {
-  formatHufBand,
-  formatUsdBand,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { loyaltyFeesFromYear1Huf } from "@/config/plans";
+import {
   MARKET_CONTROL_MATRIX,
   OURS_ENTERPRISE_PERPETUAL_HUF,
   OURS_PRO_PERPETUAL_HUF,
   OURS_SOLO_PERPETUAL_HUF,
-  PERPETUAL_COMPETITORS,
-  PERPETUAL_MARKET_PRO_MID_HUF,
-  SAAS_COMPETITORS,
-  SAAS_CONTROL_SEAT_MONTHLY_HUF,
-  type MarketTier,
-  type PerpetualPriceBand,
-  type SaasPriceBand,
 } from "@/lib/private/marketControls";
 import {
-  enterpriseBaselineSliders,
-  perpetualBaselineSliders,
+  optionABaselineSliders,
+  optionBBaselineSliders,
   PRIVATE_MONETIZATION_CASE,
-  subscriptionBaselineSliders,
 } from "@/lib/private/monetizationCase";
 import {
-  simulateEnterpriseSlot,
-  simulatePerpetualSlot,
-  simulateSubscriptionSlot,
+  simulateOptionA,
+  simulateOptionB,
+  simulateTwoPillars,
   type MonetizationSlotResult,
 } from "@/lib/private/monetizationEngine";
 import { PRO_LINE_CLASS, PRO_OPT, PRO_PESS, PRO_REAL } from "@/lib/proChart";
@@ -125,173 +126,64 @@ function ProLinesChart({ data }: { data: MonetizationSlotResult["chart"] }) {
   );
 }
 
-function saasBandLabel(band: SaasPriceBand): string {
-  const usd = formatUsdBand(band.monthlyUsd.min, band.monthlyUsd.max, " / hó");
-  if (!band.monthlyHuf) return usd;
-  return `${usd} · ${formatHufBand(band.monthlyHuf.min, band.monthlyHuf.max, "/hó")}`;
-}
-
-function perpetualBandLabel(band: PerpetualPriceBand): string {
-  const suffix = band.billing === "annual" ? " / év" : " egyszeri";
-  const usd = formatUsdBand(band.usd.min, band.usd.max, suffix);
-  if (!band.huf) return usd;
-  return `${usd} · ${formatHufBand(band.huf.min, band.huf.max, band.billing === "annual" ? "/év" : "")}`;
-}
-
-const TIER_LABEL: Record<MarketTier, string> = {
-  starter: "Starter",
-  pro: "Pro",
-  enterprise: "Enterprise",
-};
-
 function MarketMatrix() {
   return (
-    <section className="overflow-x-auto rounded-xl border border-border/60 bg-card/40">
-      <div className="border-b border-border/50 px-4 py-3">
-        <h2 className="text-sm font-semibold">Összegző mátrix — piaci kontroll vs. a mi árazásunk</h2>
+    <section className="rounded-xl border border-white/12 bg-card">
+      <div className="border-b border-white/10 px-4 py-3">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Örökös katalógus
+        </div>
+        <h2 className="mt-1 text-base font-semibold">Basic · Pro Szcenárió · Enterprise & Csapatok</h2>
         <p className="mt-1 text-[12px] text-muted-foreground">
-          Publikus versenytárs-árak (LivePlan, Brixx, Causal · TablePlus/Sublime, Quantrix, JetBrains)
-          leképezve Starter / Pro / Enterprise szintre.
+          Opció A: Y1 örök licenc + 1 év frissítés. Opció B: opcionális Y2 75% · Y3 60% · Y4+ 0. Nincs
+          havi díj.
         </p>
       </div>
-      <table className="w-full min-w-[640px] text-left text-[12px]">
-        <thead className="bg-muted/30 text-[11px] uppercase tracking-wide text-muted-foreground">
-          <tr>
-            <th className="px-3 py-2 font-medium">Csomag</th>
-            <th className="px-3 py-2 font-medium">1. SaaS piaci átlag</th>
-            <th className="px-3 py-2 font-medium">2. Örökös / local-first</th>
-            <th className="px-3 py-2 font-medium">A mi Szcenárió árazásunk</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Csomag</TableHead>
+            <TableHead>Y1 örök + 1 év</TableHead>
+            <TableHead>Y2 / Y3 / Y4+</TableHead>
+            <TableHead>Case · Slot · Seat · Guest</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {MARKET_CONTROL_MATRIX.map((row) => (
-            <tr key={row.tier} className="border-t border-border/40">
-              <td className="px-3 py-2.5 font-semibold text-foreground">{row.label}</td>
-              <td className="px-3 py-2.5 text-muted-foreground">
-                <div className="font-mono text-foreground">
-                  {formatHufBand(row.saasMonthlyHuf.min, row.saasMonthlyHuf.max, "/hó")}
-                </div>
-                <div className="mt-0.5 text-[11px]">{row.saasNote}</div>
-              </td>
-              <td className="px-3 py-2.5 text-muted-foreground">
-                {row.perpetualOnceHuf ? (
-                  <div className="font-mono text-foreground">
-                    {formatHufBand(row.perpetualOnceHuf.min, row.perpetualOnceHuf.max, " egyszeri")}
-                  </div>
-                ) : (
-                  <div className="font-mono text-foreground">éves / egyedi</div>
-                )}
-                <div className="mt-0.5 text-[11px]">{row.perpetualNote}</div>
-              </td>
-              <td className="px-3 py-2.5">
-                <div className="font-mono font-medium text-amber-200/90">
-                  {row.ours.priceHuf != null
-                    ? `${row.ours.priceHuf.toLocaleString("hu-HU")} Ft egyszeri`
-                    : "—"}
-                </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{row.ours.detail}</div>
-              </td>
-            </tr>
+            <TableRow
+              key={row.tier}
+              className={row.tier === "pro" ? "bg-amber-500/[0.06]" : undefined}
+            >
+              <TableCell className="text-[13px] font-semibold">{row.label}</TableCell>
+              <TableCell className="text-[12px] font-medium tabular-nums">
+                {row.y1.toLocaleString("hu-HU")} Ft
+              </TableCell>
+              <TableCell className="text-[12px] tabular-nums text-muted-foreground">
+                {row.y2.toLocaleString("hu-HU")} · {row.y3.toLocaleString("hu-HU")} · 0 Ft
+              </TableCell>
+              <TableCell className="text-[12px] tabular-nums">
+                {row.cases} · {row.slots} · {row.seats} · {row.guests}
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </section>
   );
 }
 
-function CompetitorPanels() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <section className="rounded-xl border border-emerald-500/25 bg-card/40 p-4">
-        <h3 className="text-sm font-semibold text-emerald-400">1. Stratégia: Klasszikus SaaS</h3>
-        <p className="mt-1 text-[12px] text-muted-foreground">
-          Adat a szolgáltató felhőjében · havi/éves díj · előfizetés nélkül leáll.
-        </p>
-        <ul className="mt-3 space-y-3">
-          {SAAS_COMPETITORS.map((c) => (
-            <li key={c.id} className="rounded-lg border border-border/50 bg-background/40 px-3 py-2.5">
-              <div className="text-[13px] font-semibold">{c.name}</div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{c.blurb}</p>
-              <dl className="mt-2 space-y-1.5">
-                {(Object.keys(TIER_LABEL) as MarketTier[]).map((tier) => {
-                  const band = c.tiers[tier];
-                  return (
-                    <div key={tier} className="grid grid-cols-[5.5rem_1fr] gap-2 text-[11px]">
-                      <dt className="text-muted-foreground">{TIER_LABEL[tier]}</dt>
-                      <dd className="font-mono text-foreground">
-                        {band ? (
-                          <>
-                            {saasBandLabel(band)}
-                            <span className="mt-0.5 block font-sans text-[10px] text-muted-foreground">
-                              {band.note}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="rounded-xl border border-sky-500/25 bg-card/40 p-4">
-        <h3 className="text-sm font-semibold text-sky-400">2. Stratégia: Örökös / local-first</h3>
-        <p className="mt-1 text-[12px] text-muted-foreground">
-          Saját gépen fut · megvásárolt verzió örökre · opcionális éves frissítés.
-        </p>
-        <ul className="mt-3 space-y-3">
-          {PERPETUAL_COMPETITORS.map((c) => (
-            <li key={c.id} className="rounded-lg border border-border/50 bg-background/40 px-3 py-2.5">
-              <div className="text-[13px] font-semibold">{c.name}</div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{c.blurb}</p>
-              <dl className="mt-2 space-y-1.5">
-                {(Object.keys(TIER_LABEL) as MarketTier[]).map((tier) => {
-                  const band = c.tiers[tier];
-                  return (
-                    <div key={tier} className="grid grid-cols-[5.5rem_1fr] gap-2 text-[11px]">
-                      <dt className="text-muted-foreground">{TIER_LABEL[tier]}</dt>
-                      <dd className="font-mono text-foreground">
-                        {band ? (
-                          <>
-                            {perpetualBandLabel(band)}
-                            <span className="mt-0.5 block font-sans text-[10px] text-muted-foreground">
-                              {band.note}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">Nincs külön starter</span>
-                        )}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
-  );
-}
-
 export function PrivateMonetizationSim() {
-  const [sub, setSub] = useState(subscriptionBaselineSliders);
-  const [perp, setPerp] = useState(perpetualBaselineSliders);
-  const [ent, setEnt] = useState(enterpriseBaselineSliders);
+  const [optA, setOptA] = useState(optionABaselineSliders);
+  const [optB, setOptB] = useState(optionBBaselineSliders);
 
-  const subResult = useMemo(() => simulateSubscriptionSlot(sub), [sub]);
-  const perpResult = useMemo(() => simulatePerpetualSlot(perp), [perp]);
-  const entResult = useMemo(() => simulateEnterpriseSlot(ent), [ent]);
+  const aResult = useMemo(() => simulateOptionA(optA, optB), [optA, optB]);
+  const bResult = useMemo(() => simulateOptionB(optA, optB), [optA, optB]);
+  const abResult = useMemo(() => simulateTwoPillars(optA, optB), [optA, optB]);
+  const fees = loyaltyFeesFromYear1Huf(optA.perpetualPrice);
 
   const handleReset = () => {
-    setSub(subscriptionBaselineSliders());
-    setPerp(perpetualBaselineSliders());
-    setEnt(enterpriseBaselineSliders());
+    setOptA(optionABaselineSliders());
+    setOptB(optionBBaselineSliders());
   };
 
   return (
@@ -304,8 +196,15 @@ export function PrivateMonetizationSim() {
           <h1 className="mt-2 text-xl font-semibold tracking-tight">{PRIVATE_MONETIZATION_CASE.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {PRIVATE_MONETIZATION_CASE.timeHorizonMonths} hónapos (3 éves) dinamikus P-R-O előrejelzés —
-            halmozott nettó (bevétel − CAC). Piaci kontroll-alap a publikus SaaS / örökös árazásokból.
+            halmozott nettó (bevétel − CAC). Két pillér: örök + 1 év frissítés (egyszeri vagy 2×60 nap),
+            plusz opcionális Y2+ éves csomag. Nincs havi előfizetés.
           </p>
+          <a
+            href="#lego-matrix"
+            className="mt-2 inline-block text-[12px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Termék-legó, SWOT, két pillér ↓
+          </a>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={handleReset}>
           Csúszkák alaphelyzetbe
@@ -313,43 +212,13 @@ export function PrivateMonetizationSim() {
       </div>
 
       <MarketMatrix />
-      <CompetitorPanels />
 
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           size="sm"
           variant="secondary"
-          onClick={() =>
-            setSub((s) => ({
-              ...s,
-              seatPriceMonthly: MARKET_CONTROL_MATRIX[0]!.saasMonthlyHuf.max,
-            }))
-          }
-        >
-          SaaS Starter kontroll (15 e Ft/hó)
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="secondary"
-          onClick={() => setSub((s) => ({ ...s, seatPriceMonthly: SAAS_CONTROL_SEAT_MONTHLY_HUF }))}
-        >
-          SaaS Pro kontroll (Causal 92 e Ft/hó)
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="secondary"
-          onClick={() => setPerp((s) => ({ ...s, perpetualPrice: PERPETUAL_MARKET_PRO_MID_HUF }))}
-        >
-          Örökös piaci Pro közép (200 e Ft)
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="secondary"
-          onClick={() => setPerp((s) => ({ ...s, perpetualPrice: OURS_SOLO_PERPETUAL_HUF }))}
+          onClick={() => setOptA((s) => ({ ...s, perpetualPrice: OURS_SOLO_PERPETUAL_HUF }))}
         >
           Basic listaárunk (199 e Ft)
         </Button>
@@ -357,7 +226,7 @@ export function PrivateMonetizationSim() {
           type="button"
           size="sm"
           variant="secondary"
-          onClick={() => setPerp((s) => ({ ...s, perpetualPrice: OURS_PRO_PERPETUAL_HUF }))}
+          onClick={() => setOptA((s) => ({ ...s, perpetualPrice: OURS_PRO_PERPETUAL_HUF }))}
         >
           Pro listaárunk (399 e Ft)
         </Button>
@@ -365,79 +234,25 @@ export function PrivateMonetizationSim() {
           type="button"
           size="sm"
           variant="secondary"
-          onClick={() => setEnt((s) => ({ ...s, basePackagePrice: OURS_ENTERPRISE_PERPETUAL_HUF }))}
+          onClick={() => setOptA((s) => ({ ...s, perpetualPrice: OURS_ENTERPRISE_PERPETUAL_HUF }))}
         >
           Enterprise listaárunk (799 e Ft)
         </Button>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <section className="space-y-4 rounded-xl border border-border/60 bg-card/40 p-4">
-          <h2 className="border-b border-border/50 pb-2 text-sm font-semibold text-emerald-400">
-            {PRIVATE_MONETIZATION_CASE.slot1.name}
+          <h2 className="border-b border-border/50 pb-2 text-sm font-semibold text-amber-300">
+            {PRIVATE_MONETIZATION_CASE.optionA.name}
           </h2>
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            {PRIVATE_MONETIZATION_CASE.optionA.description}
+          </p>
           <label className="block space-y-1 text-xs text-muted-foreground">
             <span className="flex justify-between gap-2">
-              <span>Havi Seat ár (SaaS kontroll)</span>
+              <span>Y1 örök licenc (1 év frissítéssel)</span>
               <span className="font-mono text-foreground">
-                {sub.seatPriceMonthly.toLocaleString("hu-HU")} Ft/hó
-              </span>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={250_000}
-              step={1_000}
-              value={sub.seatPriceMonthly}
-              onChange={(e) => setSub((s) => ({ ...s, seatPriceMonthly: Number(e.target.value) }))}
-              className="w-full accent-emerald-500"
-            />
-          </label>
-          <label className="block space-y-1 text-xs text-muted-foreground">
-            <span className="flex justify-between gap-2">
-              <span>Havi organic növekedés</span>
-              <span className="font-mono text-foreground">{sub.monthlyGrowthRatePct}% / hó</span>
-            </span>
-            <input
-              type="range"
-              min={1}
-              max={25}
-              step={0.5}
-              value={sub.monthlyGrowthRatePct}
-              onChange={(e) =>
-                setSub((s) => ({ ...s, monthlyGrowthRatePct: Number(e.target.value) }))
-              }
-              className="w-full accent-emerald-500"
-            />
-          </label>
-          <label className="block space-y-1 text-xs text-muted-foreground">
-            <span className="flex justify-between gap-2">
-              <span>Havi churn</span>
-              <span className="font-mono text-foreground">{sub.churnRatePct}%</span>
-            </span>
-            <input
-              type="range"
-              min={0.1}
-              max={8}
-              step={0.1}
-              value={sub.churnRatePct}
-              onChange={(e) => setSub((s) => ({ ...s, churnRatePct: Number(e.target.value) }))}
-              className="w-full accent-emerald-500"
-            />
-          </label>
-          <ProLinesChart data={subResult.chart} />
-          <EndStats result={subResult} />
-        </section>
-
-        <section className="space-y-4 rounded-xl border border-border/60 bg-card/40 p-4">
-          <h2 className="border-b border-border/50 pb-2 text-sm font-semibold text-sky-400">
-            {PRIVATE_MONETIZATION_CASE.slot2.name}
-          </h2>
-          <label className="block space-y-1 text-xs text-muted-foreground">
-            <span className="flex justify-between gap-2">
-              <span>Örökös licenc ár</span>
-              <span className="font-mono text-foreground">
-                {perp.perpetualPrice.toLocaleString("hu-HU")} Ft
+                {optA.perpetualPrice.toLocaleString("hu-HU")} Ft
               </span>
             </span>
             <input
@@ -445,130 +260,123 @@ export function PrivateMonetizationSim() {
               min={22_000}
               max={1_000_000}
               step={1_000}
-              value={perp.perpetualPrice}
-              onChange={(e) => setPerp((s) => ({ ...s, perpetualPrice: Number(e.target.value) }))}
-              className="w-full accent-sky-500"
+              value={optA.perpetualPrice}
+              onChange={(e) => setOptA((s) => ({ ...s, perpetualPrice: Number(e.target.value) }))}
+              className="w-full accent-amber-400"
             />
           </label>
           <label className="block space-y-1 text-xs text-muted-foreground">
             <span className="flex justify-between gap-2">
-              <span>Éves frissítési arány (2. &amp; 3. év)</span>
-              <span className="font-mono text-foreground">{perp.renewalRatePct}%</span>
+              <span>Részletfizetők aránya (2×60 nap)</span>
+              <span className="font-mono text-foreground">{Math.round(optA.installmentSharePct)}%</span>
             </span>
             <input
               type="range"
-              min={30}
-              max={95}
+              min={0}
+              max={100}
               step={5}
-              value={perp.renewalRatePct}
-              onChange={(e) => setPerp((s) => ({ ...s, renewalRatePct: Number(e.target.value) }))}
-              className="w-full accent-sky-500"
+              value={optA.installmentSharePct}
+              onChange={(e) => setOptA((s) => ({ ...s, installmentSharePct: Number(e.target.value) }))}
+              className="w-full accent-amber-400"
+            />
+          </label>
+          <label className="block space-y-1 text-xs text-muted-foreground">
+            <span className="flex justify-between gap-2">
+              <span>Kezdő havi értékesítés</span>
+              <span className="font-mono text-foreground">{optA.initialSales} db/hó</span>
+            </span>
+            <input
+              type="range"
+              min={1}
+              max={24}
+              step={1}
+              value={optA.initialSales}
+              onChange={(e) => setOptA((s) => ({ ...s, initialSales: Number(e.target.value) }))}
+              className="w-full accent-amber-400"
+            />
+          </label>
+          <label className="block space-y-1 text-xs text-muted-foreground">
+            <span className="flex justify-between gap-2">
+              <span>Havi értékesítés-növekedés</span>
+              <span className="font-mono text-foreground">{optA.salesGrowthPct}% / hó</span>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={15}
+              step={0.5}
+              value={optA.salesGrowthPct}
+              onChange={(e) => setOptA((s) => ({ ...s, salesGrowthPct: Number(e.target.value) }))}
+              className="w-full accent-amber-400"
             />
           </label>
           <p className="text-[11px] text-muted-foreground">
-            Hűséglétra:{" "}
-            <span className="font-mono text-foreground">
-              {PRIVATE_MONETIZATION_CASE.slot2.baseValues.maintenanceFeeY2.toLocaleString("hu-HU")} Ft (2. év)
-            </span>
-            {" · "}
-            <span className="font-mono text-foreground">
-              {PRIVATE_MONETIZATION_CASE.slot2.baseValues.maintenanceFeeY3.toLocaleString("hu-HU")} Ft (3. év)
-            </span>
-            {" · "}
-            <span className="font-mono text-foreground">0 Ft (4. évtől)</span>.
+            A maradék {Math.round(100 - optA.installmentSharePct)}% egyszerre fizet. 2. részlet a 60.
+            napon.
           </p>
-          <ProLinesChart data={perpResult.chart} />
-          <EndStats result={perpResult} />
+          <ProLinesChart data={aResult.chart} />
+          <EndStats result={aResult} />
         </section>
 
-        <section className="space-y-4 rounded-xl border border-border/60 bg-card/40 p-4 lg:col-span-2 xl:col-span-1">
-          <h2 className="border-b border-border/50 pb-2 text-sm font-semibold text-amber-300">
-            {PRIVATE_MONETIZATION_CASE.slot3.name}
+        <section className="space-y-4 rounded-xl border border-border/60 bg-card/40 p-4">
+          <h2 className="border-b border-border/50 pb-2 text-sm font-semibold text-sky-400">
+            {PRIVATE_MONETIZATION_CASE.optionB.name}
           </h2>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            {PRIVATE_MONETIZATION_CASE.slot3.description}
+            {PRIVATE_MONETIZATION_CASE.optionB.description}
           </p>
           <label className="block space-y-1 text-xs text-muted-foreground">
             <span className="flex justify-between gap-2">
-              <span>Alap Enterprise ár (örökös)</span>
-              <span className="font-mono text-foreground">
-                {ent.basePackagePrice.toLocaleString("hu-HU")} Ft
-              </span>
+              <span>Y2+ csatlakozási arány (opcionális)</span>
+              <span className="font-mono text-foreground">{Math.round(optB.attachRatePct)}%</span>
             </span>
             <input
               type="range"
-              min={399_000}
-              max={2_500_000}
-              step={10_000}
-              value={ent.basePackagePrice}
-              onChange={(e) => setEnt((s) => ({ ...s, basePackagePrice: Number(e.target.value) }))}
-              className="w-full accent-amber-400"
-            />
-          </label>
-          <label className="block space-y-1 text-xs text-muted-foreground">
-            <span className="flex justify-between gap-2">
-              <span>Várható havi Enterprise értékesítés</span>
-              <span className="font-mono text-foreground">{ent.monthlySalesVolume} db/hó</span>
-            </span>
-            <input
-              type="range"
-              min={0.5}
-              max={12}
-              step={0.5}
-              value={ent.monthlySalesVolume}
-              onChange={(e) => setEnt((s) => ({ ...s, monthlySalesVolume: Number(e.target.value) }))}
-              className="w-full accent-amber-400"
-            />
-          </label>
-          <label className="block space-y-1 text-xs text-muted-foreground">
-            <span className="flex justify-between gap-2">
-              <span>Éves frissítési megújítási arány</span>
-              <span className="font-mono text-foreground">{ent.renewalRatePct}%</span>
-            </span>
-            <input
-              type="range"
-              min={50}
-              max={98}
-              step={1}
-              value={ent.renewalRatePct}
-              onChange={(e) => setEnt((s) => ({ ...s, renewalRatePct: Number(e.target.value) }))}
-              className="w-full accent-amber-400"
+              min={0}
+              max={100}
+              step={5}
+              value={optB.attachRatePct}
+              onChange={(e) => setOptB((s) => ({ ...s, attachRatePct: Number(e.target.value) }))}
+              className="w-full accent-sky-500"
             />
           </label>
           <p className="text-[11px] text-muted-foreground">
-            Alapcsomag: 5 Aktív Case · 4 Aktív Slot/Case · 3 Seat + 20 Guest · JIT{" "}
-            <span className="font-mono text-foreground">
-              +{PRIVATE_MONETIZATION_CASE.slot3.baseValues.extraCasePrice.toLocaleString("hu-HU")} Ft/Case
-            </span>
+            Évfordulós csomag a telepített bázison:{" "}
+            <span className="font-mono text-foreground">{fees.y2.toLocaleString("hu-HU")} Ft (2. év)</span>
             {" · "}
-            <span className="font-mono text-foreground">
-              +{PRIVATE_MONETIZATION_CASE.slot3.baseValues.extraSeatPrice.toLocaleString("hu-HU")} Ft/Seat
-            </span>
+            <span className="font-mono text-foreground">{fees.y3.toLocaleString("hu-HU")} Ft (3. év)</span>
             {" · "}
-            <span className="font-mono text-foreground">
-              +{PRIVATE_MONETIZATION_CASE.slot3.baseValues.extraSlotPrice.toLocaleString("hu-HU")} Ft/Slot
-            </span>
-            . Hűséglétra:{" "}
-            <span className="font-mono text-foreground">
-              {PRIVATE_MONETIZATION_CASE.slot3.baseValues.maintenanceFeeY2.toLocaleString("hu-HU")} /
-              {PRIVATE_MONETIZATION_CASE.slot3.baseValues.maintenanceFeeY3.toLocaleString("hu-HU")} / 0 Ft
-            </span>
-            .
+            <span className="font-mono text-foreground">0 Ft (4. évtől)</span>. Nem kötelező — aki
+            kihagyja, az Y1 verzióval marad.
           </p>
-          <ProLinesChart data={entResult.chart} />
-          <EndStats result={entResult} />
+          <ProLinesChart data={bResult.chart} />
+          <EndStats result={bResult} />
         </section>
       </div>
 
+      <section className="space-y-3 rounded-xl border border-emerald-500/25 bg-card/40 p-4">
+        <h2 className="text-sm font-semibold text-emerald-300">Két pillér együtt — 36 hó nettó</h2>
+        <ProLinesChart data={abResult.chart} />
+        <EndStats result={abResult} />
+      </section>
+
+      <EngineInterestPanel
+        y1={optA.perpetualPrice}
+        installmentSharePct={optA.installmentSharePct}
+        attachRatePct={optB.attachRatePct}
+      />
+
+      <PricingLegoPanel />
+
       <aside className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
-        <strong className="text-amber-200/90">Konklúzió:</strong> Pro 399 e Ft és Enterprise 799 e Ft
-        egyszeri listaáron önkiszolgáló — nincs „keressen minket” súrlódás. A 3. slot a multi-seat
-        volumennel mutatja a 36 hónapos nettó pályát (P-R-O).
+        <strong className="text-amber-200/90">Konklúzió:</strong> A mért modell csak Opció A (örök + 1
+        év, egyszeri vagy 2×60 nap) és Opció B (opcionális Y2+). Nincs havi előfizetéses elsőválasztó
+        Pro. A motor-érdeklődés ugyanerre a két pillérre konvertál.
       </aside>
 
       <p className="text-xs text-muted-foreground">
         A három görbe egyidejűleg futó P-R-O sáv (nem párhuzamos pálya-állítás). A band-szorzók a
-        növekedés / churn / renewal érzékenységét modellezik a csúszkaértékek körül.
+        növekedés / értékesítés / Y2+ csatlakozás érzékenységét modellezik a csúszkaértékek körül.
       </p>
     </div>
   );

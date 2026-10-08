@@ -31,6 +31,7 @@ export type GlossaryTermId =
   | "dock"
   | "vat"
   | "kpi"
+  | "devTree"
   | "whatIf"
   | "burn"
   | "kaizen"
@@ -65,12 +66,12 @@ const GLOSSARY: Record<GlossaryTermId, GlossaryTerm> = {
     hu: {
       term: "Aktív Case",
       plain: "az asztal, amin most dolgozol",
-      exact: "Egy nyitott helyzet. A licenc azt köti, hány ilyen asztal lehet egyszerre nyitva — nem azt, mennyi régi mentésed van.",
+      exact: "Egy nyitott helyzet. A licenc azt köti, hány ilyen asztal lehet egyszerre nyitva — nem azt, mennyi régi mentésed van. Új motor (oktatás, BCP) külön asztalt nem ad.",
     },
     en: {
       term: "Active Case",
       plain: "the desk you are working on now",
-      exact: "One open situation. The licence caps how many desks can be open at once — not how much old save you keep.",
+      exact: "One open situation. The licence caps how many desks can be open at once — not how much old save you keep. A new engine (education, BCP) does not add a desk.",
     },
     supportSlug: "pricing",
     supportAnchor: "active-workspaces",
@@ -81,12 +82,12 @@ const GLOSSARY: Record<GlossaryTermId, GlossaryTerm> = {
     hu: {
       term: "Aktív Slot",
       plain: "Magán / Vállalkozás / Projekt fül — külön kassza",
-      exact: "Ugyanazon az asztalon három fiók. A tétel oda esik, amelyik fül nyitva van. Ha a hely betelt, bővíteni kell — a régi, nem használt fiókot simán felülírhatod.",
+      exact: "Ugyanazon az asztalon három fiók. A tétel oda esik, amelyik fül nyitva van. A Slot a licenc kvótája; motorfelvétel új fület nem nyit. Ha a hely betelt, Extra Slot kell — a régi, nem használt fiókot simán felülírhatod.",
     },
     en: {
       term: "Active Slot",
       plain: "Personal / Business / Project tab — separate cash",
-      exact: "Three drawers on the same desk. A posting lands on the open tab. If the place is full you need an add-on; an unused drawer can be overwritten.",
+      exact: "Three drawers on the same desk. A posting lands on the open tab. The Slot is licence quota; adding an engine does not open a tab. If the place is full you need Extra Slot; an unused drawer can be overwritten.",
     },
     supportSlug: "lecke-dash-slot-ful",
     kbId: "concept-case-slot",
@@ -314,14 +315,15 @@ const GLOSSARY: Record<GlossaryTermId, GlossaryTerm> = {
     hu: {
       term: "Poka-Yoke",
       plain: "úgy rakd össze, hogy ne lehessen elrontani",
-      exact: "A motor megkérdez, mielőtt átír. WANT keret, ÁFA-kulcs, Szummában tiltott import. A hiba drágább, mint a kérdés.",
+      exact: "A motor megkérdez, mielőtt átír. WANT keret, ÁFA-kulcs, Szummában tiltott import, nyelv a címsorban. A fa is zár: ami nincs bekapcsolva, az nem zsúfolja az asztalt. A hiba drágább, mint a kérdés.",
     },
     en: {
       term: "Poka-Yoke",
       plain: "build it so it is hard to mess up",
-      exact: "The engine asks before it overwrites. WANT cap, VAT rate, import blocked in Szumma. The error costs more than the question.",
+      exact: "The engine asks before it overwrites. WANT cap, VAT rate, import blocked in Szumma, language in the address bar. The tree is a lock too: what is off does not clutter the desk. The error costs more than the question.",
     },
     supportSlug: "lecke-motor-poka-yoke",
+    kbId: "poka-yoke-guard",
   },
   oee: {
     id: "oee",
@@ -400,15 +402,31 @@ const GLOSSARY: Record<GlossaryTermId, GlossaryTerm> = {
     id: "kpi",
     hu: {
       term: "KPI",
-      plain: "négy gyors szám fent — merre nézz tovább",
-      exact: "KPI mutató #1–#4, egyedi beállítás. Nem mérleg, nem jegy. Ha 0 a runway, az nem „rossz mutató” — elfogyott a levegő.",
+      plain: "négy gyors szám a lombik fáján — merre nézz tovább",
+      exact: "KPI mutató #1–#4, egyedi beállítás. Nem Slot. A sáv a lombik fáján van, a főasztalon előkészítés. Nem mérleg, nem jegy. Ha 0 a runway, az nem „rossz mutató” — elfogyott a levegő.",
     },
     en: {
       term: "KPI",
-      plain: "four quick numbers at the top — where to look next",
-      exact: "KPI indicator #1–#4, each a custom setting. Not a balance sheet, not a grade. If runway is 0, that is not a “bad metric” — the air is gone.",
+      plain: "four quick numbers on the flask tree — where to look next",
+      exact: "KPI indicator #1–#4, each a custom setting. Not a Slot. The bar lives on the flask tree; the main desk still keeps it in preparation. Not a balance sheet, not a grade. If runway is 0, that is not a “bad metric” — the air is gone.",
     },
     supportSlug: "lecke-dash-kpi-sav",
+    kbId: "labs-dev-tree",
+  },
+  devTree: {
+    id: "devTree",
+    hu: {
+      term: "Fejlesztési fa",
+      plain: "a lombik — itt kapcsolod a modulokat",
+      exact: "A fejléc lombikja nyitja a Laboratóriumot. A magból ágaznak a motorok, onnan a modulok. A bogyóra kattintasz: ami kell, az asztalon jelenik meg. Ami kikapcsolva, az nem zsúfol.",
+    },
+    en: {
+      term: "Development tree",
+      plain: "the flask — this is where you switch modules",
+      exact: "The flask in the header opens the Laboratory. Engines branch from the core, modules from the engines. Tap a berry: what you need lands on the desk. What is off does not clutter.",
+    },
+    supportSlug: "lecke-dash-dev-tree",
+    kbId: "labs-dev-tree",
   },
   whatIf: {
     id: "whatIf",

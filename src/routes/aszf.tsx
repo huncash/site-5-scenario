@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FunnelShell } from "@/components/funnel/FunnelShell";
 import { ASZF_META, ASZF_SECTIONS_EN, ASZF_SECTIONS_HU } from "@/content/aszf";
 import { useI18n } from "@/i18n";
+import { keepLang, langSearch } from "@/lib/langSearch";
 import { publicSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/aszf")({
@@ -28,11 +29,11 @@ function AszfPage() {
           </section>
         ))}
         <p>
-          <Link to="/gdpr" className="text-[var(--accent)] underline-offset-4 hover:underline">
+          <Link to="/gdpr" search={keepLang} className="text-[var(--accent)] underline-offset-4 hover:underline">
             {t("footer.gdpr")}
           </Link>
           {" · "}
-          <Link to="/" className="text-[var(--accent)] underline-offset-4 hover:underline">
+          <Link to="/" search={langSearch} className="text-[var(--accent)] underline-offset-4 hover:underline">
             {t("brand.aboutBack")}
           </Link>
         </p>

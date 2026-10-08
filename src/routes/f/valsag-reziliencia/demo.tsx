@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useVault } from "@/lib/vault";
 import { writeScenarioDoorStep } from "@/lib/doorStep";
+import { langSearch } from "@/lib/langSearch";
 
 export const Route = createFileRoute("/f/valsag-reziliencia/demo")({
   component: ValsagRezilienciaDemoLoaderPage,
@@ -28,7 +29,7 @@ function ValsagRezilienciaDemoLoaderPage() {
         window.localStorage.removeItem("szcenario_home_mode");
         window.dispatchEvent(new Event("szcenario:home_mode"));
       }
-      void navigate({ to: "/", hash: "tipusok" });
+      void navigate({ to: "/", hash: "tipusok", search: langSearch() });
     } catch (e: unknown) {
       inFlight.current = false;
       setError(e instanceof Error ? e.message : "Nem sikerült megnyitni a reziliencia-eseteket.");

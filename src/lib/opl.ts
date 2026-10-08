@@ -1,4 +1,5 @@
 import type { GlossaryTermId } from "@/lib/glossary";
+import type { KnowledgeBaseArticleId } from "@/lib/knowledgeBase";
 import { DASH_OPL_LESSONS } from "@/lib/oplDashboard";
 import { MOTOR_OPL_LESSONS } from "@/lib/oplMotor";
 
@@ -34,6 +35,7 @@ export type OplLesson = {
   deepDiveEn: string;
   jargon: GlossaryTermId[];
   keywords: string[];
+  kbId?: KnowledgeBaseArticleId;
   steps: OplStep[];
 };
 
@@ -50,38 +52,39 @@ export const OPL_CORE_LESSONS: OplLesson[] = [
     categoryEn: "Dashboard",
     titleHu: "Dashboard kezelés",
     titleEn: "Dashboard handling",
-    whyHu: "Ha nem tudod, melyik sáv mit mutat, a számok csak zajok. Először a három sávot rögzítsd.",
-    whyEn: "If you cannot tell which band does what, the numbers are noise. Lock the three bands first.",
-    jargon: ["kpi", "whatIf", "pro", "slot"],
-    keywords: ["dashboard", "kpi", "what-if", "pro"],
+    whyHu: "Előbb a fül, aztán a lombik. A modulok a fán vannak — a főasztal a döntésé.",
+    whyEn: "Tab first, then the flask. Modules live on the tree — the desk is for the decision.",
+    jargon: ["kpi", "whatIf", "pro", "slot", "devTree"],
+    keywords: ["dashboard", "kpi", "what-if", "pro", "lombik", "dev tree", "laboratórium"],
+    kbId: "labs-dev-tree",
     deepDiveHu:
-      "A műszerfal nem könyvelés. Három sáv: fent a gyors állapot (KPI), középen a döntés (What-if, P-R-O, kártyák), alul a modulok (Cashflow, Tételek, Üzletek, Leltár). Először a fület nézd — Magán, Vállalkozás vagy Projekt —, mert ugyanaz a szám más fiókban más döntés. A P-R-O három világ ugyanarra a múltra: rossz, közepes, jó. Ha összekevered a sávokat, zajnak tűnik, pedig csak más kérdésre válaszolnak.",
+      "A műszerfal nem könyvelés. Először a fület nézd — Magán, Vállalkozás vagy Projekt —, mert ugyanaz a szám más fiókban más döntés. A modulok és a gyors mutatók a fejléc lombikjában, a fejlesztési fán kapcsolhatók: a bogyóra kattintasz, a kép az asztalon jelenik meg. Középen a döntés: What-if, három pálya, kártyák. A fa Poka-Yoke: ami nincs bekapcsolva, az nem zsúfolja a főképet. Ha összekevered a fiókot a fával, zajnak tűnik — más kérdésre válaszolnak.",
     deepDiveEn:
-      "The dashboard is not bookkeeping. Three bands: top is the quick read (KPI), the middle is the decision (What-if, P-R-O, cards), the bottom is modules (Cashflow, Ledger, Deals, Inventory). Look at the tab first — Personal, Business or Project — because the same number is a different decision in another drawer. P-R-O is three worlds on the same past: bad, mid, good. Mix the bands and it looks like noise; they are just answering different questions.",
+      "The dashboard is not bookkeeping. Look at the tab first — Personal, Business or Project — because the same number is a different decision in another drawer. Modules and the quick indicators switch on the flask in the header, on the development tree: tap a berry, the picture lands on the desk. The middle is the decision: What-if, three paths, cards. The tree is poka-yoke: what is off does not clutter the main view. Mix the drawer with the tree and it looks like noise — they answer different questions.",
     steps: [
       {
         id: "s1",
-        titleHu: "Felső sáv",
-        titleEn: "Top band",
-        actionHu: "Nézd a 4 KPI-t. Nem könyvelés — gyors állapot.",
-        actionEn: "Read the 4 KPIs. Not accounting — a quick status.",
-        image: { captionHu: "KPI sáv a fejléc alatt", captionEn: "KPI bar under the header" },
+        titleHu: "Fül",
+        titleEn: "Tab",
+        actionHu: "Előbb a Slot: Magán, Vállalkozás vagy Projekt.",
+        actionEn: "Slot first: Personal, Business or Project.",
+        image: { captionHu: "Slot fülek a fejlécben", captionEn: "Slot tabs in the header" },
       },
       {
         id: "s2",
-        titleHu: "Középső munka",
-        titleEn: "Middle work",
-        actionHu: "What-if: válaszd a P / R / O pályát. Ugyanaz a múlt, más világ.",
-        actionEn: "What-if: pick the P / R / O path. Same past, different world.",
-        image: { captionHu: "What-if + P-R-O gombok", captionEn: "What-if + P-R-O buttons" },
+        titleHu: "Lombik",
+        titleEn: "Flask",
+        actionHu: "A fa bogyói a modulok. Kapcsold, aztán keresd az asztalon.",
+        actionEn: "The tree berries are modules. Switch one, then find it on the desk.",
+        image: { captionHu: "Lombik — fejlesztési fa", captionEn: "Flask — development tree" },
       },
       {
         id: "s3",
-        titleHu: "Alsó modulok",
-        titleEn: "Bottom modules",
-        actionHu: "A fülek Slotot cserélnek: Magán / Vállalkozás / Projekt. Előbb a fület, aztán a tételt.",
-        actionEn: "Tabs swap the Slot: Personal / Business / Project. Tab first, then the posting.",
-        image: { captionHu: "Slot fülek", captionEn: "Slot tabs" },
+        titleHu: "Döntés",
+        titleEn: "Decision",
+        actionHu: "Középen a What-if: három pálya ugyanarra a múltra.",
+        actionEn: "In the middle, What-if: three paths on the same past.",
+        image: { captionHu: "What-if gombok a munkaterületen", captionEn: "What-if buttons on the desk" },
       },
     ],
   },
@@ -248,7 +251,7 @@ export const OPL_CORE_LESSONS: OplLesson[] = [
 export const OPL_LESSONS: OplLesson[] = [...OPL_CORE_LESSONS, ...DASH_OPL_LESSONS, ...MOTOR_OPL_LESSONS];
 
 export function oplByPath(path: string): OplLesson | null {
-  const key = path.replace(/^\/+/, "");
+  const key = path.replace(/^\/+/, "").replace(/^(kb|embed)\//, "");
   return OPL_LESSONS.find((l) => l.path === key || l.id === key) ?? null;
 }
 

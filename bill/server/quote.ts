@@ -11,6 +11,7 @@ import {
   type BillInterval,
   type BillTier,
 } from "./catalog.ts";
+import { evaluateBundleLockFromCart, type BundleLockDecision } from "../../src/lib/bundleLock.ts";
 import { resolveVat, splitVat, type VatDecision } from "./vat.ts";
 
 export type MoneySplit = { net: number; vat: number; gross: number };
@@ -33,6 +34,7 @@ export type PackageQuote = {
   monthly12: MoneySplit;
   saveNet: number;
   lines: QuoteLine[];
+  bundleLock: BundleLockDecision;
 };
 
 export function packageLines(
@@ -78,6 +80,11 @@ export function quotePackage(
   const lines = packageLines(tier, interval, input);
   const dueNet = lines.reduce((sum, line) => sum + line.netUnitPrice * line.quantity, 0);
   const packageNet = chargeHuf(tier, interval);
+  const bundleLock = evaluateBundleLockFromCart({
+    planId: tier,
+    addon: input.addon,
+    slotPack: slotPackAllowedForTier(tier) ? input.slotPack : undefined,
+  });
   return {
     vat,
     monthlyNet: packageNet,
@@ -89,5 +96,6 @@ export function quotePackage(
     monthly12: splitVat(packageNet, vat.rate),
     saveNet: 0,
     lines,
+    bundleLock,
   };
 }

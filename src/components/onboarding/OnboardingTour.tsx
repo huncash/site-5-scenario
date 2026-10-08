@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import type { OnboardingStep, TourAnchorId, TourVisual } from "@/components/onboarding/onboardingTourSteps";
 import { useSupportEmbedOptional } from "@/components/support/SupportEmbedProvider";
@@ -60,6 +61,7 @@ export function OnboardingTour(props: {
   onFinish: () => void;
 }) {
   const { open, stepIndex, steps, onOpenChange, onPrev, onNext, onSkip, onFinish } = props;
+  const { t } = useI18n();
   const step = steps[stepIndex];
   const embed = useSupportEmbedOptional();
   const lessonSlug = step?.id ? ONBOARDING_EMBED_SLUG[step.id] : undefined;
@@ -148,7 +150,7 @@ export function OnboardingTour(props: {
           <button
             type="button"
             className="rounded-md px-1.5 text-muted-foreground hover:text-foreground"
-            aria-label="Bezárás"
+            aria-label={t("tour.close")}
             onClick={() => onOpenChange(false)}
           >
             ×
@@ -186,30 +188,30 @@ export function OnboardingTour(props: {
         <div className="mt-2 flex items-center justify-between gap-2">
           <div className="flex gap-1">
             <Button type="button" variant="ghost" className="h-8 px-2 text-muted-foreground" onClick={onSkip}>
-              Kihagyás
+              {t("tour.skip")}
             </Button>
             {embed && lessonSlug ? (
               <Button
                 type="button"
                 variant="ghost"
                 className="h-8 px-2 text-primary"
-                onClick={() => embed.openEmbed(lessonSlug, step?.title ?? "Lecke")}
+                onClick={() => embed.openEmbed(lessonSlug, step?.title ?? t("tour.lesson"))}
               >
-                Lecke
+                {t("tour.lesson")}
               </Button>
             ) : null}
           </div>
           <div className="flex gap-1.5">
             <Button type="button" variant="outline" className="h-8" onClick={onPrev} disabled={stepIndex === 0}>
-              Előző
+              {t("tour.prev")}
             </Button>
             {last ? (
               <Button type="button" className="h-8" onClick={onFinish}>
-                Bezárás
+                {t("tour.close")}
               </Button>
             ) : (
               <Button type="button" className="h-8" onClick={onNext}>
-                Tovább
+                {t("tour.next")}
               </Button>
             )}
           </div>

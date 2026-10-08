@@ -38,6 +38,8 @@
     if (p[3] === "en" || p[3] === "hu") locale = p[3];
   }
   try {
+    var m = document.cookie.match(/(?:^|; )szcenario_view=([^;]*)/);
+    fromToken(m ? m[1] : "");
     var lsT = localStorage.getItem("szcenario_theme");
     var lsP = localStorage.getItem("szcenario_palette");
     var lsA = localStorage.getItem("szcenario_a11y");
@@ -47,8 +49,6 @@
     if (lsA === "1") a11y = true;
     if (lsA === "0") a11y = false;
     if (lsL === "en" || lsL === "hu") locale = lsL;
-    var m = document.cookie.match(/(?:^|; )szcenario_view=([^;]*)/);
-    fromToken(m ? m[1] : "");
     var q = new URLSearchParams(location.search);
     var qt = q.get("theme");
     var qp = q.get("palette");
@@ -64,6 +64,11 @@
     localStorage.setItem("szcenario_a11y", a11y ? "1" : "0");
     localStorage.setItem("szcenario_locale", locale);
     localStorage.setItem("szcenario_currency", locale === "en" ? "EUR" : "HUF");
+    if (ql !== "en" && ql !== "hu") {
+      q.set("lang", locale);
+      var qs = q.toString();
+      history.replaceState(history.state, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
+    }
     var host = location.hostname.toLowerCase();
     var domain =
       host === "szcenario.hu" || host.slice(-13) === ".szcenario.hu" ? "; Domain=.szcenario.hu" : "";

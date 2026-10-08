@@ -1,5 +1,13 @@
-import { caseTitle, useI18n } from "@/i18n";
+import { caseTitle, formatCurrency, useI18n } from "@/i18n";
 import { CampusAllocationSim } from "@/components/education/CampusAllocationSim";
+import { useState } from "react";
+
+import { AnonReviewWizard } from "@/components/education/AnonReviewWizard";
+import { LabSection } from "@/components/labs/LabSection";
+import { Button } from "@/components/ui/button";
+import { useEduAnonymize } from "@/hooks/useEngineFramePrefs";
+import type { EconomicReadSnapshot } from "@/lib/bcpEconomicOverlay";
+import { anonymizeEconomicSnapshot } from "@/lib/educationAnonymize";
 import { HelpIcon } from "@/components/HelpIcon";
 import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
@@ -123,13 +131,17 @@ export function EducationCasePanel(props: {
   phase?: "PLAN" | "DO" | "CHECK" | "ACT";
   model?: EducationModel | null;
   baseline?: MasterBaselineContext | null;
+  snapshot?: EconomicReadSnapshot | null;
 }) {
   const { locale, t } = useI18n();
+  const anon = useEduAnonymize();
+  const [wizard, setWizard] = useState(false);
   if (!isEducationSegment(props.segmentId)) return null;
   const model = props.model ?? buildEducationModel(props.segmentId as EducationCaseId);
   const physical = buildPhysicalDashboard(props.segmentId, props.baseline);
   const startup = model.kind === "startup";
   const ops = model.kind === "ops";
+  const study = anon.on && props.snapshot ? anonymizeEconomicSnapshot(props.snapshot) : null;
   const phaseHint = startup
     ? props.phase === "PLAN"
       ? t("panel.eduStartupPlan")
@@ -163,6 +175,31 @@ export function EducationCasePanel(props: {
       }
     >
       <p className="text-[12px] leading-snug text-[var(--text-main)]">{phaseHint}</p>
+      {study ? (
+        <LabSection id="labs-anon" className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-2 text-[11px] leading-snug">
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-foreground">
+              {t("frame.studyAlias")}: {study.orgAlias}
+            </div>
+            <p className="mt-0.5 text-muted-foreground">
+              {formatCurrency(study.cashHuf)} · {study.headcountBand}
+            </p>
+          </div>
+          {props.snapshot ? (
+            <Button type="button" size="sm" variant="outline" onClick={() => setWizard(true)}>
+              {t("frame.anonWizard")}
+            </Button>
+          ) : null}
+        </LabSection>
+      ) : null}
+      {props.snapshot ? (
+        <AnonReviewWizard
+          open={wizard}
+          onOpenChange={setWizard}
+          snapshot={props.snapshot}
+          anonOn={anon.on}
+        />
+      ) : null}
       {ops ? (
           <div className="mt-2 rounded-md border border-border/60 bg-background px-2.5 py-2 text-[11px] leading-snug text-[var(--text-main)]">
             <span className="font-semibold">Veszteségcsökkentési &amp; Profit-potenciál (Lean Quick Wins)</span>

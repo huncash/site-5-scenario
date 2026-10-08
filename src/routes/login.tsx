@@ -35,6 +35,7 @@ import { ContentBackButton } from "@/components/nav/ContentBackButton";
 import { useI18n } from "@/i18n";
 import { demoSerialFromId } from "@/lib/coreCases";
 import { DEMO_PASSWORD, isDemoSegmentId, type DemoSegmentId } from "@/lib/demoCatalog";
+import { recordEngineStart } from "@/lib/engineInterest";
 import { isStartableScenarioKind, publicScenarioKindGroups, scenarioKindOf } from "@/lib/scenarioCatalog";
 import {
   LAST_PROFILE_KEY,
@@ -45,8 +46,10 @@ import {
 import { GuestLoginCard } from "@/components/access/GuestLoginCard";
 import { isSchoolHost, isSchoolVerified, markSchoolSession } from "@/lib/school";
 import { applySchoolCampusLicense } from "@/lib/schoolLicense";
+import { langSearch, parseLangSearch } from "@/lib/langSearch";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => parseLangSearch(s),
   component: LoginPage,
 });
 
@@ -96,6 +99,7 @@ function LoginPage() {
   const handleDemoLogin = async (segmentId: DemoSegmentId) => {
     if (!isStartableScenarioKind(scenarioKindOf(segmentId))) return;
     if (demoInFlightRef.current) return;
+    recordEngineStart(scenarioKindOf(segmentId));
     demoInFlightRef.current = true;
     setBusy(true);
     setDemoBusyId(segmentId);
@@ -113,7 +117,7 @@ function LoginPage() {
       } catch {
         // ignore
       }
-      await navigate({ to: "/" });
+      await navigate({ to: "/", search: langSearch() });
     } catch (err: any) {
       setError(err?.message || t("login.demoFail"));
     } finally {
@@ -215,7 +219,7 @@ function LoginPage() {
         } catch {
           // ignore
         }
-        void navigate({ to: "/" });
+        void navigate({ to: "/", search: langSearch() });
       } else {
         setError(t("login.badPassword"));
       }
@@ -305,7 +309,7 @@ function LoginPage() {
                     } catch {
                       // ignore
                     }
-                    void navigate({ to: "/" });
+                    void navigate({ to: "/", search: langSearch() });
                   }}
                 >
                   {t("login.dashboard")}

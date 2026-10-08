@@ -8,6 +8,11 @@ import type { Transaction } from "@/lib/mesh/transaction";
 import { TransactionSchema } from "@/lib/mesh/transaction";
 import type { WebRTCDataTransport } from "@/lib/mesh/transport";
 import type { TransportStatus } from "@/lib/mesh/transport";
+import {
+  allowRemoteMeshPayload,
+  currentLicenseFingerprint,
+  FUSION_ERROR_HU,
+} from "@/lib/licenseFusion";
 
 // BroadcastChannel a tabok közötti azonnali szinkronhoz
 const meshChannel = typeof window !== "undefined" ? new BroadcastChannel('mesh-sync') : null;
@@ -35,10 +40,10 @@ function logMeshEvent(event: MeshEvent) {
 }
 
 type MeshWireMessage =
-  | { v: 1; kind: "hello"; deviceId: string; name: string }
-  | { v: 1; kind: "sync:full"; store: "transactions"; items: Transaction[] }
-  | { v: 1; kind: "op:save"; store: "transactions"; item: Transaction }
-  | { v: 1; kind: "op:delete"; store: "transactions"; key: string };
+  | { v: 1; kind: "hello"; deviceId: string; name: string; licenseFp?: string }
+  | { v: 1; kind: "sync:full"; store: "transactions"; items: Transaction[]; licenseFp?: string }
+  | { v: 1; kind: "op:save"; store: "transactions"; item: Transaction; licenseFp?: string }
+  | { v: 1; kind: "op:delete"; store: "transactions"; key: string; licenseFp?: string };
 
 let _transport: WebRTCDataTransport | null = null;
 let _applyingRemote = false;
@@ -187,6 +192,16 @@ export function createMeshRepository<TSchema extends DataStoreSchema>(
     const msg = safeParseWire(raw);
     if (!msg) return;
 
+    const remoteFp = "licenseFp" in msg ? msg.licenseFp : undefined;
+    if (!allowRemoteMeshPayload(remoteFp)) {
+      await appendLog({
+        op: "license:fusion",
+        store: "license",
+        message: FUSION_ERROR_HU,
+      });
+      return;
+    }
+
     if (msg.kind === "hello") {
       if (_activeProfileId) {
         const d: MeshDevice = {
@@ -243,8 +258,9 @@ export function createMeshRepository<TSchema extends DataStoreSchema>(
       const items = (await store.getAll("transactions" as never)) as Transaction[];
       try {
         setSyncFull(true);
-        t.send(JSON.stringify({ v: 1, kind: "hello", deviceId: getOrCreateDeviceId(), name: _activeProfileName ?? "Device" } satisfies MeshWireMessage));
-        t.send(JSON.stringify({ v: 1, kind: "sync:full", store: "transactions", items } satisfies MeshWireMessage));
+        const licenseFp = currentLicenseFingerprint() ?? undefined;
+        t.send(JSON.stringify({ v: 1, kind: "hello", deviceId: getOrCreateDeviceId(), name: _activeProfileName ?? "Device", licenseFp } satisfies MeshWireMessage));
+        t.send(JSON.stringify({ v: 1, kind: "sync:full", store: "transactions", items, licenseFp } satisfies MeshWireMessage));
       } catch {
         /* ignore */
       } finally {
@@ -281,7 +297,7 @@ export function createMeshRepository<TSchema extends DataStoreSchema>(
         const ok = TransactionSchema.safeParse(t);
         if (ok.success) {
           _transport.send(
-            JSON.stringify({ v: 1, kind: "op:save", store: "transactions", item: ok.data } satisfies MeshWireMessage),
+            JSON.stringify({ v: 1, kind: "op:save", store: "transactions", item: ok.data, licenseFp: currentLicenseFingerprint() ?? undefined } satisfies MeshWireMessage),
           );
         }
       }
@@ -307,7 +323,7 @@ export function createMeshRepository<TSchema extends DataStoreSchema>(
 
       if (!_applyingRemote && _transport?.isOpen() && s === "transactions") {
         _transport.send(
-          JSON.stringify({ v: 1, kind: "op:delete", store: "transactions", key: String(key) } satisfies MeshWireMessage),
+          JSON.stringify({ v: 1, kind: "op:delete", store: "transactions", key: String(key), licenseFp: currentLicenseFingerprint() ?? undefined } satisfies MeshWireMessage),
         );
       }
 

@@ -69,6 +69,10 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
         q: "Ez világvége-szimulátor?",
         a: "Nem. Vállalati BCP és működési reziliencia. A pesszimista sáv érettség: aki a kiesést is számolja, az tartja a folytonosságot.",
       },
+      {
+        q: "Új motort veszek, kapok extra Case-t?",
+        a: "Nem. A Case / Slot / Seat / Guest a licenc kvótája. A BCP motor ugyanerre a keretre ül — moduláris legó, külön kvótát nem ad.",
+      },
       MEASURE_FAQ,
       PRICING_VAT_FAQ,
       WHY_FAQ,
@@ -196,6 +200,10 @@ export const CAMPAIGN_FUNNELS: Record<CampaignId, CampaignFunnelCopy> = {
       {
         q: "Ez ügyféladat?",
         a: "Nem. Diák- és tanműhely-léptékű minta. Nincs felhő. A fejlesztők nem látják.",
+      },
+      {
+        q: "Új motort veszek, kapok extra Case-t?",
+        a: "Nem. A Case / Slot / Seat / Guest a licenc kvótája. Az oktatási motor ugyanerre a keretre ül — moduláris legó, külön kvótát nem ad.",
       },
       MEASURE_FAQ,
       PRICING_VAT_FAQ,

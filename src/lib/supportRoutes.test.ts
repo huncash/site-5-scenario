@@ -39,11 +39,27 @@ describe("supportRoutes", () => {
     expect(searchSupportLessons("raktárdivat").some((l) => l.path === "lecke-motor-jit")).toBe(true);
     expect(searchSupportLessons("majd jól jön").some((l) => l.path === "lecke-motor-holtpenz")).toBe(true);
     expect(searchSupportLessons("opciódíj").some((l) => l.path === "lecke-motor-opcio")).toBe(true);
+    expect(searchSupportLessons("licenckeret").some((l) => l.path === "lecke-motor-licenckeret")).toBe(true);
+    expect(searchSupportLessons("lombik").some((l) => l.path === "lecke-dash-dev-tree")).toBe(true);
+    expect(searchSupportLessons("nyelv").some((l) => l.path === "lecke-dash-nyelv")).toBe(true);
+    expect(searchSupportLessons("poka").some((l) => l.path === "lecke-motor-poka-yoke")).toBe(true);
+    expect(searchSupportLessons("development tree", "en").some((l) => l.path === "lecke-dash-dev-tree")).toBe(true);
     expect(searchSupportLessons("zzzz-nincs")).toEqual([]);
   });
 
   it("maps knowledge-base ids to public lesson paths", () => {
     expect(supportSlugForKb("lesson-bcp")).toBe("vallalati-bcp-folytonossag");
+    expect(supportSlugForKb("labs-dev-tree")).toBe("lecke-dash-dev-tree");
+    expect(supportSlugForKb("poka-yoke-guard")).toBe("lecke-motor-poka-yoke");
+    expect(supportSlugForKb("language-persist")).toBe("lecke-dash-nyelv");
     expect(supportLessonByRef("lesson-kahn")?.path).toBe("kahn-strategiai-elagazas");
+  });
+
+  it("resolves English lesson aliases without 404", () => {
+    expect(supportLessonByRef("lesson-sample-case")?.path).toBe("lecke-1-mintahelyzet");
+    expect(supportLessonByRef("sample-case")?.path).toBe("lecke-1-mintahelyzet");
+    expect(supportLessonByRef("lesson-01")?.path).toBe("lecke-1-mintahelyzet");
+    expect(canonicalizeSupportSlug("lesson-dashboard-handling")).toBe("lecke-1-dashboard-kezeles");
+    expect(searchSupportLessons("sample case", "en")[0]?.path).toBe("lecke-1-mintahelyzet");
   });
 });

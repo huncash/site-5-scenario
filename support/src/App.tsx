@@ -17,6 +17,7 @@ import { readSupportTicketSearch } from "@/lib/support";
 import { lessonBySlug } from "./content";
 import {
   localizeLesson,
+  supportChecklist,
   supportCopy,
   supportFaqSections,
   supportKahn,
@@ -134,14 +135,34 @@ function Items({ items }: { items: Array<{ q: string; a: string; id?: string }> 
   );
 }
 
+function Checklist({ locale, items }: { locale: Locale; items: Array<{ q: string; a: string; id?: string }> }) {
+  const t = supportCopy(locale);
+  if (!items.length) return null;
+  return (
+    <div className="check" id="ellenorzes">
+      <h2>{t.checkTitle}</h2>
+      <p className="note">{t.checkLead}</p>
+      <ol>
+        {items.map((x) => (
+          <li key={x.id ?? x.q} id={x.id} className="scroll-mt-24">
+            <b>{x.q}</b>
+            <RichAnswer text={x.a} />
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function FaqSearch({ locale }: { locale: Locale }) {
   const t = supportCopy(locale);
   const sections = supportFaqSections(locale);
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return sections;
-    return sections
+    const rest = sections.filter((section) => !/ellenőrző|checklist/i.test(section.category));
+    if (!needle) return rest;
+    return rest
       .map((section) => ({
         ...section,
         items: section.items.filter(
@@ -150,9 +171,16 @@ function FaqSearch({ locale }: { locale: Locale }) {
       }))
       .filter((section) => section.items.length > 0);
   }, [sections, q]);
+  const checkHits = useMemo(() => {
+    const items = supportChecklist(locale);
+    const needle = q.trim().toLowerCase();
+    if (!needle) return items;
+    return items.filter((x) => `${x.q} ${x.a}`.toLowerCase().includes(needle));
+  }, [locale, q]);
 
   return (
     <div className="section-block">
+      <Checklist locale={locale} items={checkHits} />
       <h2>{t.faqTitle}</h2>
       <div className="search-wrap">
         <input
@@ -170,7 +198,7 @@ function FaqSearch({ locale }: { locale: Locale }) {
             <Items items={section.items} />
           </div>
         ))
-      ) : (
+      ) : checkHits.length ? null : (
         <p className="note">{t.searchEmpty}</p>
       )}
     </div>
@@ -252,9 +280,11 @@ function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }
       </nav>
       <nav className="nav" aria-label={t.pricingTocActive}>
         <a href="#active-workspaces">{t.pricingTocActive}</a>
+        <a href="#license-frame">{t.pricingTocFrame}</a>
         <a href="#workflow">{t.pricingTocWorkflow}</a>
         <a href="#local-import">{t.pricingTocLocal}</a>
         <a href="#desktop">{t.pricingTocDesktop}</a>
+        <a href="#own-line">{t.pricingTocOwnLine}</a>
         <a href="#economic-engine">{t.pricingTocEconomic}</a>
         <a href="#bcp">{t.pricingTocBcp}</a>
         <a href="#education-engine">{t.pricingTocEducation}</a>
@@ -339,6 +369,10 @@ function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }
         <h2>{t.pricingActiveTitle}</h2>
         <p>{t.pricingActiveBody}</p>
       </div>
+      <div className="section-block scroll-mt-24" id="license-frame">
+        <h2>{t.pricingFrameTitle}</h2>
+        <p>{t.pricingFrameBody}</p>
+      </div>
       <div className="section-block scroll-mt-24" id="workflow">
         <h2>{t.pricingWorkflowTitle}</h2>
         <p>{t.pricingWorkflowBody}</p>
@@ -349,6 +383,8 @@ function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }
         <p>{t.pricingLocalBody}</p>
       </div>
       <div className="section-block scroll-mt-24" id="desktop-engines">
+        <h2>{t.pricingRoadmapTitle}</h2>
+        <p>{t.pricingRoadmapLead}</p>
         <RoadmapCard
           id="desktop"
           title={t.pricingRoadmapDesktopTitle}
@@ -368,19 +404,25 @@ function PricingPage({ locale, pathname }: { locale: Locale; pathname?: string }
           title={t.pricingRoadmapBcpTitle}
           when={t.pricingRoadmapBcpWhen}
           body={t.pricingRoadmapBcpBody}
-          status={t.pricingAddonStatus}
-          ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
-          ctaLabel={t.pricingAddonBuy}
         />
         <RoadmapCard
           id="education-engine"
           title={t.pricingRoadmapEducationTitle}
           when={t.pricingRoadmapEducationWhen}
           body={t.pricingRoadmapEducationBody}
-          status={t.pricingAddonStatus}
-          ctaHref={billCheckoutUrl({ tier: "pro", interval: "yearly" })}
-          ctaLabel={t.pricingAddonBuy}
         />
+      </div>
+      <div className="section-block scroll-mt-24" id="own-line">
+        <h2>{t.pricingOwnLineTitle}</h2>
+        <p className="note">{t.pricingOwnLineWhen}</p>
+        <p>{t.pricingOwnLineLead}</p>
+        <p>{t.pricingOwnLineBody}</p>
+        <ul className="plan-bullets">
+          {t.pricingOwnLinePoints.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <p>{t.pricingOwnLineClose}</p>
       </div>
     </>
   );

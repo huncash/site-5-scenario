@@ -16,7 +16,7 @@ import { isSupportHost, supportPageUrl, supportPathSlug, supportPricingHref, sup
 import { resolveSupportSlug, type SupportLessonIndex } from "@/lib/supportRoutes";
 import { cn } from "@/lib/utils";
 import { withViewPrefs } from "@/lib/viewPrefs";
-import { supportFaqSections, supportTips } from "../../support/src/copy";
+import { supportChecklist, supportFaqSections, supportTips } from "../../support/src/copy";
 
 const SupportSpaApp = lazy(() => import("../../support/src/App").then((m) => ({ default: m.App })));
 
@@ -67,7 +67,9 @@ export function SupportMainContent({
   const [kbQuery, setKbQuery] = useState("");
   const needle = kbQuery.trim().toLowerCase();
   const faqSections = useMemo(() => {
-    const sections = supportFaqSections(locale);
+    const sections = supportFaqSections(locale).filter(
+      (section) => !/ellenőrző|checklist/i.test(section.category),
+    );
     if (!needle) return sections;
     return sections
       .map((section) => ({
@@ -75,6 +77,11 @@ export function SupportMainContent({
         items: section.items.filter((x) => `${section.category} ${x.q} ${x.a}`.toLowerCase().includes(needle)),
       }))
       .filter((section) => section.items.length > 0);
+  }, [locale, needle]);
+  const checkHits = useMemo(() => {
+    const items = supportChecklist(locale);
+    if (!needle) return items;
+    return items.filter((x) => `${x.q} ${x.a}`.toLowerCase().includes(needle));
   }, [locale, needle]);
   const tipHits = useMemo(() => {
     const tips = supportTips(locale);
@@ -154,6 +161,24 @@ export function SupportMainContent({
           </p>
         </div>
       )}
+
+      {checkHits.length ? (
+        <section
+          id="ellenorzes"
+          className="scroll-mt-24 rounded-xl border border-[#2D6A4F]/40 bg-card/50 px-4 py-4"
+        >
+          <h2 className="text-sm font-semibold text-foreground">{t("supportDoor.checkTitle")}</h2>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{t("supportDoor.checkLead")}</p>
+          <ol className="mt-3 list-decimal space-y-3 pl-5">
+            {checkHits.map((item) => (
+              <li key={item.id ?? item.q} id={item.id} className="scroll-mt-24 pl-1 text-[13px] leading-snug">
+                <strong className="block text-foreground">{item.q}</strong>
+                <span className="mt-1 block text-muted-foreground">{item.a.replace(/\*\*/g, "")}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <label className="mx-auto block w-full max-w-3xl">
         <span className="sr-only">{t("supportDoor.kbSearch")}</span>

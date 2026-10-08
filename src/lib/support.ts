@@ -51,7 +51,9 @@ export type SupportPricingAnchor =
   | "desktop"
   | "economic-engine"
   | "bcp"
-  | "education-engine";
+  | "education-engine"
+  | "own-line"
+  | "license-frame";
 
 export type SupportPlanId = "basic" | "pro" | "enterprise";
 

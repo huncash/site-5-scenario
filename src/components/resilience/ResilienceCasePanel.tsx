@@ -1,8 +1,11 @@
-import { caseTitle, useI18n } from "@/i18n";
+import { BcpEngineRoom } from "@/components/engine/BcpEngineRoom";
+import { BcpPracticeDelta } from "@/components/engine/BcpPracticeDelta";
+import { useBcpView } from "@/hooks/useEngineFramePrefs";
+import { caseTitle, formatCurrency, useI18n } from "@/i18n";
+import type { EconomicReadSnapshot } from "@/lib/bcpEconomicOverlay";
 import { HelpIcon } from "@/components/HelpIcon";
 import { CollapsibleCard, DetailFold } from "@/components/lean-viz/CollapsibleCard";
 import { ChartLegendSwatch } from "@/components/lean-viz/LeanCharts";
-import { PhysicalOpsPanel } from "@/components/physical/PhysicalOpsPanel";
 import type { MasterBaselineContext } from "@/lib/masterBaseline";
 import { PRO_LINE_CLASS, PRO_OPT, PRO_PESS, PRO_REAL } from "@/lib/proChart";
 import {
@@ -170,8 +173,10 @@ export function ResilienceCasePanel(props: {
   phase?: "PLAN" | "DO" | "CHECK" | "ACT";
   model?: ResilienceModel | null;
   baseline?: MasterBaselineContext | null;
+  snapshot?: EconomicReadSnapshot | null;
 }) {
   const { locale, t } = useI18n();
+  const bcp = useBcpView();
   if (!isResilienceSegment(props.segmentId)) return null;
   const model = props.model ?? buildResilienceModel(props.segmentId as ResilienceCaseId);
   const phaseHint =
@@ -209,7 +214,19 @@ export function ResilienceCasePanel(props: {
       }
     >
       <p className="text-[12px] leading-snug text-muted-foreground">{phaseHint}</p>
-      <div className="mt-3 grid gap-3">
+      {props.snapshot ? <div className="mt-2"><BcpPracticeDelta snapshot={props.snapshot} /></div> : null}
+      {bcp.mode !== "isolated" && props.snapshot ? (
+        <div className="mt-2">
+          {bcp.mode === "engine-room" ? (
+            <BcpEngineRoom snapshot={props.snapshot} />
+          ) : (
+            <p className="rounded-md border border-border/60 bg-background/50 px-2.5 py-2 text-[11px] text-muted-foreground">
+              {t("frame.overlayHint", { cash: formatCurrency(props.snapshot.reserveDepthHuf) })}
+            </p>
+          )}
+        </div>
+      ) : null}
+      <div className="mt-3 grid gap-3" aria-readonly={bcp.mode === "engine-room" ? true : undefined}>
         {model.kind === "macro" ? (
           props.phase === "PLAN" ? (
             <TfrMatrix rows={model.tfrRows} replacement={model.replacementTfr} />
@@ -222,7 +239,12 @@ export function ResilienceCasePanel(props: {
             <KpiTrio kpis={model.kpis} />
           )
         ) : (
-          <PhysicalOpsPanel segmentId={props.segmentId} baseline={props.baseline} phase={props.phase} />
+          <>
+            <KpiTrio kpis={model.kpis} />
+            {model.hours.length > 1 ? (
+              <PhysicalHourChart points={model.hours} unit={model.hourUnit} label={model.hourLabel} />
+            ) : null}
+          </>
         )}
         {model.extras.length && model.kind === "macro" && (props.phase === "CHECK" || props.phase === "ACT") ? (
           <div className="overflow-x-auto">

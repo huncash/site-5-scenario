@@ -129,8 +129,8 @@ export function WorkspaceSettings({
 
   const saveAll = () => {
     ask(
-      "Biztosan frissíted a törzsadat-kapcsolatot?",
-      `Mentés a(z) „${workspaceLabel}” munkatérre (workspace_id: ${workspaceId}).`,
+      t("ref.saveConfirmTitle"),
+      t("ref.saveConfirmDetail", { name: workspaceLabel, id: workspaceId }),
       () => {
         void Promise.resolve(
           onPersistMeta(
@@ -142,7 +142,7 @@ export function WorkspaceSettings({
               bankAccountIds: draft.bankAccountIds ?? [],
               bank_sync_folder: draft.bank_sync_folder ?? null,
             },
-            "Törzsadatok mentve",
+            t("ref.saved"),
           ),
         ).then(() => setDirty(false));
       },
@@ -160,8 +160,8 @@ export function WorkspaceSettings({
       : "border-border/60 bg-background/40";
 
   const titleText = embedded
-    ? `${workspaceLabel} munkatér törzsadatai`
-    : "Törzsadatok & Beállítások";
+    ? t("ref.embeddedTitle", { name: workspaceLabel })
+    : t("ref.title");
 
   return (
     <div className={cn("grid gap-6", embedded && "rounded-xl border border-border/60 bg-background/30 p-5")}>
@@ -174,7 +174,7 @@ export function WorkspaceSettings({
               </h1>
               {!embedded ? (
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  References Hub · workspace_id:{" "}
+                  {t("ref.hubLead")}{" "}
                   <span className="font-mono text-slate-400">{workspaceId}</span>
                 </p>
               ) : (
@@ -185,10 +185,10 @@ export function WorkspaceSettings({
 
           {showWorkspaceSwitcher && workspaceOptions && onWorkspaceChange ? (
             <div className="flex flex-col gap-2 sm:max-w-xs">
-              <Label className="text-[11px] text-muted-foreground">Slot</Label>
+              <Label className="text-[11px] text-muted-foreground">{t("ref.slot")}</Label>
               <Select value={workspaceId} onValueChange={onWorkspaceChange}>
-                <SelectTrigger className="h-10 w-full sm:w-[240px]" title="Workspace váltó">
-                  <SelectValue placeholder="Válassz Slot / Munkateret" />
+                <SelectTrigger className="h-10 w-full sm:w-[240px]" title={t("ref.slotSwitcher")}>
+                  <SelectValue placeholder={t("ref.pickSlot")} />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaceOptions.map((w) => (
@@ -200,13 +200,13 @@ export function WorkspaceSettings({
               </Select>
               {dirty ? (
                 <Badge variant="outline" className="w-fit border-amber-500/40 text-[10px] text-amber-300">
-                  Mentetlen
+                  {t("common.unsaved")}
                 </Badge>
               ) : null}
             </div>
           ) : dirty ? (
             <Badge variant="outline" className="w-fit border-amber-500/40 text-[10px] text-amber-300">
-              Mentetlen
+              {t("common.unsaved")}
             </Badge>
           ) : null}
         </div>
@@ -215,17 +215,17 @@ export function WorkspaceSettings({
           {dirty ? (
             <>
               <Button type="button" variant="ghost" size="sm" onClick={discard} disabled={busy}>
-                Elvetés
+                {t("common.discard")}
               </Button>
               <Button type="button" size="sm" className="gap-2" onClick={saveAll} disabled={busy}>
                 <Save className="h-3.5 w-3.5" />
-                Mentés
+                {t("common.save")}
               </Button>
             </>
           ) : null}
           {showBackButton && onBack ? (
             <Button type="button" variant="outline" className="gap-2" onClick={onBack}>
-              ◄ Vissza a PDCA nézethez
+              {t("ref.backPdca")}
             </Button>
           ) : null}
         </div>
@@ -233,19 +233,19 @@ export function WorkspaceSettings({
 
       {showTabs ? (
         <div className="flex flex-col gap-2.5 border-b border-border/60 pb-3 sm:flex-row sm:flex-wrap sm:gap-3">
-          {REFERENCES_TABS.map((t) => (
+          {REFERENCES_TABS.map((tab) => (
             <button
-              key={t.id}
+              key={tab.id}
               type="button"
-              onClick={() => onTabChange(t.id)}
+              onClick={() => onTabChange(tab.id)}
               className={cn(
                 "rounded-md px-4 py-2.5 text-left text-xs font-medium transition-all duration-200",
-                activeTab === t.id
+                activeTab === tab.id
                   ? "bg-primary/20 text-primary"
                   : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
-              {t.label}
+              {t(tab.key)}
             </button>
           ))}
         </div>
@@ -256,8 +256,8 @@ export function WorkspaceSettings({
           <CardHeader className="pb-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-sm">Partnerek</CardTitle>
-                <p className="text-xs text-muted-foreground">Vevők, beszállítók, hatóságok.</p>
+                <CardTitle className="text-sm">{t("ref.tabPartners")}</CardTitle>
+                <p className="text-xs text-muted-foreground">{t("ref.partnersLead")}</p>
               </div>
               <Button
                 type="button"
@@ -267,7 +267,7 @@ export function WorkspaceSettings({
                   const row: WorkspacePartner = {
                     id: newId(),
                     kind: "customer",
-                    name: "Új partner",
+                    name: t("ref.newPartner"),
                     tax_id: null,
                     payment_term_days: 30,
                     note: null,
@@ -275,20 +275,20 @@ export function WorkspaceSettings({
                   mark({ ...draft, partners: [...partners, row] });
                 }}
               >
-                <Plus className="h-3.5 w-3.5" /> Hozzáadás
+                <Plus className="h-3.5 w-3.5" /> {t("common.add")}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="grid gap-4">
             {partners.length === 0 ? (
-              <div className="text-sm text-muted-foreground">Még nincs partner.</div>
+              <div className="text-sm text-muted-foreground">{t("ref.noPartners")}</div>
             ) : (
               <ul className="grid gap-3">
                 {partners.map((p) => (
                   <li key={p.id} className={cn("rounded-lg border p-4 transition-all duration-200 hover:bg-muted/10", hot(p.id))}>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Név</Label>
+                        <Label className="text-[11px]">{t("common.name")}</Label>
                         <Input
                           value={p.name}
                           onChange={(e) =>
@@ -302,7 +302,7 @@ export function WorkspaceSettings({
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Típus</Label>
+                        <Label className="text-[11px]">{t("common.type")}</Label>
                         <Select
                           value={p.kind}
                           onValueChange={(v) =>
@@ -318,14 +318,14 @@ export function WorkspaceSettings({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="customer">Vevő</SelectItem>
-                            <SelectItem value="supplier">Beszállító</SelectItem>
-                            <SelectItem value="authority">Hatóság (NAV…)</SelectItem>
+                            <SelectItem value="customer">{t("ref.kindCustomer")}</SelectItem>
+                            <SelectItem value="supplier">{t("ref.kindSupplier")}</SelectItem>
+                            <SelectItem value="authority">{t("ref.kindAuthority")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Adószám</Label>
+                        <Label className="text-[11px]">{t("ref.taxId")}</Label>
                         <Input
                           value={p.tax_id ?? ""}
                           onChange={(e) =>
@@ -339,7 +339,7 @@ export function WorkspaceSettings({
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Fizetési határidő (nap)</Label>
+                        <Label className="text-[11px]">{t("ref.payDays")}</Label>
                         <Input
                           type="number"
                           value={p.payment_term_days ?? ""}
@@ -367,12 +367,12 @@ export function WorkspaceSettings({
                         variant="ghost"
                         className="h-8 text-rose-300"
                         onClick={() =>
-                          ask("Partner törlése?", `„${p.name}” eltávolítása a törzsadatból.`, () =>
+                          ask(t("ref.deletePartner"), t("ref.deleteNamed", { name: p.name }), () =>
                             mark({ ...draft, partners: partners.filter((x) => x.id !== p.id) }),
                           )
                         }
                       >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Törlés
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> {t("common.delete")}
                       </Button>
                     </div>
                   </li>
@@ -382,7 +382,7 @@ export function WorkspaceSettings({
             {dirty ? (
               <div className="flex justify-end">
                 <Button type="button" className="gap-1.5" onClick={saveAll} disabled={busy}>
-                  <Save className="h-4 w-4" /> Mentés
+                  <Save className="h-4 w-4" /> {t("common.save")}
                 </Button>
               </div>
             ) : null}
@@ -393,12 +393,12 @@ export function WorkspaceSettings({
       {activeTab === "bank" ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Bankszámlák & Szinkron</CardTitle>
-            <p className="text-xs text-muted-foreground">Csatolt számlák és fájl-import mappa.</p>
+            <CardTitle className="text-sm">{t("ref.tabBank")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t("ref.bankLead")}</p>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="space-y-2">
-              <Label className="text-[11px]">Banki szinkron mappa</Label>
+              <Label className="text-[11px]">{t("ref.bankFolder")}</Label>
               <Input
                 value={draft.bank_sync_folder ?? ""}
                 placeholder="pl. C:\\Bank\\Kivonatok"
@@ -408,7 +408,7 @@ export function WorkspaceSettings({
             <ul className="grid gap-3">
               {bankAccounts.length === 0 ? (
                 <li className="text-sm text-muted-foreground">
-                  Nincs bankszámla a profilban — add hozzá a Beállítások → Bankszámlák fülön.
+                  {t("ref.noBank")}
                 </li>
               ) : (
                 bankAccounts.map((ba) => {
@@ -439,7 +439,7 @@ export function WorkspaceSettings({
                           mark({ ...draft, bankAccountIds: next });
                         }}
                       >
-                        {on ? "Csatolva" : "Csatolás"}
+                        {on ? t("common.attached") : t("common.attach")}
                       </Button>
                     </li>
                   );
@@ -449,7 +449,7 @@ export function WorkspaceSettings({
             {dirty ? (
               <div className="flex justify-end">
                 <Button type="button" className="gap-1.5" onClick={saveAll} disabled={busy}>
-                  <Save className="h-4 w-4" /> Mentés
+                  <Save className="h-4 w-4" /> {t("common.save")}
                 </Button>
               </div>
             ) : null}
@@ -462,8 +462,8 @@ export function WorkspaceSettings({
           <CardHeader className="pb-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-sm">Munkavállalók & Erőforrások</CardTitle>
-                <p className="text-xs text-muted-foreground">Díjszabás és fix költségek.</p>
+                <CardTitle className="text-sm">{t("ref.tabResources")}</CardTitle>
+                <p className="text-xs text-muted-foreground">{t("ref.resourcesLead")}</p>
               </div>
               <Button
                 type="button"
@@ -472,8 +472,8 @@ export function WorkspaceSettings({
                 onClick={() => {
                   const row: HumanResource = {
                     id: newId(),
-                    name: "Új erőforrás",
-                    role: "alvállalkozó",
+                    name: t("ref.newResource"),
+                    role: t("ref.roleSub"),
                     type: "subcontractor_ev",
                     defaultRate: 0,
                     fixedCost: 0,
@@ -481,13 +481,13 @@ export function WorkspaceSettings({
                   mark({ ...draft, humanResources: [...hrs, row] });
                 }}
               >
-                <Plus className="h-3.5 w-3.5" /> Hozzáadás
+                <Plus className="h-3.5 w-3.5" /> {t("common.add")}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="grid gap-4">
             {hrs.length === 0 ? (
-              <div className="text-sm text-muted-foreground">Nincs humán erőforrás.</div>
+              <div className="text-sm text-muted-foreground">{t("ref.noHr")}</div>
             ) : (
               <ul className="grid gap-3">
                 {hrs.map((h) => (
@@ -516,7 +516,7 @@ export function WorkspaceSettings({
                         }
                       />
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Díjszabás (HUF)</Label>
+                        <Label className="text-[11px]">{t("ref.rate")}</Label>
                         <Input
                           type="number"
                           value={h.defaultRate}
@@ -531,7 +531,7 @@ export function WorkspaceSettings({
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Fix költség (HUF)</Label>
+                        <Label className="text-[11px]">{t("ref.fixedCost")}</Label>
                         <Input
                           type="number"
                           value={h.fixedCost ?? 0}
@@ -553,7 +553,7 @@ export function WorkspaceSettings({
                         variant="ghost"
                         className="h-8 text-rose-300"
                         onClick={() =>
-                          ask("Erőforrás törlése?", `„${h.name}” eltávolítása.`, () =>
+                          ask(t("ref.deleteHr"), t("ref.deleteShort", { name: h.name }), () =>
                             mark({
                               ...draft,
                               humanResources: hrs.filter((x) => x.id !== h.id),
@@ -561,7 +561,7 @@ export function WorkspaceSettings({
                           )
                         }
                       >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Törlés
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> {t("common.delete")}
                       </Button>
                     </div>
                   </li>
@@ -571,7 +571,7 @@ export function WorkspaceSettings({
             {dirty ? (
               <div className="flex justify-end">
                 <Button type="button" className="gap-1.5" onClick={saveAll} disabled={busy}>
-                  <Save className="h-4 w-4" /> Mentés
+                  <Save className="h-4 w-4" /> {t("common.save")}
                 </Button>
               </div>
             ) : null}
@@ -582,13 +582,13 @@ export function WorkspaceSettings({
       {activeTab === "buckets" ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Megtakarítási Alhalmazok & Ügyeletek</CardTitle>
-            <p className="text-xs text-muted-foreground">Célösszegek, prioritások, ügyeleti költségek.</p>
+            <CardTitle className="text-sm">{t("ref.bucketsTitle")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t("ref.bucketsLead")}</p>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-medium text-slate-300">Perselyek</div>
+                <div className="text-xs font-medium text-slate-300">{t("ref.piggy")}</div>
                 <Button
                   type="button"
                   size="sm"
@@ -596,18 +596,18 @@ export function WorkspaceSettings({
                   onClick={() => {
                     const row: WorkspaceSavingBucket = {
                       id: newId(),
-                      name: "Új persely",
+                      name: t("ref.newPiggy"),
                       target_amount: 0,
                       priority: buckets.length + 1,
                     };
                     mark({ ...draft, workspace_buckets: [...buckets, row] });
                   }}
                 >
-                  <Plus className="h-3.5 w-3.5" /> Hozzáadás
+                  <Plus className="h-3.5 w-3.5" /> {t("common.add")}
                 </Button>
               </div>
               {buckets.length === 0 ? (
-                <div className="text-sm text-muted-foreground">Nincs workspace-persely.</div>
+                <div className="text-sm text-muted-foreground">{t("ref.noPiggy")}</div>
               ) : (
                 <ul className="grid gap-3">
                   {buckets.map((b) => (
@@ -626,7 +626,7 @@ export function WorkspaceSettings({
                         />
                         <Input
                           type="number"
-                          placeholder="Célösszeg"
+                          placeholder={t("ref.targetAmount")}
                           value={b.target_amount ?? ""}
                           onChange={(e) =>
                             mark({
@@ -645,7 +645,7 @@ export function WorkspaceSettings({
                         />
                         <Input
                           type="number"
-                          placeholder="Prioritás"
+                          placeholder={t("ref.priority")}
                           value={b.priority ?? ""}
                           onChange={(e) =>
                             mark({
@@ -669,7 +669,7 @@ export function WorkspaceSettings({
                           variant="ghost"
                           className="h-8 text-rose-300"
                           onClick={() =>
-                            ask("Persely törlése?", `„${b.name}” eltávolítása.`, () =>
+                            ask(t("ref.deletePiggy"), t("ref.deleteShort", { name: b.name }), () =>
                               mark({
                                 ...draft,
                                 workspace_buckets: buckets.filter((x) => x.id !== b.id),
@@ -677,7 +677,7 @@ export function WorkspaceSettings({
                             )
                           }
                         >
-                          <Trash2 className="mr-1 h-3.5 w-3.5" /> Törlés
+                          <Trash2 className="mr-1 h-3.5 w-3.5" /> {t("common.delete")}
                         </Button>
                       </div>
                     </li>
@@ -688,7 +688,7 @@ export function WorkspaceSettings({
 
             <div className="grid gap-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-medium text-slate-300">Ügyeletek</div>
+                <div className="text-xs font-medium text-slate-300">{t("ref.duties")}</div>
                 <Button
                   type="button"
                   size="sm"
@@ -696,18 +696,18 @@ export function WorkspaceSettings({
                   onClick={() => {
                     const row: WorkspaceDuty = {
                       id: newId(),
-                      name: "Új ügyelet",
-                      cadence: "havi",
+                      name: t("ref.newDuty"),
+                      cadence: t("ref.monthly"),
                       fixed_cost_huf: 0,
                     };
                     mark({ ...draft, duties: [...duties, row] });
                   }}
                 >
-                  <Plus className="h-3.5 w-3.5" /> Hozzáadás
+                  <Plus className="h-3.5 w-3.5" /> {t("common.add")}
                 </Button>
               </div>
               {duties.length === 0 ? (
-                <div className="text-sm text-muted-foreground">Nincs ügyelet.</div>
+                <div className="text-sm text-muted-foreground">{t("ref.noDuty")}</div>
               ) : (
                 <ul className="grid gap-3">
                   {duties.map((d) => (
@@ -726,7 +726,7 @@ export function WorkspaceSettings({
                         />
                         <Input
                           value={d.cadence ?? ""}
-                          placeholder="ütem"
+                          placeholder={t("ref.cadence")}
                           onChange={(e) =>
                             mark({
                               ...draft,
@@ -738,7 +738,7 @@ export function WorkspaceSettings({
                         />
                         <Input
                           type="number"
-                          placeholder="Fix költség"
+                          placeholder={t("ref.dutyCost")}
                           value={d.fixed_cost_huf ?? ""}
                           onChange={(e) =>
                             mark({
@@ -763,12 +763,12 @@ export function WorkspaceSettings({
                           variant="ghost"
                           className="h-8 text-rose-300"
                           onClick={() =>
-                            ask("Ügyelet törlése?", `„${d.name}” eltávolítása.`, () =>
+                            ask(t("ref.deleteDuty"), t("ref.deleteShort", { name: d.name }), () =>
                               mark({ ...draft, duties: duties.filter((x) => x.id !== d.id) }),
                             )
                           }
                         >
-                          <Trash2 className="mr-1 h-3.5 w-3.5" /> Törlés
+                          <Trash2 className="mr-1 h-3.5 w-3.5" /> {t("common.delete")}
                         </Button>
                       </div>
                     </li>
@@ -779,7 +779,7 @@ export function WorkspaceSettings({
             {dirty ? (
               <div className="flex justify-end">
                 <Button type="button" className="gap-1.5" onClick={saveAll} disabled={busy}>
-                  <Save className="h-4 w-4" /> Mentés
+                  <Save className="h-4 w-4" /> {t("common.save")}
                 </Button>
               </div>
             ) : null}
@@ -793,7 +793,7 @@ export function WorkspaceSettings({
             <div>
               <CardTitle className="text-sm">{t("dash.liabilitiesSettings")}</CardTitle>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Mentés a LoanDialog „Mentés” gombjával — workspace: {workspaceId}
+                {t("ref.debtsLead", { id: workspaceId })}
               </p>
             </div>
             {onEditLoan ? (
@@ -825,7 +825,7 @@ export function WorkspaceSettings({
                         ) : null}
                       </div>
                       <div className="mt-0.5 text-xs text-muted-foreground">
-                        Fennálló:{" "}
+                        {t("ref.outstanding")}{" "}
                         <span className="font-mono text-slate-200">
                           {formatMoney(Math.round(Number(l.remaining_principal ?? 0)))}
                         </span>
@@ -841,7 +841,7 @@ export function WorkspaceSettings({
                           className="h-8"
                           onClick={() => onEditLoan(l)}
                         >
-                          Szerkesztés
+                          {t("common.edit")}
                         </Button>
                       ) : null}
                       {onDeleteLoan ? (
@@ -852,13 +852,13 @@ export function WorkspaceSettings({
                           className="h-8 text-rose-300"
                           onClick={() =>
                             ask(
-                              "Tartozás törlése?",
-                              `„${l.name}” végleg törlődik a(z) ${workspaceId} munkatérről.`,
+                              t("ref.deleteLoan"),
+                              t("ref.deleteLoanDetail", { name: l.name, id: workspaceId }),
                               () => void onDeleteLoan(l.id),
                             )
                           }
                         >
-                          Törlés
+                          {t("common.delete")}
                         </Button>
                       ) : null}
                     </div>
@@ -873,12 +873,12 @@ export function WorkspaceSettings({
       <Dialog open={Boolean(confirm)} onOpenChange={(o) => !o && setConfirm(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{confirm?.title ?? "Megerősítés"}</DialogTitle>
+            <DialogTitle>{confirm?.title ?? t("common.confirm")}</DialogTitle>
           </DialogHeader>
           <div className="text-sm text-slate-300">{confirm?.detail}</div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setConfirm(null)}>
-              Mégse
+              {t("common.cancel")}
             </Button>
             <Button
               type="button"
@@ -888,7 +888,7 @@ export function WorkspaceSettings({
                 if (fn) fn();
               }}
             >
-              Igen
+              {t("common.yes")}
             </Button>
           </DialogFooter>
         </DialogContent>

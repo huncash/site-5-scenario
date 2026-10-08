@@ -8,10 +8,13 @@ import { claimGuestSession, parseGuestCode } from "@/lib/auth/guestSlots";
 import { isViewerInviteRevokedLocally, roleFromConnectSearch } from "@/lib/viewerInvite";
 
 export const Route = createFileRoute("/connect")({
-  validateSearch: z.object({
-    session: z.string().optional(),
-    role: z.string().optional(),
-  }),
+  validateSearch: z
+    .object({
+      session: z.string().optional(),
+      role: z.string().optional(),
+      lang: z.enum(["hu", "en"]).optional(),
+    })
+    .passthrough(),
   component: ConnectPage,
 });
 

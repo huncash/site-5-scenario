@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Columns2, Glasses, Keyboard, Moon, Palette, Sun } from "lucide-react";
 
+import { HelpIcon } from "@/components/HelpIcon";
 import { useTheme } from "@/components/ThemeProvider";
 import { localeLabel, paletteName, useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -137,15 +138,18 @@ export function ViewSettingsMenu({
         <Columns2 className="h-4 w-4" aria-hidden="true" />
       </button>
 
-      <button
-        type="button"
-        className="lang-header-btn"
-        title={t("view.lang")}
-        aria-label={t("view.langAria")}
-        onClick={toggleLocale}
-      >
-        {localeLabel(locale)}
-      </button>
+      <div className="inline-flex items-center gap-0.5">
+        <button
+          type="button"
+          className="lang-header-btn"
+          title={t("view.lang")}
+          aria-label={t("view.langAria")}
+          onClick={toggleLocale}
+        >
+          {localeLabel(locale)}
+        </button>
+        <HelpIcon kbId="language-persist" title={t("view.lang")} />
+      </div>
 
       <div className={cn("view-settings-container", open && "active")}>
         <button

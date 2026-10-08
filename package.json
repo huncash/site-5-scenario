@@ -28,6 +28,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest",
     "test:run": "vitest run",
+    "i18n:sync": "python scripts/sync_i18n.py --write --apply",
+    "i18n:check": "python scripts/sync_i18n.py --check",
     "test:live": "vitest run src/lib/billE2e.live.test.ts --testTimeout=25000",
     "dns:school": "node scripts/cloudflare-school-dns.mjs",
     "desktop:dev": "npx --yes @tauri-apps/cli@2 dev --config desktop/src-tauri/tauri.conf.json",

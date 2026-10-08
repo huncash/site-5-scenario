@@ -9,7 +9,10 @@ import { caseBlurb, caseTitle, useI18n } from "@/i18n";
 import { demoSerialFromId, type DemoSegmentId } from "@/lib/demoCatalog";
 import { demoCaseSlotCount } from "@/lib/demoCaseSlots";
 import type { DemoCatalogIndustry, DemoCatalogKind } from "@/lib/coreCases";
+import { recordEngineClick } from "@/lib/engineInterest";
+import { isLabsEngineId } from "@/lib/labsTechTree";
 import {
+  isCoreDefaultKind,
   isStartableScenarioKind,
   publicScenarioKindGroups,
   SCENARIO_INDUSTRY_TITLE_KEY,
@@ -48,12 +51,23 @@ export function HierarchicalCaseChooser({
     return all.filter((g) => allowedKinds.includes(g.kind));
   }, [allowedKinds]);
   const openDefault = defaultOpenKinds ?? ["economic"];
+  const [openKinds, setOpenKinds] = useState<string[]>(openDefault);
   const [industryByKind, setIndustryByKind] = useState<Partial<Record<DemoCatalogKind, DemoCatalogIndustry | "all">>>({});
   const [addonTitle, setAddonTitle] = useState<string | null>(null);
 
   return (
     <div className={cn("space-y-3", className)}>
-      <Accordion type="multiple" defaultValue={openDefault} className="w-full">
+      <Accordion
+        type="multiple"
+        value={openKinds}
+        onValueChange={(next) => {
+          for (const kind of next) {
+            if (!openKinds.includes(kind) && isLabsEngineId(kind)) recordEngineClick(kind);
+          }
+          setOpenKinds(next);
+        }}
+        className="w-full"
+      >
         {groups.map((group) => {
           const filter = industryByKind[group.kind] ?? "all";
           const buckets =
@@ -79,7 +93,11 @@ export function HierarchicalCaseChooser({
                       variant={startable ? "secondary" : "outline"}
                       className="text-[10px] font-medium"
                     >
-                      {startable ? t("door.coreBadge") : t("door.addonBadge")}
+                      {isCoreDefaultKind(group.kind)
+                        ? t("door.coreBadge")
+                        : startable
+                          ? t("door.availableBadge")
+                          : t("door.addonBadge")}
                     </Badge>
                   </div>
                   {variant === "door" ? (
@@ -127,6 +145,7 @@ export function HierarchicalCaseChooser({
                               className="h-auto w-full justify-start gap-2 whitespace-normal px-3 py-2.5 text-left"
                               disabled={disabled || busyId !== null}
                               onClick={() => {
+                                if (isLabsEngineId(group.kind)) recordEngineClick(group.kind);
                                 if (startable) onSelect(s.id);
                                 else setAddonTitle(kindTitle);
                               }}

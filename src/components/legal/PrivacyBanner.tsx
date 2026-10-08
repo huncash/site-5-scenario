@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { useI18n } from "@/i18n";
 import { hasGdprAcknowledged, setGdprAcknowledged } from "@/lib/gdprConsent";
+import { keepLang } from "@/lib/langSearch";
 import { currentLocation, resolveSiteHost } from "@/lib/siteSurface";
 
 /** Első betöltés: könnyű privacy tájékoztató — nincs cookie-mátrix. */
@@ -49,6 +50,7 @@ export function PrivacyBanner() {
         </button>
         <Link
           to="/gdpr"
+          search={keepLang}
           className="text-xs text-slate-400 underline underline-offset-2 hover:text-slate-200"
           onClick={accept}
         >

@@ -15,6 +15,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n";
+import { useSurfaceTx } from "@/i18n/surfaceTx";
+import { langSearch, parseLangSearch } from "@/lib/langSearch";
 
 import { decryptJSON, encryptJSON } from "@/lib/crypto";
 import { useVault } from "@/lib/vault";
@@ -26,6 +29,8 @@ import { denyShowcaseWrite, SETTINGS_FOCUS_DEMO_RESET } from "@/lib/versionPolic
 import { localdb, type BankAccountRow, type BankAccountWorkspaceRow, type BankRawRow, type SnapshotRow } from "@/lib/localdb";
 import type { CategoryRuleRow } from "@/lib/localdb";
 import { useMeshRepository } from "@/lib/mesh/meshRepository";
+import { LabToggleRow } from "@/components/labs/LabToggleRow";
+import { DASHBOARD_LABS } from "@/lib/dashboardLabs";
 import { suggestFromRules, applySuggestion } from "@/lib/categoryRules";
 import { analyzePersonalBankQuality } from "@/lib/personalBankDataQuality";
 import type { RealEstateProperty, RealEstatePropertyType } from "@/types/workspace";
@@ -41,15 +46,28 @@ import {
 import { sha256Hex } from "@/lib/hash";
 import { bankCapacityToast, checkBankAccountsForSlot } from "@/lib/bankCapacity";
 
-type SettingsTabId = "accounts" | "workspaces" | "categories" | "rules" | "backup" | "danger" | "all";
-const SETTINGS_TABS: Array<{ id: SettingsTabId; label: string }> = [
-  { id: "accounts", label: "💳 Bankszámlák & Profilok" },
-  { id: "workspaces", label: "📁 Slotok & Projektek" },
-  { id: "categories", label: "🏷️ Kategóriák" },
-  { id: "rules", label: "⚡ Besorolási Szabályok" },
-  { id: "backup", label: "💾 Mentés & Helyreállítás" },
-  { id: "danger", label: "⚠️ Veszélyes Zóna" },
-  { id: "all", label: "🌐 Összes beállítás" },
+type SettingsTabId = "accounts" | "workspaces" | "categories" | "rules" | "backup" | "labs" | "danger" | "all";
+const SETTINGS_TABS: Array<{
+  id: SettingsTabId;
+  emoji: string;
+  key:
+    | "set.tabAccounts"
+    | "set.tabWorkspaces"
+    | "set.tabCategories"
+    | "set.tabRules"
+    | "set.tabBackup"
+    | "set.tabLabs"
+    | "set.tabDanger"
+    | "set.tabAll";
+}> = [
+  { id: "accounts", emoji: "💳", key: "set.tabAccounts" },
+  { id: "workspaces", emoji: "📁", key: "set.tabWorkspaces" },
+  { id: "categories", emoji: "🏷️", key: "set.tabCategories" },
+  { id: "rules", emoji: "⚡", key: "set.tabRules" },
+  { id: "backup", emoji: "💾", key: "set.tabBackup" },
+  { id: "labs", emoji: "", key: "set.tabLabs" },
+  { id: "danger", emoji: "⚠️", key: "set.tabDanger" },
+  { id: "all", emoji: "🌐", key: "set.tabAll" },
 ];
 
 export const Route = createFileRoute("/settings")({
@@ -58,6 +76,7 @@ export const Route = createFileRoute("/settings")({
     const raw = String(s.tab ?? "");
     const tab = SETTINGS_TABS.some((t) => t.id === raw) ? (raw as SettingsTabId) : undefined;
     return {
+      ...parseLangSearch(s),
       profile: String(s.profile ?? ""),
       tab,
       focus: s.focus != null ? String(s.focus) : undefined,
@@ -295,6 +314,8 @@ type TxnPayload = {
 };
 
 function SettingsPage() {
+  const { t } = useI18n();
+  const tx = useSurfaceTx();
   const { state } = useVault();
   const qc = useQueryClient();
   const navigate = Route.useNavigate();
@@ -410,7 +431,7 @@ function SettingsPage() {
         incomeCategories: s.incomeCategories ?? [],
         expenseCategories: s.expenseCategories ?? [],
         savingCategories: (s as any).savingCategories ?? [],
-        showKpiQuickBar: (s as any).showKpiQuickBar ?? true,
+        showKpiQuickBar: (s as any).showKpiQuickBar ?? false,
         buckets: s.buckets ?? [],
         recurring: s.recurring ?? [],
         plannedOneOff: s.plannedOneOff ?? [],
@@ -543,7 +564,7 @@ function SettingsPage() {
       } as any;
       await persistWorkspaces(
         workspaces.map((w) => (w.id === id ? merged : w)),
-        "Módosítások sikeresen mentve!",
+        tx("Módosítások sikeresen mentve!"),
       );
       setWsDirty((prev) => ({ ...prev, [id]: false }));
     },
@@ -564,8 +585,12 @@ function SettingsPage() {
     return Array.from(new Set(ids));
   }, [workspaces]);
   const workspaceName = useCallback(
-    (id: string) => workspaces.find((w) => w.id === id)?.alias?.trim() || (id === "personal" ? "Magán" : id),
-    [workspaces],
+    (id: string) => {
+      const alias = workspaces.find((w) => w.id === id)?.alias?.trim();
+      if (id === "personal" && (!alias || alias === "Magán")) return t("chrome.personal");
+      return alias || id;
+    },
+    [t, workspaces],
   );
 
   const dangerToken = useMemo(() => {
@@ -575,8 +600,8 @@ function SettingsPage() {
   }, [dangerWsId, workspaceName]);
 
   const saveSettings = useCallback(
-    async (next: CustomSettings, successMsg = "Beállítások mentve.") => {
-      if (!vaultKey) return toast.error("Nincs feloldott profil.");
+    async (next: CustomSettings, successMsg = tx("Beállítások mentve.")) => {
+      if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
       const enc = await encryptJSON(vaultKey, next);
       await localdb.putSettings(enc);
       await qc.invalidateQueries({ queryKey: ["settings"] });
@@ -637,16 +662,16 @@ function SettingsPage() {
   }
 
   const exportBackup = async (encrypted: boolean) => {
-    if (encrypted && !vaultKey) return toast.error("Nincs feloldott profil.");
+    if (encrypted && !vaultKey) return toast.error(tx("Nincs feloldott profil."));
     const dump = await localdb.exportDump();
     if (encrypted) {
       const enc = await encryptJSON(vaultKey!, dump);
       downloadText(`mesh_backup_${ymd()}_enc.json`, enc);
-      toast.success("Encrypted mentés letöltve.");
+      toast.success(tx("Encrypted mentés letöltve."));
       return;
     }
     downloadText(`mesh_backup_${ymd()}.json`, JSON.stringify(dump, null, 2));
-    toast.success("Mentés letöltve.");
+    toast.success(tx("Mentés letöltve."));
   };
 
   useEffect(() => {
@@ -658,7 +683,7 @@ function SettingsPage() {
   }, []);
 
   const doEncryptedExport = async () => {
-    if (state.status !== "unlocked") return toast.error("Nincs feloldott profil.");
+    if (state.status !== "unlocked") return toast.error(tx("Nincs feloldott profil."));
     setEncBusy(true);
     try {
       const scope = encScope === "ALL" ? "ALL" : encScope;
@@ -670,26 +695,26 @@ function SettingsPage() {
       const label = scope === "ALL" ? "full" : String(workspaceName(scope)).replaceAll(" ", "_");
       const fn = scope === "ALL" ? `mesh_backup_full_${date}.json` : `mesh_backup_${label}_${date}.json`;
       downloadText(fn, txt);
-      toast.success("Titkosított mentés letöltve.");
+      toast.success(tx("Titkosított mentés letöltve."));
     } catch (e: any) {
-      toast.error(e?.message || "Titkosított mentés sikertelen.");
+      toast.error(e?.message || tx("Titkosított mentés sikertelen."));
     } finally {
       setEncBusy(false);
     }
   };
 
   const doEncryptedImport = async (mode: "OVERWRITE" | "MERGE") => {
-    if (!importFile2) return toast.error("Válassz mentés fájlt.");
-    if (state.status !== "unlocked") return toast.error("Nincs feloldott profil.");
+    if (!importFile2) return toast.error(tx("Válassz mentés fájlt."));
+    if (state.status !== "unlocked") return toast.error(tx("Nincs feloldott profil."));
     setEncBusy(true);
     try {
       const txt = await importFile2.text();
       await localdb.importEncryptedData(txt, importPass2, mode);
       await qc.invalidateQueries();
-      toast.success("Adatok sikeresen helyreállítva!");
+      toast.success(tx("Adatok sikeresen helyreállítva!"));
       setTimeout(() => window.location.reload(), 350);
     } catch (e: any) {
-      toast.error(e?.message || "Helyreállítás sikertelen.");
+      toast.error(e?.message || tx("Helyreállítás sikertelen."));
     } finally {
       setEncBusy(false);
     }
@@ -697,13 +722,13 @@ function SettingsPage() {
 
   const onRestoreFile = async (file: File | null) => {
     if (!file) return;
-    if (!vaultKey) return toast.error("Nincs feloldott profil.");
+    if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
     const txt = await file.text();
     let parsed: unknown;
     try {
       parsed = JSON.parse(txt);
     } catch {
-      toast.error("Nem érvényes JSON fájl.");
+      toast.error(tx("Nem érvényes JSON fájl."));
       return;
     }
     let dump: unknown = parsed;
@@ -711,34 +736,34 @@ function SettingsPage() {
       try {
         dump = await decryptJSON(vaultKey, txt);
       } catch {
-        toast.error("Encrypted mentés dekódolása sikertelen (rossz profil / kulcs).");
+        toast.error(tx("Encrypted mentés dekódolása sikertelen (rossz profil / kulcs)."));
         return;
       }
     }
     const res = FinanceVaultDumpSchema.safeParse(dump);
     if (!res.success) {
-      toast.error("Mentés sémája nem megfelelő.");
+      toast.error(tx("Mentés sémája nem megfelelő."));
       return;
     }
     await localdb.importDump(res.data as any, restoreMode);
     await qc.invalidateQueries();
-    toast.success(restoreMode === "replace" ? "Visszaállítás kész." : "Összefűzés kész.");
+    toast.success(restoreMode === "replace" ? tx("Visszaállítás kész.") : tx("Összefűzés kész."));
   };
 
   const restoreSnapshot = async (snap: SnapshotRow) => {
-    if (!vaultKey) return toast.error("Nincs feloldott profil.");
+    if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
     let dump: unknown;
     try {
       dump = await decryptJSON(vaultKey, snap.data_enc);
     } catch {
-      toast.error("Snapshot dekódolása sikertelen.");
+      toast.error(tx("Snapshot dekódolása sikertelen."));
       return;
     }
     const res = FinanceVaultDumpSchema.safeParse(dump);
-    if (!res.success) return toast.error("Snapshot sémája nem megfelelő.");
+    if (!res.success) return toast.error(tx("Snapshot sémája nem megfelelő."));
     await localdb.importDump(res.data as any, "replace");
     await qc.invalidateQueries();
-    toast.success("Snapshot visszaállítva.");
+    toast.success(tx("Snapshot visszaállítva."));
   };
 
   const mappingsByAccount = useMemo(() => {
@@ -759,11 +784,11 @@ function SettingsPage() {
 
   const onFile = async (file: File | null) => {
     if (!file) return;
-    if (!vaultKey) return toast.error("Nincs feloldott profil.");
-    if (!file.name.toLowerCase().endsWith(".csv")) return toast.error("Csak .csv támogatott.");
-    if (!bankAccountId) return toast.error("Válassz bankszámlát az importhoz.");
+    if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
+    if (!file.name.toLowerCase().endsWith(".csv")) return toast.error(tx("Csak .csv támogatott."));
+    if (!bankAccountId) return toast.error(tx("Válassz bankszámlát az importhoz."));
 
-    setStatus("Beolvasás…");
+    setStatus(tx("Beolvasás…"));
     try {
       const dump = await localdb.exportDump();
       const enc = await encryptJSON(vaultKey, dump);
@@ -779,7 +804,7 @@ function SettingsPage() {
       const wsMeta = workspaces.find((w) => w.id === targetWs) ?? null;
       const seen = importedHashesOf(wsMeta);
       if (!forceReimport && seen.includes(hash)) {
-        setStatus("Ez a banki fájl már be lett olvasva (SHA-256 dedup).");
+        setStatus(tx("Ez a banki fájl már be lett olvasva (SHA-256 dedup)."));
         return;
       }
       const nextHashes = Array.from(new Set([...seen, hash])).slice(-60);
@@ -798,7 +823,7 @@ function SettingsPage() {
     }
     const rows = parseHuCorporateStatementCsv(text);
     if (rows.length === 0) {
-      setStatus("Nem ismert CSV formátum. (Fejléc: Számlaazonosító;...)");
+      setStatus(tx("Nem ismert CSV formátum. (Fejléc: Számlaazonosító;...)"));
       return;
     }
 
@@ -898,7 +923,7 @@ function SettingsPage() {
 
     await qc.invalidateQueries({ queryKey: ["transactions"] });
     setStatus(
-      `Import kész: ${saved} tétel. Jelölt: ${needsReview}.${skippedNonHuf ? ` Kihagyva (nem HUF): ${skippedNonHuf}.` : ""}`,
+      `${t("set.importReady", { saved, needsReview })}${skippedNonHuf ? ` ${t("set.skippedNonHuf")} ${skippedNonHuf}.` : ""}`,
     );
   };
 
@@ -910,14 +935,14 @@ function SettingsPage() {
       await applyWorkspacePatchNow(
         workspaceId,
         { imported_file_hashes: [], bank_seen_hashes: [] } as any,
-        "Import előzmények törölve! A fájlok újra beolvashatók.",
+        tx("Import előzmények törölve! A fájlok újra beolvashatók."),
       );
     },
     [applyWorkspacePatchNow, workspaces],
   );
   const purgeWorkspaceData = useCallback(
     async (workspaceId: string) => {
-      if (!vaultKey) return toast.error("Nincs feloldott profil.");
+      if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
       setDangerBusy(true);
       try {
         // Auto-backup before destructive operations (best-effort)
@@ -978,7 +1003,7 @@ function SettingsPage() {
 
         await clearImportHashes(workspaceId);
         await qc.invalidateQueries();
-        toast.success(`Munkatér nullázva: ${workspaceName(workspaceId)}`);
+        toast.success(t("set.workspaceReset", { name: workspaceName(workspaceId) }));
       } finally {
         setDangerBusy(false);
       }
@@ -987,8 +1012,8 @@ function SettingsPage() {
   );
   const removeWorkspacePermanently = useCallback(
     async (workspaceId: string) => {
-      if (workspaceId === "personal") return toast.error("A Magán munkatér nem törölhető.");
-      if (!vaultKey) return toast.error("Nincs feloldott profil.");
+      if (workspaceId === "personal") return toast.error(tx("A Magán munkatér nem törölhető."));
+      if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
       setDangerBusy(true);
       try {
         await purgeWorkspaceData(workspaceId);
@@ -1007,11 +1032,12 @@ function SettingsPage() {
         } catch {
           /* best-effort */
         }
-        await persistWorkspaces(workspaces.filter((w) => w.id !== workspaceId), "Munkatér végleg törölve.");
+        await persistWorkspaces(workspaces.filter((w) => w.id !== workspaceId), tx("Munkatér végleg törölve."));
         setDangerConfirm("");
         setRemoveOpen(false);
         await qc.invalidateQueries();
-        toast.success("Munkatér eltávolítva.");        navigate({ to: "/" });
+        toast.success(tx("Munkatér eltávolítva."));
+        navigate({ to: "/", search: langSearch() });
       } finally {
         setDangerBusy(false);
       }
@@ -1032,11 +1058,11 @@ function SettingsPage() {
               size="sm"
               variant="outline"
               className="h-9"
-              onClick={() => navigate({ to: "/" })}
-              title="Vissza a műszerfalra"
+              onClick={() => navigate({ to: "/", search: langSearch() })}
+              title={t("chrome.backDashboard")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Vissza
+              {t("chrome.back")}
             </Button>
           }
         />
@@ -1044,13 +1070,13 @@ function SettingsPage() {
           <div className="mx-auto max-w-3xl px-6 py-6">
           <Card>
             <CardHeader>
-              <CardTitle>⚙️ Beállítások</CardTitle>
+              <CardTitle>⚙️ {t("set.title")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="text-sm text-muted-foreground">
-                Slot / Munkaterek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
+                {t("set.lead")}
               </div>
-              <div className="text-sm text-muted-foreground">Előbb lépj be egy profilba.</div>
+              <div className="text-sm text-muted-foreground">{t("set.enterProfile")}</div>
             </CardContent>
           </Card>
           </div>
@@ -1063,7 +1089,7 @@ function SettingsPage() {
     <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
       <ProfileHeader
         profileId={profileId}
-        profileName={state.profile.name ?? "Profil"}
+        profileName={state.profile.name ?? tx("Profil")}
         showBack
         rightControls={
           <Button
@@ -1071,35 +1097,36 @@ function SettingsPage() {
             size="sm"
             variant="outline"
             className="h-9"
-            onClick={() => navigate({ to: "/" })}
-            title="Vissza a műszerfalra"
-            aria-label="Vissza a műszerfalra"
+            onClick={() => navigate({ to: "/", search: langSearch() })}
+            title={t("chrome.backDashboard")}
+            aria-label={t("chrome.backDashboard")}
           >
             <X className="mr-2 h-4 w-4" />
-            Bezárás
+            {t("chrome.close")}
           </Button>
         }
       />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[98%] space-y-4 px-2 py-6 sm:px-4">
           <div className="space-y-1">
-            <div className="text-2xl font-semibold text-white">⚙️ Beállítások</div>
+            <div className="text-2xl font-semibold text-white">⚙️ {t("set.title")}</div>
             <div className="text-sm text-muted-foreground">
-              Slot / Munkaterek, bankszámlák, automatizációs szabályok és biztonsági mentések kezelése.
+              {t("set.lead")}
             </div>
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {SETTINGS_TABS.map((t) => {
-              const isActive = activeTab === t.id;
-              const isDanger = t.id === "danger";
+            {SETTINGS_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const isDanger = tab.id === "danger";
               const base = "h-9 px-3 whitespace-nowrap";
               const activeCls = "bg-slate-800/80 border border-indigo-500/30 text-white";
               const inactiveCls = "border border-border/60 bg-background/40";
               const dangerCls = isDanger ? "text-rose-200 border-rose-500/25" : "";
+              const label = `${tab.emoji ? `${tab.emoji} ` : ""}${t(tab.key)}`;
               return (
                 <Button
-                  key={t.id}
+                  key={tab.id}
                   type="button"
                   variant="outline"
                   className={`${base} ${isActive ? activeCls : inactiveCls} ${!isActive ? dangerCls : ""}`}
@@ -1107,13 +1134,13 @@ function SettingsPage() {
                     void navigate({
                       search: (prev: any) => ({
                         ...prev,
-                        tab: t.id === "accounts" ? undefined : t.id,
+                        tab: tab.id === "accounts" ? undefined : tab.id,
                       }),
                     });
                   }}
-                  title={t.label}
+                  title={label}
                 >
-                  {t.label}
+                  {label}
                 </Button>
               );
             })}
@@ -1122,16 +1149,16 @@ function SettingsPage() {
           {show("accounts") && (
             <Card>
               <CardHeader>
-                <CardTitle>💳 Bankszámlák & Profilok</CardTitle>
+                <CardTitle>💳 {t("set.tabAccounts")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
               <div className="grid gap-3 md:grid-cols-4">
                 <div className="grid gap-2 md:col-span-2">
-                  <Label>Név</Label>
-                  <Input value={baName} onChange={(e) => setBaName(e.target.value)} placeholder="pl. MBH Céges" />
+                  <Label>{tx("Név")}</Label>
+                  <Input value={baName} onChange={(e) => setBaName(e.target.value)} placeholder={tx("pl. MBH Céges")} />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Devizanem</Label>
+                  <Label>{tx("Devizanem")}</Label>
                   <Select value={baCurrency} onValueChange={setBaCurrency}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1143,7 +1170,7 @@ function SettingsPage() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Bank</Label>
+                  <Label>{tx("Bank")}</Label>
                   <Select value={baBankType} onValueChange={setBaBankType}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1159,15 +1186,15 @@ function SettingsPage() {
                   </Select>
                 </div>
                 <div className="grid gap-2 md:col-span-3">
-                  <Label>Számlaszám / IBAN</Label>
-                  <Input value={baIban} onChange={(e) => setBaIban(e.target.value)} placeholder="pl. HU12..." />
+                  <Label>{tx("Számlaszám / IBAN")}</Label>
+                  <Input value={baIban} onChange={(e) => setBaIban(e.target.value)} placeholder={tx("pl. HU12...")} />
                 </div>
                 <div className="flex items-end">
                   <Button
                     type="button"
                     onClick={async () => {
                       if (!vaultKey) return;
-                      if (!baIban.trim()) return toast.error("IBAN/Számlaszám kötelező.");
+                      if (!baIban.trim()) return toast.error(tx("IBAN/Számlaszám kötelező."));
                       await localdb.putBankAccount({
                         name: baName,
                         iban: baIban,
@@ -1178,30 +1205,30 @@ function SettingsPage() {
                       setBaIban("");
                       await qc.invalidateQueries({ queryKey: ["bank_accounts"] });
                       await qc.invalidateQueries({ queryKey: ["bank_account_workspaces"] });
-                      toast.success("Bankszámla mentve.");
+                      toast.success(tx("Bankszámla mentve."));
                     }}
                   >
-                    Hozzáad
+                    {tx("Hozzáad")}
                   </Button>
                 </div>
               </div>
 
               {(bankAccountsQ.data ?? []).length === 0 ? (
                 <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                  Még nincs bankszámla. Adj hozzá legalább egyet, hogy az import és az adatizoláció működjön.
+                  {tx("Még nincs bankszámla. Adj hozzá legalább egyet, hogy az import és az adatizoláció működjön.")}
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-md border">
                   <table className="w-full text-xs">
                     <thead className="border-b text-muted-foreground">
                       <tr>
-                        <th className="px-3 py-2 text-left font-medium">Bankszámla</th>
+                        <th className="px-3 py-2 text-left font-medium">{tx("Bankszámla")}</th>
                         {allWorkspaceIds.map((w) => (
                           <th key={w} className="px-3 py-2 text-left font-medium">
-                            {w === "personal" ? "Magán" : w}
+                            {w === "personal" ? t("chrome.personal") : w}
                           </th>
                         ))}
-                        <th className="px-3 py-2 text-right font-medium">Művelet</th>
+                        <th className="px-3 py-2 text-right font-medium">{tx("Művelet")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1240,7 +1267,7 @@ function SettingsPage() {
                                       });
                                       await qc.invalidateQueries({ queryKey: ["bank_account_workspaces"] });
                                     }}
-                                    aria-label={`Hozzárendelés: ${a.name} → ${w}`}
+                                    aria-label={t("set.assign", { name: a.name, ws: w })}
                                   />
                                 </td>
                               );
@@ -1255,11 +1282,11 @@ function SettingsPage() {
                                   if (bankAccountId === a.id) setBankAccountId("");
                                   await qc.invalidateQueries({ queryKey: ["bank_accounts"] });
                                   await qc.invalidateQueries({ queryKey: ["bank_account_workspaces"] });
-                                  toast.success("Bankszámla törölve.");
+                                  toast.success(tx("Bankszámla törölve."));
                                 }}
-                                title="Bankszámla törlése"
+                                title={tx("Bankszámla törlése")}
                               >
-                                Törlés
+                                {tx("Törlés")}
                               </Button>
                             </td>
                           </tr>
@@ -1279,26 +1306,6 @@ function SettingsPage() {
                 <CardTitle>📁 Slot / Munkaterek & Projektek kezelése</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-              <div className="rounded-lg border border-border/60 bg-background/40 p-3">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium">KPI mutató #1–#4 megjelenítése</div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">
-                      A fejléc alatti 4 gyorscsempe: KPI mutató #1–#4 — egyedi beállítás. Nem Slot.
-                    </div>
-                  </div>
-                  <Switch
-                    checked={Boolean((settings as any).showKpiQuickBar ?? true)}
-                    onCheckedChange={(v) => {
-                      const cur = settingsQ.data ?? EMPTY_SETTINGS;
-                      const next: CustomSettings = { ...cur, showKpiQuickBar: Boolean(v) };
-                      void saveSettings(next, "KPI mutató sáv beállítás mentve.");
-                    }}
-                    aria-label="KPI mutató #1–#4 megjelenítése"
-                  />
-                </div>
-              </div>
-
               <div className="text-sm text-muted-foreground">
                 Itt tudsz munkatér-meta adatokat megadni (becenév, leírás, banki kivonatok mappája), valamint projekteknél
                 tervezői beállításokat (készültség, forgatókönyv) és élesítést.
@@ -1343,7 +1350,7 @@ function SettingsPage() {
                             className="h-8"
                             disabled={!dirty}
                             onClick={() => void saveWsDraft(w.id)}
-                            title="Módosítások mentése"
+                            title={tx("Módosítások mentése")}
                           >
                             💾 Módosítások mentése
                           </Button>
@@ -1353,7 +1360,7 @@ function SettingsPage() {
                             variant="outline"
                             className="h-8"
                             onClick={() => openWorkspaceResources(w.id)}
-                            title="Erőforrások hozzárendelése"
+                            title={tx("Erőforrások hozzárendelése")}
                           >
                             🧩 Erőforrások
                           </Button>
@@ -1370,10 +1377,10 @@ function SettingsPage() {
                                 setPromoteTargetBusinessId(businessOptions[0]?.id ?? "");
                                 setPromoteOpen(true);
                               }}
-                              title="Átalakítás / Élesítés"
-                            >
-                              Átalakítás / Élesítés
-                            </Button>
+                              title={tx("Átalakítás / Élesítés")}
+                            >{
+                              tx("Átalakítás / Élesítés")
+                            }</Button>
                           )}
                           {w.type === "project" && <HelpIcon kbId="promote-member-loan" />}
                         </div>
@@ -1392,7 +1399,7 @@ function SettingsPage() {
                           <Label>Leírás</Label>
                           <Input
                             value={d.description ?? ""}
-                            placeholder="rövid leírás / megjegyzés"
+                            placeholder={tx("rövid leírás / megjegyzés")}
                             onChange={(e) => patchWsDraft(w.id, { description: e.currentTarget.value })}
                           />
                         </div>
@@ -1403,9 +1410,9 @@ function SettingsPage() {
                             placeholder='pl. C:\\\\Users\\\\...\\\\Downloads\\\\bank vagy "/sdcard/Download/bank"'
                             onChange={(e) => patchWsDraft(w.id, { bank_sync_folder: e.currentTarget.value })}
                           />
-                          <div className="text-[11px] text-muted-foreground">
-                            Megjegyzés: böngésző módban a mappaútvonal csak “hint” (auto-olvasás nem minden platformon lehetséges).
-                          </div>
+                          <div className="text-[11px] text-muted-foreground">{
+                            tx("Megjegyzés: böngésző módban a mappaútvonal csak “hint” (auto-olvasás nem minden platformon lehetséges).")
+                          }</div>
                         </div>
                       </div>
 
@@ -1522,7 +1529,7 @@ function SettingsPage() {
                       🧩 Erőforrások —{" "}
                       {workspaces.find((x) => x.id === wsResId)?.alias?.trim() ||
                         workspaces.find((x) => x.id === wsResId)?.id ||
-                        "Munkatér"}
+                        tx("Munkatér")}
                     </DialogTitle>
                   </DialogHeader>
 
@@ -1637,17 +1644,17 @@ function SettingsPage() {
                                             patchWsDraft(wsResId, { bankAccountIds: next } as any);
                                           })();
                                         }}
-                                        title={on ? "Leválasztás" : "Csatolás"}
+                                        title={on ? tx("Leválasztás") : tx("Csatolás")}
                                       >
-                                        {on ? "Csatolva" : "Csatolás"}
+                                        {on ? tx("Csatolva") : tx("Csatolás")}
                                       </Button>
                                     </div>
                                   );
                                 })
                               )}
-                              <div className="text-[11px] text-muted-foreground">
-                                Megjegyzés: a csatolás a bank-importnál is ezt a mappinget használja.
-                              </div>
+                              <div className="text-[11px] text-muted-foreground">{
+                                tx("Megjegyzés: a csatolás a bank-importnál is ezt a mappinget használja.")
+                              }</div>
                             </CardContent>
                           </Card>
                         ) : null}
@@ -1664,7 +1671,7 @@ function SettingsPage() {
                                   <Input
                                     value={newResLocName}
                                     onChange={(e) => setNewResLocName(e.currentTarget.value)}
-                                    placeholder="pl. Raktár — Gyál"
+                                    placeholder={tx("pl. Raktár — Gyál")}
                                     maxLength={64}
                                   />
                                 </div>
@@ -1689,7 +1696,7 @@ function SettingsPage() {
                                   size="sm"
                                   onClick={() => {
                                     const name = newResLocName.trim();
-                                    if (!name) return toast.error("Adj meg helyszín nevet.");
+                                    if (!name) return toast.error(tx("Adj meg helyszín nevet."));
                                     const id =
                                       typeof crypto !== "undefined" && "randomUUID" in crypto
                                         ? (crypto as any).randomUUID()
@@ -1700,7 +1707,7 @@ function SettingsPage() {
                                           ...settings,
                                           locations: [...(settings.locations ?? []), { id, name, kind: newResLocKind }],
                                         } as any,
-                                        "Helyszín hozzáadva.",
+                                        tx("Helyszín hozzáadva."),
                                       );
                                       patchWsDraft(wsResId, {
                                         locationIds: Array.from(new Set([...locationIdsDraft, id])),
@@ -1708,7 +1715,7 @@ function SettingsPage() {
                                       setNewResLocName("");
                                     })();
                                   }}
-                                  title="Új helyszín felvitele"
+                                  title={tx("Új helyszín felvitele")}
                                 >
                                   + Új helyszín
                                 </Button>
@@ -1729,12 +1736,12 @@ function SettingsPage() {
                                           <div className="truncate text-sm font-medium">{l.name}</div>
                                           <div className="text-[11px] text-muted-foreground font-mono">
                                             {l.kind === "szekhely"
-                                              ? "székhely"
+                                              ? tx("székhely")
                                               : l.kind === "telephely"
-                                                ? "telephely"
+                                                ? tx("telephely")
                                                 : l.kind === "raktar"
-                                                  ? "raktár"
-                                                  : "egyéb"}
+                                                  ? tx("raktár")
+                                                  : tx("egyéb")}
                                           </div>
                                         </div>
                                         <Button
@@ -1748,9 +1755,9 @@ function SettingsPage() {
                                               : Array.from(new Set([...locationIdsDraft, l.id]));
                                             patchWsDraft(wsResId, { locationIds: next } as any);
                                           }}
-                                          title={on ? "Leválasztás" : "Hozzárendelés"}
+                                          title={on ? tx("Leválasztás") : tx("Hozzárendelés")}
                                         >
-                                          {on ? "Hozzárendelve" : "Hozzárendelés"}
+                                          {on ? tx("Hozzárendelve") : tx("Hozzárendelés")}
                                         </Button>
                                       </div>
                                     );
@@ -1804,7 +1811,7 @@ function SettingsPage() {
                                     onClick={() => {
                                       const nm = newVehicleName.trim();
                                       const plate = newVehiclePlate.trim().toUpperCase();
-                                      if (!nm || !plate) return toast.error("Add meg a megnevezést és rendszámot.");
+                                      if (!nm || !plate) return toast.error(tx("Add meg a megnevezést és rendszámot."));
                                       const id =
                                         typeof crypto !== "undefined" && "randomUUID" in crypto
                                           ? (crypto as any).randomUUID()
@@ -1826,9 +1833,9 @@ function SettingsPage() {
                                       setNewVehicleRate(100);
                                       setNewVehicleType("company_fleet");
                                     }}
-                                    title="Jármű hozzáadása"
+                                    title={tx("Jármű hozzáadása")}
                                   >
-                                    + Hozzáadás
+                                    + {tx("Hozzáadás")}
                                   </Button>
                                 </div>
                               </div>
@@ -1847,7 +1854,7 @@ function SettingsPage() {
                                           {v.name} <span className="font-mono text-muted-foreground">({v.plateNumber})</span>
                                         </div>
                                         <div className="text-[11px] text-muted-foreground">
-                                          {v.type === "private_business" ? `magánautó · ${v.reimbursementRate} Ft/km` : "céges flotta"}
+                                          {v.type === "private_business" ? t("set.kmRate", { rate: v.reimbursementRate }) : t("set.fleetCar")}
                                         </div>
                                       </div>
                                       <Button
@@ -1859,9 +1866,9 @@ function SettingsPage() {
                                             vehicles: vehiclesDraft.filter((x: any) => x.id !== v.id),
                                           } as any)
                                         }
-                                        title="Törlés"
+                                        title={tx("Törlés")}
                                       >
-                                        Törlés
+                                        {tx("Törlés")}
                                       </Button>
                                     </div>
                                   ))}
@@ -1880,11 +1887,11 @@ function SettingsPage() {
                               <div className="grid gap-2 md:grid-cols-4">
                                 <div className="grid gap-1.5 md:col-span-2">
                                   <Label>Név / megnevezés</Label>
-                                  <Input value={newHrName} onChange={(e) => setNewHrName(e.currentTarget.value)} placeholder="pl. Kovács Béla" />
+                                  <Input value={newHrName} onChange={(e) => setNewHrName(e.currentTarget.value)} placeholder={tx("pl. Kovács Béla")} />
                                 </div>
                                 <div className="grid gap-1.5">
                                   <Label>Szerep</Label>
-                                  <Input value={newHrRole} onChange={(e) => setNewHrRole(e.currentTarget.value)} placeholder="pl. Burkoló" />
+                                  <Input value={newHrRole} onChange={(e) => setNewHrRole(e.currentTarget.value)} placeholder={tx("pl. Burkoló")} />
                                 </div>
                                 <div className="grid gap-1.5">
                                   <Label>Típus</Label>
@@ -1893,7 +1900,7 @@ function SettingsPage() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="subcontractor_ev">EV alvállalkozó</SelectItem>
+                                      <SelectItem value="subcontractor_ev">{tx("EV alvállalkozó")}</SelectItem>
                                       <SelectItem value="efo_casual">EFO (eseti)</SelectItem>
                                     </SelectContent>
                                   </Select>
@@ -1935,9 +1942,9 @@ function SettingsPage() {
                                       setNewHrType("subcontractor_ev");
                                       setNewHrRate(0);
                                     }}
-                                    title="HR hozzáadása"
+                                    title={tx("HR hozzáadása")}
                                   >
-                                    + Hozzáadás
+                                    + {tx("Hozzáadás")}
                                   </Button>
                                 </div>
                               </div>
@@ -1954,7 +1961,7 @@ function SettingsPage() {
                                       <div className="min-w-0">
                                         <div className="truncate text-sm font-medium">{h.name}</div>
                                         <div className="text-[11px] text-muted-foreground">
-                                          {h.type === "subcontractor_ev" ? "EV alvállalkozó" : "EFO"} · {h.role || "—"} ·{" "}
+                                          {h.type === "subcontractor_ev" ? tx("EV alvállalkozó") : "EFO"} · {h.role || "—"} ·{" "}
                                           <span className="font-mono">{Math.round(Number(h.defaultRate ?? 0))} Ft</span>
                                         </div>
                                       </div>
@@ -1967,9 +1974,9 @@ function SettingsPage() {
                                             humanResources: hrDraft.filter((x: any) => x.id !== h.id),
                                           } as any)
                                         }
-                                        title="Törlés"
+                                        title={tx("Törlés")}
                                       >
-                                        Törlés
+                                        {tx("Törlés")}
                                       </Button>
                                     </div>
                                   ))}
@@ -1993,7 +2000,7 @@ function SettingsPage() {
                                   <Input
                                     value={newPropName}
                                     onChange={(e) => setNewPropName(e.currentTarget.value)}
-                                    placeholder='pl. "Elsődleges lakóingatlan"'
+                                    placeholder='pl. tx("Elsődleges lakóingatlan")'
                                     maxLength={80}
                                   />
                                 </div>
@@ -2004,7 +2011,7 @@ function SettingsPage() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="primary_residence">Elsődleges lakóingatlan</SelectItem>
+                                      <SelectItem value="primary_residence">{tx("Elsődleges lakóingatlan")}</SelectItem>
                                       <SelectItem value="secondary_property">Másodlagos ingatlan</SelectItem>
                                       <SelectItem value="land_plot">Telek / föld</SelectItem>
                                       <SelectItem value="rental">Kiadó ingatlan</SelectItem>
@@ -2036,7 +2043,7 @@ function SettingsPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="no">Nem</SelectItem>
-                                      <SelectItem value="yes">Igen</SelectItem>
+                                      <SelectItem value="yes">{tx("Igen")}</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -2066,9 +2073,9 @@ function SettingsPage() {
                                       setNewPropValue(0);
                                       setNewPropIncome("no");
                                     }}
-                                    title="Ingatlan hozzáadása"
+                                    title={tx("Ingatlan hozzáadása")}
                                   >
-                                    + Hozzáadás
+                                    + {tx("Hozzáadás")}
                                   </Button>
                                 </div>
                               </div>
@@ -2081,7 +2088,7 @@ function SettingsPage() {
                                     <div key={p.id} className="rounded-md border border-border/60 bg-background/50 p-3">
                                       <div className="grid gap-2 md:grid-cols-4">
                                         <div className="grid gap-1.5 md:col-span-2">
-                                          <Label>Név</Label>
+                                          <Label>{tx("Név")}</Label>
                                           <Input
                                             value={p.name}
                                             onChange={(e) => {
@@ -2154,7 +2161,7 @@ function SettingsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                               <SelectItem value="no">Nem</SelectItem>
-                                              <SelectItem value="yes">Igen</SelectItem>
+                                              <SelectItem value="yes">{tx("Igen")}</SelectItem>
                                             </SelectContent>
                                           </Select>
                                         </div>
@@ -2170,7 +2177,7 @@ function SettingsPage() {
                                             } as any);
                                           }}
                                         >
-                                          Törlés
+                                          {tx("Törlés")}
                                         </Button>
                                       </div>
                                     </div>
@@ -2186,7 +2193,7 @@ function SettingsPage() {
 
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setWsResOpen(false)}>
-                      Bezárás
+                      {t("chrome.close")}
                     </Button>
                     <Button
                       type="button"
@@ -2194,9 +2201,9 @@ function SettingsPage() {
                         if (!wsResId) return;
                         void saveWsDraft(wsResId);
                       }}
-                      title="Mentés"
+                      title={tx("Mentés")}
                     >
-                      Mentés
+                      {tx("Mentés")}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -2221,7 +2228,7 @@ function SettingsPage() {
                     <Input
                       value={catNewName}
                       onChange={(e) => setCatNewName(e.currentTarget.value)}
-                      placeholder="pl. Üzemanyag, Előfizetések, Bankköltség"
+                      placeholder={tx("pl. Üzemanyag, Előfizetések, Bankköltség")}
                       maxLength={64}
                     />
                   </div>
@@ -2251,20 +2258,20 @@ function SettingsPage() {
                       if (catNewKind === "income") next.incomeCategories = uniqAdd(cur.incomeCategories ?? [], name);
                       else if (catNewKind === "expense") next.expenseCategories = uniqAdd(cur.expenseCategories ?? [], name);
                       else next.savingCategories = uniqAdd(((cur as any).savingCategories ?? []) as string[], name);
-                      await saveSettings(next, "Kategória hozzáadva.");
+                      await saveSettings(next, tx("Kategória hozzáadva."));
                       setCatNewName("");
                     }}
-                    title="Kategória hozzáadása"
+                    title={tx("Kategória hozzáadása")}
                   >
-                    Hozzáadás
+                    {tx("Hozzáadás")}
                   </Button>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
                   {[
-                    { id: "income", title: "Bevétel", items: settings.incomeCategories ?? [] },
-                    { id: "expense", title: "Kiadás", items: settings.expenseCategories ?? [] },
-                    { id: "saving", title: "Megtakarítás", items: (((settings as any).savingCategories ?? []) as string[]) ?? [] },
+                    { id: "income", title: tx("Bevétel"), items: settings.incomeCategories ?? [] },
+                    { id: "expense", title: tx("Kiadás"), items: settings.expenseCategories ?? [] },
+                    { id: "saving", title: tx("Megtakarítás"), items: (((settings as any).savingCategories ?? []) as string[]) ?? [] },
                   ].map((g) => (
                     <div key={g.id} className="rounded-lg border border-border/60 bg-background/40 p-3">
                       <div className="text-xs font-medium text-slate-200">{g.title}</div>
@@ -2287,11 +2294,11 @@ function SettingsPage() {
                                   if (g.id === "income") next.incomeCategories = rm(cur.incomeCategories ?? [], c);
                                   else if (g.id === "expense") next.expenseCategories = rm(cur.expenseCategories ?? [], c);
                                   else next.savingCategories = rm(((cur as any).savingCategories ?? []) as string[], c);
-                                  await saveSettings(next, "Kategória törölve.");
+                                  await saveSettings(next, tx("Kategória törölve."));
                                 }}
-                                title="Kategória törlése"
+                                title={tx("Kategória törlése")}
                               >
-                                Törlés
+                                {tx("Törlés")}
                               </Button>
                             </div>
                           ))}
@@ -2311,7 +2318,7 @@ function SettingsPage() {
                 <CardTitle>💾 Mentés & Helyreállítás</CardTitle>
                 <div className="flex flex-wrap items-center gap-2">
                   <Select value={restoreMode} onValueChange={(v) => setRestoreMode(v as any)}>
-                    <SelectTrigger className="h-9 w-[140px]" title="Visszaállítás mód">
+                    <SelectTrigger className="h-9 w-[140px]" title={tx("Visszaállítás mód")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2319,18 +2326,18 @@ function SettingsPage() {
                       <SelectItem value="replace">Felülírás</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button type="button" variant="outline" onClick={() => void exportBackup(false)} title="Teljes mentés (JSON)">
+                  <Button type="button" variant="outline" onClick={() => void exportBackup(false)} title={tx("Teljes mentés (JSON)")}>
                     Export JSON
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => void exportBackup(true)}
-                    title="Teljes mentés (Encrypted Backup)"
+                    title={tx("Teljes mentés (Encrypted Backup)")}
                   >
                     Export Encrypted
                   </Button>
-                  <Button type="button" onClick={() => backupRef.current?.click()} title="Mentés import (restore/merge)">
+                  <Button type="button" onClick={() => backupRef.current?.click()} title={tx("Mentés import (restore/merge)")}>
                     Import…
                   </Button>
                   <input
@@ -2354,14 +2361,14 @@ function SettingsPage() {
                   type="button"
                   variant="outline"
                   onClick={async () => {
-                    if (!vaultKey) return toast.error("Nincs feloldott profil.");
+                    if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
                     const dump = await localdb.exportDump();
                     const enc = await encryptJSON(vaultKey, dump);
                     await localdb.putSnapshot({ label: `Manual snapshot: ${new Date().toISOString()}`, data_enc: enc });
                     await qc.invalidateQueries({ queryKey: ["snapshots"] });
                     toast.success("Snapshot elmentve.");
                   }}
-                  title="Kézi snapshot mentése"
+                  title={tx("Kézi snapshot mentése")}
                 >
                   Snapshot mentése
                 </Button>
@@ -2376,7 +2383,7 @@ function SettingsPage() {
                       <tr>
                         <th className="px-3 py-2 text-left">Idő</th>
                         <th className="px-3 py-2 text-left">Címke</th>
-                        <th className="px-3 py-2 text-right">Művelet</th>
+                        <th className="px-3 py-2 text-right">{tx("Művelet")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2391,7 +2398,7 @@ function SettingsPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => void restoreSnapshot(s)}
-                                title="Snapshot visszaállítása (felülírás)"
+                                title={tx("Snapshot visszaállítása (felülírás)")}
                               >
                                 Visszaállítás
                               </Button>
@@ -2402,11 +2409,11 @@ function SettingsPage() {
                                 onClick={async () => {
                                   await localdb.deleteSnapshot(s.id);
                                   await qc.invalidateQueries({ queryKey: ["snapshots"] });
-                                  toast.success("Snapshot törölve.");
+                                  toast.success(tx("Snapshot törölve."));
                                 }}
-                                title="Snapshot törlése"
+                                title={tx("Snapshot törlése")}
                               >
-                                Törlés
+                                {tx("Törlés")}
                               </Button>
                             </div>
                           </td>
@@ -2453,7 +2460,7 @@ function SettingsPage() {
                     <Label>Egyedi jelszó a mentéshez (opcionális)</Label>
                     <Input
                       type="password"
-                      placeholder="(opcionális) pl. erős-jelszó-123"
+                      placeholder={tx("(opcionális) pl. erős-jelszó-123")}
                       value={encPass}
                       onChange={(e) => setEncPass(e.currentTarget.value)}
                     />
@@ -2467,11 +2474,11 @@ function SettingsPage() {
                     type="button"
                     onClick={() => void doEncryptedExport()}
                     disabled={encBusy}
-                    title="Titkosított mentés letöltése"
+                    title={tx("Titkosított mentés letöltése")}
                   >
-                    <Download className="mr-2 h-4 w-4" />
-                    Titkosított mentés letöltése
-                  </Button>
+                    <Download className="mr-2 h-4 w-4" />{
+                    tx("Titkosított mentés letöltése")
+                  }</Button>
                 </div>
               </div>
 
@@ -2522,7 +2529,7 @@ function SettingsPage() {
                     <Label>Jelszó (ha jelszavas mentés)</Label>
                     <Input
                       type="password"
-                      placeholder="Add meg a mentés jelszavát"
+                      placeholder={tx("Add meg a mentés jelszavát")}
                       value={importPass2}
                       onChange={(e) => setImportPass2(e.currentTarget.value)}
                     />
@@ -2534,7 +2541,7 @@ function SettingsPage() {
                         type="button"
                         variant={importMode2 === "OVERWRITE" ? "destructive" : "outline"}
                         onClick={() => setImportMode2("OVERWRITE")}
-                        title="Felülírás (tiszta helyreállítás)"
+                        title={tx("Felülírás (tiszta helyreállítás)")}
                       >
                         ⚠️ Felülírás
                       </Button>
@@ -2542,7 +2549,7 @@ function SettingsPage() {
                         type="button"
                         variant={importMode2 === "MERGE" ? "default" : "outline"}
                         onClick={() => setImportMode2("MERGE")}
-                        title="Hozzáfűzés / merge"
+                        title={tx("Hozzáfűzés / merge")}
                       >
                         🔄 Hozzáfűzés (Merge)
                       </Button>
@@ -2561,11 +2568,11 @@ function SettingsPage() {
                       if (importMode2 === "OVERWRITE") setOverwriteConfirmOpen(true);
                       else void doEncryptedImport("MERGE");
                     }}
-                    title="Mentés beolvasása"
+                    title={tx("Mentés beolvasása")}
                   >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Mentés beolvasása
-                  </Button>
+                    <Upload className="mr-2 h-4 w-4" />{
+                    tx("Mentés beolvasása")
+                  }</Button>
                 </div>
 
                 <Dialog open={overwriteConfirmOpen} onOpenChange={setOverwriteConfirmOpen}>
@@ -2583,9 +2590,9 @@ function SettingsPage() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="button" variant="ghost" onClick={() => setOverwriteConfirmOpen(false)}>
-                        Mégse
-                      </Button>
+                      <Button type="button" variant="ghost" onClick={() => setOverwriteConfirmOpen(false)}>{
+                        tx("Mégse")
+                      }</Button>
                       <Button
                         type="button"
                         variant="destructive"
@@ -2612,8 +2619,8 @@ function SettingsPage() {
               <CardTitle>Automatikus besorolási szabályok</CardTitle>
               <div className="text-xs text-muted-foreground">
                 {canCustomRules
-                  ? "Ismétlődő mintákból (pl. Lidl, MÁV) kitölti a kategóriát. A beépített heurisztika Basicben is fut; a saját szabály a Proban."
-                  : "A beépített heurisztika helyben fut. Saját minta rögzítése a Pro csomagban él."}
+                  ? tx("Ismétlődő mintákból (pl. Lidl, MÁV) kitölti a kategóriát. A beépített heurisztika Basicben is fut; a saját szabály a Proban.")
+                  : tx("A beépített heurisztika helyben fut. Saját minta rögzítése a Pro csomagban él.")}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -2710,10 +2717,10 @@ function SettingsPage() {
                     <Label>Kiadás típusa</Label>
                     <Select value={ruleExpenseType} onValueChange={(v) => setRuleExpenseType(v as any)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="(üres)" />
+                        <SelectValue placeholder={tx("(üres)")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">(üres)</SelectItem>
+                        <SelectItem value="">{tx("(üres)")}</SelectItem>
                         <SelectItem value="FIX_NEED">FIX_NEED</SelectItem>
                         <SelectItem value="VARIABLE_NEED">VARIABLE_NEED</SelectItem>
                         <SelectItem value="WANT">WANT</SelectItem>
@@ -2725,10 +2732,10 @@ function SettingsPage() {
                     <Label>MUDA típus</Label>
                     <Select value={ruleMudaType} onValueChange={(v) => setRuleMudaType(v as any)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="(üres)" />
+                        <SelectValue placeholder={tx("(üres)")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">(üres)</SelectItem>
+                        <SelectItem value="">{tx("(üres)")}</SelectItem>
                         <SelectItem value="NONE">NONE</SelectItem>
                         <SelectItem value="FEES">FEES</SelectItem>
                         <SelectItem value="DUPLICATE_SUBSCRIPTION">DUPLICATE_SUBSCRIPTION</SelectItem>
@@ -2760,14 +2767,14 @@ function SettingsPage() {
                         size="sm"
                         className="h-7 px-2 text-[11px] text-muted-foreground"
                         onClick={() => setRuleNewCatOpen((o) => !o)}
-                        title="Új kategória hozzáadása"
+                        title={tx("Új kategória hozzáadása")}
                       >
                         + Új kategória
                       </Button>
                     </div>
                     <Select value={ruleCategory} onValueChange={setRuleCategory}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Válassz kategóriát" />
+                        <SelectValue placeholder={tx("Válassz kategóriát")} />
                       </SelectTrigger>
                       <SelectContent>
                         {[
@@ -2790,7 +2797,7 @@ function SettingsPage() {
                           <div className="grid gap-1.5 md:col-span-2">
                             <Label className="text-xs text-slate-300">Kategória neve</Label>
                             <Input
-                              placeholder="pl. Üzemanyag, Előfizetések, Bankköltség"
+                              placeholder={tx("pl. Üzemanyag, Előfizetések, Bankköltség")}
                               value={ruleNewCatName}
                               onChange={(e) => setRuleNewCatName(e.currentTarget.value)}
                               maxLength={64}
@@ -2819,15 +2826,15 @@ function SettingsPage() {
                               setRuleNewCatName("");
                               setRuleNewCatOpen(false);
                             }}
-                          >
-                            Mégse
-                          </Button>
+                          >{
+                            tx("Mégse")
+                          }</Button>
                           <Button
                             type="button"
                             size="sm"
                             disabled={!ruleNewCatName.trim() || !vaultKey}
                             onClick={async () => {
-                              if (!vaultKey) return toast.error("Nincs feloldott profil.");
+                              if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
                               const name = ruleNewCatName.trim();
                               const cur = settingsQ.data ?? EMPTY_SETTINGS;
                               const uniq = (arr: string[], v: string) => {
@@ -2844,7 +2851,7 @@ function SettingsPage() {
                               setRuleCategory(name);
                               setRuleNewCatName("");
                               setRuleNewCatOpen(false);
-                              toast.success("Kategória hozzáadva.");
+                              toast.success(tx("Kategória hozzáadva."));
                             }}
                           >
                             Mentés
@@ -2860,7 +2867,7 @@ function SettingsPage() {
                   <div className="grid gap-2">
                     <Label>Cél partner (opcionális)</Label>
                     <Input
-                      placeholder="pl. Lidl, MOL, MÁV"
+                      placeholder={tx("pl. Lidl, MOL, MÁV")}
                       value={rulePartner}
                       onChange={(e) => setRulePartner(e.currentTarget.value)}
                     />
@@ -2872,7 +2879,7 @@ function SettingsPage() {
                     type="button"
                     disabled={rulesBusy || !ruleKeyword.trim() || !ruleCategory.trim()}
                     onClick={async () => {
-                      if (state.status !== "unlocked") return toast.error("Nincs feloldott profil.");
+                      if (state.status !== "unlocked") return toast.error(tx("Nincs feloldott profil."));
                       setRulesBusy(true);
                       try {
                         const tags = ruleTags
@@ -2902,9 +2909,9 @@ function SettingsPage() {
                         setRuleExpenseType("");
                         setRuleMudaType("");
                         setRuleIsRecurring(false);
-                        toast.success("Szabály elmentve.");
+                        toast.success(tx("Szabály elmentve."));
                       } catch (e: any) {
-                        toast.error(e?.message || "Szabály mentése sikertelen.");
+                        toast.error(e?.message || tx("Szabály mentése sikertelen."));
                       } finally {
                         setRulesBusy(false);
                       }
@@ -2986,7 +2993,7 @@ function SettingsPage() {
                                 setRulesBusy(false);
                               }
                             }}
-                            title="Ki-/bekapcsolás"
+                            title={tx("Ki-/bekapcsolás")}
                           >
                             {r.is_active ? "Bekapcsolva" : "Kikapcsolva"}
                           </Button>
@@ -2999,14 +3006,14 @@ function SettingsPage() {
                               try {
                                 await localdb.deleteCategoryRule(r.id);
                                 await qc.invalidateQueries({ queryKey: ["category_rules"] });
-                                toast.success("Szabály törölve.");
+                                toast.success(tx("Szabály törölve."));
                               } finally {
                                 setRulesBusy(false);
                               }
                             }}
-                            title="Törlés"
+                            title={tx("Törlés")}
                           >
-                            Törlés
+                            {tx("Törlés")}
                           </Button>
                         </div>
                       </li>
@@ -3016,14 +3023,14 @@ function SettingsPage() {
               )}
 
               <div className="flex items-center justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setRetroOpen(true)} title="Szabályok futtatása a meglévő tételekre">
+                <Button type="button" variant="outline" onClick={() => setRetroOpen(true)} title={tx("Szabályok futtatása a meglévő tételekre")}>
                   🔄 Szabályok visszamenőleges futtatása
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setDqOpen(true)}
-                  title="Adatminőség ellenőrzés a Magán banki tételekre"
+                  title={tx("Adatminőség ellenőrzés a Magán banki tételekre")}
                 >
                   🧪 Adatminőség (Magán bank)
                 </Button>
@@ -3032,7 +3039,7 @@ function SettingsPage() {
               <Dialog open={retroOpen} onOpenChange={setRetroOpen}>
                 <DialogContent className="w-full max-w-3xl max-h-[85vh] overflow-y-auto p-8 custom-scrollbar">
                   <DialogHeader>
-                    <DialogTitle>Szabályok futtatása a meglévő tételekre</DialogTitle>
+                    <DialogTitle>{tx("Szabályok futtatása a meglévő tételekre")}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     🎯 Mire jó? Ha utólag hozol létre szabályokat, ezzel gyorsan „rendbe tudod húzni” a régi tételeket is.
@@ -3042,13 +3049,13 @@ function SettingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="button" variant="ghost" onClick={() => setRetroOpen(false)}>
-                      Mégse
-                    </Button>
+                    <Button type="button" variant="ghost" onClick={() => setRetroOpen(false)}>{
+                      tx("Mégse")
+                    }</Button>
                     <Button
                       type="button"
                       onClick={async () => {
-                        if (!vaultKey) return toast.error("Nincs feloldott profil.");
+                        if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
                         setRetroOpen(false);
                         setRulesBusy(true);
                         try {
@@ -3086,9 +3093,9 @@ function SettingsPage() {
                             changed++;
                           }
                           await qc.invalidateQueries({ queryKey: ["transactions"] });
-                          toast.success(`Kész. Frissített tételek: ${changed}`);
+                          toast.success(t("set.rulesChanged", { changed }));
                         } catch (e: any) {
-                          toast.error(e?.message || "Futtatás sikertelen.");
+                          toast.error(e?.message || tx("Futtatás sikertelen."));
                         } finally {
                           setRulesBusy(false);
                         }
@@ -3116,7 +3123,7 @@ function SettingsPage() {
                         variant="outline"
                         disabled={rulesBusy || !vaultKey}
                         onClick={async () => {
-                          if (!vaultKey) return toast.error("Nincs feloldott profil.");
+                          if (!vaultKey) return toast.error(tx("Nincs feloldott profil."));
                           setRulesBusy(true);
                           try {
                             const rows = await localdb.listTxns();
@@ -3142,10 +3149,10 @@ function SettingsPage() {
                             };
                             setDqResult(res);
                             toast.success(
-                              `Adatminőség ellenőrzés kész. Banki tételek: ${res.bank}, uncategorized: ${res.uncategorized}.`,
+                              t("set.qualityDone", { bank: res.bank, uncategorized: res.uncategorized }),
                             );
                           } catch (e: any) {
-                            toast.error(e?.message || "Ellenőrzés sikertelen.");
+                            toast.error(e?.message || tx("Ellenőrzés sikertelen."));
                           } finally {
                             setRulesBusy(false);
                           }
@@ -3200,7 +3207,7 @@ function SettingsPage() {
 
               <div className="space-y-3">
                 <div className="rounded-md border border-border/60 bg-background/40 p-3">
-                  <div className="text-xs text-muted-foreground">Projekt</div>
+                  <div className="text-xs text-muted-foreground">{tx("Projekt")}</div>
                   <div className="mt-0.5 text-sm font-medium">{promoteProjectId || "—"}</div>
                 </div>
 
@@ -3274,9 +3281,9 @@ function SettingsPage() {
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setPromoteOpen(false)}>
-                  Mégse
-                </Button>
+                <Button type="button" variant="ghost" onClick={() => setPromoteOpen(false)}>{
+                  tx("Mégse")
+                }</Button>
                 <Button
                   type="button"
                   onClick={async () => {
@@ -3309,9 +3316,9 @@ function SettingsPage() {
                             tags: Array.from(new Set([...tags, "sunk_cost"])).slice(0, 12),
                           };
                           if (promoteSunkMode === "prep_cost") {
-                            next.title = "Céges előkészítési költség";
+                            next.title = tx("Céges előkészítési költség");
                           } else if (promoteSunkMode === "member_loan") {
-                            next.title = "Tagi kölcsön (jelölés)";
+                            next.title = tx("Tagi kölcsön (jelölés)");
                           }
                           const data_enc = await encryptJSON(vaultKey, next);
                           await localdb.putTxn({ id: r.id, type: r.type, occurred_at: r.occurred_at, data_enc });
@@ -3330,13 +3337,13 @@ function SettingsPage() {
                           counts_in_business: null,
                           project_mode: null as any,
                         },
-                        "Projekt átalakítva Vállalkozássá.",
+                        tx("Projekt átalakítva Vállalkozássá."),
                       );
                       setPromoteOpen(false);
                       return;
                     }
                     if (!promoteTargetBusinessId || promoteTargetBusinessId === "__none") {
-                      toast.error("Válassz Vállalkozást a csatoláshoz.");
+                      toast.error(tx("Válassz Vállalkozást a csatoláshoz."));
                       return;
                     }
                     await applyWorkspacePatchNow(
@@ -3346,7 +3353,7 @@ function SettingsPage() {
                         counts_in_business: true,
                         project_mode: "pilot" as any,
                       },
-                      "Projekt csatolva a Vállalkozáshoz.",
+                      tx("Projekt csatolva a Vállalkozáshoz."),
                     );
                     setPromoteOpen(false);
                   }}
@@ -3369,7 +3376,7 @@ function SettingsPage() {
               className="gap-2"
             >
               <Upload className="h-4 w-4" />
-              Fájl kiválasztása
+              {tx("Fájl kiválasztása")}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -3381,7 +3388,7 @@ function SettingsPage() {
               onChange={(e) => void onFile(e.currentTarget.files?.[0] ?? null)}
             />
             <div className="grid gap-2">
-              <Label>Bankszámla</Label>
+              <Label>{tx("Bankszámla")}</Label>
               <Select value={bankAccountId || "__none"} onValueChange={(v) => setBankAccountId(v === "__none" ? "" : v)}>
                 <SelectTrigger className="max-w-sm">
                   <SelectValue />
@@ -3396,7 +3403,7 @@ function SettingsPage() {
                 </SelectContent>
               </Select>
 
-              <Label>Cél munkatér</Label>
+              <Label>{tx("Cél munkatér")}</Label>
               <Select value={targetWs} onValueChange={setTargetWs}>
                 <SelectTrigger className="max-w-sm">
                   <SelectValue />
@@ -3421,7 +3428,7 @@ function SettingsPage() {
                   onChange={(e) => setForceReimport(e.currentTarget.checked)}
                 />
                 <span className="text-muted-foreground">
-                  Már beolvasott fájl felülírása / deduplikáció figyelmen kívül hagyása
+                  {tx("Már beolvasott fájl felülírása / deduplikáció figyelmen kívül hagyása")}
                 </span>
               </label>
             </div>
@@ -3450,25 +3457,41 @@ function SettingsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Megjegyzés</CardTitle>
+            <CardTitle>{t("set.noteTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            A beállítások oldalon tartjuk a “hosszabb” import felületet, a Cashflow oldalon csak egy kompakt gomb marad.
+            {t("set.noteBody")}
           </CardContent>
         </Card>
             </>
+          )}
+
+          {show("labs") && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("set.tabLabs")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {t("set.labsLead")}
+                </p>
+                {DASHBOARD_LABS.map((lab) => (
+                  <LabToggleRow key={lab.id} id={lab.id} />
+                ))}
+              </CardContent>
+            </Card>
           )}
 
         {show("danger") && (
         <Card className="border border-red-500/30 bg-red-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              Veszélyes zóna / Danger Zone <HelpIcon kbId="settings-danger-zone" />
+              {t("set.dangerTitle")} <HelpIcon kbId="settings-danger-zone" />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="text-sm text-muted-foreground">
-              Ezek a műveletek adatvesztéssel járnak. Import előzmények törlése biztonságosabb; a munkatér nullázás visszavonhatatlan.
+              {t("set.dangerLead")}
             </div>
 
             {isDemoProfile && (
@@ -3481,16 +3504,16 @@ function SettingsPage() {
                 }
               >
                 {search.focus === SETTINGS_FOCUS_DEMO_RESET ? (
-                  <p className="mb-2 text-[11px] text-amber-100/90">
-                    Itt van az újraindítás. A többi beállítás megtekinthető; írni a jelenlegi verzióban még nem.
-                  </p>
+                  <p className="mb-2 text-[11px] text-amber-100/90">{
+                    tx("Itt van az újraindítás. A többi beállítás megtekinthető; írni a jelenlegi verzióban még nem.")
+                  }</p>
                 ) : null}
-                <div className="text-sm font-medium text-rose-200">DEMO profil eszközök</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  DEMO profiloknál a saját adat feltöltését nem javasoljuk. Itt 1 kattintással törölhetők a generált (teszt) adatok.
-                </div>
+                <div className="text-sm font-medium text-rose-200">{tx("DEMO profil eszközök")}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{
+                  tx("DEMO profiloknál a saját adat feltöltését nem javasoljuk. Itt 1 kattintással törölhetők a generált (teszt) adatok.")
+                }</div>
                 <div className="mt-3 grid gap-2 max-w-xl">
-                  <Label>Biztonsági kód</Label>
+                  <Label>{tx("Biztonsági kód")}</Label>
                   <div className="text-sm">
                     Pontosan ezt írd be a megerősítéshez:{" "}
                     <span className="select-all font-mono bg-slate-800 text-rose-300 px-2 py-1 rounded">
@@ -3536,7 +3559,7 @@ function SettingsPage() {
                         } catch {
                           // ignore
                         }
-                        toast.success("DEMO generált adatok törölve.");
+                        toast.success(tx("DEMO generált adatok törölve."));
                       } catch (e: any) {
                         toast.error(e?.message || "DEMO reset hiba.");
                       } finally {
@@ -3544,7 +3567,7 @@ function SettingsPage() {
                         setDemoResetConfirm("");
                       }
                     }}
-                    title="Törli a demo: prefixű tranzakciókat és hiteleket, és lenullázza a demo tervező adatokat."
+                    title={tx("Törli a demo: prefixű tranzakciókat és hiteleket, és lenullázza a demo tervező adatokat.")}
                   >
                     ♻️ DEMO reset (generált adatok törlése)
                   </Button>
@@ -3561,15 +3584,15 @@ function SettingsPage() {
                         for (const p of demos) {
                           await localdb.deleteProfile(p.id);
                         }
-                        toast.success(`DEMO profilok törölve: ${demos.length} db`);
+                        toast.success(t("set.demosDeleted", { count: demos.length }));
                       } catch (e: any) {
-                        toast.error(e?.message || "DEMO profil törlés hiba.");
+                        toast.error(e?.message || tx("DEMO profil törlés hiba."));
                       } finally {
                         setDangerBusy(false);
                         setDemoResetConfirm("");
                       }
                     }}
-                    title="Törli az összes DEMO profilt (DEMO név prefix alapján) erről az eszközről."
+                    title={tx("Törli az összes DEMO profilt (DEMO név prefix alapján) erről az eszközről.")}
                   >
                     🧨 Összes DEMO profil törlése erről az eszközről
                   </Button>
@@ -3581,10 +3604,10 @@ function SettingsPage() {
               <Label>Érintett munkatér</Label>
               <Select value={dangerWsId} onValueChange={setDangerWsId}>
                 <SelectTrigger className="max-w-sm">
-                  <SelectValue placeholder="-- Válassz munkateret a művelethez --" />
+                  <SelectValue placeholder={tx("-- Válassz munkateret a művelethez --")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Válassz munkateret a művelethez --</SelectItem>
+                  <SelectItem value="">{tx("-- Válassz munkateret a művelethez --")}</SelectItem>
                   {allWorkspaceIds
                     .filter((id) => id !== "__all")
                     .map((id) => (
@@ -3606,7 +3629,7 @@ function SettingsPage() {
                   setDangerConfirm("");
                   setHashesOpen(true);
                 }}
-                title="Import hashek / fájl memória törlése"
+                title={tx("Import hashek / fájl memória törlése")}
               >
                 🔄 Import hashek / fájl memória törlése
               </Button>
@@ -3620,7 +3643,7 @@ function SettingsPage() {
                   setDangerConfirm("");
                   setPurgeOpen(true);
                 }}
-                title="Munkatér adatainak és import előzményeinek nullázása"
+                title={tx("Munkatér adatainak és import előzményeinek nullázása")}
               >
                 🗑️ Munkatér adatainak és import előzményeinek nullázása
               </Button>
@@ -3634,7 +3657,7 @@ function SettingsPage() {
                   setDangerConfirm("");
                   setRemoveOpen(true);
                 }}
-                title="Munkatér végleges eltávolítása (visszavonhatatlan)"
+                title={tx("Munkatér végleges eltávolítása (visszavonhatatlan)")}
               >
                 💥 Munkatér végleges törlése a magból
               </Button>
@@ -3643,7 +3666,7 @@ function SettingsPage() {
             <Dialog open={hashesOpen} onOpenChange={setHashesOpen}>
               <DialogContent className="w-full max-w-4xl max-h-[85vh] overflow-y-auto p-8 custom-scrollbar">
                 <DialogHeader>
-                  <DialogTitle>Import hashek / fájl memória törlése</DialogTitle>
+                  <DialogTitle>{tx("Import hashek / fájl memória törlése")}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground">
@@ -3656,7 +3679,7 @@ function SettingsPage() {
                       Pontosan ezt kell bemásolnod a megerősítéshez:{" "}
                       <span
                         className="select-all font-mono bg-slate-800 text-rose-300 px-2 py-1 rounded cursor-pointer"
-                        title="Kijelöléshez kattints, majd Ctrl+C"
+                        title={tx("Kijelöléshez kattints, majd Ctrl+C")}
                       >
                         {dangerToken || "—"}
                       </span>
@@ -3673,9 +3696,9 @@ function SettingsPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="ghost" onClick={() => setHashesOpen(false)}>
-                    Mégse
-                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setHashesOpen(false)}>{
+                    tx("Mégse")
+                  }</Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -3685,7 +3708,7 @@ function SettingsPage() {
                       void clearImportHashes(dangerWsId);
                     }}
                   >
-                    Törlés megerősítése
+                    {tx("Törlés megerősítése")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -3708,7 +3731,7 @@ function SettingsPage() {
                       Pontosan ezt kell bemásolnod a megerősítéshez:{" "}
                       <span
                         className="select-all font-mono bg-slate-800 text-rose-300 px-2 py-1 rounded cursor-pointer"
-                        title="Kijelöléshez kattints, majd Ctrl+C"
+                        title={tx("Kijelöléshez kattints, majd Ctrl+C")}
                       >
                         {dangerToken || "—"}
                       </span>
@@ -3725,9 +3748,9 @@ function SettingsPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="ghost" onClick={() => setPurgeOpen(false)}>
-                    Mégse
-                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setPurgeOpen(false)}>{
+                    tx("Mégse")
+                  }</Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -3737,7 +3760,7 @@ function SettingsPage() {
                       void purgeWorkspaceData(dangerWsId);
                     }}
                   >
-                    Törlés megerősítése
+                    {tx("Törlés megerősítése")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -3760,7 +3783,7 @@ function SettingsPage() {
                       Pontosan ezt kell bemásolnod a megerősítéshez:{" "}
                       <span
                         className="select-all font-mono bg-slate-800 text-rose-300 px-2 py-1 rounded cursor-pointer"
-                        title="Kijelöléshez kattints, majd Ctrl+C"
+                        title={tx("Kijelöléshez kattints, majd Ctrl+C")}
                       >
                         {dangerToken || "—"}
                       </span>
@@ -3777,9 +3800,9 @@ function SettingsPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="ghost" onClick={() => setRemoveOpen(false)}>
-                    Mégse
-                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setRemoveOpen(false)}>{
+                    tx("Mégse")
+                  }</Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -3799,4 +3822,5 @@ function SettingsPage() {
     </div>
   );
 }
+
 

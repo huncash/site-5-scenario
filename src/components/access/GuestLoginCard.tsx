@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ACCESS_ROLE, writeAccessRole, writeViewerToken } from "@/lib/accessRole";
 import { claimGuestSession, normalizeGuestCode, parseGuestCode } from "@/lib/auth/guestSlots";
+import { langSearch } from "@/lib/langSearch";
 
 /** Anonymous Guest belépés: egyedi kód + opcionális helyi jelszó — nincs e-mail / név. */
 export function GuestLoginCard() {
@@ -42,7 +43,7 @@ export function GuestLoginCard() {
       } else {
         toast.success(`Guest Slot #${String(res.claim.slotIndex).padStart(2, "0")} aktív.`);
       }
-      void navigate({ to: "/" });
+      void navigate({ to: "/", search: langSearch() });
     } finally {
       setBusy(false);
     }

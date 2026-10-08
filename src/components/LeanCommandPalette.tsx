@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
+import { useI18n } from "@/i18n";
+import { langSearch } from "@/lib/langSearch";
+
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,6 +19,7 @@ import {
   WORKSPACE_CATALOG_EVENT,
   type WorkspaceCatalogItem,
 } from "@/lib/workspaceSwitch";
+import { useDashboardLab } from "@/hooks/useDashboardLabs";
 
 type Item = {
   id: string;
@@ -36,6 +40,8 @@ export function LeanCommandPalette() {
   const [q, setQ] = useState("");
   const [extra, setExtra] = useState<WorkspaceCatalogItem[]>([]);
   const navigate = useNavigate();
+  const { t } = useI18n();
+  const szummaLab = useDashboardLab("labs-szumma");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -58,9 +64,11 @@ export function LeanCommandPalette() {
 
   const items = useMemo<Item[]>(() => {
     const rows: Item[] = [
-      { id: "personal", label: "Magán", hint: "Személyes tér", keywords: "magan personal privat" },
-      { id: "__all", label: "Szumma", hint: "Összesítés", keywords: "szumma osszes all" },
+      { id: "personal", label: t("chrome.personal"), hint: t("chrome.personalHint"), keywords: "magan personal privat" },
     ];
+    if (szummaLab.isOpen) {
+      rows.push({ id: "__all", label: t("dash.szumma"), hint: t("chrome.szummaHint"), keywords: "szumma osszes all" });
+    }
     for (const w of extra) {
       rows.push({
         id: w.id,
@@ -70,7 +78,7 @@ export function LeanCommandPalette() {
       });
     }
     return rows;
-  }, [extra]);
+  }, [extra, szummaLab.isOpen, t]);
 
   const filtered = useMemo(() => {
     const nq = norm(q.trim());
@@ -88,7 +96,7 @@ export function LeanCommandPalette() {
     } catch {
       // ignore
     }
-    void navigate({ to: "/" });
+    void navigate({ to: "/", search: (prev) => langSearch(prev) });
   };
 
   return (
@@ -96,11 +104,11 @@ export function LeanCommandPalette() {
       <CommandInput
         value={q}
         onValueChange={setQ}
-        placeholder="Projekt / munkatér keresése…"
+        placeholder={t("chrome.cmdPlaceholder")}
       />
       <CommandList>
-        <CommandEmpty>Nincs találat.</CommandEmpty>
-        <CommandGroup heading="Lean betöltő">
+        <CommandEmpty>{t("chrome.cmdEmpty")}</CommandEmpty>
+        <CommandGroup heading={t("chrome.cmdGroup")}>
           {filtered.map((it) => (
             <CommandItem key={it.id} value={`${it.label} ${it.keywords}`} onSelect={() => go(it.id)}>
               <span className="min-w-0 truncate">{it.label}</span>

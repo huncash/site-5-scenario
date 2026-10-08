@@ -13,6 +13,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FeatureComingSoonProvider } from "@/components/FeatureComingSoon";
+import { EntitlementProvider } from "@/components/EntitlementModal";
 import { HoverCoachTooltip } from "@/components/HoverCoachTooltip";
 import { BillTestSurface } from "@/components/BillTestSurface";
 import { SupportHost } from "@/components/SupportSurface";
@@ -27,7 +28,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SchoolWatermark } from "@/components/school/SchoolWatermark";
 import { SchoolSurface } from "@/components/school/SchoolSurface";
 import { LocaleProvider, useI18n } from "@/i18n";
-import { LOCALE_BOOT_SCRIPT } from "@/i18n/locale";
+import { hrefWithLang, inheritedLang, parseLangSearch, withInheritedLang } from "@/lib/langSearch";
 import {
   currentSiteHost,
   readBootSiteKind,
@@ -51,6 +52,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
+            search={(prev) => withInheritedLang({}, prev)}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {t("error.goHome")}
@@ -106,7 +108,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              if (typeof window !== "undefined") window.location.assign("/");
+              if (typeof window !== "undefined") window.location.assign(hrefWithLang("/", inheritedLang()));
             }}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
@@ -119,6 +121,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  validateSearch: (s: Record<string, unknown>) => parseLangSearch(s),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -183,7 +186,6 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="hu" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: VIEW_PREFS_BOOT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SITE_KIND_BOOT_SCRIPT }} />
         <HeadContent />
@@ -271,6 +273,7 @@ function RootComponent() {
       <ThemeProvider>
         <VaultProvider>
           <FeatureComingSoonProvider>
+          <EntitlementProvider>
             <SupportEmbedProvider>
               <OnboardingTourProvider>
                 {!siteReady ? (
@@ -292,6 +295,7 @@ function RootComponent() {
                 {dedicated ? null : <Toaster richColors closeButton position="top-center" />}
               </OnboardingTourProvider>
             </SupportEmbedProvider>
+          </EntitlementProvider>
           </FeatureComingSoonProvider>
         </VaultProvider>
       </ThemeProvider>

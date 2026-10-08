@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
-import { ONBOARDING_TOUR_STEPS } from "@/components/onboarding/onboardingTourSteps";
+import { ONBOARDING_TOUR_STEP_IDS, onboardingTourSteps } from "@/components/onboarding/onboardingTourSteps";
+import { useI18n } from "@/i18n";
 
 const STORAGE_KEY = "szcenario_onboarding_seen";
 const PENDING_KEY = "szcenario_onboarding_pending";
@@ -57,6 +58,8 @@ function safeReadHomeMode(): "door" | "dashboard" {
 }
 
 export function OnboardingTourProvider({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
+  const steps = useMemo(() => onboardingTourSteps(t), [t]);
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -80,7 +83,7 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const next = useCallback(() => {
-    setStepIndex((i) => Math.min(i + 1, ONBOARDING_TOUR_STEPS.length - 1));
+    setStepIndex((i) => Math.min(i + 1, ONBOARDING_TOUR_STEP_IDS.length - 1));
   }, []);
 
   const prev = useCallback(() => {
@@ -107,7 +110,7 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
       closeTour,
       isOpen: open,
       stepIndex,
-      stepId: ONBOARDING_TOUR_STEPS[stepIndex]?.id ?? null,
+      stepId: ONBOARDING_TOUR_STEP_IDS[stepIndex] ?? null,
     }),
     [openTour, closeTour, open, stepIndex],
   );
@@ -118,7 +121,7 @@ export function OnboardingTourProvider({ children }: { children: ReactNode }) {
       <OnboardingTour
         open={open}
         stepIndex={stepIndex}
-        steps={ONBOARDING_TOUR_STEPS}
+        steps={steps}
         onOpenChange={(o) => {
           setOpen(o);
           if (!o) safeSetSeen();

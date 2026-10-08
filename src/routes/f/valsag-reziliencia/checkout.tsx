@@ -3,9 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FunnelCheckout } from "@/components/funnel/FunnelCheckout";
 import { getTierCore, isTierId, type TierId } from "@/content/pricing/tiers";
 import { VALSAG_REZILIENCIA_FUNNEL } from "@/content/funnels/valsagReziliencia";
+import { parseLangSearch } from "@/lib/langSearch";
 
 export const Route = createFileRoute("/f/valsag-reziliencia/checkout")({
-  validateSearch: (s: Record<string, unknown>) => ({ tier: isTierId(s.tier) ? s.tier : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    ...parseLangSearch(s),
+    tier: isTierId(s.tier) ? s.tier : undefined,
+  }),
   component: ValsagRezilienciaCheckoutPage,
 });
 

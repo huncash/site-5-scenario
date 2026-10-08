@@ -25,6 +25,8 @@ describe("support pricing ↔ tier hrefs", () => {
     expect(supportPricingHref("economic-engine")).toContain("#economic-engine");
     expect(supportPricingHref("bcp")).toContain("#bcp");
     expect(supportPricingHref("education-engine")).toContain("#education-engine");
+    expect(supportPricingHref("own-line")).toContain("#own-line");
+    expect(supportPricingHref("license-frame")).toContain("#license-frame");
   });
 
   it("opens the ticket form with a subject query, not mailto", () => {

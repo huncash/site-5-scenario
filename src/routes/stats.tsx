@@ -6,6 +6,8 @@ import { RotateCw } from "lucide-react";
 import { useFeatureComingSoon } from "@/components/FeatureComingSoon";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useI18n } from "@/i18n";
+import { langSearch, parseLangSearch } from "@/lib/langSearch";
 import { decryptJSON } from "@/lib/crypto";
 import { EMPTY_SETTINGS, type CustomSettings, type WorkspaceMeta } from "@/lib/finance";
 import { getPdcaCycleCount, getPdcaCycleSum, getTopPdcaWorkspaces } from "@/lib/pdcaCycle";
@@ -15,11 +17,13 @@ import { useVault } from "@/lib/vault";
 export const Route = createFileRoute("/stats")({
   component: StatsPage,
   validateSearch: (s: Record<string, unknown>) => ({
+    ...parseLangSearch(s),
     profile: String(s.profile ?? ""),
   }),
 });
 
 function StatsPage() {
+  const { t } = useI18n();
   const { state } = useVault();
   const { openComingSoon } = useFeatureComingSoon();
   const search = Route.useSearch();
@@ -51,12 +55,12 @@ function StatsPage() {
   if (state.status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        Betöltés…
+        {t("common.loading")}
       </div>
     );
   }
   if (!unlocked || !vaultKey) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" search={langSearch} />;
   }
 
   return (
@@ -67,17 +71,17 @@ function StatsPage() {
           <div>
             <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
               <RotateCw className="h-5 w-5 text-muted-foreground" />
-              Aktivitás & Ciklus Statisztikák
+              {t("stats.title")}
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              Vázlat: user aktivitás, elvégzett PDCA ciklusok és futási idő nyomon követése (offline).
+              {t("stats.lead")}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Globális ciklus szumma</CardTitle>
+                <CardTitle className="text-xs font-medium text-muted-foreground">{t("stats.cycleSum")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="font-mono text-2xl font-bold tabular-nums">#{sum}</div>
@@ -85,7 +89,7 @@ function StatsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Aktív munkaterek</CardTitle>
+                <CardTitle className="text-xs font-medium text-muted-foreground">{t("stats.activeSlots")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="font-mono text-2xl font-bold tabular-nums">{workspaces.length || 1}</div>
@@ -97,9 +101,8 @@ function StatsPage() {
               className="cursor-pointer transition-all duration-200 hover:bg-muted/20"
               onClick={() =>
                 openComingSoon({
-                  title: "Futási idő & aktivitás-napló",
-                  purpose:
-                    "Offline session idő, aktív napok és PDCA fázisonkénti időráfordítás. Az aktivitás-gyűjtő és a riport nézet előkészítés alatt áll.",
+                  title: t("stats.runtimeTitle"),
+                  purpose: t("stats.runtimePurpose"),
                   featureId: "stats.runtime",
                 })
               }
@@ -107,36 +110,35 @@ function StatsPage() {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   openComingSoon({
-                    title: "Futási idő & aktivitás-napló",
-                    purpose:
-                      "Offline session idő, aktív napok és PDCA fázisonkénti időráfordítás. Az aktivitás-gyűjtő és a riport nézet előkészítés alatt áll.",
+                    title: t("stats.runtimeTitle"),
+                    purpose: t("stats.runtimePurpose"),
                     featureId: "stats.runtime",
                   });
                 }
               }}
             >
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Futási idő</CardTitle>
+                <CardTitle className="text-xs font-medium text-muted-foreground">{t("stats.runtime")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-sm text-muted-foreground">Előkészítés alatt — kattints a részletekért</div>
+                <div className="text-sm text-muted-foreground">{t("stats.runtimeSoon")}</div>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Workspace ciklusok</CardTitle>
+              <CardTitle className="text-sm">{t("stats.wsCycles")}</CardTitle>
             </CardHeader>
             <CardContent>
               {top.length === 0 ? (
-                <div className="text-sm text-muted-foreground">Még nincs lezárt PDCA ciklus.</div>
+                <div className="text-sm text-muted-foreground">{t("stats.noCycles")}</div>
               ) : (
                 <ul className="divide-y divide-border/50">
                   {top.map((w) => (
                     <li key={w.id} className="flex items-center justify-between py-2 text-sm">
                       <span className="truncate">
-                        {w.alias?.trim() || (w.id === "personal" ? "Magán" : w.id)}
+                        {w.alias?.trim() || (w.id === "personal" ? t("stats.personal") : w.id)}
                       </span>
                       <span className="font-mono text-slate-200">#{getPdcaCycleCount(w)}</span>
                     </li>

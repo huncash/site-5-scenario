@@ -23,6 +23,13 @@ export function PricingFootnotes(props: { className?: string }) {
         {t("pricing.fnActiveShort")}
       </p>
       <p>
+        <a href={supportPricingHref("license-frame")} className="underline hover:text-emerald-300">
+          {t("pricing.fnEngineLink")}
+        </a>
+        {" — "}
+        {t("pricing.fnEngineShort")}
+      </p>
+      <p>
         <a href={supportPricingHref("tiered-loyalty")} className="underline hover:text-emerald-300">
           {t("pricing.fnLoyaltyLink")}
         </a>

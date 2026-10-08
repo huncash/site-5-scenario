@@ -1,5 +1,12 @@
-import { ENGINE_VERSION } from "@/config/plans";
+import { ENGINE_VERSION, type JitAddonId } from "@/config/plans";
 import { billPublicOrigin } from "@/lib/billing";
+import {
+  admitLicenseToken,
+  FUSION_ERROR_HU,
+  lastLicenseFusionError,
+  logFusionAttempt,
+  readInstanceBind,
+} from "@/lib/licenseFusion";
 import { installment2ArrearsActive } from "@/lib/installmentPlan";
 import {
   activeGiftSlotsFromCredits,
@@ -42,12 +49,18 @@ export type LicenseEntitlement = {
   permanentSlots?: number;
   /** Megvásárolt bővítő pack id-k ismétléssel. */
   slotPacks?: SlotPackId[];
+  /** JIT örökös modulok a licencrosteren (Case / Slot / Edge / Seat / vendég). */
+  addons?: JitAddonId[];
+  /** Extra motorok ugyanazon a tokenen (economic mindig jár). Nem duzzaszt kvótát. */
+  engines?: Array<"education" | "resilience">;
   /** Két egyenlő 1. évi részlet. */
   installmentPlan?: boolean;
   installment2Paid?: boolean;
   year1StartedAt?: string;
   installment2DueAt?: string | null;
 };
+
+export { FUSION_ERROR_HU, lastLicenseFusionError } from "@/lib/licenseFusion";
 
 const KEY = "szcenario_license_v1";
 const LEDGER_KEY = "szcenario_slot_ledger_v1";
@@ -69,18 +82,32 @@ export function readLicense(): LicenseEntitlement | null {
     if (!raw) return null;
     const t = JSON.parse(raw) as LicenseEntitlement;
     if (!t?.token) return null;
+    const bound = readInstanceBind();
+    if (bound && bound.token.trim() !== t.token.trim()) {
+      logFusionAttempt({
+        ok: false,
+        reason: "token_mismatch",
+        boundToken: bound.token,
+        incomingToken: t.token,
+        message: FUSION_ERROR_HU,
+      });
+      return null;
+    }
     return clampSchoolEntitlement(t);
   } catch {
     return null;
   }
 }
 
-export function writeLicense(e: LicenseEntitlement): void {
+export function writeLicense(e: LicenseEntitlement): boolean {
   const next = clampSchoolEntitlement(e);
+  const admitted = admitLicenseToken(next.token);
+  if (!admitted.ok) return false;
   localStorage.setItem(KEY, JSON.stringify(next));
   if (next.referralCode) writeReferralCode(next.referralCode);
   syncLedgerFromLicense(next);
   emitLicenseChange();
+  return true;
 }
 
 export function clearLicense(): void {
@@ -141,6 +168,7 @@ export function readSlotLedger(): SlotLedger {
 export function writeSlotLedger(ledger: SlotLedger): void {
   const next = isSchoolHost() ? emptySlotLedger("campus") : ledger;
   localStorage.setItem(LEDGER_KEY, JSON.stringify(next));
+  if (typeof window === "undefined") return;
   window.dispatchEvent(new Event("szcenario:slot_ledger"));
 }
 
@@ -184,8 +212,13 @@ export function grantLocalLicense(tier: SlotTierId = "local"): LicenseEntitlemen
     referralCode: code,
     permanentSlots: permanentSlotsFromCredits(),
     slotPacks: [],
+    engines: ["education", "resilience"],
   };
-  writeLicense(entitlement);
+  if (!writeLicense(entitlement)) {
+    const cur = readLicense();
+    if (cur) return cur;
+    throw new Error(lastLicenseFusionError() ?? FUSION_ERROR_HU);
+  }
   return entitlement;
 }
 
@@ -228,7 +261,7 @@ export async function verifyBillLicense(token: string): Promise<LicenseEntitleme
       year1StartedAt: data.year1StartedAt,
       installment2DueAt: data.installment2DueAt ?? null,
     };
-    writeLicense(entitlement);
+    if (!writeLicense(entitlement)) return null;
     return entitlement;
   } catch {
     return null;

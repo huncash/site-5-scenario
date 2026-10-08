@@ -8,9 +8,12 @@ import { useVault } from "@/lib/vault";
 import type { MeshLogEntry } from "@/lib/mesh/log";
 
 export const Route = createFileRoute("/logs")({
-  validateSearch: z.object({
-    profile: z.string().min(1),
-  }),
+  validateSearch: z
+    .object({
+      profile: z.string().min(1),
+      lang: z.enum(["hu", "en"]).optional(),
+    })
+    .passthrough(),
   component: LogsPage,
 });
 
