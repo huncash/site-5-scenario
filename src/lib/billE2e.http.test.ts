@@ -42,6 +42,7 @@ describe("E2E HTTP — checkout → díjbekérő mock → webhook → licenc", (
       BARION_POS_KEY: "",
       BARION_ENV: "test",
       NODE_ENV: "test",
+      MAINTENANCE_MODE: "false",
     };
     child = spawn(
       process.platform === "win32" ? "npx.cmd" : "npx",

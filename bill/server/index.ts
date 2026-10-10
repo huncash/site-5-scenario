@@ -33,6 +33,11 @@ import { grossFromLines, issueSzamlazzProforma, proformaPdfPath } from "./szamla
 import { countryFromTaxId, SELLER_COUNTRY } from "./vat.ts";
 import { lookupCompany } from "./vies.ts";
 import { handleBillingWebhook } from "./webhooks.ts";
+import { maintenanceModeFromEnv } from "../../src/lib/maintenanceMode.ts";
+
+function billMaintenanceOn(): boolean {
+  return maintenanceModeFromEnv(process.env.MAINTENANCE_MODE ?? process.env.VITE_MAINTENANCE_MODE);
+}
 
 const BILL_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -222,6 +227,16 @@ function refuseLiveKeys(): Response | null {
 async function handleApi(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const p = url.pathname;
+
+  if (
+    billMaintenanceOn() &&
+    (p === "/api/billing/checkout" ||
+      p === "/api/billing/portal" ||
+      p === "/api/billing/lookup" ||
+      p === "/api/billing/dijbekero")
+  ) {
+    return Response.json({ ok: false, error: "maintenance" }, { status: 503 });
+  }
 
   if (req.method === "POST" && p === "/api/billing/lookup") {
     const body = await readJson(req);

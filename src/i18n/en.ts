@@ -1651,4 +1651,17 @@ export const en: DeepString<typeof hu> = {
     loadFailBody: "Something broke on this device. Try again, or go home.",
     tryAgain: "Try again",
   },
+  gate: {
+    title: "Under Development",
+    headlineHu: "Fejlesztés alatt",
+    headlineEn: "Under Development",
+    bodyHu: "A Szcenárió hétvégén szünetel: a felületet újragondoljuk. Kérjük, térjen vissza később.",
+    bodyEn: "Szcenárió is paused this weekend while we rethink the surface. Please come back later.",
+    adminLink: "Admin sign-in",
+    adminTitle: "Admin sign-in",
+    adminLead: "Owner only. No guest or public account.",
+    keyLabel: "Key",
+    enter: "Enter",
+    denied: "The key is not valid.",
+  },
 };

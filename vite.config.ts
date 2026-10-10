@@ -4,7 +4,16 @@
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import { createHash } from "node:crypto";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+
+function sha256(s: string) {
+  return createHash("sha256").update(s, "utf8").digest("hex");
+}
+
+const adminPlain = String(process.env.ADMIN_PASSPHRASE || process.env.VITE_ADMIN_PASSPHRASE || "").trim();
+const adminHashEnv = String(process.env.VITE_ADMIN_PASSPHRASE_HASH || "").trim().toLowerCase();
+const injectedAdminHash = adminHashEnv || (adminPlain ? sha256(adminPlain) : "");
 
 export default defineConfig({
   tanstackStart: {
@@ -13,6 +22,9 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    define: {
+      __MAINTENANCE_ADMIN_HASH__: JSON.stringify(injectedAdminHash),
+    },
     server: {
       proxy: {
         "/api/billing": {

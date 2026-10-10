@@ -1655,4 +1655,17 @@ export const hu = {
     loadFailBody: "Valami elromlott ezen az eszközön. Próbáld újra, vagy lépj a főoldalra.",
     tryAgain: "Újra",
   },
+  gate: {
+    title: "Fejlesztés alatt",
+    headlineHu: "Fejlesztés alatt",
+    headlineEn: "Under Development",
+    bodyHu: "A Szcenárió hétvégén szünetel: a felületet újragondoljuk. Kérjük, térjen vissza később.",
+    bodyEn: "Szcenárió is paused this weekend while we rethink the surface. Please come back later.",
+    adminLink: "Admin belépés",
+    adminTitle: "Admin belépés",
+    adminLead: "Csak a tulajdonos. Vendég vagy nyilvános fiók nincs.",
+    keyLabel: "Kulcs",
+    enter: "Belépek",
+    denied: "A kulcs nem érvényes.",
+  },
 } as const;
