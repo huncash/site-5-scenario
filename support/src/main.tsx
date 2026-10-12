@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { LocaleProvider } from "@/i18n";
-import { ConstructionGate } from "@/components/ConstructionGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { App } from "./App";
 import "../../src/styles.css";
@@ -11,9 +10,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <LocaleProvider>
       <ThemeProvider>
-        <ConstructionGate>
-          <App />
-        </ConstructionGate>
+        <App />
       </ThemeProvider>
     </LocaleProvider>
   </StrictMode>,

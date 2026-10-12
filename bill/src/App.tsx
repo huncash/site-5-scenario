@@ -27,7 +27,6 @@ import {
   splitVat,
   VAT_COUNTRIES,
 } from "../../src/content/pricing/vat";
-import { ConstructionGate } from "@/components/ConstructionGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ViewSettingsMenu } from "@/components/ViewSettingsMenu";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -240,9 +239,7 @@ export function App() {
   return (
     <LocaleProvider>
       <ThemeProvider>
-        <ConstructionGate>
-          <BillingCheckout />
-        </ConstructionGate>
+        <BillingCheckout />
       </ThemeProvider>
     </LocaleProvider>
   );

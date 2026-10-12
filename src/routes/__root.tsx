@@ -37,7 +37,6 @@ import {
   type SiteHostKind,
 } from "@/lib/siteSurface";
 import { isSchoolHost, isSchoolVerified, SCHOOL_PROOF_EVENT } from "@/lib/school";
-import { ConstructionGate, useMaintenanceLocked } from "@/components/ConstructionGate";
 import { publicSeoHead } from "@/lib/seo";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import { VIEW_PREFS_BOOT_SCRIPT } from "@/lib/viewPrefs";
@@ -236,7 +235,6 @@ function RootComponent() {
   const isBill = siteKind === "bill";
   const isSupport = siteKind === "support";
   const dedicated = isBill || isSupport;
-  const locked = useMaintenanceLocked();
   const [schoolOk, setSchoolOk] = useState(() => typeof window === "undefined" || !isSchoolHost() || isSchoolVerified());
 
   useEffect(() => {
@@ -278,25 +276,23 @@ function RootComponent() {
           <EntitlementProvider>
             <SupportEmbedProvider>
               <OnboardingTourProvider>
-                <ConstructionGate pathname={pathname}>
-                  {!siteReady ? (
-                    <SurfacePending />
-                  ) : isBill ? (
-                    <BillTestSurface />
-                  ) : isSupport ? (
-                    <SupportHost />
-                  ) : !schoolOk ? (
-                    <SchoolSurface />
-                  ) : (
-                    <Outlet />
-                  )}
-                </ConstructionGate>
-                {locked || dedicated ? null : <RootFooter />}
-                {locked ? null : <SchoolWatermark />}
-                {locked || dedicated ? null : <PrivacyBanner />}
-                {locked || dedicated ? null : <LeanCommandPalette />}
-                {locked || dedicated ? null : <HoverCoachTooltip />}
-                {locked || dedicated ? null : <Toaster richColors closeButton position="top-center" />}
+                {!siteReady ? (
+                  <SurfacePending />
+                ) : isBill ? (
+                  <BillTestSurface />
+                ) : isSupport ? (
+                  <SupportHost />
+                ) : !schoolOk ? (
+                  <SchoolSurface />
+                ) : (
+                  <Outlet />
+                )}
+                {dedicated ? null : <RootFooter />}
+                <SchoolWatermark />
+                {dedicated ? null : <PrivacyBanner />}
+                {dedicated ? null : <LeanCommandPalette />}
+                {dedicated ? null : <HoverCoachTooltip />}
+                {dedicated ? null : <Toaster richColors closeButton position="top-center" />}
               </OnboardingTourProvider>
             </SupportEmbedProvider>
           </EntitlementProvider>
