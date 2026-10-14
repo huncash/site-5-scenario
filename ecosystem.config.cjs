@@ -21,8 +21,9 @@ module.exports = {
       merge_logs: true,
       env: {
         NODE_ENV: process.env.NODE_ENV || "production",
-        HOST: process.env.HOST || "127.0.0.1",
+        HOST: process.env.HOST || "0.0.0.0",
         PORT: process.env.PORT || process.env.NITRO_PORT || "5100",
+        PUBLIC_HOME_GATE: process.env.PUBLIC_HOME_GATE || "1",
         STATIC_ROOT: process.env.STATIC_ROOT || pathJoin(CWD, ".output/public"),
         BUILD_SHA: process.env.BUILD_SHA || "",
         BILL_PORT: process.env.BILL_PORT || "5110",

@@ -72,11 +72,11 @@ jobs:
           mkdir -p release/scripts
           cp -a .output release/.output
           cp -a package.json package-lock.json ecosystem.config.cjs BUILD_SHA release/
-          cp -a scripts/static-origin.mjs scripts/site-hosts.mjs scripts/bill-api-path.mjs scripts/vps-activate.sh release/scripts/
+          cp -a scripts/static-origin.mjs scripts/site-hosts.mjs scripts/bill-api-path.mjs scripts/publicHomeGate.mjs scripts/vps-activate.sh release/scripts/
           tar -czf release.tar.gz -C release .
           tar -tzf release.tar.gz | grep -E '^\./ecosystem\.config\.cjs$|^ecosystem\.config\.cjs$'
           tar -tzf release.tar.gz | grep -E 'scripts/vps-activate\.sh'
-          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs|scripts/site-hosts\.mjs|scripts/bill-api-path\.mjs|\.output/bill-server\.mjs'
+          tar -tzf release.tar.gz | grep -E '\.output/server/index\.mjs|BUILD_SHA|build-id\.txt|scripts/static-origin\.mjs|scripts/site-hosts\.mjs|scripts/bill-api-path\.mjs|scripts/publicHomeGate\.mjs|\.output/bill-server\.mjs'
           tar -tzf release.tar.gz | grep -E 'sites/support/index\.html|sites/docs/index\.html|sites/blog/index\.html|sites/bill/index\.html'
           ls -lh release.tar.gz
 

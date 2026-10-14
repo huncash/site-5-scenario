@@ -10,6 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { shouldProxyBillApi } from "./bill-api-path.mjs";
 import { resolveSiteKey, resolveSiteRoot } from "./site-hosts.mjs";
+import { PUBLIC_HOME_GATE_HTML, shouldServePublicHomeGate } from "./publicHomeGate.mjs";
 
 process.on("uncaughtException", (error) => {
   console.error("[static-origin] uncaughtException", error);
@@ -192,6 +193,16 @@ const server = createServer(async (req, res) => {
     const siteKey = resolveSiteKey(hostname, port);
     const root = resolveSiteRoot(siteKey, MAIN_ROOT);
     const urlPath = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`).pathname;
+
+    if (shouldServePublicHomeGate(urlPath, hostname)) {
+      res.writeHead(200, {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "x-szcenario-site": "gate",
+      });
+      res.end(PUBLIC_HOME_GATE_HTML);
+      return;
+    }
 
     if (shouldProxyBillApi(urlPath, siteKey)) {
       proxyToBillApi(req, res);
