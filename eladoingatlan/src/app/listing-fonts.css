@@ -1,0 +1,116 @@
+@font-face {
+  font-family: "Listing Display";
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+  src: url("/fonts/fraunces-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Listing Display";
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+  src: url("/fonts/fraunces-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Listing Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/outfit-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Listing Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/outfit-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+html:has(.listing-root) {
+  scroll-behavior: smooth;
+}
+
+.listing-root {
+  /* Természetes paletta: erdei zöld · meleg bézs · napsárga */
+  --ls-forest: #0f2e1f;
+  --ls-forest-mid: #1a4530;
+  --ls-forest-soft: #243f30;
+  --ls-sand: #efe8db;
+  --ls-sand-mid: #e5dccb;
+  --ls-card: #f7f1e6;
+  --ls-border: #d4c9b5;
+  --ls-ink: #241f18;
+  --ls-muted: #5a5146;
+  --ls-sun: #e8b84a;
+  --ls-sun-deep: #d4a017;
+  --ls-on-sun: #241f18;
+  --ls-on-forest: #f7f1e6;
+  font-family: "Listing Sans", system-ui, sans-serif;
+  color: var(--ls-ink);
+  background-color: var(--ls-sand);
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.listing-root img,
+.listing-root iframe,
+.listing-root video {
+  max-width: 100%;
+}
+
+.listing-root table {
+  max-width: 100%;
+}
+
+/* Tablet: kényelmesebb érintési célok a menüpontokra */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .listing-root h1 {
+    letter-spacing: -0.01em;
+  }
+}
+
+.listing-root h1,
+.listing-root h2,
+.listing-root h3 {
+  font-family: "Listing Display", Georgia, serif;
+}
+
+.listing-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background-color: var(--ls-sun);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ls-on-sun);
+  text-align: center;
+}
+
+.listing-cta:hover {
+  background-color: var(--ls-sun-deep);
+  color: var(--ls-on-sun);
+}
+
+.listing-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--ls-on-forest) 85%, transparent);
+  background-color: color-mix(in srgb, var(--ls-forest) 35%, transparent);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ls-on-forest);
+  text-align: center;
+}
