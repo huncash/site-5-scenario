@@ -238,7 +238,7 @@ export function PropertyLanding() {
           <div className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-end px-4 py-12 md:min-h-[75vh] md:px-6 md:py-16 lg:min-h-[78vh]">
             <div className="max-w-3xl rounded-lg bg-[#0f2e1f]/88 p-5 shadow-[0_8px_40px_rgba(15,46,31,0.45)] md:p-7">
               <p className="inline-flex rounded-md border border-[#e8b84a]/70 bg-[#1a4530]/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[#e8b84a] sm:text-sm">
-                Novemberi szerződéskötési kedvezmény: −{VARIANT_OFFER.discountAmount}
+                {VARIANT_OFFER.heroBadge}
               </p>
               <h1 className="mt-4 text-3xl font-medium leading-tight text-[#f7f1e6] md:text-4xl lg:text-5xl">
                 Erdei faház a Börzsönyben, 1046&nbsp;m² privát telken
@@ -248,7 +248,7 @@ export function PropertyLanding() {
                 áron, jutalék nélkül.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-[#f7f1e6]/85">
-                Alapár: {VARIANT_OFFER.basePrice}. Novemberi szerződéskötéssel és első részlettel:{" "}
+                {VARIANT_OFFER.heroLead} Kedvezményes vételár:{" "}
                 <strong className="font-semibold text-[#e8b84a]">{VARIANT_OFFER.discountPrice}</strong>.
               </p>
               <a
@@ -591,10 +591,40 @@ export function PropertyLanding() {
 
         <section className="scroll-mt-24 border-t border-[#d4c9b5] bg-[#f7f1e6] py-14 md:py-16" id="azaras">
           <div className="mx-auto max-w-6xl px-4 md:px-6">
-            <h2 className="text-3xl font-medium">Árazás</h2>
+            <h2 className="text-3xl font-medium">{VARIANT_OFFER.pricingHeading}</h2>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5a5146] sm:text-base">
               {VARIANT_OFFER.premiumNote}
             </p>
+
+            <dl className="mt-8 grid max-w-xl gap-3 rounded-lg border border-[#d4c9b5] bg-[#efe8db] p-5 sm:p-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[#d4c9b5] pb-3">
+                <dt className="text-sm text-[#5a5146]">Alapár</dt>
+                <dd className="text-lg font-medium text-[#241f18]">{VARIANT_OFFER.basePrice}</dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[#d4c9b5] pb-3">
+                <dt className="text-sm text-[#5a5146]">{VARIANT_OFFER.paymentLabel}</dt>
+                <dd className="text-lg font-medium text-[#d4a017]">−{VARIANT_OFFER.discountAmount}</dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 pt-1">
+                <dt className="text-sm font-medium text-[#241f18]">Kedvezményes vételár</dt>
+                <dd className="text-2xl font-medium text-[#d4a017]">{VARIANT_OFFER.discountPrice}</dd>
+              </div>
+            </dl>
+
+            <aside className="mt-6 max-w-3xl rounded-lg border border-[#e8b84a]/50 bg-[#efe8db] p-5">
+              <p className="text-sm font-medium text-[#241f18]">{VARIANT_OFFER.discountTermsTitle}</p>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-[#5a5146]">
+                {VARIANT_OFFER.discountTerms.map((term) => (
+                  <li key={term}>{term}</li>
+                ))}
+              </ol>
+              <p className="mt-3 text-sm leading-relaxed text-[#5a5146]">{VARIANT_OFFER.possessionNote}</p>
+            </aside>
+
+            <div className="mt-8 max-w-3xl rounded-lg border border-[#d4c9b5] border-l-4 border-l-[#e8b84a] bg-[#efe8db] p-5">
+              <p className="text-base font-medium text-[#241f18]">{VARIANT_OFFER.ctaCardTitle}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#5a5146]">{VARIANT_OFFER.ctaCardBody}</p>
+            </div>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               <article className="flex flex-col rounded-lg border border-[#d4c9b5] border-l-4 border-l-[#e8b84a] bg-[#efe8db] p-5 md:p-6">
@@ -607,7 +637,7 @@ export function PropertyLanding() {
                   onClick={() => trackListingCta("variant_a")}
                   className="mt-6 inline-flex justify-center rounded-md bg-[#e8b84a] px-5 py-3 text-center text-sm font-semibold text-[#241f18]"
                 >
-                  Érdeklődöm a novemberi kedvezményre
+                  {VARIANT_OFFER.a.ctaLabel}
                 </Link>
               </article>
               <article className="flex flex-col rounded-lg border border-[#d4c9b5] border-l-4 border-l-[#d4a017] bg-[#efe8db] p-5 md:p-6">
@@ -620,7 +650,7 @@ export function PropertyLanding() {
                   onClick={() => trackListingCta("variant_b")}
                   className="mt-6 inline-flex justify-center rounded-md bg-[#d4a017] px-5 py-3 text-center text-sm font-semibold text-[#241f18]"
                 >
-                  Érdeklődöm az alapárra
+                  {VARIANT_OFFER.b.ctaLabel}
                 </Link>
               </article>
             </div>
@@ -682,7 +712,7 @@ export function PropertyLanding() {
               <p className="mt-3 text-lg font-medium text-[#e8b84a]">Írj nekem — megtekintést egyeztetünk.</p>
               <p className="mt-3 text-sm leading-relaxed text-[#f7f1e6]/90 sm:text-base">
                 Használd az űrlapot, vagy — adatkezelés elfogadása után — hívd a védett számot, illetve írj közvetlen
-                emailt. Ha a novemberi kedvezmény érdekel, jelezd az üzenetben.
+                emailt. Ha a kétütemű novemberi kedvezmény érdekel, jelezd az üzenetben.
               </p>
               <ListingSellerCard tone="dark" />
             </div>

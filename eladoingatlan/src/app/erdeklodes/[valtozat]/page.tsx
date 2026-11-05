@@ -18,9 +18,9 @@ export function generateMetadata({ params }: { params: Promise<{ valtozat: strin
     }
     return {
       title: {
-        absolute: `Érdeklődés — ${code === "a" ? "Novemberi kedvezmény" : "Alapár"}`,
+        absolute: `Érdeklődés — ${code === "a" ? "Kétütemű novemberi kedvezmény" : "Alapár"}`,
       },
-      description: "Fix vételár és kapcsolatfelvétel közvetlenül a tulajdonossal.",
+      description: "Fix vételár, strukturált fizetési kedvezmény és kapcsolatfelvétel közvetlenül a tulajdonossal.",
       robots: { index: false, follow: false },
     };
   });
