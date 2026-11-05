@@ -3,13 +3,23 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./listing-fonts.css";
 
+const SITE_URL = "https://eladoingatlan.szcenario.hu";
+const OG_IMAGE = {
+  url: "/hirdetes/og-cover.jpg",
+  width: 1024,
+  height: 1024,
+  alt: "Erdei faház a tölgyesben — Kismaros–Börzsönyliget",
+  type: "image/jpeg",
+} as const;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Erdei faház Börzsönyligeten — 1046 m² privát telek",
     template: "%s · eladoingatlan.szcenario.hu",
   },
   description:
-    "Kismaros-Börzsönyliget, zsákutca vége. 1046 m² belterületi Lke-4 telek faházzal. Közvetlenül a tulajdonostól.",
+    "Kismaros-Börzsönyliget, zsákutca vége, az erdő sűrűjében. 1046 m² belterületi Lke-4 telek faházzal. Közvetlenül a tulajdonostól.",
   icons: {
     icon: [
       { url: "/hirdetes/favicon.ico", sizes: "any" },
@@ -17,6 +27,23 @@ export const metadata: Metadata = {
       { url: "/hirdetes/favicon-48.png", type: "image/png", sizes: "48x48" },
     ],
     apple: [{ url: "/hirdetes/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  openGraph: {
+    type: "website",
+    locale: "hu_HU",
+    url: SITE_URL,
+    siteName: "eladoingatlan.szcenario.hu",
+    title: "Erdei faház Börzsönyligeten — 1046 m² privát telek",
+    description:
+      "Kismaros-Börzsönyliget, az erdő sűrűjében. 1046 m² belterületi telek faházzal. Közvetlenül a tulajdonostól.",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Erdei faház Börzsönyligeten — 1046 m² privát telek",
+    description:
+      "Kismaros-Börzsönyliget, az erdő sűrűjében. 1046 m² belterületi telek faházzal. Közvetlenül a tulajdonostól.",
+    images: [OG_IMAGE.url],
   },
 };
 

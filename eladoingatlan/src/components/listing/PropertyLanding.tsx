@@ -244,8 +244,8 @@ export function PropertyLanding() {
                 Erdei faház a Börzsönyben, 1046&nbsp;m² privát telken
               </h1>
               <p className="mt-4 text-base leading-relaxed text-[#f7f1e6]/95 sm:text-lg">
-                Kismaros-Börzsönyliget, zsákutca vége, a Duna–Ipoly Nemzeti Park szélén. Csend, árnyék, nyugalom, fix
-                áron, jutalék nélkül.
+                Kismaros-Börzsönyliget, zsákutca vége, az erdő sűrűjében, a Duna–Ipoly Nemzeti Park szélén. Csend,
+                árnyék, nyugalom, fix áron, jutalék nélkül.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-[#f7f1e6]/85">
                 {VARIANT_OFFER.heroLead} Kedvezményes vételár:{" "}
@@ -268,7 +268,7 @@ export function PropertyLanding() {
           <div className="mt-6 max-w-3xl space-y-4 text-sm leading-relaxed text-[#5a5146] sm:text-base">
             <p>
               Itt nincs szomszéd az ablakodban, és nincs átmenő forgalom. A telek a Hörcsög utca végén áll, az erdő
-              szélén. Nyáron az erdei mikroklíma átlagosan 4&nbsp;°C-kal hűvösebb, mint a Duna-parton; télen a
+              sűrűjében. Nyáron az erdei mikroklíma átlagosan 4&nbsp;°C-kal hűvösebb, mint a Duna-parton; télen a
               cserépkályha tölti be a házat melegével.
             </p>
             <p>
@@ -309,7 +309,7 @@ export function PropertyLanding() {
                 <h3 className="text-lg font-medium">Ipoly Erdő &amp; Nemzeti Park</h3>
                 <p className="mt-3 text-sm leading-relaxed text-[#5a5146]">
                   A környéken az Ipoly Erdő Zrt. gazdálkodik; a terület a Duna–Ipoly Nemzeti Park vonzáskörzetébe
-                  tartozik. Natura 2000-es ősfás tölgyerdő: igazi béke a Börzsöny kapujában.
+                  tartozik. Natura 2000-es ősfás tölgyerdő: igazi béke az erdő sűrűjében.
                 </p>
               </article>
               <article className="rounded-lg border border-[#d4c9b5] bg-[#f7f1e6] p-5">
