@@ -188,7 +188,12 @@ export const PHOTOS = [
 
 export const UTILITY_PHOTOS = [
   { src: "/hirdetes/20260902-mero.jpg", alt: "A mérőhely, felette a cserélt kismegszakítók", title: "Áram", caption: "A mérőhely. A mérő után a rendszer cserélve." },
-  { src: "/hirdetes/20260902-viz.jpg", alt: "Folyó víz a konyhai csapon", title: "Víz", caption: "Folyó víz a vezetékes bekötésen." },
+  {
+    src: "/hirdetes/20260902-viz.jpg",
+    alt: "Folyó víz a konyhai csapon",
+    title: "Vezetékes ivóvíz",
+    caption: "Vezetékes ivóvíz — kiépített hálózatra kötve.",
+  },
   {
     src: "/hirdetes/20260902-furdo.jpg",
     alt: "A csempézett fürdő. A mosdócsap fölötti tükör fölött látszik a befalazott ajtó helye.",

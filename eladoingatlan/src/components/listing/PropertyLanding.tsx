@@ -368,9 +368,10 @@ export function PropertyLanding() {
                 <Droplets className="h-5 w-5 text-[#e8b84a]" aria-hidden />
                 <h3 className="mt-3 text-lg font-medium">Közművek &amp; szolgáltatások</h3>
                 <p className="mt-3 text-sm leading-relaxed text-[#5a5146]">
-                  Villany, cserépkályha fűtési infrastruktúra, HÉSZ 42. § szerinti zárt szennyvíztároló. Kommunális
-                  szemétszállítás heti rendszerességgel, szelektív hulladék elvitel 2 hetente. Jó közbiztonság. 1,5
-                  km-en belül 2 természetes erdei forrás is elérhető (változó vízhozammal/minőséggel).
+                  Vezetékes ivóvíz (kiépített hálózatra kötve), villany, cserépkályha fűtési infrastruktúra, HÉSZ
+                  42.&nbsp;§ szerinti zárt szennyvíztároló. Kommunális szemétszállítás heti rendszerességgel, szelektív
+                  hulladék elvitel 2 hetente. Jó közbiztonság. A hálózati vízen felül 1,5&nbsp;km-en belül 2 természetes
+                  erdei forrás is elérhető (változó vízhozammal/minőséggel).
                 </p>
               </li>
             </ul>

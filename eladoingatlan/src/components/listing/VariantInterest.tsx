@@ -74,7 +74,7 @@ export function VariantInterest({ variant }: { variant: ListingVariant }) {
               <ul className="mt-3 space-y-2 text-sm leading-relaxed text-[#5a5146]">
                 <li>Belterület · Lke-4 · max. 30% · max. 4,5 m</li>
                 <li>Változtatási tilalom alól mentes (8/2025.)</li>
-                <li>Zárt szennyvíztároló · villany · cserépkályha</li>
+                <li>Vezetékes ivóvíz · villany · cserépkályha · zárt szennyvíztároló</li>
                 <li>Azonnal használható / kiadható felépítmény</li>
                 <li>Fix ár · nincs jutalék · 1/1 tulajdonos</li>
               </ul>
