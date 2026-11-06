@@ -1,4 +1,4 @@
-import { deliverEnquiry } from "@/lib/quote-delivery";
+import { appendEnquiryToFile, deliverEnquiry } from "@/lib/quote-delivery";
 
 const MAX_NAME = 120;
 const MAX_EMAIL = 254;
@@ -87,32 +87,70 @@ export async function POST(request: Request): Promise<Response> {
       .join("\n"),
   };
 
-  const result = await deliverEnquiry(delivery);
-
-  if (!result.ok) {
+  // SMTP hibánál se 503: mentés data/enquiries/ alá, válasz { ok: true, mail: false, file: true }.
+  let mail = false;
+  let file = false;
+  try {
+    const result = await deliverEnquiry(delivery);
+    mail = result.mail;
+    file = result.file;
+    if (result.ok) {
+      console.log(
+        JSON.stringify({
+          event: "listing_enquiry",
+          hasName: true,
+          hasEmail: Boolean(email),
+          hasPhone: Boolean(phone),
+          mail,
+          file,
+        }),
+      );
+      return Response.json({ ok: true, mail, file });
+    }
+  } catch (err) {
     console.error(
       JSON.stringify({
-        event: "listing_enquiry_delivery_failed",
-        reason: result.reason ?? "none",
-        mail: result.mail,
-        file: result.file,
+        event: "listing_enquiry_delivery_throw",
+        message: err instanceof Error ? err.message : "unknown",
       }),
-    );
-    return Response.json(
-      { error: "delivery", detail: result.reason ?? "none", mail: false, file: false },
-      { status: 503 },
     );
   }
 
-  console.log(
+  if (!file) {
+    try {
+      file = await appendEnquiryToFile(delivery);
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          event: "listing_enquiry_file_catch",
+          message: err instanceof Error ? err.message : "unknown",
+        }),
+      );
+      file = false;
+    }
+  }
+
+  if (file) {
+    console.log(
+      JSON.stringify({
+        event: "listing_enquiry",
+        hasName: true,
+        hasEmail: Boolean(email),
+        hasPhone: Boolean(phone),
+        mail: false,
+        file: true,
+      }),
+    );
+    return Response.json({ ok: true, mail: false, file: true });
+  }
+
+  console.error(
     JSON.stringify({
-      event: "listing_enquiry",
-      hasName: true,
-      hasEmail: Boolean(email),
-      hasPhone: Boolean(phone),
-      mail: result.mail,
-      file: result.file,
+      event: "listing_enquiry_delivery_failed",
+      reason: "none",
+      mail: false,
+      file: false,
     }),
   );
-  return Response.json({ ok: true, mail: result.mail, file: result.file });
+  return Response.json({ error: "delivery", detail: "none", mail: false, file: false }, { status: 503 });
 }
