@@ -150,8 +150,8 @@ jobs:
               rsync -rltgoD --no-perms --no-owner --no-group --delete --exclude 'node_modules' --exclude '.next' "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
 
               cd "$SUB_DIR"
-              # Tiszta build biztosítása cache beragadás ellen
-              rm -rf .next/cache
+              # Poka-Yoke: teljes .next törlés — régi/új build hash ne keveredjen (ChunkLoadError)
+              rm -rf .next
               npm install
               npm run build
 
