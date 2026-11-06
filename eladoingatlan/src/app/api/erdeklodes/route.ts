@@ -1,4 +1,4 @@
-import { sendQuoteEmail } from "@/lib/quote-delivery";
+import { deliverEnquiry } from "@/lib/quote-delivery";
 
 const MAX_NAME = 120;
 const MAX_EMAIL = 254;
@@ -16,11 +16,17 @@ export async function POST(request: Request): Promise<Response> {
   let body: unknown;
   try {
     body = await request.json();
-  } catch {
-    return Response.json({ error: "invalid" }, { status: 400 });
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        event: "listing_enquiry_bad_json",
+        message: err instanceof Error ? err.message : "unknown",
+      }),
+    );
+    return Response.json({ error: "invalid", detail: "json" }, { status: 400 });
   }
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return Response.json({ error: "invalid" }, { status: 400 });
+    return Response.json({ error: "invalid", detail: "body" }, { status: 400 });
   }
 
   const data = body as Record<string, unknown>;
@@ -29,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
     (typeof data.company === "string" && data.company.trim()) ||
     (typeof data.website === "string" && data.website.trim())
   ) {
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, honeypot: true });
   }
 
   const name = text(data.name, MAX_NAME);
@@ -44,7 +50,16 @@ export async function POST(request: Request): Promise<Response> {
   const phone = phoneRaw && phoneRaw.length <= MAX_PHONE ? phoneRaw : null;
 
   if (!name || !message || (!email && !phone)) {
-    return Response.json({ error: "invalid" }, { status: 400 });
+    console.warn(
+      JSON.stringify({
+        event: "listing_enquiry_invalid",
+        hasName: Boolean(name),
+        hasMessage: Boolean(message),
+        hasEmail: Boolean(email),
+        hasPhone: Boolean(phone),
+      }),
+    );
+    return Response.json({ error: "invalid", detail: "fields" }, { status: 400 });
   }
 
   const optionLabel =
@@ -55,7 +70,7 @@ export async function POST(request: Request): Promise<Response> {
         : null;
   const variantLine = optionLabel ? `Konstrukció: ${optionLabel}` : "Konstrukció: nem jelölt";
   const replyTo = email ?? undefined;
-  const sent = await sendQuoteEmail({
+  const delivery = {
     subject: optionLabel
       ? `Érdeklődés (${optionLabel}): Kismaros, Börzsönyliget`
       : "Érdeklődés: Kismaros, Börzsönyliget",
@@ -70,12 +85,34 @@ export async function POST(request: Request): Promise<Response> {
     ]
       .filter(Boolean)
       .join("\n"),
-  });
+  };
 
-  if (!sent) {
-    return Response.json({ error: "mail" }, { status: 503 });
+  const result = await deliverEnquiry(delivery);
+
+  if (!result.ok) {
+    console.error(
+      JSON.stringify({
+        event: "listing_enquiry_delivery_failed",
+        reason: result.reason ?? "none",
+        mail: result.mail,
+        file: result.file,
+      }),
+    );
+    return Response.json(
+      { error: "delivery", detail: result.reason ?? "none", mail: false, file: false },
+      { status: 503 },
+    );
   }
 
-  console.log(JSON.stringify({ event: "listing_enquiry", hasName: true, hasEmail: Boolean(email), hasPhone: Boolean(phone) }));
-  return Response.json({ ok: true });
+  console.log(
+    JSON.stringify({
+      event: "listing_enquiry",
+      hasName: true,
+      hasEmail: Boolean(email),
+      hasPhone: Boolean(phone),
+      mail: result.mail,
+      file: result.file,
+    }),
+  );
+  return Response.json({ ok: true, mail: result.mail, file: result.file });
 }

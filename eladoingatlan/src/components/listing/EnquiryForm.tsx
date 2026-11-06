@@ -20,6 +20,7 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
   const [company, setCompany] = useState("");
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error" | "invalid">("idle");
+  const [errorDetail, setErrorDetail] = useState<string>("");
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -27,9 +28,11 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
     const looksEmail = trimmedContact.includes("@");
     if (!name.trim() || !trimmedContact || !message.trim()) {
       setStatus("invalid");
+      setErrorDetail("");
       return;
     }
     setStatus("sending");
+    setErrorDetail("");
     try {
       const response = await fetch("/api/erdeklodes", {
         method: "POST",
@@ -45,9 +48,27 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
           variant: variant ?? null,
         }),
       });
+      let payload: { error?: string; detail?: string; ok?: boolean } | null = null;
+      try {
+        payload = (await response.json()) as { error?: string; detail?: string; ok?: boolean };
+      } catch {
+        payload = null;
+      }
       if (!response.ok) {
+        const code = payload?.error ?? `http_${response.status}`;
+        setErrorDetail(
+          response.status === 503
+            ? "A küldés átmenetileg nem elérhető a szerveren. Próbáld meg később, vagy hívd a megjelenített számot."
+            : response.status === 400
+              ? "Ellenőrizd a kitöltött mezőket, majd küldd újra."
+              : `A szerver hibát jelzett (${code}).`,
+        );
         setStatus("error");
-        trackConversion("listing_enquiry_submit_error", { variant: variant ?? "general" });
+        trackConversion("listing_enquiry_submit_error", {
+          variant: variant ?? "general",
+          status: response.status,
+          code,
+        });
         return;
       }
       setStatus("sent");
@@ -56,6 +77,7 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
       setContact("");
       setMessage(defaultMessage);
     } catch {
+      setErrorDetail("Hálózati hiba — ellenőrizd a kapcsolatot, majd próbáld újra.");
       setStatus("error");
       trackConversion("listing_enquiry_submit_error", { variant: variant ?? "general" });
     }
@@ -63,11 +85,17 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
 
   if (status === "sent") {
     return (
-      <p className="rounded-md border border-[#d4c9b5] bg-[#f7f1e6] px-5 py-6 text-sm leading-relaxed">
-        Megkaptuk az érdeklődést
-        {variant ? ` (${variant === "a" ? "kétütemű novemberi kedvezmény" : "alapár"})` : ""}. Hamarosan jelentkezem a
-        megadott elérhetőségen.
-      </p>
+      <div
+        role="status"
+        className="rounded-md border border-[#c5d4b8] bg-[#eef5e8] px-5 py-6 text-sm leading-relaxed text-[#1c2e1a]"
+      >
+        <p className="text-base font-semibold text-[#0f2e1f]">Köszönjük — az érdeklődés megérkezett.</p>
+        <p className="mt-2">
+          Megkaptuk az üzeneted
+          {variant ? ` (${variant === "a" ? "kétütemű novemberi kedvezmény" : "alapár"})` : ""}. Hamarosan jelentkezem
+          a megadott elérhetőségen.
+        </p>
+      </div>
     );
   }
 
@@ -120,8 +148,9 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
       </p>
       {status === "invalid" ? <p className="text-sm text-[#8a3a1a]">Kérlek, töltsd ki a nevet, az elérhetőséget és az üzenetet.</p> : null}
       {status === "error" ? (
-        <p className="text-sm text-[#8a3a1a]">
-          Az üzenetet most nem sikerült elküldeni. Próbáld meg később, vagy hívd a megjelenített telefonszámot.
+        <p className="text-sm text-[#8a3a1a]" role="alert">
+          {errorDetail ||
+            "Az üzenetet most nem sikerült elküldeni. Próbáld meg később, vagy hívd a megjelenített telefonszámot."}
         </p>
       ) : null}
       <button
