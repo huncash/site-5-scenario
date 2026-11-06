@@ -151,7 +151,7 @@ jobs:
 
             mkdir -p "$SUB_DIR"
             # Forrás sync + törölt fájlok eltüntetése; node_modules/.next külön kezelve
-            rsync -a --delete --exclude node_modules --exclude .next "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
+            rsync -avrt --no-g --no-o --exclude 'node_modules' --exclude '.next' "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
             # Poka-Yoke: régi Next build soha ne maradjon
             rm -rf "$SUB_DIR/.next"
             printf '%s\n' "$SHA" > "$SUB_DIR/BUILD_SHA"
