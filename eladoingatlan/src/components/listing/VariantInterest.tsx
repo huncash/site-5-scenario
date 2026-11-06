@@ -38,8 +38,8 @@ export function VariantInterest({ variant }: { variant: ListingVariant }) {
           <p className="text-sm uppercase tracking-[0.16em] text-[#6b6154]">Érdeklődés · {selected.optionLabel}</p>
           <h1 className="mt-2 max-w-3xl text-3xl font-medium sm:text-4xl">{selected.title}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5a5146] sm:text-base">
-            Ugyanaz a telek ({VARIANT_OFFER.plotSqm} m²) és ugyanaz a felépítmény. Közvetlenül tőlem, 1/1 tulajdonostól —
-            jutalék nélkül. Az árak fixek.
+            Ugyanaz a telek ({VARIANT_OFFER.plotSqm} m²) és ugyanaz a felépítmény. Közvetlenül tőlem, 1/1 tulajdonostól.
+            Az árak fixek.
           </p>
 
           <section className="mt-10 grid gap-4 lg:grid-cols-3">
@@ -76,7 +76,7 @@ export function VariantInterest({ variant }: { variant: ListingVariant }) {
                 <li>Változtatási tilalom alól mentes (8/2025.)</li>
                 <li>Vezetékes ivóvíz · villany · cserépkályha · zárt szennyvíztároló</li>
                 <li>Azonnal használható / kiadható felépítmény</li>
-                <li>Fix ár · nincs jutalék · 1/1 tulajdonos</li>
+                <li>Fix ár · 1/1 tulajdonos</li>
               </ul>
             </article>
           </section>

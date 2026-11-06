@@ -245,7 +245,7 @@ export function PropertyLanding() {
               </h1>
               <p className="mt-4 text-base leading-relaxed text-[#f7f1e6]/95 sm:text-lg">
                 Kismaros-Börzsönyliget, zsákutca vége, az erdő sűrűjében, a Duna–Ipoly Nemzeti Park szélén. Csend,
-                árnyék, nyugalom, fix áron, jutalék nélkül.
+                árnyék, nyugalom, fix áron.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-[#f7f1e6]/85">
                 {VARIANT_OFFER.heroLead} Kedvezményes vételár:{" "}
@@ -367,15 +367,11 @@ export function PropertyLanding() {
               <li className="rounded-lg border border-[#d4c9b5] border-l-4 border-l-[#e8b84a] bg-[#efe8db] p-5">
                 <Droplets className="h-5 w-5 text-[#e8b84a]" aria-hidden />
                 <h3 className="mt-3 text-lg font-medium">Közművek &amp; szolgáltatások</h3>
-                <p className="mt-3 inline-flex rounded-md border border-[#e8b84a]/70 bg-[#f7f1e6] px-3 py-1.5 text-sm font-semibold text-[#0f2e1f]">
-                  Vezetékes ivóvíz (kiépített hálózatra kötve)
-                </p>
                 <p className="mt-3 text-sm leading-relaxed text-[#5a5146]">
-                  <strong className="font-semibold text-[#2f4a38]">Vezetékes ivóvíz (kiépített hálózatra kötve)</strong>
-                  , villany, cserépkályha fűtési infrastruktúra, HÉSZ 42.&nbsp;§ szerinti zárt szennyvíztároló.
-                  Kommunális szemétszállítás heti rendszerességgel, szelektív hulladék elvitel 2 hetente. Jó
-                  közbiztonság. A hálózati vízen felül 1,5&nbsp;km-en belül 2 természetes erdei forrás is elérhető
-                  (változó vízhozammal/minőséggel).
+                  Vezetékes ivóvíz (kiépített hálózatra kötve), villany, cserépkályha fűtési infrastruktúra, HÉSZ
+                  42.&nbsp;§ szerinti zárt szennyvíztároló. Kommunális szemétszállítás heti rendszerességgel, szelektív
+                  hulladék elvitel 2 hetente. Jó közbiztonság. A hálózati vízen felül 1,5&nbsp;km-en belül 2 természetes
+                  erdei forrás is elérhető (változó vízhozammal/minőséggel).
                 </p>
               </li>
             </ul>

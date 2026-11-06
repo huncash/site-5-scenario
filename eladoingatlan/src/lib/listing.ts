@@ -61,7 +61,7 @@ export const VARIANT_OFFER = {
     listPrice: "31.500.000 Ft",
     deposit: "Szerződés szerint",
     possession: "Azonnali — legkorábban 2026. november 10.",
-    bandNote: "Fix alapár, jutalék nélkül, közvetlenül tőlem",
+    bandNote: "Fix alapár, közvetlenül tőlem",
     perSqm: "kb. 30,1 ezer Ft/m²",
     summary:
       "A fix alapár 31.500.000 Ft. A ház azonnal használható; a birtokbaadás legkorábban 2026. november 10-től lehetséges.",

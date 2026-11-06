@@ -122,3 +122,27 @@ jobs:
             test -f "$RELEASE_DIR/scripts/vps-activate.sh"
             chmod +x "$RELEASE_DIR/scripts/vps-activate.sh"
             SITE_SLUG="$SITE_SLUG" APP_DIR="$APP_DIR" bash "$RELEASE_DIR/scripts/vps-activate.sh" "$SHA"
+
+      - name: Deploy eladoingatlan subdomain
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 195.228.152.141
+          username: deploy
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: false
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            SUB_DIR=/var/www/eladoingatlan
+            if [ -d "$SUB_DIR/.git" ]; then
+              cd "$SUB_DIR"
+              git pull origin main || git pull origin master
+            fi
+            if [ -d "$SUB_DIR" ]; then
+              cd "$SUB_DIR"
+              npm install
+              npm run build
+              PORT=5140 pm2 restart eladoingatlan-szcenario --update-env || PORT=5140 pm2 start npm --name "eladoingatlan-szcenario" --update-env -- start
+              pm2 save
+            fi
