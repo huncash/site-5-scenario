@@ -135,7 +135,7 @@ jobs:
           username: deploy
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script_stop: false
+          script_stop: true
           command_timeout: 10m
           script: |
             set -euo pipefail
@@ -144,17 +144,49 @@ jobs:
             RELEASE_DIR="$APP_DIR/releases/$SHA"
             SUB_DIR=/var/www/eladoingatlan
 
-            if [ -d "$RELEASE_DIR/eladoingatlan" ]; then
-              mkdir -p "$SUB_DIR"
-              # Poka-Yoke: Ne próbáljon időbélyeget és jogosultságot szinkronizálni a meglévő állományokra
-              rsync -rltgoD --no-perms --no-owner --no-group --delete --exclude 'node_modules' --exclude '.next' "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
+            test -d "$RELEASE_DIR/eladoingatlan"
+            mkdir -p "$SUB_DIR" "$SUB_DIR/data/enquiries"
+            # Poka-Yoke: data/.env megmarad — rsync --delete ne törölje az érdeklődéseket / SMTP konfigot
+            rsync -rltgoD --no-perms --no-owner --no-group --delete \
+              --exclude 'node_modules' \
+              --exclude '.next' \
+              --exclude 'data' \
+              --exclude '.env' \
+              --exclude '.env.production' \
+              --exclude '.env.local' \
+              "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
 
-              cd "$SUB_DIR"
-              # Poka-Yoke: teljes .next törlés — régi/új build hash ne keveredjen (ChunkLoadError)
-              rm -rf .next
-              npm install
-              npm run build
+            cd "$SUB_DIR"
+            mkdir -p data/enquiries
+            # Poka-Yoke: teljes .next törlés — régi/új build hash ne keveredjen
+            rm -rf .next
+            npm install
+            npm run build
+            test -d .next
+            # A fájl-fallback marker legyen a buildben (régi mail-only route kiszűrése)
+            grep -Rql "listing_enquiry_file_saved\|appendEnquiryToFile\|deliverEnquiry" .next || {
+              echo "FATAL: enquiry file-fallback missing from .next build"
+              exit 1
+            }
 
-              PORT=5140 pm2 restart eladoingatlan-szcenario --update-env || PORT=5140 pm2 start npm --name "eladoingatlan-szcenario" --update-env -- start
-              pm2 save
+            if [ -f ecosystem.config.cjs ]; then
+              PORT=5140 pm2 startOrReload ecosystem.config.cjs --update-env || \
+                PORT=5140 pm2 restart eladoingatlan-szcenario --update-env || \
+                PORT=5140 pm2 start ecosystem.config.cjs --update-env
+            else
+              PORT=5140 pm2 restart eladoingatlan-szcenario --update-env || \
+                PORT=5140 pm2 start npm --name "eladoingatlan-szcenario" --update-env -- start
             fi
+            pm2 save
+
+            # Smoke: SMTP nélkül is 200 + ok:true (file fallback)
+            sleep 2
+            BODY='{"name":"CI Smoke","email":"ci-smoke@example.com","phone":"","message":"deploy healthcheck","company":"","website":"","consent":true,"variant":null}'
+            RESP="$(curl -sS -m 20 -X POST http://127.0.0.1:5140/api/erdeklodes \
+              -H 'Content-Type: application/json' \
+              -d "$BODY" || true)"
+            echo "enquiry_smoke=$RESP"
+            echo "$RESP" | grep -q '"ok":true' || {
+              echo "FATAL: enquiry API did not return ok:true (got: $RESP)"
+              exit 1
+            }

@@ -48,34 +48,47 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
           variant: variant ?? null,
         }),
       });
-      let payload: { error?: string; detail?: string; ok?: boolean } | null = null;
+      let payload: { error?: string; detail?: string; ok?: boolean; mail?: boolean; file?: boolean } | null =
+        null;
       try {
-        payload = (await response.json()) as { error?: string; detail?: string; ok?: boolean };
+        payload = (await response.json()) as {
+          error?: string;
+          detail?: string;
+          ok?: boolean;
+          mail?: boolean;
+          file?: boolean;
+        };
       } catch {
         payload = null;
       }
-      if (!response.ok) {
-        const code = payload?.error ?? `http_${response.status}`;
-        setErrorDetail(
-          response.status === 503
-            ? "A küldés átmenetileg nem elérhető a szerveren. Próbáld meg később, vagy hívd a megjelenített számot."
-            : response.status === 400
-              ? "Ellenőrizd a kitöltött mezőket, majd küldd újra."
-              : `A szerver hibát jelzett (${code}).`,
-        );
-        setStatus("error");
-        trackConversion("listing_enquiry_submit_error", {
+      // Siker: { ok: true } (mail:false + file:true is OK), vagy HTTP 200 hiba mező nélkül.
+      const accepted = payload?.ok === true || (response.ok && !payload?.error);
+      if (accepted) {
+        setStatus("sent");
+        trackConversion("listing_enquiry_submit_success", {
           variant: variant ?? "general",
-          status: response.status.toString(),
-          code,
+          mail: payload?.mail === true ? "1" : "0",
+          file: payload?.file === true ? "1" : "0",
         });
+        setName("");
+        setContact("");
+        setMessage(defaultMessage);
         return;
       }
-      setStatus("sent");
-      trackConversion("listing_enquiry_submit_success", { variant: variant ?? "general" });
-      setName("");
-      setContact("");
-      setMessage(defaultMessage);
+      const code = payload?.error ?? `http_${response.status}`;
+      setErrorDetail(
+        response.status === 503 || code === "delivery" || code === "mail"
+          ? "A küldés átmenetileg nem elérhető a szerveren. Próbáld meg később, vagy hívd a megjelenített számot."
+          : response.status === 400
+            ? "Ellenőrizd a kitöltött mezőket, majd küldd újra."
+            : `A szerver hibát jelzett (${code}).`,
+      );
+      setStatus("error");
+      trackConversion("listing_enquiry_submit_error", {
+        variant: variant ?? "general",
+        status: response.status.toString(),
+        code,
+      });
     } catch {
       setErrorDetail("Hálózati hiba — ellenőrizd a kapcsolatot, majd próbáld újra.");
       setStatus("error");

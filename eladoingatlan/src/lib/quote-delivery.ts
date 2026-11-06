@@ -1,4 +1,5 @@
 import { mkdir, appendFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import nodemailer from "nodemailer";
@@ -36,37 +37,54 @@ function resolveFrom(smtpUser: string): string {
   return smtpUser;
 }
 
-function enquiryStoreDir(): string {
+function enquiryStoreCandidates(): string[] {
   const raw = process.env.ENQUIRY_STORE_DIR?.trim();
-  if (raw) return raw;
-  return path.join(process.cwd(), "data", "enquiries");
+  const primary = raw || path.join(process.cwd(), "data", "enquiries");
+  const fallback = path.join(os.tmpdir(), "eladoingatlan-enquiries");
+  return primary === fallback ? [primary] : [primary, fallback];
+}
+
+async function appendEnquiryToDir(dir: string, delivery: QuoteDelivery): Promise<string> {
+  await mkdir(dir, { recursive: true });
+  const day = new Date().toISOString().slice(0, 10);
+  const file = path.join(dir, `${day}.jsonl`);
+  const line =
+    JSON.stringify({
+      at: new Date().toISOString(),
+      subject: delivery.subject,
+      replyTo: delivery.replyTo ?? null,
+      text: delivery.text,
+    }) + "\n";
+  await appendFile(file, line, "utf8");
+  return file;
 }
 
 export async function appendEnquiryToFile(delivery: QuoteDelivery): Promise<boolean> {
-  try {
-    const dir = enquiryStoreDir();
-    await mkdir(dir, { recursive: true });
-    const day = new Date().toISOString().slice(0, 10);
-    const file = path.join(dir, `${day}.jsonl`);
-    const line =
-      JSON.stringify({
-        at: new Date().toISOString(),
-        subject: delivery.subject,
-        replyTo: delivery.replyTo ?? null,
-        text: delivery.text,
-      }) + "\n";
-    await appendFile(file, line, "utf8");
-    console.log(JSON.stringify({ event: "listing_enquiry_file_saved", file }));
-    return true;
-  } catch (err) {
-    console.error(
-      JSON.stringify({
-        event: "listing_enquiry_file_failed",
-        message: err instanceof Error ? err.message : "unknown",
-      }),
-    );
-    return false;
+  const dirs = enquiryStoreCandidates();
+  let lastError: unknown;
+  for (const dir of dirs) {
+    try {
+      const file = await appendEnquiryToDir(dir, delivery);
+      console.log(JSON.stringify({ event: "listing_enquiry_file_saved", file }));
+      return true;
+    } catch (err) {
+      lastError = err;
+      console.error(
+        JSON.stringify({
+          event: "listing_enquiry_file_failed",
+          dir,
+          message: err instanceof Error ? err.message : "unknown",
+        }),
+      );
+    }
   }
+  console.error(
+    JSON.stringify({
+      event: "listing_enquiry_file_exhausted",
+      message: lastError instanceof Error ? lastError.message : "unknown",
+    }),
+  );
+  return false;
 }
 
 export async function sendQuoteEmail(delivery: QuoteDelivery): Promise<boolean> {
