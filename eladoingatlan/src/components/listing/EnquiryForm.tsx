@@ -66,7 +66,7 @@ export function EnquiryForm({ variant, defaultMessage = "" }: EnquiryFormProps) 
         setStatus("error");
         trackConversion("listing_enquiry_submit_error", {
           variant: variant ?? "general",
-          status: response.status,
+          status: response.status.toString(),
           code,
         });
         return;
