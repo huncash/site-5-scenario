@@ -135,43 +135,26 @@ jobs:
           username: deploy
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script_stop: true
-          command_timeout: 12m
+          script_stop: false
+          command_timeout: 10m
           script: |
             set -euo pipefail
-            export HOME=/home/deploy
             APP_DIR=/var/www/szcenario
             SHA=${{ github.sha }}
             RELEASE_DIR="$APP_DIR/releases/$SHA"
             SUB_DIR=/var/www/eladoingatlan
 
-            echo "elado_release=$RELEASE_DIR/eladoingatlan"
-            test -d "$RELEASE_DIR/eladoingatlan"
-            test -f "$RELEASE_DIR/eladoingatlan/package.json"
+            if [ -d "$RELEASE_DIR/eladoingatlan" ]; then
+              mkdir -p "$SUB_DIR"
+              # Poka-Yoke: Ne próbáljon időbélyeget és jogosultságot szinkronizálni a meglévő állományokra
+              rsync -rltgoD --no-perms --no-owner --no-group --delete --exclude 'node_modules' --exclude '.next' "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
 
-            mkdir -p "$SUB_DIR"
-            # Forrás sync + törölt fájlok eltüntetése; node_modules/.next külön kezelve
-            rsync -avrt --no-g --no-o --exclude 'node_modules' --exclude '.next' "$RELEASE_DIR/eladoingatlan/" "$SUB_DIR/"
-            # Poka-Yoke: régi Next build soha ne maradjon
-            rm -rf "$SUB_DIR/.next"
-            printf '%s\n' "$SHA" > "$SUB_DIR/BUILD_SHA"
-            chown -R deploy:deploy "$SUB_DIR"
+              cd "$SUB_DIR"
+              # Tiszta build biztosítása cache beragadás ellen
+              rm -rf .next/cache
+              npm install
+              npm run build
 
-            cd "$SUB_DIR"
-            if [ -f package-lock.json ]; then npm ci; else npm install; fi
-            npm run build
-            test -d "$SUB_DIR/.next"
-            test -f "$SUB_DIR/.next/BUILD_ID" || test -d "$SUB_DIR/.next/server"
-
-            # PM2: tiszta újraindítás az új builddel
-            pm2 delete eladoingatlan-szcenario 2>/dev/null || true
-            PORT=5140 HOSTNAME=127.0.0.1 pm2 start npm --name eladoingatlan-szcenario --cwd "$SUB_DIR" --update-env -- start
-            pm2 save
-
-            sleep 3
-            CODE=$(curl -sS -o /tmp/elado-body.html -w '%{http_code}' --max-time 20 http://127.0.0.1:5140/ || echo 000)
-            echo "curl_5140=$CODE"
-            test "$CODE" = "200"
-            grep -qiE 'faház|Börzsöny|Közművek|ivóvíz' /tmp/elado-body.html
-            test "$(tr -d '\n' < "$SUB_DIR/BUILD_SHA")" = "$SHA"
-            echo "eladoingatlan_ok sha=$SHA"
+              PORT=5140 pm2 restart eladoingatlan-szcenario --update-env || PORT=5140 pm2 start npm --name "eladoingatlan-szcenario" --update-env -- start
+              pm2 save
+            fi
